@@ -8,20 +8,28 @@ import { PrimaryButton, SecondaryButton } from '../components/Button';
 import OnboardingScreen from '../components/OnboardingScreen';
 import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
+import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 import useToast from '../utils/useToast';
 
 export default function ResetPasswordScreen({ navigation }) {
+  const { preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useContext(BottomTabBarHeightContext) || 0;
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const resetCopy = settingsCopy.resetPassword;
   const [email, setEmail] = useState('');
   const toast = useToast();
 
   const handleSend = () => {
-    toast.show('Reset link sent');
+    toast.show(resetCopy.sentToast);
     setTimeout(() => navigation.goBack(), 500);
   };
 
@@ -44,35 +52,33 @@ export default function ResetPasswordScreen({ navigation }) {
                 color={colors.text.secondary}
               />
             </Pressable>
-            <AppText style={styles.headerTitle}>Reset password</AppText>
+            <AppText style={styles.headerTitle}>{resetCopy.title}</AppText>
           </View>
 
           <View style={styles.contentBlock}>
             <View style={styles.fields}>
               <View style={styles.field}>
-                <AppText style={styles.label}>Email address</AppText>
+                <AppText style={styles.label}>{resetCopy.emailLabel}</AppText>
                 <AppTextInput
                   value={email}
                   onChangeText={setEmail}
-                  placeholder="name@email.com"
+                  placeholder={resetCopy.emailPlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   style={styles.input}
                 />
               </View>
-              <AppText style={styles.hint}>
-                We'll send a reset link to your email.
-              </AppText>
+              <AppText style={styles.hint}>{resetCopy.hint}</AppText>
             </View>
 
             <View style={styles.actions}>
               <PrimaryButton
-                label="Send reset link"
+                label={resetCopy.sendResetLink}
                 onPress={handleSend}
                 disabled={!email.trim()}
               />
-              <SecondaryButton label="Cancel" onPress={() => navigation.goBack()} />
+              <SecondaryButton label={resetCopy.cancel} onPress={() => navigation.goBack()} />
             </View>
           </View>
         </View>

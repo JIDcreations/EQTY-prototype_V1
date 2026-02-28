@@ -6,15 +6,21 @@ import { PrimaryButton } from '../components/Button';
 import Card from '../components/Card';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 
 export default function LoggedOutScreen({ navigation }) {
-  const { updateAuthUser } = useApp();
+  const { updateAuthUser, preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const loggedOutCopy = settingsCopy.loggedOut;
 
   const handleLogin = async () => {
     await updateAuthUser({});
@@ -28,11 +34,9 @@ export default function LoggedOutScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <Card style={styles.card}>
-          <AppText style={styles.title}>You are logged out</AppText>
-          <AppText style={styles.text}>
-            This prototype uses local-only data. Tap below to continue with a demo profile.
-          </AppText>
-          <PrimaryButton label="Log in" onPress={handleLogin} />
+          <AppText style={styles.title}>{loggedOutCopy.title}</AppText>
+          <AppText style={styles.text}>{loggedOutCopy.description}</AppText>
+          <PrimaryButton label={loggedOutCopy.cta} onPress={handleLogin} />
         </Card>
       </ScrollView>
     </View>

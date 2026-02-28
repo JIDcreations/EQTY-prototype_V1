@@ -6,6 +6,9 @@ import { curriculumNl } from '../data/curriculumNl';
 const LOCALE_MAP = {
   English: 'en',
   Dutch: 'nl',
+  Nederlands: 'nl',
+  en: 'en',
+  nl: 'nl',
 };
 
 const LESSON_OVERVIEW_COPY = {
@@ -899,12 +902,207 @@ const SETTINGS_COPY = {
       twoFactorLabel: 'Two-factor authentication',
       twoFactorSubtitle: 'Extra security for your account',
     },
+    account: {
+      title: 'Account',
+      subtitle: 'Update your username, email, and password',
+      usernameLabel: 'Username',
+      usernamePlaceholder: 'Enter username',
+      emailLabel: 'Email address',
+      emailPlaceholder: 'name@email.com',
+      resetPasswordLabel: 'Reset password',
+      saveChanges: 'Save changes',
+      cancel: 'Cancel',
+      emptyValue: '—',
+    },
+    personalContext: {
+      title: 'Personal context (AI)',
+      subtitle:
+        'Answer these questions to adapt examples, pacing, and feedback. No financial advice.',
+      questions: [
+        {
+          label: 'Question 01',
+          prompt: 'What have you already done in terms of investing?',
+          placeholder: 'e.g. nothing yet, crypto, ETFs, savings...',
+        },
+        {
+          label: 'Question 02',
+          prompt: 'What do you already know about investing today?',
+          placeholder: 'e.g. basic terms, risks, returns...',
+        },
+        {
+          label: 'Question 03',
+          prompt: 'Why do you want to start investing?',
+          placeholder: 'e.g. long-term growth, curiosity, financial independence...',
+        },
+      ],
+      note: 'Changes apply to future explanations and scenarios only.',
+      saveChanges: 'Save changes',
+      cancel: 'Cancel',
+    },
     support: {
       title: 'Help & support',
       subtitle: 'Find answers or get in touch',
       helpCenter: 'Help center',
       contactSupport: 'Contact support',
       faq: 'FAQ',
+    },
+    helpCenter: {
+      title: 'Help center',
+      subtitle: 'Browse quick answers and guided steps.',
+      searchTitle: 'Search the help center',
+      searchPlaceholder: 'Search help topics',
+      helperText: 'Popular: resetting passwords, lesson progress, and profile updates.',
+      browseTopicsTitle: 'Browse topics',
+      topics: [
+        {
+          title: 'Getting started',
+          description: 'Set up your profile, choose a goal, and begin your first lesson.',
+        },
+        {
+          title: 'Lessons and progress',
+          description:
+            'How lessons work, what is tracked, and how to pick the next step.',
+        },
+        {
+          title: 'Account and security',
+          description: 'Update your email, reset passwords, and manage access.',
+        },
+        {
+          title: 'Troubleshooting',
+          description: 'Fix loading issues, missing progress, or sync delays.',
+        },
+      ],
+      popularGuidesTitle: 'Popular guides',
+      guides: [
+        {
+          title: 'Reset your password',
+          description: 'Head to Settings > Account to reset your credentials.',
+        },
+        {
+          title: 'Update profile details',
+          description: 'Keep your learning context and goals up to date.',
+        },
+        {
+          title: 'Track lesson progress',
+          description: 'See completed lessons and what is coming up next.',
+        },
+        {
+          title: 'Review your notes',
+          description: 'Return to lesson summaries for quick refreshers.',
+        },
+        {
+          title: 'Adjust text size',
+          description: 'Increase readability from the accessibility settings.',
+        },
+      ],
+      noGuides: 'No guides match that search yet.',
+      needMoreHelpTitle: 'Need more help?',
+      needMoreHelpText:
+        'Contact support for account access, lesson issues, or feedback on the learning flow.',
+      contactSupportCta: 'Contact support',
+    },
+    faq: {
+      title: 'FAQ',
+      subtitle: 'Answers to the most common questions.',
+      items: [
+        {
+          question: 'How do lessons work?',
+          answer:
+            'Each lesson is a short flow with concepts, examples, and exercises. Your progress saves automatically.',
+        },
+        {
+          question: 'How do I see my progress?',
+          answer:
+            'Your progress appears on the home screen and in your profile overview. Completed lessons stay marked.',
+        },
+        {
+          question: 'Can I update my learning context?',
+          answer:
+            'Yes. Update your experience, knowledge, or motivation from the profile settings at any time.',
+        },
+        {
+          question: 'I forgot my password. What should I do?',
+          answer:
+            'Use the reset password option in settings. You can also contact support if you are locked out.',
+        },
+        {
+          question: 'Is my data private?',
+          answer:
+            'We store only your profile context and lesson progress. Do not share sensitive financial details.',
+        },
+        {
+          question: 'Why is content missing or not loading?',
+          answer:
+            'Try refreshing the app or checking your connection. If it persists, send us a support request.',
+        },
+      ],
+      stillNeedHelpTitle: 'Still need help?',
+      stillNeedHelpText:
+        'Visit the help center or send a support request for anything not covered here.',
+      contactSupportCta: 'Contact support',
+    },
+    contactSupport: {
+      title: 'Contact support',
+      subtitle: 'We usually reply within 24 hours.',
+      contactOptionsTitle: 'Contact options',
+      channels: [
+        {
+          label: 'In-app chat',
+          subtitle: 'Fastest response. Weekdays 09:00 to 17:00.',
+        },
+        {
+          label: 'Email support',
+          subtitle: 'support@example.com. Replies within 24 hours.',
+        },
+        {
+          label: 'Phone line',
+          subtitle: '+1 (555) 014-2030 for account access issues.',
+        },
+      ],
+      beforeReachOutTitle: 'Before you reach out',
+      beforeReachOutText:
+        'Including these details helps us resolve your request faster:',
+      checklist: [
+        'Your account email or username.',
+        'What you were trying to do when it happened.',
+        'Device model and OS version.',
+        'Screenshots or screen recordings if possible.',
+      ],
+      sendRequestTitle: 'Send a request',
+      subjectLabel: 'Subject',
+      subjectPlaceholder: 'Short summary',
+      messageLabel: 'Message',
+      messagePlaceholder: 'Describe what you need help with',
+      helperText: 'Please do not include passwords or sensitive financial details.',
+      sendButton: 'Send message',
+      sentToast: 'Support request sent',
+    },
+    changePassword: {
+      title: 'Reset password',
+      currentPasswordLabel: 'Current password',
+      currentPasswordPlaceholder: 'Enter current password',
+      newPasswordLabel: 'New password',
+      newPasswordPlaceholder: 'Create a new password',
+      confirmPasswordLabel: 'Confirm new password',
+      confirmPasswordPlaceholder: 'Confirm new password',
+      forgotPasswordCta: 'Forgot password? Send reset link',
+      saveChanges: 'Save changes',
+      cancel: 'Cancel',
+    },
+    resetPassword: {
+      title: 'Reset password',
+      emailLabel: 'Email address',
+      emailPlaceholder: 'name@email.com',
+      hint: "We'll send a reset link to your email.",
+      sendResetLink: 'Send reset link',
+      cancel: 'Cancel',
+      sentToast: 'Reset link sent',
+    },
+    loggedOut: {
+      title: 'You are logged out',
+      description:
+        'This prototype uses local-only data. Tap below to continue with a demo profile.',
+      cta: 'Log in',
     },
     accessibility: {
       title: 'Accessibility',
@@ -972,12 +1170,208 @@ const SETTINGS_COPY = {
       twoFactorLabel: 'Tweestapsverificatie',
       twoFactorSubtitle: 'Extra beveiliging voor je account',
     },
+    account: {
+      title: 'Account',
+      subtitle: 'Werk je gebruikersnaam, e-mail en wachtwoord bij',
+      usernameLabel: 'Gebruikersnaam',
+      usernamePlaceholder: 'Voer gebruikersnaam in',
+      emailLabel: 'E-mailadres',
+      emailPlaceholder: 'naam@email.com',
+      resetPasswordLabel: 'Wachtwoord resetten',
+      saveChanges: 'Wijzigingen opslaan',
+      cancel: 'Annuleren',
+      emptyValue: '—',
+    },
+    personalContext: {
+      title: 'Persoonlijke context (AI)',
+      subtitle:
+        'Beantwoord deze vragen zodat voorbeelden, tempo en feedback worden aangepast. Geen financieel advies.',
+      questions: [
+        {
+          label: 'Vraag 01',
+          prompt: 'Wat heb je al gedaan op vlak van investeren?',
+          placeholder: 'bv. nog niets, crypto, ETF\'s, sparen...',
+        },
+        {
+          label: 'Vraag 02',
+          prompt: 'Wat weet je vandaag al over investeren?',
+          placeholder: 'bv. basisbegrippen, risico, rendement...',
+        },
+        {
+          label: 'Vraag 03',
+          prompt: 'Waarom wil je beginnen met investeren?',
+          placeholder: 'bv. groei op lange termijn, nieuwsgierigheid, financiele onafhankelijkheid...',
+        },
+      ],
+      note: 'Wijzigingen gelden alleen voor toekomstige uitleg en scenario\'s.',
+      saveChanges: 'Wijzigingen opslaan',
+      cancel: 'Annuleren',
+    },
     support: {
       title: 'Hulp en ondersteuning',
       subtitle: 'Vind antwoorden of neem contact op',
       helpCenter: 'Helpcenter',
       contactSupport: 'Contact met support',
       faq: 'FAQ',
+    },
+    helpCenter: {
+      title: 'Helpcenter',
+      subtitle: 'Bekijk snelle antwoorden en duidelijke stappen.',
+      searchTitle: 'Zoek in het helpcenter',
+      searchPlaceholder: 'Zoek hulponderwerpen',
+      helperText:
+        'Populair: wachtwoorden resetten, lesvoortgang en profielupdates.',
+      browseTopicsTitle: 'Onderwerpen',
+      topics: [
+        {
+          title: 'Aan de slag',
+          description: 'Stel je profiel in, kies een doel en start je eerste les.',
+        },
+        {
+          title: 'Lessen en voortgang',
+          description:
+            'Hoe lessen werken, wat wordt bijgehouden en hoe je je volgende stap kiest.',
+        },
+        {
+          title: 'Account en beveiliging',
+          description: 'Werk je e-mail bij, reset wachtwoorden en beheer toegang.',
+        },
+        {
+          title: 'Probleemoplossing',
+          description: 'Los laadproblemen, ontbrekende voortgang of syncvertraging op.',
+        },
+      ],
+      popularGuidesTitle: 'Populaire handleidingen',
+      guides: [
+        {
+          title: 'Wachtwoord resetten',
+          description: 'Ga naar Instellingen > Account om je wachtwoord te resetten.',
+        },
+        {
+          title: 'Profielgegevens bijwerken',
+          description: 'Houd je leercontext en doelen up-to-date.',
+        },
+        {
+          title: 'Lesvoortgang volgen',
+          description: 'Bekijk afgeronde lessen en wat hierna komt.',
+        },
+        {
+          title: 'Notities opnieuw bekijken',
+          description: 'Ga terug naar lessamenvattingen voor een snelle opfrisser.',
+        },
+        {
+          title: 'Tekstgrootte aanpassen',
+          description: 'Verhoog de leesbaarheid via toegankelijkheidsinstellingen.',
+        },
+      ],
+      noGuides: 'Geen handleidingen gevonden voor deze zoekopdracht.',
+      needMoreHelpTitle: 'Meer hulp nodig?',
+      needMoreHelpText:
+        'Neem contact op met support voor accounttoegang, lesproblemen of feedback over de leerflow.',
+      contactSupportCta: 'Contact met support',
+    },
+    faq: {
+      title: 'FAQ',
+      subtitle: 'Antwoorden op de meest gestelde vragen.',
+      items: [
+        {
+          question: 'Hoe werken lessen?',
+          answer:
+            'Elke les is een korte flow met concepten, voorbeelden en oefeningen. Je voortgang wordt automatisch opgeslagen.',
+        },
+        {
+          question: 'Hoe zie ik mijn voortgang?',
+          answer:
+            'Je voortgang staat op het homescherm en in je profieloverzicht. Afgeronde lessen blijven gemarkeerd.',
+        },
+        {
+          question: 'Kan ik mijn leercontext aanpassen?',
+          answer:
+            'Ja. Werk je ervaring, kennis of motivatie op elk moment bij in de profielinstellingen.',
+        },
+        {
+          question: 'Ik ben mijn wachtwoord vergeten. Wat nu?',
+          answer:
+            'Gebruik de optie om je wachtwoord te resetten in instellingen. Je kunt ook support contacteren als je bent buitengesloten.',
+        },
+        {
+          question: 'Zijn mijn gegevens prive?',
+          answer:
+            'We slaan alleen je profielcontext en lesvoortgang op. Deel geen gevoelige financiele details.',
+        },
+        {
+          question: 'Waarom ontbreekt inhoud of laadt iets niet?',
+          answer:
+            'Probeer de app te vernieuwen of controleer je verbinding. Blijft het probleem? Stuur dan een supportverzoek.',
+        },
+      ],
+      stillNeedHelpTitle: 'Nog hulp nodig?',
+      stillNeedHelpText:
+        'Ga naar het helpcenter of stuur een supportverzoek voor alles wat hier niet wordt behandeld.',
+      contactSupportCta: 'Contact met support',
+    },
+    contactSupport: {
+      title: 'Contact met support',
+      subtitle: 'We antwoorden meestal binnen 24 uur.',
+      contactOptionsTitle: 'Contactopties',
+      channels: [
+        {
+          label: 'In-app chat',
+          subtitle: 'Snelste reactie. Weekdagen van 09:00 tot 17:00.',
+        },
+        {
+          label: 'E-mail support',
+          subtitle: 'support@example.com. Antwoord binnen 24 uur.',
+        },
+        {
+          label: 'Telefonische lijn',
+          subtitle: '+1 (555) 014-2030 voor problemen met accounttoegang.',
+        },
+      ],
+      beforeReachOutTitle: 'Voor je contact opneemt',
+      beforeReachOutText:
+        'Met deze details kunnen we je verzoek sneller oplossen:',
+      checklist: [
+        'Je account-e-mail of gebruikersnaam.',
+        'Wat je probeerde te doen toen het probleem optrad.',
+        'Toestelmodel en OS-versie.',
+        'Screenshots of schermopnames indien mogelijk.',
+      ],
+      sendRequestTitle: 'Stuur een verzoek',
+      subjectLabel: 'Onderwerp',
+      subjectPlaceholder: 'Korte samenvatting',
+      messageLabel: 'Bericht',
+      messagePlaceholder: 'Beschrijf waarbij je hulp nodig hebt',
+      helperText: 'Deel geen wachtwoorden of gevoelige financiele details.',
+      sendButton: 'Verstuur bericht',
+      sentToast: 'Supportverzoek verzonden',
+    },
+    changePassword: {
+      title: 'Wachtwoord resetten',
+      currentPasswordLabel: 'Huidig wachtwoord',
+      currentPasswordPlaceholder: 'Voer huidig wachtwoord in',
+      newPasswordLabel: 'Nieuw wachtwoord',
+      newPasswordPlaceholder: 'Maak een nieuw wachtwoord',
+      confirmPasswordLabel: 'Bevestig nieuw wachtwoord',
+      confirmPasswordPlaceholder: 'Bevestig nieuw wachtwoord',
+      forgotPasswordCta: 'Wachtwoord vergeten? Stuur resetlink',
+      saveChanges: 'Wijzigingen opslaan',
+      cancel: 'Annuleren',
+    },
+    resetPassword: {
+      title: 'Wachtwoord resetten',
+      emailLabel: 'E-mailadres',
+      emailPlaceholder: 'naam@email.com',
+      hint: 'We sturen een resetlink naar je e-mailadres.',
+      sendResetLink: 'Verstuur resetlink',
+      cancel: 'Annuleren',
+      sentToast: 'Resetlink verzonden',
+    },
+    loggedOut: {
+      title: 'Je bent uitgelogd',
+      description:
+        'Dit prototype gebruikt alleen lokale data. Tik hieronder om verder te gaan met een demoprofiel.',
+      cta: 'Inloggen',
     },
     accessibility: {
       title: 'Toegankelijkheid',

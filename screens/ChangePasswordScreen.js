@@ -7,15 +7,23 @@ import { PrimaryButton, SecondaryButton } from '../components/Button';
 import SettingsHeader from '../components/SettingsHeader';
 import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
+import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 import useToast from '../utils/useToast';
 
 export default function ChangePasswordScreen({ navigation }) {
+  const { preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const passwordCopy = settingsCopy.changePassword;
   const [currentPassword, setCurrentPassword] = useState('');
   const [nextPassword, setNextPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -24,7 +32,7 @@ export default function ChangePasswordScreen({ navigation }) {
   const canSave = currentPassword && nextPassword && confirmPassword;
 
   const handleSave = () => {
-    toast.show('Saved');
+    toast.show(settingsCopy.saved);
     setTimeout(() => navigation.goBack(), 500);
   };
 
@@ -34,36 +42,36 @@ export default function ChangePasswordScreen({ navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <SettingsHeader title="Reset password" onBack={() => navigation.goBack()} />
+        <SettingsHeader title={passwordCopy.title} onBack={() => navigation.goBack()} />
         <View style={styles.section}>
           <View style={styles.field}>
-            <AppText style={styles.label}>Current password</AppText>
+            <AppText style={styles.label}>{passwordCopy.currentPasswordLabel}</AppText>
             <AppTextInput
               value={currentPassword}
               onChangeText={setCurrentPassword}
-              placeholder="Enter current password"
+              placeholder={passwordCopy.currentPasswordPlaceholder}
               placeholderTextColor={colors.text.secondary}
               secureTextEntry
               style={styles.input}
             />
           </View>
           <View style={styles.field}>
-            <AppText style={styles.label}>New password</AppText>
+            <AppText style={styles.label}>{passwordCopy.newPasswordLabel}</AppText>
             <AppTextInput
               value={nextPassword}
               onChangeText={setNextPassword}
-              placeholder="Create a new password"
+              placeholder={passwordCopy.newPasswordPlaceholder}
               placeholderTextColor={colors.text.secondary}
               secureTextEntry
               style={styles.input}
             />
           </View>
           <View style={styles.field}>
-            <AppText style={styles.label}>Confirm new password</AppText>
+            <AppText style={styles.label}>{passwordCopy.confirmPasswordLabel}</AppText>
             <AppTextInput
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Confirm new password"
+              placeholder={passwordCopy.confirmPasswordPlaceholder}
               placeholderTextColor={colors.text.secondary}
               secureTextEntry
               style={styles.input}
@@ -73,12 +81,16 @@ export default function ChangePasswordScreen({ navigation }) {
             onPress={() => navigation.navigate('ResetPassword')}
             style={styles.forgotRow}
           >
-            <AppText style={styles.forgotText}>Forgot password? Send reset link</AppText>
+            <AppText style={styles.forgotText}>{passwordCopy.forgotPasswordCta}</AppText>
           </Pressable>
         </View>
         <View style={styles.actions}>
-          <PrimaryButton label="Save changes" onPress={handleSave} disabled={!canSave} />
-          <SecondaryButton label="Cancel" onPress={() => navigation.goBack()} />
+          <PrimaryButton
+            label={passwordCopy.saveChanges}
+            onPress={handleSave}
+            disabled={!canSave}
+          />
+          <SecondaryButton label={passwordCopy.cancel} onPress={() => navigation.goBack()} />
         </View>
       </ScrollView>
       <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />

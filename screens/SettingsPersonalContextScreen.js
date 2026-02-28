@@ -10,15 +10,21 @@ import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import useToast from '../utils/useToast';
+import { getSettingsCopy } from '../utils/localization';
 
 export default function SettingsPersonalContextScreen({ navigation }) {
-  const { onboardingContext, updateOnboardingContext } = useApp();
+  const { onboardingContext, updateOnboardingContext, preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const personalCopy = settingsCopy.personalContext;
   const toast = useToast();
   const [experienceAnswer, setExperienceAnswer] = useState(
     onboardingContext?.experienceAnswer || ''
@@ -51,7 +57,7 @@ export default function SettingsPersonalContextScreen({ navigation }) {
       knowledgeAnswer: knowledgeAnswer.trim(),
       motivationAnswer: motivationAnswer.trim(),
     });
-    toast.show('Saved');
+    toast.show(settingsCopy.saved);
   };
 
   return (
@@ -62,19 +68,17 @@ export default function SettingsPersonalContextScreen({ navigation }) {
         contentContainerStyle={styles.content}
       >
         <SettingsHeader
-          title="Personal context (AI)"
-          subtitle="Answer these questions to adapt examples, pacing, and feedback. No financial advice."
+          title={personalCopy.title}
+          subtitle={personalCopy.subtitle}
           onBack={() => navigation.goBack()}
         />
         <View style={[styles.questionBlock, styles.questionDivider]}>
-          <AppText style={styles.questionLabel}>Question 01</AppText>
-          <AppText style={styles.question}>
-            What have you already done in terms of investing?
-          </AppText>
+          <AppText style={styles.questionLabel}>{personalCopy.questions[0].label}</AppText>
+          <AppText style={styles.question}>{personalCopy.questions[0].prompt}</AppText>
           <AppTextInput
             value={experienceAnswer}
             onChangeText={setExperienceAnswer}
-            placeholder="e.g. nothing yet, crypto, ETFs, savings..."
+            placeholder={personalCopy.questions[0].placeholder}
             placeholderTextColor={colors.text.secondary}
             multiline
             style={styles.input}
@@ -82,14 +86,12 @@ export default function SettingsPersonalContextScreen({ navigation }) {
         </View>
 
         <View style={[styles.questionBlock, styles.questionDivider]}>
-          <AppText style={styles.questionLabel}>Question 02</AppText>
-          <AppText style={styles.question}>
-            What do you already know about investing today?
-          </AppText>
+          <AppText style={styles.questionLabel}>{personalCopy.questions[1].label}</AppText>
+          <AppText style={styles.question}>{personalCopy.questions[1].prompt}</AppText>
           <AppTextInput
             value={knowledgeAnswer}
             onChangeText={setKnowledgeAnswer}
-            placeholder="e.g. basic terms, risks, returns..."
+            placeholder={personalCopy.questions[1].placeholder}
             placeholderTextColor={colors.text.secondary}
             multiline
             style={styles.input}
@@ -97,12 +99,12 @@ export default function SettingsPersonalContextScreen({ navigation }) {
         </View>
 
         <View style={styles.questionBlock}>
-          <AppText style={styles.questionLabel}>Question 03</AppText>
-          <AppText style={styles.question}>Why do you want to start investing?</AppText>
+          <AppText style={styles.questionLabel}>{personalCopy.questions[2].label}</AppText>
+          <AppText style={styles.question}>{personalCopy.questions[2].prompt}</AppText>
           <AppTextInput
             value={motivationAnswer}
             onChangeText={setMotivationAnswer}
-            placeholder="e.g. long-term growth, curiosity, financial independence..."
+            placeholder={personalCopy.questions[2].placeholder}
             placeholderTextColor={colors.text.secondary}
             multiline
             style={styles.input}
@@ -111,14 +113,22 @@ export default function SettingsPersonalContextScreen({ navigation }) {
 
         <View style={styles.noteCard}>
           <AppText style={styles.noteText}>
-            Changes apply to future explanations and scenarios only.
+            {personalCopy.note}
           </AppText>
         </View>
 
         {hasChanges ? (
           <View style={styles.actions}>
-            <SecondaryButton label="Cancel" onPress={handleCancel} style={styles.flex} />
-            <PrimaryButton label="Save changes" onPress={handleSave} style={styles.flex} />
+            <SecondaryButton
+              label={personalCopy.cancel}
+              onPress={handleCancel}
+              style={styles.flex}
+            />
+            <PrimaryButton
+              label={personalCopy.saveChanges}
+              onPress={handleSave}
+              style={styles.flex}
+            />
           </View>
         ) : null}
       </OnboardingScreen>

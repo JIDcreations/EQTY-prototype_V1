@@ -12,6 +12,7 @@ import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import useToast from '../utils/useToast';
+import { getSettingsCopy } from '../utils/localization';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -23,12 +24,16 @@ const toRgba = (hex, alpha) => {
 };
 
 export default function SettingsAccountScreen({ navigation }) {
-  const { authUser, updateAuthUser } = useApp();
+  const { authUser, updateAuthUser, preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
+  );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
   );
   const toast = useToast();
   const [activeField, setActiveField] = useState(null);
@@ -64,7 +69,7 @@ export default function SettingsAccountScreen({ navigation }) {
     if (hasEmailChange) updates.email = trimmedEmail;
     if (Object.keys(updates).length) {
       await updateAuthUser(updates);
-      toast.show('Saved');
+      toast.show(settingsCopy.saved);
     }
     setActiveField(null);
   };
@@ -97,7 +102,7 @@ export default function SettingsAccountScreen({ navigation }) {
       );
     }
 
-    const displayValue = value?.trim() ? value.trim() : '—';
+    const displayValue = value?.trim() ? value.trim() : settingsCopy.account.emptyValue;
     return (
       <View style={styles.inlineField}>
         <AppText style={styles.label}>{label}</AppText>
@@ -124,23 +129,23 @@ export default function SettingsAccountScreen({ navigation }) {
         contentContainerStyle={styles.content}
       >
         <SettingsHeader
-          title="Account"
-          subtitle="Update your username, email, and password"
+          title={settingsCopy.account.title}
+          subtitle={settingsCopy.account.subtitle}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.section}>
           {renderField({
             key: 'username',
-            label: 'Username',
+            label: settingsCopy.account.usernameLabel,
             value: username,
-            placeholder: 'Enter username',
+            placeholder: settingsCopy.account.usernamePlaceholder,
             onChangeText: setUsername,
           })}
           {renderField({
             key: 'email',
-            label: 'Email address',
+            label: settingsCopy.account.emailLabel,
             value: email,
-            placeholder: 'name@email.com',
+            placeholder: settingsCopy.account.emailPlaceholder,
             onChangeText: setEmail,
             inputProps: {
               keyboardType: 'email-address',
@@ -148,7 +153,7 @@ export default function SettingsAccountScreen({ navigation }) {
             },
           })}
           <SettingsRow
-            label="Reset password"
+            label={settingsCopy.account.resetPasswordLabel}
             onPress={() => navigation.navigate('ChangePassword')}
             isLast
             containerStyle={styles.rowCard}
@@ -157,11 +162,11 @@ export default function SettingsAccountScreen({ navigation }) {
         {hasChanges ? (
           <View style={styles.actions}>
             <PrimaryButton
-              label="Save changes"
+              label={settingsCopy.account.saveChanges}
               onPress={handleSave}
               disabled={saveDisabled}
             />
-            <SecondaryButton label="Cancel" onPress={handleCancel} />
+            <SecondaryButton label={settingsCopy.account.cancel} onPress={handleCancel} />
           </View>
         ) : null}
       </OnboardingScreen>

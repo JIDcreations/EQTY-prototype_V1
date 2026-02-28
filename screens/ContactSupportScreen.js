@@ -9,44 +9,30 @@ import SettingsHeader from '../components/SettingsHeader';
 import SettingsRow from '../components/SettingsRow';
 import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
+import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 import useToast from '../utils/useToast';
 
-const CONTACT_CHANNELS = [
-  {
-    label: 'In-app chat',
-    subtitle: 'Fastest response. Weekdays 09:00 to 17:00.',
-  },
-  {
-    label: 'Email support',
-    subtitle: 'support@example.com. Replies within 24 hours.',
-  },
-  {
-    label: 'Phone line',
-    subtitle: '+1 (555) 014-2030 for account access issues.',
-  },
-];
-
-const SUPPORT_CHECKLIST = [
-  'Your account email or username.',
-  'What you were trying to do when it happened.',
-  'Device model and OS version.',
-  'Screenshots or screen recordings if possible.',
-];
-
 export default function ContactSupportScreen({ navigation }) {
+  const { preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const supportCopy = settingsCopy.contactSupport;
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const toast = useToast();
   const canSend = subject.trim().length > 0 && message.trim().length > 0;
 
   const handleSend = () => {
-    toast.show('Support request sent');
+    toast.show(supportCopy.sentToast);
     setSubject('');
     setMessage('');
   };
@@ -59,60 +45,60 @@ export default function ContactSupportScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
       >
         <SettingsHeader
-          title="Contact support"
-          subtitle="We usually reply within 24 hours."
+          title={supportCopy.title}
+          subtitle={supportCopy.subtitle}
           onBack={() => navigation.goBack()}
         />
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Contact options</AppText>
+          <AppText style={styles.sectionTitle}>{supportCopy.contactOptionsTitle}</AppText>
           <View style={styles.list}>
-            {CONTACT_CHANNELS.map((channel, index) => (
+            {supportCopy.channels.map((channel, index) => (
               <SettingsRow
-                key={channel.label}
+                key={`${channel.label}-${index}`}
                 label={channel.label}
                 subtitle={channel.subtitle}
-                isLast={index === CONTACT_CHANNELS.length - 1}
+                isLast={index === supportCopy.channels.length - 1}
               />
             ))}
           </View>
         </Card>
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Before you reach out</AppText>
-          <AppText style={styles.text}>
-            Including these details helps us resolve your request faster:
-          </AppText>
+          <AppText style={styles.sectionTitle}>{supportCopy.beforeReachOutTitle}</AppText>
+          <AppText style={styles.text}>{supportCopy.beforeReachOutText}</AppText>
           <View style={styles.bulletList}>
-            {SUPPORT_CHECKLIST.map((item) => (
-              <AppText key={item} style={styles.bulletText}>
+            {supportCopy.checklist.map((item, index) => (
+              <AppText key={`${item}-${index}`} style={styles.bulletText}>
                 - {item}
               </AppText>
             ))}
           </View>
         </Card>
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Send a request</AppText>
-          <AppText style={styles.label}>Subject</AppText>
+          <AppText style={styles.sectionTitle}>{supportCopy.sendRequestTitle}</AppText>
+          <AppText style={styles.label}>{supportCopy.subjectLabel}</AppText>
           <AppTextInput
             value={subject}
             onChangeText={setSubject}
-            placeholder="Short summary"
+            placeholder={supportCopy.subjectPlaceholder}
             placeholderTextColor={colors.text.secondary}
             style={styles.input}
           />
-          <AppText style={styles.label}>Message</AppText>
+          <AppText style={styles.label}>{supportCopy.messageLabel}</AppText>
           <AppTextInput
             value={message}
             onChangeText={setMessage}
-            placeholder="Describe what you need help with"
+            placeholder={supportCopy.messagePlaceholder}
             placeholderTextColor={colors.text.secondary}
             style={[styles.input, styles.messageInput]}
             multiline
             textAlignVertical="top"
           />
-          <AppText style={styles.helperText}>
-            Please do not include passwords or sensitive financial details.
-          </AppText>
-          <PrimaryButton label="Send message" onPress={handleSend} disabled={!canSend} />
+          <AppText style={styles.helperText}>{supportCopy.helperText}</AppText>
+          <PrimaryButton
+            label={supportCopy.sendButton}
+            onPress={handleSend}
+            disabled={!canSend}
+          />
         </Card>
       </ScrollView>
       <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />

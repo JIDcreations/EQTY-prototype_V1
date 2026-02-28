@@ -8,48 +8,8 @@ import { SecondaryButton } from '../components/Button';
 import Card from '../components/Card';
 import SettingsHeader from '../components/SettingsHeader';
 import { typography, useTheme } from '../theme';
-
-const HELP_TOPICS = [
-  {
-    title: 'Getting started',
-    description: 'Set up your profile, choose a goal, and begin your first lesson.',
-  },
-  {
-    title: 'Lessons and progress',
-    description: 'How lessons work, what is tracked, and how to pick the next step.',
-  },
-  {
-    title: 'Account and security',
-    description: 'Update your email, reset passwords, and manage access.',
-  },
-  {
-    title: 'Troubleshooting',
-    description: 'Fix loading issues, missing progress, or sync delays.',
-  },
-];
-
-const GUIDE_ITEMS = [
-  {
-    title: 'Reset your password',
-    description: 'Head to Settings > Account to reset your credentials.',
-  },
-  {
-    title: 'Update profile details',
-    description: 'Keep your learning context and goals up to date.',
-  },
-  {
-    title: 'Track lesson progress',
-    description: 'See completed lessons and what is coming up next.',
-  },
-  {
-    title: 'Review your notes',
-    description: 'Return to lesson summaries for quick refreshers.',
-  },
-  {
-    title: 'Adjust text size',
-    description: 'Increase readability from the accessibility settings.',
-  },
-];
+import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -61,21 +21,27 @@ const toRgba = (hex, alpha) => {
 };
 
 export default function HelpCenterScreen({ navigation }) {
+  const { preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const helpCopy = settingsCopy.helpCenter;
   const [query, setQuery] = useState('');
   const filteredGuides = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return GUIDE_ITEMS;
-    return GUIDE_ITEMS.filter((item) => {
+    if (!normalized) return helpCopy.guides;
+    return helpCopy.guides.filter((item) => {
       const haystack = `${item.title} ${item.description}`.toLowerCase();
       return haystack.includes(normalized);
     });
-  }, [query]);
+  }, [helpCopy.guides, query]);
 
   return (
     <View style={styles.container}>
@@ -85,12 +51,12 @@ export default function HelpCenterScreen({ navigation }) {
         keyboardShouldPersistTaps="handled"
       >
         <SettingsHeader
-          title="Help center"
-          subtitle="Browse quick answers and guided steps."
+          title={helpCopy.title}
+          subtitle={helpCopy.subtitle}
           onBack={() => navigation.goBack()}
         />
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Search the help center</AppText>
+          <AppText style={styles.sectionTitle}>{helpCopy.searchTitle}</AppText>
           <View style={styles.searchBar}>
             <Ionicons
               name="search"
@@ -100,7 +66,7 @@ export default function HelpCenterScreen({ navigation }) {
             <AppTextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search help topics"
+              placeholder={helpCopy.searchPlaceholder}
               placeholderTextColor={colors.text.secondary}
               style={styles.searchInput}
             />
@@ -114,17 +80,15 @@ export default function HelpCenterScreen({ navigation }) {
               </Pressable>
             ) : null}
           </View>
-          <AppText style={styles.helperText}>
-            Popular: resetting passwords, lesson progress, and profile updates.
-          </AppText>
+          <AppText style={styles.helperText}>{helpCopy.helperText}</AppText>
         </Card>
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Browse topics</AppText>
+          <AppText style={styles.sectionTitle}>{helpCopy.browseTopicsTitle}</AppText>
           <View style={styles.list}>
-            {HELP_TOPICS.map((topic, index) => (
+            {helpCopy.topics.map((topic, index) => (
               <View
-                key={topic.title}
-                style={[styles.listItem, index < HELP_TOPICS.length - 1 && styles.listDivider]}
+                key={`${topic.title}-${index}`}
+                style={[styles.listItem, index < helpCopy.topics.length - 1 && styles.listDivider]}
               >
                 <AppText style={styles.itemTitle}>{topic.title}</AppText>
                 <AppText style={styles.itemText}>{topic.description}</AppText>
@@ -133,14 +97,14 @@ export default function HelpCenterScreen({ navigation }) {
           </View>
         </Card>
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Popular guides</AppText>
+          <AppText style={styles.sectionTitle}>{helpCopy.popularGuidesTitle}</AppText>
           <View style={styles.list}>
             {filteredGuides.length === 0 ? (
-              <AppText style={styles.emptyText}>No guides match that search yet.</AppText>
+              <AppText style={styles.emptyText}>{helpCopy.noGuides}</AppText>
             ) : (
               filteredGuides.map((guide, index) => (
                 <View
-                  key={guide.title}
+                  key={`${guide.title}-${index}`}
                   style={[styles.listItem, index < filteredGuides.length - 1 && styles.listDivider]}
                 >
                   <AppText style={styles.itemTitle}>{guide.title}</AppText>
@@ -151,12 +115,10 @@ export default function HelpCenterScreen({ navigation }) {
           </View>
         </Card>
         <Card style={styles.card}>
-          <AppText style={styles.sectionTitle}>Need more help?</AppText>
-          <AppText style={styles.text}>
-            Contact support for account access, lesson issues, or feedback on the learning flow.
-          </AppText>
+          <AppText style={styles.sectionTitle}>{helpCopy.needMoreHelpTitle}</AppText>
+          <AppText style={styles.text}>{helpCopy.needMoreHelpText}</AppText>
           <SecondaryButton
-            label="Contact support"
+            label={helpCopy.contactSupportCta}
             onPress={() => navigation.navigate('ContactSupport')}
           />
         </Card>
