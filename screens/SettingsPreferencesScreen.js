@@ -13,6 +13,7 @@ import {
   getLanguageOptions,
   getSettingsCopy,
 } from '../utils/localization';
+import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 import useToast from '../utils/useToast';
 
 const toRgba = (hex, alpha) => {
@@ -111,11 +112,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       flex: 1,
     },
     content: {
-      paddingBottom:
-        components.layout.safeArea.bottom +
-        tabBarHeight +
-        components.layout.spacing.xl,
-      gap: components.layout.contentGap,
+      ...getSettingsOnboardingContentStyle(components, tabBarHeight),
     },
     block: {
       gap: components.layout.spacing.sm,

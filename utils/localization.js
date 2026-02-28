@@ -1079,6 +1079,7 @@ const SETTINGS_COPY = {
     },
     changePassword: {
       title: 'Reset password',
+      subtitle: 'Change your password',
       currentPasswordLabel: 'Current password',
       currentPasswordPlaceholder: 'Enter current password',
       newPasswordLabel: 'New password',
@@ -1090,7 +1091,8 @@ const SETTINGS_COPY = {
       cancel: 'Cancel',
     },
     resetPassword: {
-      title: 'Reset password',
+      title: 'Forgot password',
+      subtitle: 'Request a reset link',
       emailLabel: 'Email address',
       emailPlaceholder: 'name@email.com',
       hint: "We'll send a reset link to your email.",
@@ -1348,6 +1350,7 @@ const SETTINGS_COPY = {
     },
     changePassword: {
       title: 'Wachtwoord resetten',
+      subtitle: 'Wijzig je wachtwoord',
       currentPasswordLabel: 'Huidig wachtwoord',
       currentPasswordPlaceholder: 'Voer huidig wachtwoord in',
       newPasswordLabel: 'Nieuw wachtwoord',
@@ -1359,7 +1362,8 @@ const SETTINGS_COPY = {
       cancel: 'Annuleren',
     },
     resetPassword: {
-      title: 'Wachtwoord resetten',
+      title: 'Wachtwoord vergeten',
+      subtitle: 'Vraag een resetlink aan',
       emailLabel: 'E-mailadres',
       emailPlaceholder: 'naam@email.com',
       hint: 'We sturen een resetlink naar je e-mailadres.',

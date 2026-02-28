@@ -10,6 +10,7 @@ import SettingsHeader from '../components/SettingsHeader';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getSettingsCopy } from '../utils/localization';
+import { getSettingsScrollContentStyle } from '../utils/settingsLayout';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -135,16 +136,13 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: colors.background.app,
     },
     content: {
-      paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.lg,
-      gap: components.layout.contentGap,
-      paddingBottom: components.layout.safeArea.bottom + tabBarHeight,
+      ...getSettingsScrollContentStyle(components, tabBarHeight),
     },
     card: {
       gap: components.layout.cardGap,
     },
     sectionTitle: {
-      ...typography.styles.h2,
+      ...typography.styles.h3,
       color: colors.text.primary,
     },
     searchBar: {

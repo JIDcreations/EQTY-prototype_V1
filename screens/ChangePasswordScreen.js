@@ -9,6 +9,7 @@ import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getSettingsCopy } from '../utils/localization';
+import { getSettingsScrollContentStyle } from '../utils/settingsLayout';
 import useToast from '../utils/useToast';
 
 export default function ChangePasswordScreen({ navigation }) {
@@ -42,7 +43,11 @@ export default function ChangePasswordScreen({ navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <SettingsHeader title={passwordCopy.title} onBack={() => navigation.goBack()} />
+        <SettingsHeader
+          title={passwordCopy.title}
+          subtitle={passwordCopy.subtitle}
+          onBack={() => navigation.goBack()}
+        />
         <View style={styles.section}>
           <View style={styles.field}>
             <AppText style={styles.label}>{passwordCopy.currentPasswordLabel}</AppText>
@@ -106,10 +111,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: colors.background.app,
     },
     content: {
-      paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.lg,
-      gap: components.layout.contentGap,
-      paddingBottom: components.layout.safeArea.bottom + tabBarHeight,
+      ...getSettingsScrollContentStyle(components, tabBarHeight),
     },
     section: {
       gap: components.layout.spacing.sm,
@@ -118,8 +120,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       gap: components.layout.spacing.xs,
     },
     label: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
+      ...components.input.label,
     },
     input: {
       ...components.input.container,

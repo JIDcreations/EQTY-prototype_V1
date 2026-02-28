@@ -8,6 +8,7 @@ import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getSettingsCopy, getTextSizeOptions } from '../utils/localization';
+import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 import useToast from '../utils/useToast';
 
 export default function SettingsAccessibilityScreen({ navigation }) {
@@ -71,12 +72,6 @@ export default function SettingsAccessibilityScreen({ navigation }) {
           onBack={() => navigation.goBack()}
         />
         <View style={styles.section}>
-          <View style={styles.textSizeHeader}>
-            <AppText style={styles.cardTitle}>{settingsCopy.accessibility.textSizeTitle}</AppText>
-            <AppText style={styles.cardSubtitle}>
-              {settingsCopy.accessibility.textSizeSubtitle}
-            </AppText>
-          </View>
           <View style={styles.textSizeList}>{textSizeOptions.map(renderTextSizeOption)}</View>
           <View style={styles.previewCard}>
             <AppText style={styles.previewTitle}>{settingsCopy.accessibility.previewTitle}</AppText>
@@ -97,25 +92,10 @@ const createStyles = (colors, components, tabBarHeight) =>
       flex: 1,
     },
     content: {
-      paddingBottom:
-        components.layout.safeArea.bottom +
-        tabBarHeight +
-        components.layout.spacing.xl,
-      gap: components.layout.contentGap,
+      ...getSettingsOnboardingContentStyle(components, tabBarHeight),
     },
     section: {
       gap: components.layout.spacing.lg,
-    },
-    cardTitle: {
-      ...typography.styles.h3,
-      color: colors.text.primary,
-    },
-    cardSubtitle: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    textSizeHeader: {
-      gap: components.layout.spacing.xs,
     },
     textSizeList: {
       gap: components.layout.spacing.sm,

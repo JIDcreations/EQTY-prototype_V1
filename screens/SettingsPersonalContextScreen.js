@@ -11,6 +11,7 @@ import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import useToast from '../utils/useToast';
 import { getSettingsCopy } from '../utils/localization';
+import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 
 export default function SettingsPersonalContextScreen({ navigation }) {
   const { onboardingContext, updateOnboardingContext, preferences } = useApp();
@@ -111,23 +112,16 @@ export default function SettingsPersonalContextScreen({ navigation }) {
           />
         </View>
 
-        <View style={styles.noteCard}>
-          <AppText style={styles.noteText}>
-            {personalCopy.note}
-          </AppText>
-        </View>
-
         {hasChanges ? (
           <View style={styles.actions}>
-            <SecondaryButton
-              label={personalCopy.cancel}
-              onPress={handleCancel}
-              style={styles.flex}
-            />
+            <AppText style={styles.actionHint}>{personalCopy.note}</AppText>
             <PrimaryButton
               label={personalCopy.saveChanges}
               onPress={handleSave}
-              style={styles.flex}
+            />
+            <SecondaryButton
+              label={personalCopy.cancel}
+              onPress={handleCancel}
             />
           </View>
         ) : null}
@@ -143,11 +137,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       flex: 1,
     },
     content: {
-      paddingBottom:
-        components.layout.safeArea.bottom +
-        tabBarHeight +
-        components.layout.spacing.xl,
-      gap: components.layout.contentGap,
+      ...getSettingsOnboardingContentStyle(components, tabBarHeight),
     },
     questionBlock: {
       gap: components.layout.spacing.sm,
@@ -174,22 +164,12 @@ const createStyles = (colors, components, tabBarHeight) =>
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
       textAlignVertical: 'top',
     },
-    noteCard: {
-      ...components.input.container,
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      padding: components.layout.spacing.md,
-    },
-    noteText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
     actions: {
-      flexDirection: 'row',
-      gap: components.layout.spacing.sm,
+      gap: components.layout.spacing.md,
     },
-    flex: {
-      flex: 1,
+    actionHint: {
+      ...typography.styles.meta,
+      color: colors.text.secondary,
     },
   });
 

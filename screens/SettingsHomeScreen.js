@@ -8,6 +8,7 @@ import { PrimaryButton } from '../components/Button';
 import { useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getSettingsCopy } from '../utils/localization';
+import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -106,11 +107,7 @@ export default function SettingsHomeScreen({ navigation }) {
 const createStyles = (colors, components, tabBarHeight) =>
   StyleSheet.create({
     content: {
-      paddingBottom:
-        components.layout.safeArea.bottom +
-        tabBarHeight +
-        components.layout.spacing.xl,
-      gap: components.layout.contentGap,
+      ...getSettingsOnboardingContentStyle(components, tabBarHeight),
     },
     section: {
       gap: components.layout.spacing.sm,

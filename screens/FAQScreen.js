@@ -8,6 +8,7 @@ import SettingsHeader from '../components/SettingsHeader';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getSettingsCopy } from '../utils/localization';
+import { getSettingsScrollContentStyle } from '../utils/settingsLayout';
 
 export default function FAQScreen({ navigation }) {
   const { preferences } = useApp();
@@ -63,13 +64,10 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: colors.background.app,
     },
     content: {
-      paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.lg,
-      gap: components.layout.contentGap,
-      paddingBottom: components.layout.safeArea.bottom + tabBarHeight,
+      ...getSettingsScrollContentStyle(components, tabBarHeight),
     },
     list: {
-      gap: components.layout.spacing.md,
+      gap: components.layout.spacing.sm,
     },
     card: {
       gap: components.layout.cardGap,

@@ -13,6 +13,7 @@ import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import useToast from '../utils/useToast';
 import { getSettingsCopy } from '../utils/localization';
+import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -181,19 +182,16 @@ const createStyles = (colors, components, tabBarHeight) =>
       flex: 1,
     },
     content: {
-      paddingBottom:
-        components.layout.safeArea.bottom +
-        tabBarHeight +
-        components.layout.spacing.xl,
-      gap: components.layout.contentGap,
+      ...getSettingsOnboardingContentStyle(components, tabBarHeight),
     },
     section: {
-      gap: components.layout.spacing.sm,
+      gap: components.layout.spacing.md,
     },
     rowCard: {
       ...components.input.container,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      marginTop: components.layout.spacing.md,
     },
     inlineField: {
       gap: components.layout.spacing.xs,

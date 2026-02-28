@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
+import SettingsHeader from '../components/SettingsHeader';
 import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
+import { getSettingsScrollContentStyle } from '../utils/settingsLayout';
 import useToast from '../utils/useToast';
 
 export default function EditPersonalContextScreen({ navigation }) {
@@ -45,16 +46,7 @@ export default function EditPersonalContextScreen({ navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headerRow}>
-          <AppText style={styles.title}>Personal context</AppText>
-          <Pressable onPress={() => navigation.goBack()} style={styles.closeButton}>
-            <Ionicons
-              name="close"
-              size={components.sizes.icon.lg}
-              color={colors.text.secondary}
-            />
-          </Pressable>
-        </View>
+        <SettingsHeader title="Personal context" onBack={() => navigation.goBack()} />
         <AppText style={styles.subtitle}>
           You can update this at any time. Changes affect future lessons and feedback.
         </AppText>
@@ -123,27 +115,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: colors.background.app,
     },
     content: {
-      paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.lg,
-      gap: components.layout.contentGap,
-      paddingBottom: components.layout.safeArea.bottom + tabBarHeight,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    title: {
-      ...typography.styles.h1,
-      color: colors.text.primary,
-    },
-    closeButton: {
-      width: components.sizes.square.lg,
-      height: components.sizes.square.lg,
-      borderRadius: components.radius.pill,
-      backgroundColor: colors.background.surface,
-      alignItems: 'center',
-      justifyContent: 'center',
+      ...getSettingsScrollContentStyle(components, tabBarHeight),
     },
     subtitle: {
       ...typography.styles.small,
