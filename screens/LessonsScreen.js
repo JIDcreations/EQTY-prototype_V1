@@ -8,6 +8,7 @@ import OnboardingScreen from '../components/OnboardingScreen';
 import ProgressBar from '../components/ProgressBar';
 import SectionTitle from '../components/SectionTitle';
 import Tag from '../components/Tag';
+import TopTabHeader from '../components/TopTabHeader';
 import { CtaButton } from '../components/Button';
 import {
   getHomeCopy,
@@ -122,22 +123,11 @@ export default function LessonsScreen() {
       contentContainerStyle={styles.content}
       scrollRef={scrollRef}
     >
-      <View style={styles.headerRow}>
-          <AppText style={styles.screenTitle}>Lesoverzicht</AppText>
-          <Pressable
-            onPress={() => navigation.navigate('Profile')}
-            style={styles.profileButton}
-            hitSlop={components.layout.spacing.sm}
-          >
-            <Ionicons
-              name="person-outline"
-              size={components.sizes.icon.lg}
-              color={colors.text.primary}
-            />
-          </Pressable>
-      </View>
-
-      <SectionTitle title="Nu bezig" />
+      <TopTabHeader
+        title="Lesoverzicht"
+        subtitle={homeCopy.currentLessonLabel}
+        onPressProfile={() => navigation.navigate('Profile')}
+      />
 
       <View style={styles.currentCard}>
         <View style={styles.currentMetaRow}>
@@ -361,29 +351,9 @@ const createStyles = (colors, components, tabBarHeight) =>
   StyleSheet.create({
     content: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.lg,
+      paddingTop: components.layout.safeArea.top + components.layout.spacing.xl,
       gap: components.layout.contentGap,
       paddingBottom: components.layout.safeArea.bottom + tabBarHeight,
-    },
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: components.layout.spacing.md,
-    },
-    screenTitle: {
-      ...typography.styles.h1,
-      color: colors.text.primary,
-    },
-    profileButton: {
-      width: components.sizes.square.lg,
-      height: components.sizes.square.lg,
-      borderRadius: components.radius.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
     },
     currentCard: {
       ...components.input.container,

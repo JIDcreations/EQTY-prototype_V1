@@ -848,12 +848,264 @@ const SETTINGS_COPY = {
     saved: 'Saved',
     selected: 'Selected',
     onboardingQuestions: 'Onboarding questions',
+    common: {
+      off: 'Off',
+      comingLater: 'Coming later',
+    },
+    settingsHome: {
+      title: 'Settings',
+      subtitle: 'Account, preferences, and support',
+      logoutButton: 'Log out',
+      logoutAlertTitle: 'Log out',
+      logoutAlertMessage: 'Are you sure you want to log out?',
+      logoutAlertCancel: 'Cancel',
+      logoutAlertConfirm: 'Log out',
+      categories: {
+        account: {
+          label: 'Account',
+          subtitle: 'Username, email, reset password',
+        },
+        security: {
+          label: 'Security',
+          subtitle: 'Two-factor authentication (coming later)',
+        },
+        personal: {
+          label: 'Personal context (AI)',
+          subtitle: 'Onboarding answers and AI context',
+        },
+        preferences: {
+          label: 'Preferences',
+          subtitle: 'Language, appearance',
+        },
+        accessibility: {
+          label: 'Accessibility',
+          subtitle: 'Text size and preview',
+        },
+        support: {
+          label: 'Help & support',
+          subtitle: 'Help center, contact support, FAQ',
+        },
+      },
+    },
+    preferences: {
+      title: 'Preferences',
+      subtitle: 'Language and appearance choices',
+      languageLabel: 'Language',
+      appearanceLabel: 'Appearance',
+    },
+    security: {
+      title: 'Security',
+      subtitle: 'Account protection',
+      twoFactorLabel: 'Two-factor authentication',
+      twoFactorSubtitle: 'Extra security for your account',
+    },
+    support: {
+      title: 'Help & support',
+      subtitle: 'Find answers or get in touch',
+      helpCenter: 'Help center',
+      contactSupport: 'Contact support',
+      faq: 'FAQ',
+    },
+    accessibility: {
+      title: 'Accessibility',
+      subtitle: 'Adjust text size for better readability',
+      textSizeTitle: 'Text size',
+      textSizeSubtitle: 'Adjust text size for better readability',
+      previewTitle: 'Preview',
+      previewText:
+        'Investing is a long-term journey. Adjust the text size to match your comfort.',
+    },
   },
   nl: {
     languageTitle: 'Taal',
     saved: 'Opgeslagen',
     selected: 'Gekozen',
     onboardingQuestions: 'Onboardingvragen',
+    common: {
+      off: 'Uit',
+      comingLater: 'Komt later',
+    },
+    settingsHome: {
+      title: 'Instellingen',
+      subtitle: 'Account, voorkeuren en ondersteuning',
+      logoutButton: 'Uitloggen',
+      logoutAlertTitle: 'Uitloggen',
+      logoutAlertMessage: 'Weet je zeker dat je wilt uitloggen?',
+      logoutAlertCancel: 'Annuleren',
+      logoutAlertConfirm: 'Uitloggen',
+      categories: {
+        account: {
+          label: 'Account',
+          subtitle: 'Gebruikersnaam, e-mail, wachtwoord resetten',
+        },
+        security: {
+          label: 'Beveiliging',
+          subtitle: 'Tweestapsverificatie (komt later)',
+        },
+        personal: {
+          label: 'Persoonlijke context (AI)',
+          subtitle: 'Onboarding-antwoorden en AI-context',
+        },
+        preferences: {
+          label: 'Voorkeuren',
+          subtitle: 'Taal, weergave',
+        },
+        accessibility: {
+          label: 'Toegankelijkheid',
+          subtitle: 'Tekstgrootte en voorbeeld',
+        },
+        support: {
+          label: 'Hulp en ondersteuning',
+          subtitle: 'Helpcenter, contact met support, FAQ',
+        },
+      },
+    },
+    preferences: {
+      title: 'Voorkeuren',
+      subtitle: 'Taal- en weergavekeuzes',
+      languageLabel: 'Taal',
+      appearanceLabel: 'Weergave',
+    },
+    security: {
+      title: 'Beveiliging',
+      subtitle: 'Accountbescherming',
+      twoFactorLabel: 'Tweestapsverificatie',
+      twoFactorSubtitle: 'Extra beveiliging voor je account',
+    },
+    support: {
+      title: 'Hulp en ondersteuning',
+      subtitle: 'Vind antwoorden of neem contact op',
+      helpCenter: 'Helpcenter',
+      contactSupport: 'Contact met support',
+      faq: 'FAQ',
+    },
+    accessibility: {
+      title: 'Toegankelijkheid',
+      subtitle: 'Pas tekstgrootte aan voor betere leesbaarheid',
+      textSizeTitle: 'Tekstgrootte',
+      textSizeSubtitle: 'Pas tekstgrootte aan voor betere leesbaarheid',
+      previewTitle: 'Voorbeeld',
+      previewText:
+        'Investeren is een langetermijnreis. Pas de tekstgrootte aan voor jouw comfort.',
+    },
+  },
+};
+
+const APPEARANCE_OPTIONS = {
+  en: [
+    { label: 'Dark', value: 'Dark' },
+    { label: 'Light', value: 'Light' },
+    { label: 'System', value: 'System' },
+  ],
+  nl: [
+    { label: 'Donker', value: 'Dark' },
+    { label: 'Licht', value: 'Light' },
+    { label: 'Systeem', value: 'System' },
+  ],
+};
+
+const TEXT_SIZE_OPTIONS = {
+  en: [
+    { label: 'Default', value: 'Default' },
+    { label: 'Comfort', value: 'Comfort' },
+    { label: 'Large', value: 'Large' },
+  ],
+  nl: [
+    { label: 'Standaard', value: 'Default' },
+    { label: 'Comfort', value: 'Comfort' },
+    { label: 'Groot', value: 'Large' },
+  ],
+};
+
+const GLOSSARY_COPY = {
+  en: {
+    title: 'Glossary',
+    subtitle: 'Find terms fast without leaving your flow.',
+    searchLabel: 'Search glossary',
+    searchPlaceholder: 'Search terms, tags, or categories',
+    filterAll: 'All',
+    allTerms: 'All terms',
+    fallbackTerms: 'Terms',
+    termCount: (count) => `${count} terms`,
+    noMatches: 'No matches. Try another term.',
+    definition: 'Definition',
+    example: 'Example',
+    watchVideo: 'Watch 2-minute video',
+    explainForMeTitle: 'Explain for me',
+    explainForMeBody: 'Tap below for a tailored explanation.',
+    explainForMeButton: 'Explain for me',
+    back: 'Back',
+  },
+  nl: {
+    title: 'Woordenlijst',
+    subtitle: 'Vind snel begrippen zonder je flow te onderbreken.',
+    searchLabel: 'Zoek in woordenlijst',
+    searchPlaceholder: 'Zoek begrippen, tags of categorieen',
+    filterAll: 'Alles',
+    allTerms: 'Alle begrippen',
+    fallbackTerms: 'Begrippen',
+    termCount: (count) => `${count} begrippen`,
+    noMatches: 'Geen resultaten. Probeer een ander begrip.',
+    definition: 'Definitie',
+    example: 'Voorbeeld',
+    watchVideo: 'Bekijk video van 2 minuten',
+    explainForMeTitle: 'Leg uit voor mij',
+    explainForMeBody: 'Tik hieronder voor een uitleg op maat.',
+    explainForMeButton: 'Leg uit voor mij',
+    back: 'Terug',
+  },
+};
+
+const GLOSSARY_CATEGORY_COPY = {
+  nl: {
+    market_basics: {
+      title: 'Marktbasis',
+      description: 'Kernbegrippen over hoe markten prijzen vormen en handelen.',
+    },
+    risk_return: {
+      title: 'Risico en Rendement',
+      description: 'Hoe prestaties en onzekerheid gemeten en vergeleken worden.',
+    },
+    portfolio_building: {
+      title: 'Portefeuilleopbouw',
+      description: 'Hoe je een mix opbouwt, balanceert en onderhoudt.',
+    },
+    etfs_funds: {
+      title: 'ETF\'s en Fondsen',
+      description: 'Gebundelde producten, indexvolging en aandelenklassen.',
+    },
+    stocks_equity: {
+      title: 'Aandelen en Equity',
+      description: 'Bedrijfseigendom, waardering en termen rond aandelen.',
+    },
+    bonds_income: {
+      title: 'Obligaties en Vastrentend',
+      description: 'Schuldinstrumenten, rendement en rentegevoeligheid.',
+    },
+    orders_trading: {
+      title: 'Orders en Handel',
+      description: 'Hoe transacties geplaatst, uitgevoerd en beheerd worden.',
+    },
+    costs_fees: {
+      title: 'Kosten en Vergoedingen',
+      description: 'Welke kosten je betaalt en waar ze zichtbaar zijn.',
+    },
+    taxes_regulation: {
+      title: 'Belastingen en Regelgeving',
+      description: 'Belastingen, naleving en beleggersbescherming.',
+    },
+    time_goals: {
+      title: 'Tijdshorizon en Doelen',
+      description: 'Planning, timing en doelgerichte beleggingskeuzes.',
+    },
+    macro_rates: {
+      title: 'Macro en Rente',
+      description: 'Economische krachten die markten en rendementen sturen.',
+    },
+    behavior_psychology: {
+      title: 'Gedrag en Psychologie',
+      description: 'Veelvoorkomende denkfouten bij beleggingsbeslissingen.',
+    },
   },
 };
 
@@ -913,6 +1165,31 @@ export function getHomeCopy(language) {
 export function getSettingsCopy(language) {
   const locale = getLocaleKey(language);
   return SETTINGS_COPY[locale] || SETTINGS_COPY.en;
+}
+
+export function getAppearanceOptions(language) {
+  const locale = getLocaleKey(language);
+  return APPEARANCE_OPTIONS[locale] || APPEARANCE_OPTIONS.en;
+}
+
+export function getTextSizeOptions(language) {
+  const locale = getLocaleKey(language);
+  return TEXT_SIZE_OPTIONS[locale] || TEXT_SIZE_OPTIONS.en;
+}
+
+export function getGlossaryCopy(language) {
+  const locale = getLocaleKey(language);
+  return GLOSSARY_COPY[locale] || GLOSSARY_COPY.en;
+}
+
+export function getLocalizedGlossaryCategories(language, categories = []) {
+  const locale = getLocaleKey(language);
+  const localizedById = GLOSSARY_CATEGORY_COPY[locale];
+  if (!localizedById) return categories;
+  return categories.map((category) => {
+    const override = localizedById[category.id];
+    return override ? { ...category, ...override } : category;
+  });
 }
 
 export function formatLessonModuleLabel(language, moduleNumber, lessonOrder) {

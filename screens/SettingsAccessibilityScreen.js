@@ -7,13 +7,8 @@ import SettingsHeader from '../components/SettingsHeader';
 import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
+import { getSettingsCopy, getTextSizeOptions } from '../utils/localization';
 import useToast from '../utils/useToast';
-
-const TEXT_SIZE_OPTIONS = [
-  { label: 'Default', value: 'Default' },
-  { label: 'Comfort', value: 'Comfort' },
-  { label: 'Large', value: 'Large' },
-];
 
 export default function SettingsAccessibilityScreen({ navigation }) {
   const { preferences, updatePreferences } = useApp();
@@ -24,6 +19,14 @@ export default function SettingsAccessibilityScreen({ navigation }) {
     [colors, components, tabBarHeight]
   );
   const toast = useToast();
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const textSizeOptions = useMemo(
+    () => getTextSizeOptions(preferences?.language),
+    [preferences?.language]
+  );
 
   const renderTextSizeOption = (option) => {
     const isActive = preferences?.textSize === option.value;
@@ -32,7 +35,7 @@ export default function SettingsAccessibilityScreen({ navigation }) {
         key={option.value}
         onPress={() => {
           updatePreferences({ textSize: option.value });
-          toast.show('Saved');
+          toast.show(settingsCopy.saved);
         }}
         style={styles.textSizeRow}
       >
@@ -63,22 +66,22 @@ export default function SettingsAccessibilityScreen({ navigation }) {
         contentContainerStyle={styles.content}
       >
         <SettingsHeader
-          title="Accessibility"
-          subtitle="Adjust text size for better readability"
+          title={settingsCopy.accessibility.title}
+          subtitle={settingsCopy.accessibility.subtitle}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.section}>
           <View style={styles.textSizeHeader}>
-            <AppText style={styles.cardTitle}>Text size</AppText>
+            <AppText style={styles.cardTitle}>{settingsCopy.accessibility.textSizeTitle}</AppText>
             <AppText style={styles.cardSubtitle}>
-              Adjust text size for better readability
+              {settingsCopy.accessibility.textSizeSubtitle}
             </AppText>
           </View>
-          <View style={styles.textSizeList}>{TEXT_SIZE_OPTIONS.map(renderTextSizeOption)}</View>
+          <View style={styles.textSizeList}>{textSizeOptions.map(renderTextSizeOption)}</View>
           <View style={styles.previewCard}>
-            <AppText style={styles.previewTitle}>Preview</AppText>
+            <AppText style={styles.previewTitle}>{settingsCopy.accessibility.previewTitle}</AppText>
             <AppText style={styles.previewText}>
-              Investing is a long-term journey. Adjust the text size to match your comfort.
+              {settingsCopy.accessibility.previewText}
             </AppText>
           </View>
         </View>

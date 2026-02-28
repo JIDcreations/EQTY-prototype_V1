@@ -10,6 +10,7 @@ import Card from '../components/Card';
 import ProgressBar from '../components/ProgressBar';
 import SectionTitle from '../components/SectionTitle';
 import Tag from '../components/Tag';
+import TopTabHeader from '../components/TopTabHeader';
 import {
   getHomeCopy,
   getLocalizedLessons,
@@ -117,28 +118,12 @@ export default function HomeScreen() {
       contentContainerStyle={styles.content}
     >
       <View style={styles.topBlock}>
-        <View style={styles.header}>
-          <View style={styles.headerMainRow}>
-            <View style={styles.headerGreeting}>
-              <AppText style={styles.greeting}>{greetingLine}</AppText>
-            </View>
-            <Pressable
-              onPress={() => navigation.navigate('Profile')}
-              style={styles.profileButton}
-              hitSlop={components.layout.spacing.sm}
-            >
-              <Ionicons
-                name="person-outline"
-                size={components.sizes.icon.lg}
-                color={colors.text.primary}
-              />
-            </Pressable>
-          </View>
-        </View>
+        <TopTabHeader
+          title={greetingLine}
+          subtitle={formatLessonPosition(lessonPosition, totalLessons)}
+          onPressProfile={() => navigation.navigate('Profile')}
+        />
         <View style={styles.trajectoryBlock}>
-          <AppText style={styles.trajectoryMeta}>
-            {formatLessonPosition(lessonPosition, totalLessons)}
-          </AppText>
           <View style={styles.trajectoryBar}>
             <ProgressBar progress={displaySeriesProgress} />
           </View>
@@ -361,37 +346,11 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     topBlock: {
       gap: components.layout.spacing.md,
     },
-    header: {
-      gap: components.layout.spacing.sm,
-    },
-    headerMainRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: components.layout.spacing.md,
-    },
-    headerGreeting: {
-      flex: 1,
-    },
-    greeting: {
-      ...typography.styles.h3,
-      color: colors.text.primary,
-    },
-    profileButton: {
-      width: components.sizes.square.lg,
-      height: components.sizes.square.lg,
-      borderRadius: components.radius.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-    },
     section: {
       gap: components.layout.spacing.md,
     },
     trajectoryBlock: {
-      gap: components.layout.spacing.sm,
+      gap: components.layout.spacing.none,
     },
     heroStack: {
       width: '100%',
@@ -594,10 +553,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       color: colors.text.secondary,
     },
     trajectoryBar: {
-    },
-    trajectoryMeta: {
-      ...typography.styles.stepLabel,
-      color: colors.text.secondary,
     },
   });
 };

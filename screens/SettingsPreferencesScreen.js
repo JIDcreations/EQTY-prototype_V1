@@ -8,14 +8,12 @@ import SettingsHeader from '../components/SettingsHeader';
 import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getLanguageOptions, getSettingsCopy } from '../utils/localization';
+import {
+  getAppearanceOptions,
+  getLanguageOptions,
+  getSettingsCopy,
+} from '../utils/localization';
 import useToast from '../utils/useToast';
-
-const APPEARANCE_OPTIONS = [
-  { label: 'Dark', value: 'Dark' },
-  { label: 'Light', value: 'Light' },
-  { label: 'System', value: 'System' },
-];
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -39,6 +37,10 @@ export default function SettingsPreferencesScreen({ navigation }) {
     () => getLanguageOptions(preferences?.language),
     [preferences?.language]
   );
+  const appearanceOptions = useMemo(
+    () => getAppearanceOptions(preferences?.language),
+    [preferences?.language]
+  );
   const settingsCopy = useMemo(
     () => getSettingsCopy(preferences?.language),
     [preferences?.language]
@@ -52,12 +54,12 @@ export default function SettingsPreferencesScreen({ navigation }) {
         contentContainerStyle={styles.content}
       >
         <SettingsHeader
-          title="Preferences"
-          subtitle="Language and appearance choices"
+          title={settingsCopy.preferences.title}
+          subtitle={settingsCopy.preferences.subtitle}
           onBack={() => navigation.goBack()}
         />
         <View style={styles.block}>
-          <AppText style={styles.cardTitle}>Language</AppText>
+          <AppText style={styles.cardTitle}>{settingsCopy.preferences.languageLabel}</AppText>
           <View style={styles.languageList}>
             {options.map((option) => {
               const isActive = preferences?.language === option.value;
@@ -85,14 +87,14 @@ export default function SettingsPreferencesScreen({ navigation }) {
           </View>
         </View>
         <View style={styles.appearanceBlock}>
-          <AppText style={styles.cardTitle}>Appearance</AppText>
+          <AppText style={styles.cardTitle}>{settingsCopy.preferences.appearanceLabel}</AppText>
           <View style={styles.appearanceContainer}>
             <SegmentedControl
-              options={APPEARANCE_OPTIONS}
+              options={appearanceOptions}
               value={preferences?.appearance || 'Dark'}
               onChange={(next) => {
                 updatePreferences({ appearance: next });
-                toast.show('Saved');
+                toast.show(settingsCopy.saved);
               }}
             />
           </View>

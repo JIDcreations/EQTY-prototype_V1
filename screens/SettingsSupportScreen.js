@@ -5,6 +5,8 @@ import OnboardingScreen from '../components/OnboardingScreen';
 import SettingsHeader from '../components/SettingsHeader';
 import SettingsRow from '../components/SettingsRow';
 import { useTheme } from '../theme';
+import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -16,11 +18,16 @@ const toRgba = (hex, alpha) => {
 };
 
 export default function SettingsSupportScreen({ navigation }) {
+  const { preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
+  );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
   );
 
   return (
@@ -30,25 +37,25 @@ export default function SettingsSupportScreen({ navigation }) {
       contentContainerStyle={styles.content}
     >
       <SettingsHeader
-        title="Help & support"
-        subtitle="Find answers or get in touch"
+        title={settingsCopy.support.title}
+        subtitle={settingsCopy.support.subtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.section}>
         <SettingsRow
-          label="Help center"
+          label={settingsCopy.support.helpCenter}
           onPress={() => navigation.navigate('HelpCenter')}
           isLast
           containerStyle={styles.rowCard}
         />
         <SettingsRow
-          label="Contact support"
+          label={settingsCopy.support.contactSupport}
           onPress={() => navigation.navigate('ContactSupport')}
           isLast
           containerStyle={styles.rowCard}
         />
         <SettingsRow
-          label="FAQ"
+          label={settingsCopy.support.faq}
           onPress={() => navigation.navigate('FAQ')}
           isLast
           containerStyle={styles.rowCard}

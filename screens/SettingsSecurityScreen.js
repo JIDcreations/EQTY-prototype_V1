@@ -6,6 +6,8 @@ import OnboardingScreen from '../components/OnboardingScreen';
 import SettingsHeader from '../components/SettingsHeader';
 import SettingsRow from '../components/SettingsRow';
 import { typography, useTheme } from '../theme';
+import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -17,11 +19,16 @@ const toRgba = (hex, alpha) => {
 };
 
 export default function SettingsSecurityScreen({ navigation }) {
+  const { preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
+  );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
   );
 
   return (
@@ -31,15 +38,15 @@ export default function SettingsSecurityScreen({ navigation }) {
       contentContainerStyle={styles.content}
     >
       <SettingsHeader
-        title="Security"
-        subtitle="Account protection"
+        title={settingsCopy.security.title}
+        subtitle={settingsCopy.security.subtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.section}>
         <SettingsRow
-          label="Two-factor authentication"
-          subtitle="Extra security for your account"
-          value="Off"
+          label={settingsCopy.security.twoFactorLabel}
+          subtitle={settingsCopy.security.twoFactorSubtitle}
+          value={settingsCopy.common.off}
           right={
             <Switch
               value={false}
@@ -55,7 +62,7 @@ export default function SettingsSecurityScreen({ navigation }) {
           disabled
           containerStyle={styles.rowCard}
         />
-        <AppText style={styles.inlineHint}>Coming later</AppText>
+        <AppText style={styles.inlineHint}>{settingsCopy.common.comingLater}</AppText>
       </View>
     </OnboardingScreen>
   );

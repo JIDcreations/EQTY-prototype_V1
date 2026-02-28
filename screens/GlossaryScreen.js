@@ -8,18 +8,29 @@ import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
 import Card from '../components/Card';
 import OnboardingScreen from '../components/OnboardingScreen';
-import SectionTitle from '../components/SectionTitle';
+import TopTabHeader from '../components/TopTabHeader';
 import { glossaryCategories, glossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
+import { useApp } from '../utils/AppContext';
+import { getGlossaryCopy, getLocalizedGlossaryCategories } from '../utils/localization';
 
 export default function GlossaryScreen() {
   const navigation = useNavigation();
   const route = useRoute();
+  const { preferences } = useApp();
   const tabBarHeight = useBottomTabBarHeight();
   const { colors, components } = useTheme();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
+  );
+  const glossaryCopy = useMemo(
+    () => getGlossaryCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const localizedCategories = useMemo(
+    () => getLocalizedGlossaryCategories(preferences?.language, glossaryCategories),
+    [preferences?.language]
   );
   const [query, setQuery] = useState('');
   const [selectedTerm, setSelectedTerm] = useState(null);
@@ -35,11 +46,11 @@ export default function GlossaryScreen() {
     null;
 
   const categoriesById = useMemo(() => {
-    return glossaryCategories.reduce((acc, category) => {
+    return localizedCategories.reduce((acc, category) => {
       acc[category.id] = category;
       return acc;
     }, {});
-  }, [glossaryCategories]);
+  }, [localizedCategories]);
 
   const scopedTerms = useMemo(() => {
     if (!Array.isArray(scopedTermIds) || scopedTermIds.length === 0) {
@@ -57,10 +68,10 @@ export default function GlossaryScreen() {
   }, [scopedTermIds]);
 
   const activeCategories = useMemo(() => {
-    return glossaryCategories.filter((category) =>
+    return localizedCategories.filter((category) =>
       scopedTerms.some((term) => term.categoryId === category.id)
     );
-  }, [glossaryCategories, scopedTerms]);
+  }, [localizedCategories, scopedTerms]);
 
   const normalizedQuery = query.trim().toLowerCase();
   const searchedTerms = useMemo(() => {
@@ -95,8 +106,8 @@ export default function GlossaryScreen() {
 
   const listTitle =
     activeCategory === 'all'
-      ? 'All terms'
-      : categoriesById[activeCategory]?.title || 'Terms';
+      ? glossaryCopy.allTerms
+      : categoriesById[activeCategory]?.title || glossaryCopy.fallbackTerms;
 
   const handleScroll = useCallback(
     (event) => {
@@ -164,29 +175,14 @@ export default function GlossaryScreen() {
         scrollRef={scrollRef}
       >
         <View style={styles.headerBlock}>
-          <View style={styles.headerSection}>
-            <View style={styles.headerRow}>
-              <SectionTitle
-                title="Glossary"
-                subtitle="Find terms fast without leaving your flow."
-              />
-              <Pressable
-                onPress={() => navigation.navigate('Profile')}
-                style={styles.profileButton}
-                hitSlop={components.layout.spacing.sm}
-              >
-                <Ionicons
-                  name="person-outline"
-                  size={components.sizes.icon.lg}
-                  color={colors.text.primary}
-                />
-              </Pressable>
-            </View>
-          </View>
+          <TopTabHeader
+            title={glossaryCopy.title}
+            subtitle={glossaryCopy.subtitle}
+            onPressProfile={() => navigation.navigate('Profile')}
+          />
 
           <View style={styles.stickyControls}>
             <View style={styles.searchGroup}>
-              <AppText style={styles.searchLabel}>Search glossary</AppText>
               <View style={styles.searchBar}>
                 <Ionicons
                   name="search"
@@ -196,7 +192,7 @@ export default function GlossaryScreen() {
                 <AppTextInput
                   value={query}
                   onChangeText={setQuery}
-                  placeholder="Search terms, tags, or categories"
+                  placeholder={glossaryCopy.searchPlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   style={styles.searchInput}
                 />
@@ -232,7 +228,7 @@ export default function GlossaryScreen() {
                       activeCategory === 'all' && styles.filterChipTextActive,
                     ]}
                   >
-                    All
+                    {glossaryCopy.filterAll}
                   </AppText>
                 </Pressable>
                 {activeCategories.map((category) => {
@@ -283,10 +279,10 @@ export default function GlossaryScreen() {
           <Card style={styles.termsCard}>
             <View style={styles.termsHeader}>
               <AppText style={styles.termsTitle}>{listTitle}</AppText>
-              <AppText style={styles.termsCount}>{displayTerms.length} terms</AppText>
+              <AppText style={styles.termsCount}>{glossaryCopy.termCount(displayTerms.length)}</AppText>
             </View>
             {displayTerms.length === 0 ? (
-              <AppText style={styles.emptyText}>No matches. Try another term.</AppText>
+              <AppText style={styles.emptyText}>{glossaryCopy.noMatches}</AppText>
             ) : (
               <View style={styles.termList}>
                 {displayTerms.map((term, index) =>
@@ -321,11 +317,11 @@ export default function GlossaryScreen() {
         scrimOpacity={0}
       >
         <View style={styles.sheetSection}>
-          <AppText style={styles.sheetLabel}>Definition</AppText>
+          <AppText style={styles.sheetLabel}>{glossaryCopy.definition}</AppText>
           <AppText style={styles.sheetDefinition}>{selectedTerm?.definition}</AppText>
         </View>
         <View style={styles.sheetSection}>
-          <AppText style={styles.sheetLabel}>Example</AppText>
+          <AppText style={styles.sheetLabel}>{glossaryCopy.example}</AppText>
           <AppText style={styles.sheetExample}>{selectedTerm?.example}</AppText>
         </View>
         {selectedTerm?.term ? (
@@ -335,7 +331,7 @@ export default function GlossaryScreen() {
               size={components.sizes.icon.sm}
               color={colors.text.secondary}
             />
-            <AppText style={styles.learnMoreText}>Watch 2-minute video</AppText>
+            <AppText style={styles.learnMoreText}>{glossaryCopy.watchVideo}</AppText>
           </Pressable>
         ) : null}
       </BottomSheet>
@@ -368,32 +364,11 @@ const createStyles = (colors, components, tabBarHeight) =>
     headerBlock: {
       gap: components.layout.spacing.lg,
     },
-    headerSection: {},
-    headerRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: components.layout.spacing.md,
-    },
-    profileButton: {
-      width: components.sizes.square.lg,
-      height: components.sizes.square.lg,
-      borderRadius: components.radius.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-    },
     stickyControls: {
       gap: components.layout.spacing.md,
     },
     searchGroup: {
       gap: components.layout.spacing.xs,
-    },
-    searchLabel: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
     },
     searchBar: {
       flexDirection: 'row',

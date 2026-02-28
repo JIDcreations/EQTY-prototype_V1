@@ -7,6 +7,7 @@ import SettingsRow from '../components/SettingsRow';
 import { PrimaryButton } from '../components/Button';
 import { useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
+import { getSettingsCopy } from '../utils/localization';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -20,56 +21,48 @@ const toRgba = (hex, alpha) => {
 const SETTINGS_CATEGORIES = [
   {
     key: 'account',
-    label: 'Account',
-    subtitle: 'Username, email, reset password',
     route: 'SettingsAccount',
   },
   {
     key: 'security',
-    label: 'Security',
-    subtitle: 'Two-factor authentication (coming later)',
     route: 'SettingsSecurity',
   },
   {
     key: 'personal',
-    label: 'Personal context (AI)',
-    subtitle: 'Onboarding answers and AI context',
     route: 'SettingsPersonalContext',
   },
   {
     key: 'preferences',
-    label: 'Preferences',
-    subtitle: 'Language, appearance',
     route: 'SettingsPreferences',
   },
   {
     key: 'accessibility',
-    label: 'Accessibility',
-    subtitle: 'Text size and preview',
     route: 'SettingsAccessibility',
   },
   {
     key: 'support',
-    label: 'Help & support',
-    subtitle: 'Help center, contact support, FAQ',
     route: 'SettingsSupport',
   },
 ];
 
 export default function SettingsHomeScreen({ navigation }) {
-  const { logOut } = useApp();
+  const { logOut, preferences } = useApp();
   const { colors, components } = useTheme();
   const tabBarHeight = useBottomTabBarHeight();
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
+  const settingsCopy = useMemo(
+    () => getSettingsCopy(preferences?.language),
+    [preferences?.language]
+  );
 
   const handleLogOut = () => {
-    Alert.alert('Log out', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(settingsCopy.settingsHome.logoutAlertTitle, settingsCopy.settingsHome.logoutAlertMessage, [
+      { text: settingsCopy.settingsHome.logoutAlertCancel, style: 'cancel' },
       {
-        text: 'Log out',
+        text: settingsCopy.settingsHome.logoutAlertConfirm,
         style: 'destructive',
         onPress: async () => {
           await logOut();
@@ -85,23 +78,27 @@ export default function SettingsHomeScreen({ navigation }) {
       contentContainerStyle={styles.content}
     >
       <SettingsHeader
-        title="Settings"
-        subtitle="Account, preferences, and support"
+        title={settingsCopy.settingsHome.title}
+        subtitle={settingsCopy.settingsHome.subtitle}
         onBack={() => navigation.goBack()}
       />
       <View style={styles.section}>
         {SETTINGS_CATEGORIES.map((item) => (
           <SettingsRow
             key={item.key}
-            label={item.label}
-            subtitle={item.subtitle}
+            label={settingsCopy.settingsHome.categories[item.key]?.label || item.key}
+            subtitle={settingsCopy.settingsHome.categories[item.key]?.subtitle}
             onPress={() => navigation.navigate(item.route)}
             isLast
             containerStyle={styles.rowCard}
           />
         ))}
       </View>
-      <PrimaryButton label="Log out" onPress={handleLogOut} style={styles.logoutButton} />
+      <PrimaryButton
+        label={settingsCopy.settingsHome.logoutButton}
+        onPress={handleLogOut}
+        style={styles.logoutButton}
+      />
     </OnboardingScreen>
   );
 }

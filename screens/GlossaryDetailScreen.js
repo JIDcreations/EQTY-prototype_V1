@@ -8,14 +8,19 @@ import { glossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getGlossaryExplanation } from '../utils/helpers';
+import { getGlossaryCopy } from '../utils/localization';
 
 export default function GlossaryDetailScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { termId } = route.params || {};
-  const { userContext } = useApp();
+  const { userContext, preferences } = useApp();
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const glossaryCopy = useMemo(
+    () => getGlossaryCopy(preferences?.language),
+    [preferences?.language]
+  );
   const [explanation, setExplanation] = useState(null);
 
   const term = useMemo(
@@ -35,17 +40,17 @@ export default function GlossaryDetailScreen() {
         </View>
 
         <Card style={styles.explainCard}>
-          <AppText style={styles.cardTitle}>Explain for me</AppText>
+          <AppText style={styles.cardTitle}>{glossaryCopy.explainForMeTitle || 'Explain for me'}</AppText>
           <AppText style={styles.cardText}>
-            {explanation || 'Tap below for a tailored explanation.'}
+            {explanation || glossaryCopy.explainForMeBody || 'Tap below for a tailored explanation.'}
           </AppText>
           <PrimaryButton
-            label="Explain for me"
+            label={glossaryCopy.explainForMeButton || 'Explain for me'}
             onPress={() => setExplanation(getGlossaryExplanation(term, userContext))}
           />
         </Card>
 
-        <SecondaryButton label="Back" onPress={() => navigation.goBack()} />
+        <SecondaryButton label={glossaryCopy.back || 'Back'} onPress={() => navigation.goBack()} />
       </ScrollView>
     </View>
   );

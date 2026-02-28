@@ -4,12 +4,19 @@ import { Ionicons } from '@expo/vector-icons';
 import BottomSheet from './BottomSheet';
 import { typography, useTheme } from '../theme';
 import AppText from './AppText';
+import { useApp } from '../utils/AppContext';
+import { getGlossaryCopy } from '../utils/localization';
 
 export const GlossaryContext = createContext(null);
 
 export function GlossaryProvider({ children }) {
+  const { preferences } = useApp();
   const { colors, components, mode } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const glossaryCopy = useMemo(
+    () => getGlossaryCopy(preferences?.language),
+    [preferences?.language]
+  );
   const sheetBorderStyle = useMemo(() => {
     if (mode !== 'light') return null;
     return {
@@ -61,12 +68,12 @@ export function GlossaryProvider({ children }) {
         sheetStyle={sheetBorderStyle}
       >
         <View style={styles.glossarySection}>
-          <AppText style={styles.sheetLabel}>Definition</AppText>
+          <AppText style={styles.sheetLabel}>{glossaryCopy.definition}</AppText>
           <AppText style={styles.sheetDefinition}>{activeTerm?.definition}</AppText>
         </View>
         {activeTerm?.example ? (
           <View style={styles.glossarySection}>
-            <AppText style={styles.sheetLabel}>Example</AppText>
+            <AppText style={styles.sheetLabel}>{glossaryCopy.example}</AppText>
             <AppText style={styles.sheetExample}>{activeTerm?.example}</AppText>
           </View>
         ) : null}
@@ -77,7 +84,7 @@ export function GlossaryProvider({ children }) {
               size={components.sizes.icon.sm}
               color={colors.text.secondary}
             />
-            <AppText style={styles.learnMoreText}>Watch 2-minute video</AppText>
+            <AppText style={styles.learnMoreText}>{glossaryCopy.watchVideo}</AppText>
           </Pressable>
         ) : null}
       </BottomSheet>
