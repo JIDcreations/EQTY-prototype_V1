@@ -13,7 +13,7 @@ export const curriculumNl = {
     lesson_0: {
       title: 'Investeren als proces',
       shortDescription:
-        'Investeren is een gestructureerd beslissingsproces, geen enkele handeling.',
+        'Investeren is een proces: eerst beslissen, dan handelen.',
     },
     lesson_1: {
       title: 'Waarom wil ik investeren?',

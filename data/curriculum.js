@@ -47,7 +47,7 @@ const baseLessons = [
     moduleId: 'module_0',
     order: 0,
     title: 'Investing as a Process',
-    shortDescription: 'Investing is a structured decision-making process, not a single action.',
+    shortDescription: 'Investing is a process: decide first, execute last.',
   },
   {
     id: 'lesson_1',
