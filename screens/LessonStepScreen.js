@@ -13,6 +13,16 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  Easing,
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
@@ -501,13 +511,8 @@ function IntroConceptStep({ content, onNext, copy }) {
 }
 
 function IntroVisualizationStep({ onNext, copy }) {
-  const { styles, components } = useLessonStepStyles();
-  const [expandedCards, setExpandedCards] = useState({});
+  const { styles, colors, components } = useLessonStepStyles();
   const steps = copy.introVisualization.steps;
-
-  const toggleCard = (id) => {
-    setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   return (
     <View style={[styles.stepBody, styles.journeyBody]}>
@@ -516,45 +521,399 @@ function IntroVisualizationStep({ onNext, copy }) {
           {copy.introVisualization.subtitle}
         </AppText>
         {steps.map((step, index) => (
-          <Pressable
+          <JourneyFlipCard
             key={step.id}
-            onPress={() => toggleCard(step.id)}
-            style={styles.journeyPage}
-          >
-            <View style={styles.journeyHeaderRow}>
-              <View style={styles.journeyStepChip}>
-                <AppText style={styles.journeyStepText}>
-                  {`${index + 1}`.padStart(2, '0')}
-                </AppText>
-              </View>
-              <View style={styles.journeyAccent} />
-            </View>
-            <AppText style={styles.journeyLabel}>{step.label}</AppText>
-            {expandedCards[step.id] ? (
-              <>
-                <AppText style={styles.journeyDetail}>{step.detail}</AppText>
-                <AppText style={styles.journeyTapHint}>{copy.labels.tapReturn}</AppText>
-              </>
-            ) : (
-              <>
-                <AppText style={styles.journeyQuestion}>{step.question}</AppText>
-                <View style={styles.journeyVisual}>
-                  <View style={styles.journeyPlaceholder}>
-                    <AppText style={styles.journeyPlaceholderText}>
-                      {copy.labels.animationPlaceholder}
-                    </AppText>
-                  </View>
-                </View>
-                <AppText style={styles.journeyWhy}>{step.why}</AppText>
-                <AppText style={styles.journeyTapHint}>{copy.labels.tapDetails}</AppText>
-              </>
-            )}
-          </Pressable>
+            step={step}
+            index={index}
+            copy={copy}
+            styles={styles}
+            colors={colors}
+            components={components}
+          />
         ))}
         <View style={styles.journeyNextWrap}>
           <PrimaryButton label={copy.buttons.next} onPress={onNext} />
         </View>
       </View>
+    </View>
+  );
+}
+
+function JourneyFlipCard({ step, index, copy, styles, colors, components }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipProgress = useSharedValue(0);
+
+  useEffect(() => {
+    flipProgress.value = withTiming(isFlipped ? 1 : 0, {
+      duration: 520,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [flipProgress, isFlipped]);
+
+  const frontStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(flipProgress.value, [0, 1], [0, 180]);
+    const opacity = interpolate(
+      flipProgress.value,
+      [0, 0.48, 0.55, 1],
+      [1, 1, 0, 0],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ perspective: 1200 }, { rotateY: `${rotate}deg` }],
+      opacity,
+      zIndex: flipProgress.value < 0.5 ? 2 : 0,
+    };
+  });
+
+  const backStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(flipProgress.value, [0, 1], [180, 360]);
+    const opacity = interpolate(
+      flipProgress.value,
+      [0, 0.45, 0.52, 1],
+      [0, 0, 1, 1],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ perspective: 1200 }, { rotateY: `${rotate}deg` }],
+      opacity,
+      zIndex: flipProgress.value >= 0.5 ? 2 : 0,
+    };
+  });
+
+  return (
+    <Pressable onPress={() => setIsFlipped((prev) => !prev)} style={styles.journeyCardShell}>
+      <View style={styles.journeyFlipCard}>
+        <Animated.View style={[styles.journeyFace, styles.journeyPage, frontStyle]}>
+          <View style={styles.journeyHeaderRow}>
+            <View style={styles.journeyStepChip}>
+              <AppText style={styles.journeyStepText}>
+                {`${index + 1}`.padStart(2, '0')}
+              </AppText>
+            </View>
+            <View style={styles.journeyAccent} />
+          </View>
+          <AppText style={styles.journeyLabel}>{step.label}</AppText>
+          <AppText style={styles.journeyQuestion}>{step.question}</AppText>
+          <View style={styles.journeyVisual}>
+            <JourneyStepAnimation
+              stepId={step.id}
+              styles={styles}
+              colors={colors}
+            />
+          </View>
+          <AppText style={styles.journeyWhy}>{step.why}</AppText>
+          <AppText style={styles.journeyTapHint}>{copy.labels.tapDetails}</AppText>
+        </Animated.View>
+
+        <Animated.View style={[styles.journeyFace, styles.journeyPage, styles.journeyBackFace, backStyle]}>
+          <View style={styles.journeyHeaderRow}>
+            <View style={styles.journeyStepChip}>
+              <AppText style={styles.journeyStepText}>
+                {`${index + 1}`.padStart(2, '0')}
+              </AppText>
+            </View>
+            <View style={styles.journeyBackBadge}>
+              <Ionicons
+                name="sparkles-outline"
+                size={components.sizes.icon.sm}
+                color={colors.text.secondary}
+              />
+              <AppText style={styles.journeyBackBadgeText}>{copy.labels.insight}</AppText>
+            </View>
+          </View>
+          <AppText style={styles.journeyLabel}>{step.label}</AppText>
+          <AppText style={styles.journeyDetail}>{step.detail}</AppText>
+          <AppText style={styles.journeyTapHint}>{copy.labels.tapReturn}</AppText>
+        </Animated.View>
+      </View>
+    </Pressable>
+  );
+}
+
+function JourneyStepAnimation({ stepId, styles, colors }) {
+  switch (stepId) {
+    case 'goal':
+      return <GoalStepAnimation styles={styles} colors={colors} />;
+    case 'risk':
+      return <RiskStepAnimation styles={styles} colors={colors} />;
+    case 'strategy':
+      return <StrategyStepAnimation styles={styles} colors={colors} />;
+    case 'allocation':
+      return <AllocationStepAnimation styles={styles} colors={colors} />;
+    case 'vehicle':
+      return <VehicleStepAnimation styles={styles} colors={colors} />;
+    case 'execution':
+      return <ExecutionStepAnimation styles={styles} colors={colors} />;
+    default:
+      return (
+        <View style={styles.journeyAnimCanvas}>
+          <AppText style={styles.journeyPlaceholderText}>{stepId}</AppText>
+        </View>
+      );
+  }
+}
+
+function GoalStepAnimation({ styles, colors }) {
+  const pulse = useSharedValue(0);
+  const drift = useSharedValue(0);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
+    drift.value = withRepeat(
+      withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true
+    );
+  }, [drift, pulse]);
+
+  const pulseRingStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(pulse.value, [0, 1], [0.88, 1.26]) }],
+    opacity: interpolate(pulse.value, [0, 1], [0.42, 0.12]),
+  }));
+
+  const dotStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(drift.value, [0, 1], [-36, 36]) }],
+  }));
+
+  return (
+    <View style={styles.journeyAnimCanvas}>
+      <View style={styles.goalTrack} />
+      <Animated.View
+        style={[
+          styles.goalPulseRing,
+          { borderColor: toRgba(colors.accent.primary, 0.45) },
+          pulseRingStyle,
+        ]}
+      />
+      <View style={styles.goalTarget} />
+      <Animated.View style={[styles.goalDot, dotStyle]} />
+    </View>
+  );
+}
+
+function RiskStepAnimation({ styles }) {
+  const swing = useSharedValue(0);
+
+  useEffect(() => {
+    swing.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 900, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      false
+    );
+  }, [swing]);
+
+  const needleStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${interpolate(swing.value, [0, 1], [-22, 22])}deg` }],
+  }));
+
+  const leftBarStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleY: interpolate(swing.value, [0, 1], [1.2, 0.72]) }],
+    opacity: interpolate(swing.value, [0, 1], [1, 0.5]),
+  }));
+
+  const rightBarStyle = useAnimatedStyle(() => ({
+    transform: [{ scaleY: interpolate(swing.value, [0, 1], [0.72, 1.2]) }],
+    opacity: interpolate(swing.value, [0, 1], [0.5, 1]),
+  }));
+
+  return (
+    <View style={styles.journeyAnimCanvas}>
+      <View style={styles.riskBarRow}>
+        <Animated.View style={[styles.riskBar, leftBarStyle]} />
+        <Animated.View style={[styles.riskBar, rightBarStyle]} />
+      </View>
+      <View style={styles.riskGaugeBase} />
+      <View style={styles.riskGaugePivot} />
+      <Animated.View style={[styles.riskNeedle, needleStyle]} />
+    </View>
+  );
+}
+
+function StrategyStepAnimation({ styles }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 2400, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      false
+    );
+  }, [progress]);
+
+  const tokenStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(progress.value, [0, 1], [-52, 52]) },
+      { translateY: interpolate(progress.value, [0, 0.5, 1], [4, -8, 4]) },
+    ],
+  }));
+
+  const nodeOneStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 0.1, 0.3], [0.35, 1, 1]),
+    transform: [{ scale: interpolate(progress.value, [0, 0.1, 0.3], [0.84, 1.12, 1]) }],
+  }));
+  const nodeTwoStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.2, 0.5, 0.7], [0.35, 1, 1]),
+    transform: [{ scale: interpolate(progress.value, [0.2, 0.5, 0.7], [0.84, 1.12, 1]) }],
+  }));
+  const nodeThreeStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0.6, 0.85, 1], [0.35, 1, 1]),
+    transform: [{ scale: interpolate(progress.value, [0.6, 0.85, 1], [0.84, 1.12, 1]) }],
+  }));
+
+  return (
+    <View style={styles.journeyAnimCanvas}>
+      <View style={styles.strategyRail} />
+      <View style={styles.strategyNodeRow}>
+        <Animated.View style={[styles.strategyNode, nodeOneStyle]} />
+        <Animated.View style={[styles.strategyNode, nodeTwoStyle]} />
+        <Animated.View style={[styles.strategyNode, nodeThreeStyle]} />
+      </View>
+      <Animated.View style={[styles.strategyToken, tokenStyle]} />
+    </View>
+  );
+}
+
+function AllocationStepAnimation({ styles }) {
+  const mix = useSharedValue(0);
+
+  useEffect(() => {
+    mix.value = withRepeat(
+      withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
+  }, [mix]);
+
+  const segmentAStyle = useAnimatedStyle(() => ({
+    flex: interpolate(mix.value, [0, 1], [5.2, 4.1]),
+  }));
+  const segmentBStyle = useAnimatedStyle(() => ({
+    flex: interpolate(mix.value, [0, 1], [3.2, 4.4]),
+  }));
+  const segmentCStyle = useAnimatedStyle(() => ({
+    flex: interpolate(mix.value, [0, 1], [1.6, 2.2]),
+  }));
+
+  return (
+    <View style={styles.journeyAnimCanvas}>
+      <View style={styles.allocationBar}>
+        <Animated.View style={[styles.allocationSegmentPrimary, segmentAStyle]} />
+        <Animated.View style={[styles.allocationSegmentSecondary, segmentBStyle]} />
+        <Animated.View style={[styles.allocationSegmentTertiary, segmentCStyle]} />
+      </View>
+      <View style={styles.allocationLegend}>
+        <View style={styles.allocationLegendItem}>
+          <View style={styles.allocationDotPrimary} />
+          <AppText style={styles.allocationLegendText}>A</AppText>
+        </View>
+        <View style={styles.allocationLegendItem}>
+          <View style={styles.allocationDotSecondary} />
+          <AppText style={styles.allocationLegendText}>B</AppText>
+        </View>
+        <View style={styles.allocationLegendItem}>
+          <View style={styles.allocationDotTertiary} />
+          <AppText style={styles.allocationLegendText}>C</AppText>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function VehicleStepAnimation({ styles, colors }) {
+  const float = useSharedValue(0);
+
+  useEffect(() => {
+    float.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 900, easing: Easing.inOut(Easing.sin) })
+      ),
+      -1,
+      false
+    );
+  }, [float]);
+
+  const firstCardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: interpolate(float.value, [0, 1], [8, -8]) }],
+    opacity: interpolate(float.value, [0, 1], [0.7, 1]),
+  }));
+  const secondCardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: interpolate(float.value, [0, 1], [-2, 4]) }],
+    opacity: interpolate(float.value, [0, 1], [1, 0.78]),
+  }));
+  const thirdCardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: interpolate(float.value, [0, 1], [4, -4]) }],
+    opacity: interpolate(float.value, [0, 1], [0.72, 1]),
+  }));
+
+  return (
+    <View style={styles.journeyAnimCanvas}>
+      <View style={styles.vehicleRow}>
+        <Animated.View style={[styles.vehicleChip, firstCardStyle]}>
+          <Ionicons name="trending-up-outline" size={18} color={colors.text.primary} />
+        </Animated.View>
+        <Animated.View style={[styles.vehicleChip, secondCardStyle]}>
+          <Ionicons name="stats-chart-outline" size={18} color={colors.text.primary} />
+        </Animated.View>
+        <Animated.View style={[styles.vehicleChip, thirdCardStyle]}>
+          <Ionicons name="shield-checkmark-outline" size={18} color={colors.text.primary} />
+        </Animated.View>
+      </View>
+      <View style={styles.vehicleTrack} />
+    </View>
+  );
+}
+
+function ExecutionStepAnimation({ styles }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      false
+    );
+  }, [progress]);
+
+  const runnerStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(progress.value, [0, 1], [-56, 56]) }],
+  }));
+
+  const checkOneStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(progress.value, [0, 0.2, 0.4], [0.85, 1.12, 1]) }],
+    opacity: interpolate(progress.value, [0, 0.2, 0.4], [0.4, 1, 1]),
+  }));
+  const checkTwoStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(progress.value, [0.25, 0.5, 0.75], [0.85, 1.12, 1]) }],
+    opacity: interpolate(progress.value, [0.25, 0.5, 0.75], [0.4, 1, 1]),
+  }));
+  const checkThreeStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(progress.value, [0.6, 0.85, 1], [0.85, 1.12, 1]) }],
+    opacity: interpolate(progress.value, [0.6, 0.85, 1], [0.4, 1, 1]),
+  }));
+
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(progress.value, [0, 0.5, 1], [0.94, 1.05, 0.94]) }],
+    opacity: interpolate(progress.value, [0, 0.5, 1], [0.75, 1, 0.75]),
+  }));
+
+  return (
+    <View style={styles.journeyAnimCanvas}>
+      <View style={styles.executionRail} />
+      <View style={styles.executionCheckpointRow}>
+        <Animated.View style={[styles.executionCheckpoint, checkOneStyle]} />
+        <Animated.View style={[styles.executionCheckpoint, checkTwoStyle]} />
+        <Animated.View style={[styles.executionCheckpoint, checkThreeStyle]} />
+      </View>
+      <Animated.View style={[styles.executionRunner, runnerStyle]} />
+      <Animated.View style={[styles.executionPulse, pulseStyle]} />
     </View>
   );
 }
@@ -2017,6 +2376,20 @@ const createStyles = (colors, components) =>
   journeyNextWrap: {
     marginTop: components.layout.spacing.md,
   },
+  journeyCardShell: {
+    marginBottom: components.layout.spacing.md,
+  },
+  journeyFlipCard: {
+    height: 420,
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: components.radius.card,
+  },
+  journeyFace: {
+    ...StyleSheet.absoluteFillObject,
+    backfaceVisibility: 'hidden',
+    borderRadius: components.radius.card,
+  },
   journeyPage: {
     borderRadius: components.radius.card,
     padding: components.layout.spacing.lg,
@@ -2024,8 +2397,10 @@ const createStyles = (colors, components) =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surface,
     gap: components.layout.spacing.md,
-    justifyContent: 'center',
-    marginBottom: components.layout.spacing.md,
+    justifyContent: 'flex-start',
+  },
+  journeyBackFace: {
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.88),
   },
   journeyHeaderRow: {
     flexDirection: 'row',
@@ -2038,17 +2413,32 @@ const createStyles = (colors, components) =>
     borderRadius: components.radius.pill,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surfaceActive,
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.95),
   },
   journeyStepText: {
     ...typography.styles.small,
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
   journeyAccent: {
     width: components.sizes.square.xs,
     height: components.sizes.line.thin,
     borderRadius: components.radius.pill,
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.surface),
+  },
+  journeyBackBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.xs,
+    borderRadius: components.radius.pill,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    paddingHorizontal: components.layout.spacing.sm,
+    paddingVertical: components.layout.spacing.xs,
+  },
+  journeyBackBadgeText: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
   },
   journeyLabel: {
     ...typography.styles.body,
@@ -2076,9 +2466,16 @@ const createStyles = (colors, components) =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surfaceActive,
     padding: components.layout.spacing.md,
-    height: components.sizes.chart.xl,
+    height: components.sizes.chart.lg,
     overflow: 'hidden',
     justifyContent: 'center',
+  },
+  journeyAnimCanvas: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: components.radius.input,
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
   },
   journeyPlaceholder: {
     flex: 1,
@@ -2093,6 +2490,201 @@ const createStyles = (colors, components) =>
   journeyPlaceholderText: {
     ...typography.styles.small,
     color: colors.text.secondary,
+  },
+  goalTrack: {
+    position: 'absolute',
+    width: '78%',
+    height: 2,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  goalPulseRing: {
+    position: 'absolute',
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: components.borderWidth.thin,
+  },
+  goalTarget: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.accent.primary,
+  },
+  goalDot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.text.primary,
+  },
+  riskBarRow: {
+    width: '78%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginBottom: components.layout.spacing.md,
+  },
+  riskBar: {
+    width: 28,
+    height: 38,
+    borderRadius: components.radius.input,
+    backgroundColor: toRgba(colors.accent.primary, 0.42),
+  },
+  riskGaugeBase: {
+    position: 'absolute',
+    bottom: components.layout.spacing.md,
+    width: '78%',
+    height: 3,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  riskGaugePivot: {
+    position: 'absolute',
+    bottom: components.layout.spacing.md - 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.text.primary,
+  },
+  riskNeedle: {
+    position: 'absolute',
+    bottom: components.layout.spacing.md,
+    width: 58,
+    height: 3,
+    borderRadius: components.radius.pill,
+    backgroundColor: colors.text.primary,
+  },
+  strategyRail: {
+    position: 'absolute',
+    width: '74%',
+    height: 2,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  strategyNodeRow: {
+    width: '74%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  strategyNode: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.accent.primary,
+  },
+  strategyToken: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.text.primary,
+  },
+  allocationBar: {
+    width: '82%',
+    height: 18,
+    borderRadius: components.radius.pill,
+    overflow: 'hidden',
+    flexDirection: 'row',
+    backgroundColor: toRgba(colors.ui.divider, 0.16),
+  },
+  allocationSegmentPrimary: {
+    backgroundColor: toRgba(colors.accent.primary, 0.85),
+  },
+  allocationSegmentSecondary: {
+    backgroundColor: toRgba(colors.accent.primary, 0.55),
+  },
+  allocationSegmentTertiary: {
+    backgroundColor: toRgba(colors.accent.primary, 0.32),
+  },
+  allocationLegend: {
+    marginTop: components.layout.spacing.md,
+    width: '82%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  allocationLegendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.xs,
+  },
+  allocationLegendText: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+  },
+  allocationDotPrimary: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.accent.primary, 0.85),
+  },
+  allocationDotSecondary: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.accent.primary, 0.55),
+  },
+  allocationDotTertiary: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.accent.primary, 0.32),
+  },
+  vehicleRow: {
+    flexDirection: 'row',
+    gap: components.layout.spacing.sm,
+    alignItems: 'center',
+  },
+  vehicleChip: {
+    width: 44,
+    height: 44,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vehicleTrack: {
+    marginTop: components.layout.spacing.sm,
+    width: '76%',
+    height: 2,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  executionRail: {
+    position: 'absolute',
+    width: '80%',
+    height: 3,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  executionCheckpointRow: {
+    width: '80%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  executionCheckpoint: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: toRgba(colors.accent.primary, 0.8),
+  },
+  executionRunner: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.text.primary,
+  },
+  executionPulse: {
+    marginTop: components.layout.spacing.lg,
+    width: 82,
+    height: 22,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.accent.primary, 0.28),
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.accent.primary, 0.5),
   },
   processCard: {
     gap: components.layout.spacing.md,
