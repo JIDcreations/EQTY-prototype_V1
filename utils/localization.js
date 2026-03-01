@@ -13,48 +13,64 @@ const LOCALE_MAP = {
 
 const LESSON_OVERVIEW_COPY = {
   en: {
-    whatYoullLearn: "What you'll learn",
-    keyTakeaways: 'Key takeaways',
-    lessonStructure: 'Lesson flow',
-    lessonFlowHeader: 'Lesson flow (6 parts)',
-    show: 'Show',
-    hide: 'Hide',
-    startLesson: 'Start lesson',
-    back: 'Back',
-    stepLabels: [
-      'Concept',
-      'Visualization',
-      'Contextual example',
-      'Practical exercise',
-      'Reflection',
-      'Summary',
+    outcomesLabel: "What you'll learn",
+    estimatedTimeLabel: 'Estimated time',
+    readinessLabel: 'Focused start',
+    minutesLabel: (minutes) => `~${minutes} min`,
+    defaultHook: 'Clarity first. Action second.',
+    lessonHooks: {
+      lesson_0: 'Start with structure, not noise.',
+      lesson_1: 'A clear reason makes every next decision easier.',
+    },
+    defaultOutcomes: [
+      'Understand core idea',
+      'See decision flow',
+      'Begin with confidence',
     ],
-    statusCompleted: 'Completed',
-    statusCurrent: 'Current',
-    statusUpcoming: 'Upcoming',
-    lessonFinished: 'Lesson finished',
+    lessonOutcomes: {
+      lesson_0: [
+        'Think in clear steps',
+        'Place action at end',
+        'Invest with structure',
+      ],
+      lesson_1: [
+        'Define your real why',
+        'Choose direction over noise',
+        'Start with clear intent',
+      ],
+    },
+    startLesson: 'Begin lesson',
+    back: 'Back',
   },
   nl: {
-    whatYoullLearn: 'Wat je leert',
-    keyTakeaways: 'Belangrijkste inzichten',
-    lessonStructure: 'Lesverloop',
-    lessonFlowHeader: 'Lesverloop (6 onderdelen)',
-    show: 'Toon',
-    hide: 'Verberg',
+    outcomesLabel: 'Wat je zal leren',
+    estimatedTimeLabel: 'Geschatte tijd',
+    readinessLabel: 'Gerichte start',
+    minutesLabel: (minutes) => `~${minutes} min`,
+    defaultHook: 'Eerst helderheid. Dan actie.',
+    lessonHooks: {
+      lesson_0: 'Start met structuur, niet met ruis.',
+      lesson_1: 'Een duidelijk waarom maakt elke keuze makkelijker.',
+    },
+    defaultOutcomes: [
+      'Begrijp het kernidee',
+      'Zie de beslisflow',
+      'Start met vertrouwen',
+    ],
+    lessonOutcomes: {
+      lesson_0: [
+        'Denk in vaste stappen',
+        'Actie komt helemaal laatst',
+        'Investeer met structuur',
+      ],
+      lesson_1: [
+        'Bepaal je echte waarom',
+        'Kies richting, geen ruis',
+        'Start met heldere intentie',
+      ],
+    },
     startLesson: 'Start les',
     back: 'Terug',
-    stepLabels: [
-      'Concept',
-      'Visualisatie',
-      'Contextueel voorbeeld',
-      'Praktische oefening',
-      'Reflectie',
-      'Samenvatting',
-    ],
-    statusCompleted: 'Afgerond',
-    statusCurrent: 'Huidig',
-    statusUpcoming: 'Aankomend',
-    lessonFinished: 'Les afgerond',
   },
 };
 
@@ -1690,14 +1706,22 @@ export function getLocalizedGlossaryCategories(language, categories = []) {
 
 export function formatLessonModuleLabel(language, moduleNumber, lessonOrder) {
   const locale = getLocaleKey(language);
+  const parsedModuleNumber = Number(moduleNumber);
+  const parsedLessonOrder = Number(lessonOrder);
+  const hasModuleNumber = Number.isFinite(parsedModuleNumber);
+  const normalizedModuleNumber = hasModuleNumber ? parsedModuleNumber + 1 : null;
+  const normalizedLessonOrder = Number.isFinite(parsedLessonOrder)
+    ? parsedLessonOrder + 1
+    : lessonOrder;
+
   if (locale === 'nl') {
-    return moduleNumber !== undefined
-      ? `Module ${moduleNumber}, Les ${lessonOrder}`
-      : `Les ${lessonOrder}`;
+    return hasModuleNumber
+      ? `Thema ${normalizedModuleNumber}, Les ${normalizedLessonOrder}`
+      : `Les ${normalizedLessonOrder}`;
   }
-  return moduleNumber !== undefined
-    ? `Module ${moduleNumber}, Lesson ${lessonOrder}`
-    : `Lesson ${lessonOrder}`;
+  return hasModuleNumber
+    ? `Theme ${normalizedModuleNumber}, Lesson ${normalizedLessonOrder}`
+    : `Lesson ${normalizedLessonOrder}`;
 }
 
 export function getIntroStepTitle(language, step) {
