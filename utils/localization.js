@@ -845,6 +845,94 @@ const HOME_COPY = {
   },
 };
 
+const LESSON_RESOURCES_COPY = {
+  en: {
+    title: 'Extra lesson info',
+    subtitle: 'Overview of context, links, and PDF sources',
+    summaryTitle: 'Lesson resources',
+    summarySubtitle: 'Tap a lesson to open all supporting resources.',
+    lessonCount: (count) => `${count} lessons`,
+    extraInfoTitle: 'Extra info',
+    sitesTitle: 'Website links',
+    pdfTitle: 'PDF links',
+    noExtraInfo: 'No extra info available yet for this lesson.',
+    noLinks: 'No links added yet.',
+    openLink: 'Open link',
+    glossaryLabel: 'Glossary source',
+    fallbackVideo: 'Video explainer',
+    fallbackArticle: 'Background article',
+    fallbackPdf: 'Find PDF resources',
+    statusCurrent: 'Current',
+    statusUpcoming: 'Upcoming',
+    statusCompleted: 'Completed',
+  },
+  nl: {
+    title: 'Extra lesinfo',
+    subtitle: 'Overzicht met context, links en PDF-bronnen',
+    summaryTitle: 'Lesbronnen',
+    summarySubtitle: 'Tik op een les om alle extra bronnen te openen.',
+    lessonCount: (count) => `${count} lessen`,
+    extraInfoTitle: 'Extra info',
+    sitesTitle: 'Website links',
+    pdfTitle: 'PDF links',
+    noExtraInfo: 'Voor deze les is nog geen extra info toegevoegd.',
+    noLinks: 'Nog geen links toegevoegd.',
+    openLink: 'Open link',
+    glossaryLabel: 'Glossary bron',
+    fallbackVideo: 'Video uitleg',
+    fallbackArticle: 'Achtergrondartikel',
+    fallbackPdf: 'Zoek PDF-bronnen',
+    statusCurrent: 'Huidig',
+    statusUpcoming: 'Aankomend',
+    statusCompleted: 'Afgerond',
+  },
+};
+
+const LESSON_VIDEOS_COPY = {
+  en: {
+    title: 'Videos',
+    subtitle: 'Quick visual explainers for each lesson',
+    featuredTitle: 'Featured for your current lesson',
+    featuredFallback: 'No featured video yet. Explore lesson videos below.',
+    watchNow: 'Watch now',
+    allFilter: 'All',
+    currentFilter: 'Current',
+    completedFilter: 'Completed',
+    upcomingFilter: 'Upcoming',
+    noLessons: 'No lessons found for this filter.',
+    lessonVideoLabel: 'Lesson video',
+    glossaryVideoLabel: 'Glossary video',
+    fallbackVideoLabel: 'Suggested explainer',
+    sourceLesson: 'Lesson summary',
+    sourceGlossary: 'Glossary',
+    sourceYoutube: 'YouTube',
+    statusCurrent: 'Current',
+    statusUpcoming: 'Upcoming',
+    statusCompleted: 'Completed',
+  },
+  nl: {
+    title: 'Videos',
+    subtitle: 'Snelle visuele uitleg per les',
+    featuredTitle: 'Uitgelicht voor je huidige les',
+    featuredFallback: 'Nog geen uitgelichte video. Bekijk de lesvideo’s hieronder.',
+    watchNow: 'Bekijk nu',
+    allFilter: 'Alles',
+    currentFilter: 'Huidig',
+    completedFilter: 'Afgerond',
+    upcomingFilter: 'Aankomend',
+    noLessons: 'Geen lessen gevonden voor deze filter.',
+    lessonVideoLabel: 'Lesvideo',
+    glossaryVideoLabel: 'Glossary video',
+    fallbackVideoLabel: 'Aanbevolen uitleg',
+    sourceLesson: 'Les samenvatting',
+    sourceGlossary: 'Glossary',
+    sourceYoutube: 'YouTube',
+    statusCurrent: 'Huidig',
+    statusUpcoming: 'Aankomend',
+    statusCompleted: 'Afgerond',
+  },
+};
+
 const SETTINGS_COPY = {
   en: {
     languageTitle: 'Language',
@@ -1558,6 +1646,16 @@ export function getOnboardingCopy(language) {
 export function getHomeCopy(language) {
   const locale = getLocaleKey(language);
   return HOME_COPY[locale] || HOME_COPY.en;
+}
+
+export function getLessonResourcesCopy(language) {
+  const locale = getLocaleKey(language);
+  return LESSON_RESOURCES_COPY[locale] || LESSON_RESOURCES_COPY.en;
+}
+
+export function getLessonVideosCopy(language) {
+  const locale = getLocaleKey(language);
+  return LESSON_VIDEOS_COPY[locale] || LESSON_VIDEOS_COPY.en;
 }
 
 export function getSettingsCopy(language) {

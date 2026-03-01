@@ -91,7 +91,13 @@ export default function HomeScreen() {
         title: 'Extra info',
         subtitle: 'Sources and deeper context',
         icon: 'book-outline',
-        target: 'Glossary',
+        target: 'Lessons',
+        params: {
+          screen: 'LessonResources',
+          params: {
+            entrySource: 'Home',
+          },
+        },
       },
       {
         id: 'videos',
@@ -99,6 +105,12 @@ export default function HomeScreen() {
         subtitle: 'Quick visual explainers',
         icon: 'play-circle-outline',
         target: 'Lessons',
+        params: {
+          screen: 'LessonVideos',
+          params: {
+            entrySource: 'Home',
+          },
+        },
       },
     ],
     []
@@ -311,7 +323,7 @@ export default function HomeScreen() {
           {quickActions.map((action) => (
             <Pressable
               key={action.id}
-              onPress={() => navigation.navigate(action.target)}
+              onPress={() => navigation.navigate(action.target, action.params)}
               style={({ pressed }) => [
                 styles.actionItem,
                 pressed && styles.actionItemPressed,
