@@ -2416,7 +2416,7 @@ const createStyles = (colors, components) =>
     backgroundColor: toRgba(colors.background.surfaceActive, 0.95),
   },
   journeyStepText: {
-    ...typography.styles.small,
+    ...typography.styles.stepLabel,
     color: colors.text.primary,
   },
   journeyAccent: {
@@ -2437,28 +2437,30 @@ const createStyles = (colors, components) =>
     paddingVertical: components.layout.spacing.xs,
   },
   journeyBackBadgeText: {
-    ...typography.styles.small,
+    ...typography.styles.stepLabel,
     color: colors.text.secondary,
   },
   journeyLabel: {
-    ...typography.styles.body,
+    ...typography.styles.h2,
     color: colors.text.primary,
   },
   journeyQuestion: {
-    ...typography.styles.body,
+    ...typography.styles.bodyStrong,
     color: colors.text.primary,
   },
   journeyWhy: {
-    ...typography.styles.body,
-    color: colors.text.primary,
+    ...typography.styles.meta,
+    color: colors.text.secondary,
   },
   journeyDetail: {
     ...typography.styles.body,
     color: colors.text.primary,
   },
   journeyTapHint: {
-    ...typography.styles.body,
+    ...typography.styles.small,
     color: colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
   journeyVisual: {
     borderRadius: components.radius.input,
