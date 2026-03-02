@@ -11,9 +11,11 @@ import {
   getLessonContent,
   getLessonOverviewCopy,
   getLocalizedLessons,
+  getLocalizedModules,
   formatLessonModuleLabel,
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
+import { annotateLessonsWithThemeContext } from '../utils/helpers';
 
 const FALLBACK_STEP_COUNT = 6;
 
@@ -39,8 +41,16 @@ export default function LessonOverviewScreen() {
     () => getLocalizedLessons(preferences?.language),
     [preferences?.language]
   );
+  const localizedModules = useMemo(
+    () => getLocalizedModules(preferences?.language),
+    [preferences?.language]
+  );
+  const lessonsWithThemeContext = useMemo(
+    () => annotateLessonsWithThemeContext(localizedLessons, localizedModules),
+    [localizedLessons, localizedModules]
+  );
 
-  const lesson = localizedLessons.find((item) => item.id === lessonId);
+  const lesson = lessonsWithThemeContext.find((item) => item.id === lessonId);
 
   if (!lesson) {
     return (
@@ -64,8 +74,11 @@ export default function LessonOverviewScreen() {
   }
 
   const content = getLessonContent(lesson.id, preferences?.language);
-  const moduleNumber = lesson.moduleId?.split('_')[1];
-  const moduleLabel = formatLessonModuleLabel(preferences?.language, moduleNumber, lesson.order);
+  const moduleLabel = formatLessonModuleLabel(
+    preferences?.language,
+    lesson.themeIndex,
+    lesson.lessonIndexInTheme
+  );
   const estimatedMinutes = estimateLessonMinutes(content);
   const hook = getLessonHook(overviewCopy, lesson, content);
   const outcomes = getLessonOutcomes(overviewCopy, lesson.id);

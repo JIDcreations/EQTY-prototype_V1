@@ -17,7 +17,11 @@ import {
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getLessonStatus } from '../utils/helpers';
+import {
+  annotateLessonsWithThemeContext,
+  buildModulesWithIndexedLessons,
+  getLessonStatus,
+} from '../utils/helpers';
 
 export default function LessonsScreen() {
   const navigation = useNavigation();
@@ -43,28 +47,24 @@ export default function LessonsScreen() {
     () => getLocalizedModules(preferences?.language),
     [preferences?.language]
   );
-  const sortedLessons = useMemo(
-    () => [...localizedLessons].sort((a, b) => a.order - b.order),
-    [localizedLessons]
+  const lessonsWithThemeContext = useMemo(
+    () => annotateLessonsWithThemeContext(localizedLessons, localizedModules),
+    [localizedLessons, localizedModules]
   );
-  const totalLessons = sortedLessons.length;
+  const totalLessons = lessonsWithThemeContext.length;
   const currentLesson =
-    sortedLessons.find((lesson) => lesson.id === progress.currentLessonId) ||
-    sortedLessons[0];
-  const currentLessonIndex = sortedLessons.findIndex(
+    lessonsWithThemeContext.find((lesson) => lesson.id === progress.currentLessonId) ||
+    lessonsWithThemeContext[0];
+  const currentLessonIndex = lessonsWithThemeContext.findIndex(
     (lesson) => lesson.id === currentLesson?.id
   );
   const lessonPosition = currentLessonIndex >= 0 ? currentLessonIndex + 1 : 1;
   const completedLessonIds = progress.completedLessonIds || [];
 
-  const modulesWithLessons = useMemo(() => {
-    return localizedModules.map((module) => ({
-      ...module,
-      lessons: sortedLessons
-        .filter((lesson) => lesson.moduleId === module.id)
-        .sort((a, b) => a.order - b.order),
-    }));
-  }, [sortedLessons, localizedModules]);
+  const modulesWithLessons = useMemo(
+    () => buildModulesWithIndexedLessons(localizedModules, localizedLessons),
+    [localizedLessons, localizedModules]
+  );
 
   const [expandedModules, setExpandedModules] = useState(() => {
     const moduleId = currentLesson?.moduleId;
@@ -162,7 +162,6 @@ export default function LessonsScreen() {
           .filter((module) => module.lessons.length > 0)
           .map((module) => {
             const isExpanded = expandedModules[module.id];
-            const moduleNumber = getModuleNumber(module.id);
             const moduleCompletedCount = module.lessons.filter((lesson) =>
               completedLessonIds.includes(lesson.id)
             ).length;
@@ -190,7 +189,7 @@ export default function LessonsScreen() {
                         <View style={styles.moduleHeaderCopy}>
                           <View style={styles.themeTitleRow}>
                             <AppText style={styles.themeLabel}>
-                              {`Thema ${moduleNumber}`}
+                              {`Thema ${module.themeIndex}`}
                             </AppText>
                             <AppText style={styles.themeDot}>·</AppText>
                             <AppText style={styles.themeTitle}>{module.title}</AppText>
@@ -237,7 +236,7 @@ export default function LessonsScreen() {
                     {module.lessons.map((lesson) => {
                       const status = getLessonStatus(lesson.id, progress);
                       const statusLabel = STATUS_LABELS[status] || STATUS_LABELS.upcoming;
-                      const lessonNumber = lesson.order + 1;
+                      const lessonNumber = lesson.lessonIndexInTheme;
                       return (
                         <Pressable
                           key={lesson.id}
@@ -302,13 +301,6 @@ export default function LessonsScreen() {
     </OnboardingScreen>
   );
 }
-
-const getModuleNumber = (moduleId) => {
-  const raw = moduleId?.split('_')[1];
-  const parsed = Number(raw);
-  if (Number.isNaN(parsed)) return 1;
-  return parsed + 1;
-};
 
 const toggleModule = (setExpandedModules, moduleId) => {
   setExpandedModules((prev) => ({ ...prev, [moduleId]: !prev[moduleId] }));

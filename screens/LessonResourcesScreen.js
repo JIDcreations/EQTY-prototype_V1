@@ -17,8 +17,9 @@ import {
   getLessonContent,
   getLessonResourcesCopy,
   getLocalizedLessons,
+  getLocalizedModules,
 } from '../utils/localization';
-import { getLessonStatus } from '../utils/helpers';
+import { annotateLessonsWithThemeContext, getLessonStatus } from '../utils/helpers';
 
 export default function LessonResourcesScreen() {
   const navigation = useNavigation();
@@ -34,11 +35,15 @@ export default function LessonResourcesScreen() {
     [preferences?.language]
   );
   const homeCopy = useMemo(() => getHomeCopy(preferences?.language), [preferences?.language]);
+  const localizedModules = useMemo(
+    () => getLocalizedModules(preferences?.language),
+    [preferences?.language]
+  );
 
   const lessons = useMemo(() => {
     const localizedLessons = getLocalizedLessons(preferences?.language);
-    return [...localizedLessons].sort((a, b) => a.order - b.order);
-  }, [preferences?.language]);
+    return annotateLessonsWithThemeContext(localizedLessons, localizedModules);
+  }, [localizedModules, preferences?.language]);
 
   const [expandedLessonId, setExpandedLessonId] = useState(
     progress.currentLessonId || lessons[0]?.id || null
@@ -102,7 +107,7 @@ export default function LessonResourcesScreen() {
           const isExpanded = expandedLessonId === lesson.id;
           const status = getLessonStatus(lesson.id, progress);
           const statusLabel = getStatusLabel(status, resourcesCopy);
-          const lessonLabel = homeCopy.lessonShort(lesson.order + 1);
+          const lessonLabel = homeCopy.lessonShort(lesson.lessonIndexInTheme);
 
           return (
             <Card

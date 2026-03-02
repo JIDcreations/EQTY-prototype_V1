@@ -18,8 +18,9 @@ import {
   getLessonContent,
   getLessonVideosCopy,
   getLocalizedLessons,
+  getLocalizedModules,
 } from '../utils/localization';
-import { getLessonStatus } from '../utils/helpers';
+import { annotateLessonsWithThemeContext, getLessonStatus } from '../utils/helpers';
 
 const FILTER_KEYS = ['all', 'current', 'completed', 'upcoming'];
 
@@ -38,11 +39,15 @@ export default function LessonVideosScreen() {
     () => getLessonVideosCopy(preferences?.language),
     [preferences?.language]
   );
+  const localizedModules = useMemo(
+    () => getLocalizedModules(preferences?.language),
+    [preferences?.language]
+  );
 
   const lessons = useMemo(() => {
     const localized = getLocalizedLessons(preferences?.language);
-    return [...localized].sort((a, b) => a.order - b.order);
-  }, [preferences?.language]);
+    return annotateLessonsWithThemeContext(localized, localizedModules);
+  }, [localizedModules, preferences?.language]);
 
   const [activeFilter, setActiveFilter] = useState('all');
   const [expandedLessonId, setExpandedLessonId] = useState(
@@ -101,7 +106,9 @@ export default function LessonVideosScreen() {
       <Card style={styles.featuredCard}>
         <SectionTitle
           title={videosCopy.featuredTitle}
-          subtitle={featuredEntry ? homeCopy.lessonShort(featuredEntry.lesson.order + 1) : null}
+          subtitle={
+            featuredEntry ? homeCopy.lessonShort(featuredEntry.lesson.lessonIndexInTheme) : null
+          }
         />
 
         {featuredEntry ? (
@@ -169,7 +176,9 @@ export default function LessonVideosScreen() {
                   style={({ pressed }) => [styles.lessonHeader, pressed && styles.lessonHeaderPressed]}
                 >
                   <View style={styles.lessonHeaderCopy}>
-                    <AppText style={styles.lessonLabel}>{homeCopy.lessonShort(lesson.order + 1)}</AppText>
+                    <AppText style={styles.lessonLabel}>
+                      {homeCopy.lessonShort(lesson.lessonIndexInTheme)}
+                    </AppText>
                     <AppText style={styles.lessonTitle}>{lesson.title}</AppText>
                   </View>
                   <View style={styles.lessonHeaderRight}>

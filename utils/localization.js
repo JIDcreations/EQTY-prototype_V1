@@ -4,9 +4,9 @@ import { lessons, modules } from '../data/curriculum';
 import { curriculumNl } from '../data/curriculumNl';
 
 const LOCALE_MAP = {
-  English: 'en',
-  Dutch: 'nl',
-  Nederlands: 'nl',
+  english: 'en',
+  dutch: 'nl',
+  nederlands: 'nl',
   en: 'en',
   nl: 'nl',
 };
@@ -1612,7 +1612,14 @@ const GLOSSARY_CATEGORY_COPY = {
 };
 
 export function getLocaleKey(language) {
-  return LOCALE_MAP[language] || 'en';
+  const raw = typeof language === 'string' ? language.trim() : '';
+  if (!raw) return 'en';
+
+  const normalized = raw.toLowerCase().replace(/_/g, '-');
+  if (normalized === 'nl' || normalized.startsWith('nl-')) return 'nl';
+  if (normalized === 'en' || normalized.startsWith('en-')) return 'en';
+
+  return LOCALE_MAP[normalized] || 'en';
 }
 
 export function getLessonContent(lessonId, language) {
@@ -1704,24 +1711,24 @@ export function getLocalizedGlossaryCategories(language, categories = []) {
   });
 }
 
-export function formatLessonModuleLabel(language, moduleNumber, lessonOrder) {
+export function formatLessonModuleLabel(language, themeIndex, lessonIndexInTheme) {
   const locale = getLocaleKey(language);
-  const parsedModuleNumber = Number(moduleNumber);
-  const parsedLessonOrder = Number(lessonOrder);
-  const hasModuleNumber = Number.isFinite(parsedModuleNumber);
-  const normalizedModuleNumber = hasModuleNumber ? parsedModuleNumber + 1 : null;
-  const normalizedLessonOrder = Number.isFinite(parsedLessonOrder)
-    ? parsedLessonOrder + 1
-    : lessonOrder;
+  const parsedThemeIndex = Number(themeIndex);
+  const parsedLessonIndex = Number(lessonIndexInTheme);
+  const hasThemeIndex = Number.isFinite(parsedThemeIndex);
+  const normalizedThemeIndex = hasThemeIndex ? Math.max(1, parsedThemeIndex) : null;
+  const normalizedLessonIndex = Number.isFinite(parsedLessonIndex)
+    ? Math.max(1, parsedLessonIndex)
+    : lessonIndexInTheme;
 
   if (locale === 'nl') {
-    return hasModuleNumber
-      ? `Thema ${normalizedModuleNumber}, Les ${normalizedLessonOrder}`
-      : `Les ${normalizedLessonOrder}`;
+    return hasThemeIndex
+      ? `Thema ${normalizedThemeIndex}, Les ${normalizedLessonIndex}`
+      : `Les ${normalizedLessonIndex}`;
   }
-  return hasModuleNumber
-    ? `Theme ${normalizedModuleNumber}, Lesson ${normalizedLessonOrder}`
-    : `Lesson ${normalizedLessonOrder}`;
+  return hasThemeIndex
+    ? `Theme ${normalizedThemeIndex}, Lesson ${normalizedLessonIndex}`
+    : `Lesson ${normalizedLessonIndex}`;
 }
 
 export function getIntroStepTitle(language, step) {

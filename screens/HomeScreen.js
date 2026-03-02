@@ -13,12 +13,17 @@ import Tag from '../components/Tag';
 import TopTabHeader from '../components/TopTabHeader';
 import {
   getHomeCopy,
+  getLocaleKey,
   getLocalizedLessons,
   getLocalizedModules,
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getLessonStatus } from '../utils/helpers';
+import {
+  annotateLessonsWithThemeContext,
+  buildModulesWithIndexedLessons,
+  getLessonStatus,
+} from '../utils/helpers';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -39,32 +44,63 @@ export default function HomeScreen() {
     () => getLocalizedLessons(preferences?.language),
     [preferences?.language]
   );
-  const sortedLessons = useMemo(
-    () => [...localizedLessons].sort((a, b) => a.order - b.order),
-    [localizedLessons]
+  const lessonsWithThemeContext = useMemo(
+    () => annotateLessonsWithThemeContext(localizedLessons, localizedModules),
+    [localizedLessons, localizedModules]
   );
+  const completedLessonIds = progress.completedLessonIds || [];
   const modulesWithLessons = useMemo(
-    () =>
-      localizedModules.map((module) => ({
-        ...module,
-        lessons: sortedLessons
-          .filter((lesson) => lesson.moduleId === module.id)
-          .sort((a, b) => a.order - b.order),
-      })),
-    [localizedModules, sortedLessons]
+    () => {
+      const indexedModules = buildModulesWithIndexedLessons(localizedModules, localizedLessons);
+      return indexedModules.map((module) => {
+        const lessons = module.lessons;
+        const completedCount = lessons.filter((lesson) =>
+          completedLessonIds.includes(lesson.id)
+        ).length;
+        return {
+          ...module,
+          completedCount,
+          isCompleted: lessons.length > 0 && completedCount === lessons.length,
+        };
+      });
+    },
+    [completedLessonIds, localizedLessons, localizedModules]
   );
-  const totalLessons = sortedLessons.length;
+  const activeModulesWithLessons = useMemo(
+    () => modulesWithLessons.filter((module) => module.lessons.length > 0 && !module.isCompleted),
+    [modulesWithLessons]
+  );
+  const totalLessons = lessonsWithThemeContext.length;
+  const progressCurrentLesson = lessonsWithThemeContext.find(
+    (lesson) => lesson.id === progress.currentLessonId
+  );
+  const firstUpcomingLesson = lessonsWithThemeContext.find(
+    (lesson) => !completedLessonIds.includes(lesson.id)
+  );
   const currentLesson =
-    sortedLessons.find((lesson) => lesson.id === progress.currentLessonId) ||
-    sortedLessons[0];
-  const currentLessonIndex = sortedLessons.findIndex(
+    (progressCurrentLesson && !completedLessonIds.includes(progressCurrentLesson.id)
+      ? progressCurrentLesson
+      : null) ||
+    firstUpcomingLesson ||
+    progressCurrentLesson ||
+    lessonsWithThemeContext[0];
+  const currentModule = modulesWithLessons.find(
+    (module) => module.id === currentLesson?.moduleId
+  );
+  const currentLessonInTheme = currentModule?.lessons.find(
     (lesson) => lesson.id === currentLesson?.id
   );
-  const lessonPosition = currentLessonIndex >= 0 ? currentLessonIndex + 1 : 1;
-  const completedLessonIds = progress.completedLessonIds || [];
+  const currentThemeIndex = currentLesson?.themeIndex || currentModule?.themeIndex || 1;
+  const currentLessonIndexInTheme =
+    currentLesson?.lessonIndexInTheme || currentLessonInTheme?.lessonIndexInTheme || 1;
+  const currentContextLabel = formatThemeLessonContext(
+    preferences?.language,
+    currentThemeIndex,
+    currentLessonIndexInTheme
+  );
   const completedCount = Math.min(
     completedLessonIds.filter((lessonId) =>
-      sortedLessons.some((lesson) => lesson.id === lessonId)
+      lessonsWithThemeContext.some((lesson) => lesson.id === lessonId)
     ).length,
     totalLessons
   );
@@ -81,7 +117,10 @@ export default function HomeScreen() {
   const heroDescription = lessonDescription;
   const greetingLine = `${greeting}, ${displayName}`;
   const [expandedModules, setExpandedModules] = useState(() => {
-    const moduleId = currentLesson?.moduleId;
+    const hasCurrentTheme = activeModulesWithLessons.some(
+      (module) => module.id === currentLesson?.moduleId
+    );
+    const moduleId = hasCurrentTheme ? currentLesson?.moduleId : activeModulesWithLessons[0]?.id;
     return moduleId ? { [moduleId]: true } : {};
   });
   const quickActions = useMemo(
@@ -117,11 +156,17 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
-    if (!currentLesson?.moduleId) return;
-    setExpandedModules((prev) =>
-      prev[currentLesson.moduleId] ? prev : { ...prev, [currentLesson.moduleId]: true }
+    const hasCurrentTheme = activeModulesWithLessons.some(
+      (module) => module.id === currentLesson?.moduleId
     );
-  }, [currentLesson?.moduleId]);
+    const moduleIdToExpand = hasCurrentTheme
+      ? currentLesson?.moduleId
+      : activeModulesWithLessons[0]?.id;
+    if (!moduleIdToExpand) return;
+    setExpandedModules((prev) =>
+      prev[moduleIdToExpand] ? prev : { ...prev, [moduleIdToExpand]: true }
+    );
+  }, [activeModulesWithLessons, currentLesson?.moduleId]);
 
   return (
     <OnboardingScreen
@@ -132,7 +177,7 @@ export default function HomeScreen() {
       <View style={styles.topBlock}>
         <TopTabHeader
           title={greetingLine}
-          subtitle={formatLessonPosition(lessonPosition, totalLessons)}
+          subtitle={currentContextLabel}
           onPressProfile={() => navigation.navigate('Profile')}
         />
         <View style={styles.trajectoryBlock}>
@@ -145,7 +190,7 @@ export default function HomeScreen() {
       <View style={styles.section}>
         <Card style={[styles.heroStack, styles.heroCard]}>
           <AppText style={styles.heroStepLabel} numberOfLines={1}>
-            {homeCopy.lessonShort(lessonPosition)}
+            {currentContextLabel}
           </AppText>
           <AppText style={styles.heroTitle}>{lessonTitle}</AppText>
           {heroDescription ? (
@@ -175,18 +220,14 @@ export default function HomeScreen() {
           </Pressable>
         </View>
         <View style={styles.themeList}>
-          {modulesWithLessons
-            .filter((module) => module.lessons.length > 0)
+          {activeModulesWithLessons
             .slice(0, 3)
             .map((module) => {
               const isExpanded = !!expandedModules[module.id];
-              const moduleNumber = getModuleNumber(module.id);
-              const moduleCompletedCount = module.lessons.filter((lesson) =>
-                completedLessonIds.includes(lesson.id)
-              ).length;
+              const moduleCompletedCount = module.completedCount;
               const moduleTotal = module.lessons.length;
               const moduleProgress = moduleTotal > 0 ? moduleCompletedCount / moduleTotal : 0;
-              const isModuleCompleted = moduleTotal > 0 && moduleCompletedCount === moduleTotal;
+              const isModuleCompleted = module.isCompleted;
               const progressLabel = formatThemeProgress(moduleCompletedCount, moduleTotal);
 
               return (
@@ -204,7 +245,7 @@ export default function HomeScreen() {
                           <View style={styles.moduleHeaderCopy}>
                             <View style={styles.themeTitleRow}>
                               <AppText style={styles.themeLabel}>
-                                {`Thema ${moduleNumber}`}
+                                {`Thema ${module.themeIndex}`}
                               </AppText>
                               <AppText style={styles.themeDot}>·</AppText>
                               <AppText style={styles.themeTitle}>{module.title}</AppText>
@@ -250,7 +291,11 @@ export default function HomeScreen() {
                       {module.lessons.map((lesson) => {
                         const status = getLessonStatus(lesson.id, progress);
                         const statusLabel = STATUS_LABELS[status] || STATUS_LABELS.upcoming;
-                        const lessonNumber = lesson.order + 1;
+                        const lessonContextLabel = formatThemeLessonContext(
+                          preferences?.language,
+                          module.themeIndex,
+                          lesson.lessonIndexInTheme
+                        );
                         return (
                           <Pressable
                             key={lesson.id}
@@ -274,7 +319,7 @@ export default function HomeScreen() {
                               >
                                 <View style={styles.lessonHeader}>
                                   <AppText style={styles.lessonNumber}>
-                                    {homeCopy.lessonShort(lessonNumber)}
+                                    {lessonContextLabel}
                                   </AppText>
                                   <Tag
                                     label={statusLabel}
@@ -571,20 +616,18 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
 
 const getGreeting = (homeCopy) => homeCopy.greetingHi || 'Hi';
 
-const getModuleNumber = (moduleId) => {
-  const raw = moduleId?.split('_')[1];
-  const parsed = Number(raw);
-  if (Number.isNaN(parsed)) return 1;
-  return parsed + 1;
-};
-
 const toggleModule = (setExpandedModules, moduleId) => {
   setExpandedModules((prev) => ({ ...prev, [moduleId]: !prev[moduleId] }));
 };
 
 const formatLessonCount = (count) => (count === 1 ? '1 les' : `${count} lessen`);
 
-const formatLessonPosition = (position, total) => `Les ${position} / ${total}`;
+const formatThemeLessonContext = (language, themeIndex, lessonIndexInTheme) => {
+  const locale = getLocaleKey(language);
+  const themeLabel = locale === 'nl' ? 'Thema' : 'Theme';
+  const lessonLabel = locale === 'nl' ? 'Les' : 'Lesson';
+  return `${themeLabel} ${themeIndex} · ${lessonLabel} ${lessonIndexInTheme}`;
+};
 
 const formatThemeProgress = (completed, total) =>
   `${formatLessonCount(total)} · ${completed} afgerond`;
