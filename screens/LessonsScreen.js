@@ -363,7 +363,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       gap: components.layout.spacing.sm,
     },
     currentProgress: {
-      ...typography.styles.small,
+      ...typography.styles.stepLabel,
       color: colors.text.secondary,
     },
     currentTitle: {
