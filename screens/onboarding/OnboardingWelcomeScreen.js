@@ -8,15 +8,12 @@ import { useApp } from '../../utils/AppContext';
 import { getOnboardingCopy } from '../../utils/localization';
 
 export default function OnboardingWelcomeScreen({ navigation }) {
-  const { preferences, updatePreferences } = useApp();
+  const { preferences } = useApp();
   const { colors, components, mode } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
 
-  const handleCreateAccount = async () => {
-    await updatePreferences({ hasOnboarded: false });
-    navigation.navigate('OnboardingEmail');
-  };
+  const handleCreateAccount = () => navigation.navigate('OnboardingWhatIsEqty');
 
   return (
     <OnboardingScreen
@@ -34,7 +31,7 @@ export default function OnboardingWelcomeScreen({ navigation }) {
         </View>
         <View style={styles.actions}>
           <PrimaryButton
-            label={copy.welcome.primaryCta}
+            label="Start"
             onPress={handleCreateAccount}
           />
           <SecondaryButton

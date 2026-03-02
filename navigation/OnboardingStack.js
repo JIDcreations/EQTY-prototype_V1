@@ -1,6 +1,7 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import OnboardingWelcomeScreen from '../screens/onboarding/OnboardingWelcomeScreen';
+import OnboardingWhatIsEqtyScreen from '../screens/onboarding/OnboardingWhatIsEqtyScreen';
 import OnboardingEntryScreen from '../screens/onboarding/OnboardingEntryScreen';
 import OnboardingLoginScreen from '../screens/onboarding/OnboardingLoginScreen';
 import OnboardingEmailScreen from '../screens/onboarding/OnboardingEmailScreen';
@@ -15,6 +16,7 @@ export default function OnboardingStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false }}>
       <Stack.Screen name="OnboardingWelcome" component={OnboardingWelcomeScreen} />
+      <Stack.Screen name="OnboardingWhatIsEqty" component={OnboardingWhatIsEqtyScreen} />
       <Stack.Screen name="OnboardingEntry" component={OnboardingEntryScreen} />
       <Stack.Screen name="OnboardingLogin" component={OnboardingLoginScreen} />
       <Stack.Screen name="OnboardingEmail" component={OnboardingEmailScreen} />
