@@ -12,8 +12,10 @@ import SectionTitle from '../components/SectionTitle';
 import Tag from '../components/Tag';
 import TopTabHeader from '../components/TopTabHeader';
 import {
+  formatLessonUnitLabel,
+  formatThemeLessonContextLabel,
+  formatThemeUnitLabel,
   getHomeCopy,
-  getLocaleKey,
   getLocalizedLessons,
   getLocalizedModules,
 } from '../utils/localization';
@@ -214,7 +216,7 @@ export default function HomeScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <SectionTitle title="Verken het leerpad" />
+          <SectionTitle title={homeCopy.nextThemesTitle} />
           <Pressable onPress={() => navigation.navigate('Lessons')}>
             <AppText style={styles.viewAll}>Bekijk alles</AppText>
           </Pressable>
@@ -245,7 +247,7 @@ export default function HomeScreen() {
                           <View style={styles.moduleHeaderCopy}>
                             <View style={styles.themeTitleRow}>
                               <AppText style={styles.themeLabel}>
-                                {`Thema ${module.themeIndex}`}
+                                {formatThemeUnitLabel(preferences?.language, module.themeIndex)}
                               </AppText>
                               <AppText style={styles.themeDot}>·</AppText>
                               <AppText style={styles.themeTitle}>{module.title}</AppText>
@@ -291,9 +293,8 @@ export default function HomeScreen() {
                       {module.lessons.map((lesson) => {
                         const status = getLessonStatus(lesson.id, progress);
                         const statusLabel = STATUS_LABELS[status] || STATUS_LABELS.upcoming;
-                        const lessonContextLabel = formatThemeLessonContext(
+                        const lessonContextLabel = formatLessonUnitLabel(
                           preferences?.language,
-                          module.themeIndex,
                           lesson.lessonIndexInTheme
                         );
                         return (
@@ -567,7 +568,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       minWidth: 0,
     },
     lessonNumber: {
-      ...typography.styles.small,
+      ...typography.styles.stepLabel,
       color: colors.text.secondary,
     },
     lessonTitle: {
@@ -623,10 +624,7 @@ const toggleModule = (setExpandedModules, moduleId) => {
 const formatLessonCount = (count) => (count === 1 ? '1 les' : `${count} lessen`);
 
 const formatThemeLessonContext = (language, themeIndex, lessonIndexInTheme) => {
-  const locale = getLocaleKey(language);
-  const themeLabel = locale === 'nl' ? 'Thema' : 'Theme';
-  const lessonLabel = locale === 'nl' ? 'Les' : 'Lesson';
-  return `${themeLabel} ${themeIndex} · ${lessonLabel} ${lessonIndexInTheme}`;
+  return formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'dot');
 };
 
 const formatThemeProgress = (completed, total) =>

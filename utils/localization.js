@@ -808,6 +808,7 @@ const HOME_COPY = {
     nextLessonTitle: 'Your next lesson',
     currentLessonLabel: 'Current lesson',
     learningPathTitle: 'Learning path',
+    nextThemesTitle: 'Next themes',
     moduleLabel: 'Module',
     lessonLabel: 'Lesson',
     moduleFallbackTitle: 'Current module',
@@ -838,6 +839,7 @@ const HOME_COPY = {
     nextLessonTitle: 'Volgende les',
     currentLessonLabel: 'Nu bezig',
     learningPathTitle: 'Leerpad',
+    nextThemesTitle: 'Volgende thema’s',
     moduleLabel: 'Module',
     lessonLabel: 'Les',
     moduleFallbackTitle: 'Huidige module',
@@ -1712,23 +1714,45 @@ export function getLocalizedGlossaryCategories(language, categories = []) {
 }
 
 export function formatLessonModuleLabel(language, themeIndex, lessonIndexInTheme) {
+  const parsedThemeIndex = Number(themeIndex);
+  const hasThemeIndex = Number.isFinite(parsedThemeIndex);
+  if (!hasThemeIndex) {
+    return formatLessonUnitLabel(language, lessonIndexInTheme);
+  }
+  return formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'comma');
+}
+
+export function formatThemeUnitLabel(language, themeIndex) {
   const locale = getLocaleKey(language);
   const parsedThemeIndex = Number(themeIndex);
+  const normalizedThemeIndex = Number.isFinite(parsedThemeIndex)
+    ? Math.max(1, parsedThemeIndex)
+    : themeIndex;
+  const themePrefix = locale === 'nl' ? 'THEMA' : 'THEME';
+  return `${themePrefix} ${normalizedThemeIndex}`;
+}
+
+export function formatLessonUnitLabel(language, lessonIndexInTheme) {
+  const locale = getLocaleKey(language);
   const parsedLessonIndex = Number(lessonIndexInTheme);
-  const hasThemeIndex = Number.isFinite(parsedThemeIndex);
-  const normalizedThemeIndex = hasThemeIndex ? Math.max(1, parsedThemeIndex) : null;
   const normalizedLessonIndex = Number.isFinite(parsedLessonIndex)
     ? Math.max(1, parsedLessonIndex)
     : lessonIndexInTheme;
+  const lessonPrefix = locale === 'nl' ? 'LES' : 'LESSON';
+  return `${lessonPrefix} ${normalizedLessonIndex}`;
+}
 
-  if (locale === 'nl') {
-    return hasThemeIndex
-      ? `Thema ${normalizedThemeIndex}, Les ${normalizedLessonIndex}`
-      : `Les ${normalizedLessonIndex}`;
-  }
-  return hasThemeIndex
-    ? `Theme ${normalizedThemeIndex}, Lesson ${normalizedLessonIndex}`
-    : `Lesson ${normalizedLessonIndex}`;
+export function formatThemeLessonContextLabel(
+  language,
+  themeIndex,
+  lessonIndexInTheme,
+  separator = 'dot'
+) {
+  const joiner = separator === 'comma' ? ', ' : ' · ';
+  return `${formatThemeUnitLabel(language, themeIndex)}${joiner}${formatLessonUnitLabel(
+    language,
+    lessonIndexInTheme
+  )}`;
 }
 
 export function getIntroStepTitle(language, step) {

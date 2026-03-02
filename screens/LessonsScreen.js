@@ -11,6 +11,9 @@ import Tag from '../components/Tag';
 import TopTabHeader from '../components/TopTabHeader';
 import { CtaButton } from '../components/Button';
 import {
+  formatLessonUnitLabel,
+  formatThemeLessonContextLabel,
+  formatThemeUnitLabel,
   getHomeCopy,
   getLocalizedLessons,
   getLocalizedModules,
@@ -51,14 +54,15 @@ export default function LessonsScreen() {
     () => annotateLessonsWithThemeContext(localizedLessons, localizedModules),
     [localizedLessons, localizedModules]
   );
-  const totalLessons = lessonsWithThemeContext.length;
   const currentLesson =
     lessonsWithThemeContext.find((lesson) => lesson.id === progress.currentLessonId) ||
     lessonsWithThemeContext[0];
-  const currentLessonIndex = lessonsWithThemeContext.findIndex(
-    (lesson) => lesson.id === currentLesson?.id
+  const currentContextLabel = formatThemeLessonContextLabel(
+    preferences?.language,
+    currentLesson?.themeIndex,
+    currentLesson?.lessonIndexInTheme,
+    'dot'
   );
-  const lessonPosition = currentLessonIndex >= 0 ? currentLessonIndex + 1 : 1;
   const completedLessonIds = progress.completedLessonIds || [];
 
   const modulesWithLessons = useMemo(
@@ -132,7 +136,7 @@ export default function LessonsScreen() {
       <View style={styles.currentCard}>
         <View style={styles.currentMetaRow}>
           <AppText style={styles.currentProgress}>
-            {formatLessonProgress(lessonPosition, totalLessons)}
+            {currentContextLabel}
           </AppText>
           <Tag label={STATUS_LABELS.current} tone="accent" />
         </View>
@@ -189,7 +193,7 @@ export default function LessonsScreen() {
                         <View style={styles.moduleHeaderCopy}>
                           <View style={styles.themeTitleRow}>
                             <AppText style={styles.themeLabel}>
-                              {`Thema ${module.themeIndex}`}
+                              {formatThemeUnitLabel(preferences?.language, module.themeIndex)}
                             </AppText>
                             <AppText style={styles.themeDot}>·</AppText>
                             <AppText style={styles.themeTitle}>{module.title}</AppText>
@@ -257,7 +261,7 @@ export default function LessonsScreen() {
                             >
                               <View style={styles.lessonHeader}>
                                 <AppText style={styles.lessonNumber}>
-                                  {homeCopy.lessonShort(lessonNumber)}
+                                  {formatLessonUnitLabel(preferences?.language, lessonNumber)}
                                 </AppText>
                                 <Tag
                                   label={statusLabel}
@@ -316,8 +320,6 @@ const getModuleIdFromTheme = (themeId, modules) => {
   if (modules?.some((module) => module.id === themeId)) return themeId;
   return null;
 };
-
-const formatLessonProgress = (position, total) => `Les ${position} / ${total}`;
 
 const formatLessonCount = (total) => (total === 1 ? '1 les' : `${total} lessen`);
 
@@ -493,7 +495,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       minWidth: 0,
     },
     lessonNumber: {
-      ...typography.styles.small,
+      ...typography.styles.stepLabel,
       color: colors.text.secondary,
     },
     lessonTitle: {
