@@ -16,9 +16,18 @@ export default function OnboardingWhatIsEqtyScreen({ navigation }) {
     normalizedLanguage === 'nl' ||
     normalizedLanguage.includes('dutch') ||
     normalizedLanguage.includes('neder');
-  const title = 'Beleggen als een proces';
-  const subtitle =
-    'Equity begeleidt je stap voor stap door de kennis en afwegingen die voorafgaan aan elke belegging.\nElk thema behandelt een essentieel onderdeel van dat proces.';
+  const title = isDutch ? 'Beleggen als een proces' : 'Investing as a process';
+  const copy = isDutch
+    ? {
+        intro: 'EQTY leert je stap voor stap welke voorbereiding nodig is vóór je begint met investeren.',
+        emphasis: 'Beleggen als een proces is een vaste methode met duidelijke stappen.',
+        outro: 'Na alle lessen weet je wat nodig is om te beginnen met beleggen.',
+      }
+    : {
+        intro: 'EQTY teaches you step by step what preparation is needed before you start investing.',
+        emphasis: 'Investing as a process is a fixed method with clear steps.',
+        outro: 'After all lessons, you will know what is needed to start investing.',
+      };
   const ctaLabel = isDutch ? 'Account aanmaken' : 'Create account';
 
   const handleCreateAccount = async () => {
@@ -45,9 +54,15 @@ export default function OnboardingWhatIsEqtyScreen({ navigation }) {
         <View style={styles.logoWrap}>
           <AppText style={styles.logo}>EQTY</AppText>
         </View>
-        <View style={styles.copyBlock}>
-          <AppText style={styles.title}>{title}</AppText>
-          <AppText style={styles.subtitle}>{subtitle}</AppText>
+        <View style={styles.editorialWrap}>
+          <View style={styles.copyBlock}>
+            <AppText style={styles.title}>{title}</AppText>
+            <View style={styles.paragraphBlock}>
+              <AppText style={styles.paragraph}>{copy.intro}</AppText>
+              <AppText style={styles.emphasis}>{copy.emphasis}</AppText>
+              <AppText style={styles.paragraph}>{copy.outro}</AppText>
+            </View>
+          </View>
         </View>
         <View style={styles.actions}>
           <PrimaryButton
@@ -78,6 +93,20 @@ const createStyles = (colors, components) =>
       flex: 1,
       justifyContent: 'space-between',
     },
+    editorialWrap: {
+      flex: 1,
+      justifyContent: 'center',
+      paddingBottom: components.layout.spacing.xl,
+    },
+    logoWrap: {
+      marginTop: components.layout.spacing.xxl,
+      alignItems: 'center',
+      justifyContent: 'flex-start',
+    },
+    logo: {
+      ...typography.styles.display,
+      color: colors.text.primary,
+    },
     header: {
       position: 'absolute',
       top: components.layout.spacing.sm,
@@ -96,27 +125,26 @@ const createStyles = (colors, components) =>
       justifyContent: 'center',
       position: 'relative',
     },
-    logoWrap: {
-      marginTop: components.layout.spacing.xxl,
-      alignItems: 'center',
-      justifyContent: 'flex-start',
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
-    },
     copyBlock: {
       width: '100%',
-      gap: components.layout.spacing.sm,
+      gap: components.layout.spacing.lg,
     },
     title: {
       ...typography.styles.h1,
       color: colors.text.primary,
       textAlign: 'left',
     },
-    subtitle: {
+    paragraphBlock: {
+      gap: components.layout.spacing.md,
+    },
+    paragraph: {
       ...typography.styles.body,
       color: colors.text.secondary,
+      textAlign: 'left',
+    },
+    emphasis: {
+      ...typography.styles.bodyStrong,
+      color: colors.text.primary,
       textAlign: 'left',
     },
     actions: {
