@@ -14,12 +14,16 @@ const LOCALE_MAP = {
 const LESSON_OVERVIEW_COPY = {
   en: {
     outcomesLabel: "What you'll learn",
+    lessonPointsLabel: 'In this lesson:',
     estimatedTimeLabel: 'Estimated time',
     readinessLabel: 'Focused start',
     minutesLabel: (minutes) => `~${minutes} min`,
+    lessonMetaChips: {
+      lesson_0: ['~8 min', 'Introduction'],
+    },
     defaultHook: 'Clarity first. Action second.',
     lessonHooks: {
-      lesson_0: 'Start with structure, not noise.',
+      lesson_0: "Learn the 'Investing as a process' plan.",
       lesson_1: 'A clear reason makes every next decision easier.',
     },
     defaultOutcomes: [
@@ -29,9 +33,9 @@ const LESSON_OVERVIEW_COPY = {
     ],
     lessonOutcomes: {
       lesson_0: [
-        'Think in clear steps',
-        'Place action at end',
-        'Invest with structure',
+        'Learn to think in steps',
+        'See why taking action comes last',
+        'Learn to invest according to a plan',
       ],
       lesson_1: [
         'Define your real why',
@@ -44,12 +48,16 @@ const LESSON_OVERVIEW_COPY = {
   },
   nl: {
     outcomesLabel: 'Wat je zal leren',
+    lessonPointsLabel: 'In deze les:',
     estimatedTimeLabel: 'Geschatte tijd',
     readinessLabel: 'Gerichte start',
     minutesLabel: (minutes) => `~${minutes} min`,
+    lessonMetaChips: {
+      lesson_0: ['~8 min', 'Introductie'],
+    },
     defaultHook: 'Eerst helderheid. Dan actie.',
     lessonHooks: {
-      lesson_0: 'Start met structuur, niet met ruis.',
+      lesson_0: 'Leer het ‘Beleggen als proces’-plan kennen.',
       lesson_1: 'Een duidelijk waarom maakt elke keuze makkelijker.',
     },
     defaultOutcomes: [
@@ -59,9 +67,9 @@ const LESSON_OVERVIEW_COPY = {
     ],
     lessonOutcomes: {
       lesson_0: [
-        'Denk in vaste stappen',
-        'Actie komt helemaal laatst',
-        'Investeer met structuur',
+        'Leer je denken in stappen',
+        'Zie je waarom handelen als laatste komt',
+        'Leer je beleggen volgens een plan',
       ],
       lesson_1: [
         'Bepaal je echte waarom',

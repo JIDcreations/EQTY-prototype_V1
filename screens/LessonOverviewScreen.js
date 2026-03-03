@@ -82,6 +82,8 @@ export default function LessonOverviewScreen() {
   const estimatedMinutes = estimateLessonMinutes(content);
   const hook = getLessonHook(overviewCopy, lesson, content);
   const outcomes = getLessonOutcomes(overviewCopy, lesson.id);
+  const pointsLabel = overviewCopy.lessonPointsLabel || overviewCopy.outcomesLabel;
+  const metaChips = getLessonMetaChips(overviewCopy, lesson.id, estimatedMinutes);
 
   const isLessonGateRequired =
     lesson.id === 'lesson_1' && !onboardingContext?.onboardingComplete;
@@ -104,26 +106,26 @@ export default function LessonOverviewScreen() {
           </View>
 
           <View style={styles.outcomeSection}>
-            <AppText style={styles.sectionLabel}>{overviewCopy.outcomesLabel}</AppText>
+            <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
             <View style={styles.outcomeList}>
               {outcomes.map((line, index) => (
-                <AppText
+                <View
                   key={`${index}-${line}`}
-                  style={[styles.outcomeText, index > 0 ? styles.outcomeTextSpaced : null]}
+                  style={[styles.outcomeItemRow, index > 0 ? styles.outcomeTextSpaced : null]}
                 >
-                  {line}
-                </AppText>
+                  <AppText style={styles.outcomeBullet}>•</AppText>
+                  <AppText style={styles.outcomeText}>{line}</AppText>
+                </View>
               ))}
             </View>
           </View>
 
-          <View style={styles.metaRow}>
-            <AppText style={styles.metaLabel}>{overviewCopy.estimatedTimeLabel}</AppText>
-            <View style={styles.metaPill}>
-              <AppText style={styles.metaValue}>{overviewCopy.minutesLabel(estimatedMinutes)}</AppText>
-              <View style={styles.metaDot} />
-              <AppText style={styles.metaHint}>{overviewCopy.readinessLabel}</AppText>
-            </View>
+          <View style={styles.metaChipRow}>
+            {metaChips.map((chipText) => (
+              <View key={chipText} style={styles.metaChip}>
+                <AppText style={styles.metaChipText}>{chipText}</AppText>
+              </View>
+            ))}
           </View>
         </ScrollView>
 
@@ -159,7 +161,7 @@ const createStyles = (colors, components, tabBarHeight) =>
     content: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
       paddingTop: components.layout.safeArea.top + components.layout.spacing.sm,
-      gap: components.layout.sectionGap,
+      gap: components.layout.spacing.xl,
       paddingBottom:
         components.layout.safeArea.bottom +
         tabBarHeight +
@@ -167,7 +169,8 @@ const createStyles = (colors, components, tabBarHeight) =>
         components.layout.spacing.xxl,
     },
     hero: {
-      gap: components.layout.spacing.none,
+      gap: components.layout.spacing.sm,
+      maxWidth: components.sizes.screen.maxContentWidth,
     },
     backButton: {
       width: components.sizes.square.lg,
@@ -190,66 +193,58 @@ const createStyles = (colors, components, tabBarHeight) =>
     title: {
       ...typography.styles.h1,
       color: colors.text.primary,
-      marginTop: components.layout.spacing.md,
     },
     hook: {
-      ...typography.styles.small,
+      ...typography.styles.body,
       color: colors.text.secondary,
-      maxWidth: components.sizes.illustration.xxl,
-      marginTop: components.layout.spacing.xs,
     },
     outcomeSection: {
+      maxWidth: components.sizes.screen.maxContentWidth,
       gap: components.layout.spacing.sm,
     },
-    sectionLabel: {
+    outcomeLabel: {
       ...typography.styles.small,
       color: colors.text.secondary,
     },
     outcomeList: {
       gap: components.layout.spacing.none,
     },
+    outcomeItemRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: components.layout.spacing.xs,
+    },
+    outcomeBullet: {
+      ...typography.styles.bodyStrong,
+      color: colors.text.primary,
+      lineHeight: typography.styles.bodyStrong.lineHeight,
+    },
     outcomeText: {
       ...typography.styles.bodyStrong,
       color: colors.text.primary,
+      flex: 1,
     },
     outcomeTextSpaced: {
       marginTop: components.layout.spacing.sm,
     },
-    metaRow: {
-      gap: components.layout.spacing.sm,
-      paddingTop: components.layout.spacing.md,
-      borderTopWidth: components.borderWidth.thin,
-      borderTopColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    },
-    metaLabel: {
-      ...typography.styles.meta,
-      color: colors.text.secondary,
-    },
-    metaPill: {
+    metaChipRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      alignSelf: 'flex-start',
       gap: components.layout.spacing.xs,
+      flexWrap: 'wrap',
+      maxWidth: components.sizes.screen.maxContentWidth,
+    },
+    metaChip: {
+      borderRadius: components.radius.pill,
       borderWidth: components.borderWidth.thin,
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      borderRadius: components.radius.pill,
       backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
       paddingVertical: components.layout.spacing.xs,
       paddingHorizontal: components.layout.spacing.md,
     },
-    metaValue: {
+    metaChipText: {
       ...typography.styles.small,
       color: colors.text.primary,
-    },
-    metaDot: {
-      width: components.sizes.dot.xs,
-      height: components.sizes.dot.xs,
-      borderRadius: components.radius.pill,
-      backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    },
-    metaHint: {
-      ...typography.styles.meta,
-      color: colors.text.secondary,
     },
     ctaDock: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
@@ -269,6 +264,12 @@ const getLessonHook = (overviewCopy, lesson, content) =>
 
 const getLessonOutcomes = (overviewCopy, lessonId) =>
   overviewCopy.lessonOutcomes?.[lessonId] || overviewCopy.defaultOutcomes;
+
+const getLessonMetaChips = (overviewCopy, lessonId, estimatedMinutes) =>
+  overviewCopy.lessonMetaChips?.[lessonId] || [
+    overviewCopy.minutesLabel(estimatedMinutes),
+    overviewCopy.readinessLabel,
+  ];
 
 const estimateLessonMinutes = (content) => {
   const stepCount = Object.keys(content?.steps || {}).length || FALLBACK_STEP_COUNT;
