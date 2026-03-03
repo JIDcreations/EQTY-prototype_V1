@@ -8,9 +8,18 @@ import { typography, useTheme } from '../../theme';
 import { useApp } from '../../utils/AppContext';
 
 export default function OnboardingWhatIsEqtyScreen({ navigation }) {
-  const { updatePreferences } = useApp();
+  const { updatePreferences, preferences } = useApp();
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const normalizedLanguage = String(preferences?.language || '').toLowerCase();
+  const isDutch =
+    normalizedLanguage === 'nl' ||
+    normalizedLanguage.includes('dutch') ||
+    normalizedLanguage.includes('neder');
+  const title = 'Beleggen als een proces';
+  const subtitle =
+    'Equity begeleidt je stap voor stap door de kennis en afwegingen die voorafgaan aan elke belegging.\nElk thema behandelt een essentieel onderdeel van dat proces.';
+  const ctaLabel = isDutch ? 'Account aanmaken' : 'Create account';
 
   const handleCreateAccount = async () => {
     await updatePreferences({ hasOnboarded: false });
@@ -34,19 +43,15 @@ export default function OnboardingWhatIsEqtyScreen({ navigation }) {
           </Pressable>
         </View>
         <View style={styles.logoWrap}>
-          <AppText style={styles.stepLabel}>WAT IS EQTY</AppText>
+          <AppText style={styles.logo}>EQTY</AppText>
         </View>
         <View style={styles.copyBlock}>
-          <AppText style={styles.title}>Leren investeren als proces.</AppText>
-          <AppText style={styles.subtitle}>
-            EQTY leert je stap voor stap investeren als proces.
-            {'\n'}
-            Na alle lessen weet je wat je moet kennen en doen voor je echt begint te investeren.
-          </AppText>
+          <AppText style={styles.title}>{title}</AppText>
+          <AppText style={styles.subtitle}>{subtitle}</AppText>
         </View>
         <View style={styles.actions}>
           <PrimaryButton
-            label="Account aanmaken"
+            label={ctaLabel}
             onPress={handleCreateAccount}
           />
         </View>
@@ -96,25 +101,23 @@ const createStyles = (colors, components) =>
       alignItems: 'center',
       justifyContent: 'flex-start',
     },
-    stepLabel: {
-      ...typography.styles.stepLabel,
+    logo: {
+      ...typography.styles.display,
       color: colors.text.primary,
     },
     copyBlock: {
       width: '100%',
-      gap: components.layout.spacing.md,
-      marginTop: components.layout.spacing.sm,
-      alignItems: 'center',
+      gap: components.layout.spacing.sm,
     },
     title: {
       ...typography.styles.h1,
       color: colors.text.primary,
-      textAlign: 'center',
+      textAlign: 'left',
     },
     subtitle: {
       ...typography.styles.body,
       color: colors.text.secondary,
-      textAlign: 'center',
+      textAlign: 'left',
     },
     actions: {
       gap: components.layout.spacing.md,
