@@ -14,7 +14,7 @@ const LOCALE_MAP = {
 const LESSON_OVERVIEW_COPY = {
   en: {
     outcomesLabel: "What you'll learn",
-    lessonPointsLabel: 'In this lesson:',
+    lessonPointsLabel: 'In this lesson',
     estimatedTimeLabel: 'Estimated time',
     readinessLabel: 'Focused start',
     minutesLabel: (minutes) => `~${minutes} min`,
@@ -48,7 +48,7 @@ const LESSON_OVERVIEW_COPY = {
   },
   nl: {
     outcomesLabel: 'Wat je zal leren',
-    lessonPointsLabel: 'In deze les:',
+    lessonPointsLabel: 'In deze les',
     estimatedTimeLabel: 'Geschatte tijd',
     readinessLabel: 'Gerichte start',
     minutesLabel: (minutes) => `~${minutes} min`,

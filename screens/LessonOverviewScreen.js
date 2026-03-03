@@ -100,19 +100,20 @@ export default function LessonOverviewScreen() {
                 color={colors.text.primary}
               />
             </Pressable>
-            <AppText style={styles.moduleLabel}>{moduleLabel}</AppText>
-            <AppText style={styles.title}>{lesson.title}</AppText>
-            <AppText style={styles.hook}>{hook}</AppText>
+            <View style={styles.heroContent}>
+              <AppText style={styles.moduleLabel}>{moduleLabel}</AppText>
+              <View style={styles.titleBlock}>
+                <AppText style={styles.title}>{lesson.title}</AppText>
+                <AppText style={styles.hook}>{hook}</AppText>
+              </View>
+            </View>
           </View>
 
           <View style={styles.outcomeSection}>
             <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
             <View style={styles.outcomeList}>
               {outcomes.map((line, index) => (
-                <View
-                  key={`${index}-${line}`}
-                  style={[styles.outcomeItemRow, index > 0 ? styles.outcomeTextSpaced : null]}
-                >
+                <View key={`${index}-${line}`} style={styles.outcomeItemRow}>
                   <AppText style={styles.outcomeBullet}>•</AppText>
                   <AppText style={styles.outcomeText}>{line}</AppText>
                 </View>
@@ -169,8 +170,14 @@ const createStyles = (colors, components, tabBarHeight) =>
         components.layout.spacing.xxl,
     },
     hero: {
-      gap: components.layout.spacing.sm,
       maxWidth: components.sizes.screen.maxContentWidth,
+    },
+    heroContent: {
+      marginTop: components.layout.spacing.xxl,
+      gap: components.layout.spacing.xl,
+    },
+    titleBlock: {
+      gap: components.layout.spacing.xs,
     },
     backButton: {
       width: components.sizes.square.lg,
@@ -188,7 +195,6 @@ const createStyles = (colors, components, tabBarHeight) =>
     moduleLabel: {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
-      marginTop: components.layout.spacing.xl,
     },
     title: {
       ...typography.styles.h1,
@@ -207,7 +213,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.secondary,
     },
     outcomeList: {
-      gap: components.layout.spacing.none,
+      gap: components.layout.spacing.sm,
     },
     outcomeItemRow: {
       flexDirection: 'row',
@@ -223,9 +229,6 @@ const createStyles = (colors, components, tabBarHeight) =>
       ...typography.styles.bodyStrong,
       color: colors.text.primary,
       flex: 1,
-    },
-    outcomeTextSpaced: {
-      marginTop: components.layout.spacing.sm,
     },
     metaChipRow: {
       flexDirection: 'row',

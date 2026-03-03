@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
-import { CtaButton } from '../components/Button';
+import { CtaInsideButton } from '../components/Button';
 import OnboardingScreen from '../components/OnboardingScreen';
 import Card from '../components/Card';
 import ProgressBar from '../components/ProgressBar';
@@ -198,7 +198,7 @@ export default function HomeScreen() {
           {heroDescription ? (
             <AppText style={styles.heroSubtitle}>{heroDescription}</AppText>
           ) : null}
-          <CtaButton
+          <CtaInsideButton
             label={primaryCtaLabel}
             onPress={() =>
               navigation.navigate('Lessons', {
@@ -209,7 +209,6 @@ export default function HomeScreen() {
                 },
               })
             }
-            style={styles.heroButton}
           />
         </Card>
       </View>
@@ -442,9 +441,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       flexShrink: 1,
       maxWidth: '100%',
       width: '100%',
-    },
-    heroButton: {
-      alignSelf: 'stretch',
     },
     sectionHeader: {
       flexDirection: 'row',

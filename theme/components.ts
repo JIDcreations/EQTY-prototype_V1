@@ -93,6 +93,12 @@ const sizes = {
     minPanelHeight: 330,
     maxContentWidth: 320,
   },
+  button: {
+    ctaPageWidth: 454,
+    ctaPageHeight: 54,
+    ctaInsideWidth: 314,
+    ctaInsideHeight: 48,
+  },
   handle: {
     width: 40,
     widthLg: 44,

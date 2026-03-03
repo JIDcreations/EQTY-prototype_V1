@@ -9,7 +9,7 @@ import ProgressBar from '../components/ProgressBar';
 import SectionTitle from '../components/SectionTitle';
 import Tag from '../components/Tag';
 import TopTabHeader from '../components/TopTabHeader';
-import { CtaButton } from '../components/Button';
+import { CtaInsideButton } from '../components/Button';
 import {
   formatLessonUnitLabel,
   formatThemeLessonContextLabel,
@@ -146,7 +146,7 @@ export default function LessonsScreen() {
             {currentLessonDescription}
           </AppText>
         ) : null}
-        <CtaButton
+        <CtaInsideButton
           label={primaryCtaLabel}
           onPress={() =>
             navigation.navigate('LessonOverview', {

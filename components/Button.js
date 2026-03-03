@@ -54,7 +54,31 @@ export function CtaButton({ label, onPress, style, disabled }) {
     <AnimatedPressable
       style={[
         styles.primaryButton,
-        styles.ctaButton,
+        styles.ctaPageButton,
+        animatedStyle,
+        disabled && styles.disabled,
+        style,
+      ]}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      onPress={onPress}
+      disabled={disabled}
+    >
+      <AppText style={styles.primaryLabel}>{label}</AppText>
+    </AnimatedPressable>
+  );
+}
+
+export function CtaInsideButton({ label, onPress, style, disabled }) {
+  const { components } = useTheme();
+  const styles = useMemo(() => createStyles(components), [components]);
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale();
+
+  return (
+    <AnimatedPressable
+      style={[
+        styles.primaryButton,
+        styles.ctaInsideButton,
         animatedStyle,
         disabled && styles.disabled,
         style,
@@ -78,7 +102,7 @@ export function CtaSecondaryButton({ label, onPress, style, disabled }) {
     <AnimatedPressable
       style={[
         styles.secondaryButton,
-        styles.ctaButton,
+        styles.ctaPageButton,
         animatedStyle,
         disabled && styles.disabled,
         style,
@@ -119,8 +143,17 @@ const createStyles = (components) =>
       ...components.button.base,
       ...components.button.primary,
     },
-    ctaButton: {
-      height: components.sizes.input.minHeight,
+    ctaPageButton: {
+      width: '100%',
+      maxWidth: components.sizes.button.ctaPageWidth,
+      height: components.sizes.button.ctaPageHeight,
+      alignSelf: 'center',
+      paddingVertical: 0,
+    },
+    ctaInsideButton: {
+      width: components.sizes.button.ctaInsideWidth,
+      height: components.sizes.button.ctaInsideHeight,
+      alignSelf: 'center',
       paddingVertical: 0,
     },
     primaryLabel: {

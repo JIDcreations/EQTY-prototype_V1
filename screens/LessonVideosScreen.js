@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
-import { CtaButton } from '../components/Button';
+import { CtaInsideButton } from '../components/Button';
 import Card from '../components/Card';
 import OnboardingScreen from '../components/OnboardingScreen';
 import SectionTitle from '../components/SectionTitle';
@@ -122,10 +122,9 @@ export default function LessonVideosScreen() {
               {featuredVideo ? <Tag label={featuredVideo.source} tone="default" /> : null}
             </View>
             {featuredVideo ? (
-              <CtaButton
+              <CtaInsideButton
                 label={videosCopy.watchNow}
                 onPress={() => handleOpenUrl(featuredVideo.url)}
-                style={styles.featuredButton}
               />
             ) : (
               <AppText style={styles.emptyText}>{videosCopy.featuredFallback}</AppText>
@@ -361,9 +360,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       alignItems: 'center',
       gap: components.layout.spacing.sm,
       flexWrap: 'wrap',
-    },
-    featuredButton: {
-      alignSelf: 'stretch',
     },
     filterWrap: {
       marginTop: -components.layout.spacing.xs,
