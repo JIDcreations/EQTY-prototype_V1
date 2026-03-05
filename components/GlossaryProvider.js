@@ -9,12 +9,18 @@ import { getGlossaryCopy } from '../utils/localization';
 
 export const GlossaryContext = createContext(null);
 
+const DEFAULT_GLOSSARY_COPY = {
+  definition: 'Definition',
+  example: 'Example',
+  watchVideo: 'Watch 2-minute video',
+};
+
 export function GlossaryProvider({ children }) {
   const { preferences } = useApp();
   const { colors, components, mode } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const glossaryCopy = useMemo(
-    () => getGlossaryCopy(preferences?.language),
+    () => getGlossaryCopy?.(preferences?.language) || DEFAULT_GLOSSARY_COPY,
     [preferences?.language]
   );
   const sheetBorderStyle = useMemo(() => {

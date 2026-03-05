@@ -14,6 +14,20 @@ import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getGlossaryCopy, getLocalizedGlossaryCategories } from '../utils/localization';
 
+const DEFAULT_GLOSSARY_COPY = {
+  title: 'Glossary',
+  subtitle: 'Find terms fast without leaving your flow.',
+  searchPlaceholder: 'Search terms, tags, or categories',
+  filterAll: 'All',
+  allTerms: 'All terms',
+  fallbackTerms: 'Terms',
+  termCount: (count) => `${count} terms`,
+  noMatches: 'No matches. Try another term.',
+  definition: 'Definition',
+  example: 'Example',
+  watchVideo: 'Watch 2-minute video',
+};
+
 export default function GlossaryScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -25,11 +39,13 @@ export default function GlossaryScreen() {
     [colors, components, tabBarHeight]
   );
   const glossaryCopy = useMemo(
-    () => getGlossaryCopy(preferences?.language),
+    () => getGlossaryCopy?.(preferences?.language) || DEFAULT_GLOSSARY_COPY,
     [preferences?.language]
   );
   const localizedCategories = useMemo(
-    () => getLocalizedGlossaryCategories(preferences?.language, glossaryCategories),
+    () =>
+      getLocalizedGlossaryCategories?.(preferences?.language, glossaryCategories) ||
+      glossaryCategories,
     [preferences?.language]
   );
   const [query, setQuery] = useState('');

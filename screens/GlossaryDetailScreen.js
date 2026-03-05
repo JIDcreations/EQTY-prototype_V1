@@ -10,6 +10,13 @@ import { useApp } from '../utils/AppContext';
 import { getGlossaryExplanation } from '../utils/helpers';
 import { getGlossaryCopy } from '../utils/localization';
 
+const DEFAULT_GLOSSARY_COPY = {
+  explainForMeTitle: 'Explain for me',
+  explainForMeBody: 'Tap below for a tailored explanation.',
+  explainForMeButton: 'Explain for me',
+  back: 'Back',
+};
+
 export default function GlossaryDetailScreen() {
   const navigation = useNavigation();
   const route = useRoute();
@@ -18,7 +25,7 @@ export default function GlossaryDetailScreen() {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const glossaryCopy = useMemo(
-    () => getGlossaryCopy(preferences?.language),
+    () => getGlossaryCopy?.(preferences?.language) || DEFAULT_GLOSSARY_COPY,
     [preferences?.language]
   );
   const [explanation, setExplanation] = useState(null);
