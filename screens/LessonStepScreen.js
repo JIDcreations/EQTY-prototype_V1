@@ -229,7 +229,7 @@ export default function LessonStepScreen() {
         helperText={
           isIntroScenario ? copy.introScenario.headerHelper : null
         }
-        showTitle
+        showTitle={!(lessonId === 'lesson_0' && step === 1)}
       />
 
       {step === 1 && (
@@ -447,64 +447,65 @@ function IntroConceptStep({ content, onNext, copy }) {
 
   return (
     <View style={styles.stepBody}>
-      {intro ? (
-        <AppText style={[styles.stepIntro, isLessonSubtitle && styles.stepIntroSecondary]}>
-          {intro}
-        </AppText>
-      ) : null}
-      <Card style={styles.conceptCard}>
-        <View style={styles.introHeader}>
-          <View style={styles.introAccent} />
-          <AppText style={styles.introLabel}>{copy.introConcept.definition}</AppText>
+      <View style={styles.conceptDef}>
+        <AppText style={styles.conceptDefTitle}>{copy.introConcept.title}</AppText>
+        <AppText style={styles.conceptDefBody}>{paragraph}</AppText>
+      </View>
+
+      <View style={styles.conceptTrackWrap}>
+        <View style={styles.conceptTrackHeader}>
+          <AppText style={styles.conceptTrackHeaderLabel}>{copy.introConcept.processTitle}</AppText>
+          <AppText style={styles.conceptTrackHeaderHint}>{copy.introConcept.processHint}</AppText>
         </View>
-        <AppText style={styles.introTitle}>{copy.introConcept.title}</AppText>
-        <AppText style={styles.introText}>{paragraph}</AppText>
-      </Card>
-      <Card style={styles.processCard}>
-        <View style={styles.processHeader}>
-          <AppText style={styles.processTitle}>{copy.introConcept.processTitle}</AppText>
-          <AppText style={styles.processSubline}>{copy.labels.processContext}</AppText>
-        </View>
-        <View style={styles.processMap}>
-          <View style={styles.processLine} />
+        <View style={styles.conceptTrack}>
           {steps.map((step, index) => {
             const isActive = index === activeIndex;
+            const isLast = index === steps.length - 1;
             return (
-              <View key={step.id} style={styles.processStationBlock}>
+              <View key={step.id}>
                 <Pressable
                   onPress={() =>
                     setActiveIndex((prev) => (prev === index ? null : index))
                   }
-                  style={[
-                    styles.processStationRow,
-                    isActive && styles.processStationRowActive,
-                  ]}
+                  style={styles.conceptTrackRow}
                 >
                   <View
-                    style={[styles.processNode, isActive && styles.processNodeActive]}
+                    style={[
+                      styles.conceptTrackBar,
+                      isActive && styles.conceptTrackBarActive,
+                    ]}
                   />
-                  <View style={styles.processStationText}>
-                    <AppText style={styles.processStationIndex}>{index + 1}</AppText>
-                    <AppText style={styles.processStationTitle}>{step.label}</AppText>
-                  </View>
-                  <View style={styles.processStationIndicator}>
-                    <Ionicons
-                      name={isActive ? 'chevron-down' : 'chevron-forward'}
-                      size={components.sizes.icon.sm}
-                      color={isActive ? colors.accent.primary : colors.text.secondary}
-                    />
+                  <View style={styles.conceptTrackBody}>
+                    <View style={styles.conceptTrackBodyRow}>
+                      <AppText
+                        style={[
+                          styles.conceptTrackIndex,
+                          isActive && styles.conceptTrackIndexActive,
+                        ]}
+                      >
+                        {String(index + 1).padStart(2, '0')}
+                      </AppText>
+                      <View style={styles.conceptTrackContent}>
+                        <AppText style={styles.conceptTrackName}>{step.label}</AppText>
+                      </View>
+                      <Ionicons
+                        name={isActive ? 'chevron-down' : 'chevron-forward'}
+                        size={components.sizes.icon.sm}
+                        color={isActive ? colors.accent.primary : colors.text.secondary}
+                      />
+                    </View>
+                    {isActive ? (
+                      <AppText style={styles.conceptTrackDetail}>{step.detail}</AppText>
+                    ) : null}
                   </View>
                 </Pressable>
-                {isActive ? (
-                  <View style={styles.processPanel}>
-                    <AppText style={styles.processDescription}>{step.detail}</AppText>
-                  </View>
-                ) : null}
+                {!isLast ? <View style={styles.conceptTrackDivider} /> : null}
               </View>
             );
           })}
         </View>
-      </Card>
+      </View>
+
       <PrimaryButton label={copy.buttons.next} onPress={onNext} />
     </View>
   );
@@ -2326,6 +2327,10 @@ const createStyles = (colors, components) =>
     ...typography.styles.body,
     color: colors.text.primary,
   },
+  introDefinitionText: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
+  },
   bodyText: {
     ...typography.styles.body,
     color: colors.text.primary,
@@ -2701,6 +2706,89 @@ const createStyles = (colors, components) =>
   processSubline: {
     ...typography.styles.body,
     color: colors.text.secondary,
+  },
+  /* ── Concept screen: definition block ── */
+  conceptDef: {
+    gap: components.layout.spacing.sm,
+    paddingTop: components.layout.spacing.xl,
+  },
+  conceptDefLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  conceptDefTitle: {
+    ...typography.styles.h1,
+    color: colors.text.primary,
+  },
+  conceptDefBody: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
+  },
+  /* ── Concept screen: process track ── */
+  conceptTrackWrap: {
+    gap: components.layout.spacing.md,
+  },
+  conceptTrackHeader: {
+    gap: components.layout.spacing.xs,
+  },
+  conceptTrackHeaderLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  conceptTrackHeaderHint: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+  },
+  conceptTrack: {
+    borderRadius: components.radius.card,
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    overflow: 'hidden',
+  },
+  conceptTrackRow: {
+    flexDirection: 'row',
+  },
+  conceptTrackBar: {
+    width: components.sizes.line.thin,
+    backgroundColor: 'transparent',
+  },
+  conceptTrackBarActive: {
+    backgroundColor: colors.accent.primary,
+  },
+  conceptTrackBody: {
+    flex: 1,
+    paddingVertical: components.layout.spacing.md,
+    paddingLeft: components.layout.spacing.md,
+    paddingRight: components.layout.spacing.lg,
+    gap: components.layout.spacing.sm,
+  },
+  conceptTrackBodyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.sm,
+  },
+  conceptTrackIndex: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+    width: components.sizes.square.xs,
+  },
+  conceptTrackIndexActive: {
+    color: colors.accent.primary,
+  },
+  conceptTrackContent: {
+    flex: 1,
+  },
+  conceptTrackName: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  conceptTrackDetail: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+  },
+  conceptTrackDivider: {
+    height: components.borderWidth.thin,
+    marginHorizontal: components.layout.spacing.lg,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   segmentRow: {
     flexDirection: 'row',
