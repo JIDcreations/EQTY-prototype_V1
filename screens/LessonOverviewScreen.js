@@ -101,9 +101,21 @@ export default function LessonOverviewScreen() {
                 color={colors.text.primary}
               />
             </Pressable>
-            <View style={styles.heroContent}>
+            <View
+              style={[
+                styles.heroContent,
+                lesson.id === 'lesson_0' && styles.heroContentLessonOne,
+              ]}
+            >
               <View style={styles.labelAndTitle}>
-                <AppText style={styles.moduleLabel}>{moduleLabel}</AppText>
+                <AppText
+                  style={[
+                    styles.moduleLabel,
+                    lesson.id === 'lesson_0' && styles.moduleLabelPrimary,
+                  ]}
+                >
+                  {moduleLabel}
+                </AppText>
                 <View style={styles.titleBlock}>
                   <AppText style={styles.title}>{lesson.title}</AppText>
                   <AppText style={styles.hook}>{hook}</AppText>
@@ -180,6 +192,9 @@ const createStyles = (colors, components, tabBarHeight) =>
       marginTop: components.layout.spacing.xxl,
       gap: components.layout.spacing.lg,
     },
+    heroContentLessonOne: {
+      marginTop: 12,
+    },
     labelAndTitle: {
       gap: components.layout.spacing.xs,
     },
@@ -202,6 +217,9 @@ const createStyles = (colors, components, tabBarHeight) =>
     moduleLabel: {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
+    },
+    moduleLabelPrimary: {
+      color: colors.text.primary,
     },
     title: {
       ...typography.styles.h1,
