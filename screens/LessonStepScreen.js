@@ -2722,18 +2722,19 @@ const createStyles = (colors, components) =>
   },
   conceptDefBody: {
     ...typography.styles.body,
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
   /* ── Concept screen: process track ── */
   conceptTrackWrap: {
     gap: components.layout.spacing.md,
+    marginTop: components.layout.spacing.sm,
   },
   conceptTrackHeader: {
     gap: components.layout.spacing.xs,
   },
   conceptTrackHeaderLabel: {
     ...typography.styles.stepLabel,
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
   conceptTrackHeaderHint: {
     ...typography.styles.meta,

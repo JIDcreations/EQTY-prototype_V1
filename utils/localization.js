@@ -181,9 +181,9 @@ const LESSON_STEP_COPY = {
     },
     introConcept: {
       definition: 'Definition',
-      title: 'What is investing as a process?',
+      title: 'What is Investing as a Process?',
       paragraph:
-        'Investing is not a single action. It is a sequence of decisions that build on each other. Buying or selling only happens at the final step.',
+        'Investing as a process is a step-by-step plan you follow before you actually start investing. You first learn to make the right choices, and only then start investing.',
       processTitle: 'Investing process',
       processHint: 'Tap a step to see its role.',
       steps: [
@@ -382,9 +382,9 @@ const LESSON_STEP_COPY = {
     },
     introConcept: {
       definition: 'Definitie',
-      title: 'Wat is investeren als proces?',
+      title: 'Wat is Beleggen als een proces?',
       paragraph:
-        'Investeren is geen eenmalige actie. Het is een reeks beslissingen die op elkaar voortbouwen. Kopen of verkopen gebeurt pas in de laatste stap.',
+        'Beleggen als een proces is een stappenplan dat je volgt vóór je start met beleggen. Je leert eerst de juiste keuzes maken, en daarna pas beleggen.',
       processTitle: 'Beleggingsproces',
       processHint: 'Tik op een stap om de rol te zien.',
       steps: [
