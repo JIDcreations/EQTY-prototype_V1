@@ -460,6 +460,7 @@ function IntroConceptStep({ content, onNext, copy }) {
         <View style={styles.conceptTrack}>
           {steps.map((step, index) => {
             const isActive = index === activeIndex;
+            const isFirst = index === 0;
             const isLast = index === steps.length - 1;
             return (
               <View key={step.id}>
@@ -473,6 +474,8 @@ function IntroConceptStep({ content, onNext, copy }) {
                     style={[
                       styles.conceptTrackBar,
                       isActive && styles.conceptTrackBarActive,
+                      isFirst && styles.conceptTrackBarFirst,
+                      isLast && styles.conceptTrackBarLast,
                     ]}
                   />
                   <View style={styles.conceptTrackBody}>
@@ -2754,6 +2757,16 @@ const createStyles = (colors, components) =>
   },
   conceptTrackBarActive: {
     backgroundColor: colors.accent.primary,
+  },
+  conceptTrackBarFirst: {
+    marginTop: components.layout.spacing.xs,
+    borderTopLeftRadius: components.radius.pill,
+    borderTopRightRadius: components.radius.pill,
+  },
+  conceptTrackBarLast: {
+    marginBottom: components.layout.spacing.xs,
+    borderBottomLeftRadius: components.radius.pill,
+    borderBottomRightRadius: components.radius.pill,
   },
   conceptTrackBody: {
     flex: 1,
