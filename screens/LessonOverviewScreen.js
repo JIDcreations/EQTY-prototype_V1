@@ -5,6 +5,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import AppText from '../components/AppText';
 import { CtaButton } from '../components/Button';
+import Card from '../components/Card';
 import ScreenBackground from '../components/ScreenBackground';
 import { useApp } from '../utils/AppContext';
 import {
@@ -101,33 +102,36 @@ export default function LessonOverviewScreen() {
               />
             </Pressable>
             <View style={styles.heroContent}>
-              <AppText style={styles.moduleLabel}>{moduleLabel}</AppText>
-              <View style={styles.titleBlock}>
-                <AppText style={styles.title}>{lesson.title}</AppText>
-                <AppText style={styles.hook}>{hook}</AppText>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.outcomeSection}>
-            <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
-            <View style={styles.outcomeList}>
-              {outcomes.map((line, index) => (
-                <View key={`${index}-${line}`} style={styles.outcomeItemRow}>
-                  <AppText style={styles.outcomeBullet}>•</AppText>
-                  <AppText style={styles.outcomeText}>{line}</AppText>
+              <View style={styles.labelAndTitle}>
+                <AppText style={styles.moduleLabel}>{moduleLabel}</AppText>
+                <View style={styles.titleBlock}>
+                  <AppText style={styles.title}>{lesson.title}</AppText>
+                  <AppText style={styles.hook}>{hook}</AppText>
                 </View>
-              ))}
+              </View>
+              <View style={styles.metaChipRow}>
+                {metaChips.map((chipText) => (
+                  <View key={chipText} style={styles.metaChip}>
+                    <AppText style={styles.metaChipText}>{chipText}</AppText>
+                  </View>
+                ))}
+              </View>
             </View>
           </View>
 
-          <View style={styles.metaChipRow}>
-            {metaChips.map((chipText) => (
-              <View key={chipText} style={styles.metaChip}>
-                <AppText style={styles.metaChipText}>{chipText}</AppText>
+          <Card>
+            <View style={styles.outcomeSection}>
+              <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
+              <View style={styles.outcomeList}>
+                {outcomes.map((line, index) => (
+                  <View key={`${index}-${line}`} style={styles.outcomeItemRow}>
+                    <AppText style={styles.outcomeBullet}>•</AppText>
+                    <AppText style={styles.outcomeText}>{line}</AppText>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
+            </View>
+          </Card>
         </ScrollView>
 
         <View style={styles.ctaDock}>
@@ -162,7 +166,7 @@ const createStyles = (colors, components, tabBarHeight) =>
     content: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
       paddingTop: components.layout.safeArea.top + components.layout.spacing.sm,
-      gap: components.layout.spacing.xl,
+      gap: components.layout.spacing.xxl,
       paddingBottom:
         components.layout.safeArea.bottom +
         tabBarHeight +
@@ -174,10 +178,13 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     heroContent: {
       marginTop: components.layout.spacing.xxl,
-      gap: components.layout.spacing.xl,
+      gap: components.layout.spacing.lg,
+    },
+    labelAndTitle: {
+      gap: components.layout.spacing.xs,
     },
     titleBlock: {
-      gap: components.layout.spacing.xs,
+      gap: components.layout.spacing.sm,
     },
     backButton: {
       width: components.sizes.square.lg,
@@ -205,12 +212,11 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.secondary,
     },
     outcomeSection: {
-      maxWidth: components.sizes.screen.maxContentWidth,
-      gap: components.layout.spacing.sm,
+      gap: components.layout.spacing.md,
     },
     outcomeLabel: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
+      ...typography.styles.bodyStrong,
+      color: colors.text.primary,
     },
     outcomeList: {
       gap: components.layout.spacing.sm,
@@ -221,12 +227,12 @@ const createStyles = (colors, components, tabBarHeight) =>
       gap: components.layout.spacing.xs,
     },
     outcomeBullet: {
-      ...typography.styles.bodyStrong,
+      ...typography.styles.body,
       color: colors.text.primary,
-      lineHeight: typography.styles.bodyStrong.lineHeight,
+      lineHeight: typography.styles.body.lineHeight,
     },
     outcomeText: {
-      ...typography.styles.bodyStrong,
+      ...typography.styles.body,
       color: colors.text.primary,
       flex: 1,
     },
