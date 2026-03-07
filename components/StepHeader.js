@@ -58,7 +58,7 @@ export default function StepHeader({
         <AppText style={styles.progressInline}>{secondaryProgressText}</AppText>
       ) : null}
       <ProgressBar progress={step / total} />
-      {showTitle ? titleNode : null}
+      {showTitle ? <View style={styles.titleWrap}>{titleNode}</View> : null}
       {helperText ? <AppText style={styles.helperText}>{helperText}</AppText> : null}
     </View>
   );
@@ -100,6 +100,9 @@ const createStyles = (colors, components) =>
     progressInline: {
       ...typography.styles.small,
       color: colors.text.secondary,
+    },
+    titleWrap: {
+      marginTop: components.layout.spacing.xs / 2,
     },
     helperText: {
       ...typography.styles.body,

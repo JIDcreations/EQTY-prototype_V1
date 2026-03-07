@@ -1100,7 +1100,7 @@ function ProcessGridFlipCard({
   };
 
   const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
-  const frontCtaLabel = isLocked ? 'Vergrendeld' : 'Bekijk';
+  const frontCtaLabel = isLocked ? 'Bekijk eerst de stappen hierboven' : 'Bekijk';
   const backCtaLabel = 'Terug';
 
   const renderStatusIndicator = () => {
@@ -4588,7 +4588,8 @@ const createStyles = (colors, components) =>
   l1VisGrid: {
     width: '100%',
     flexDirection: 'column',
-    gap: components.layout.spacing.sm,
+    gap: components.layout.spacing.md,
+    marginTop: components.layout.spacing.sm,
   },
   l1CardShell: {
     width: '100%',
@@ -4612,7 +4613,7 @@ const createStyles = (colors, components) =>
   },
   l1Page: {
     borderRadius: components.radius.card,
-    padding: components.layout.spacing.md,
+    padding: components.layout.spacing.lg,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surface,
