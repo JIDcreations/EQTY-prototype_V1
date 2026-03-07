@@ -1618,6 +1618,7 @@ function IntroScenarioStep({ onNext, copy }) {
   const [progress, setProgress] = useState(0);
   const clampedProgress = Math.max(0, Math.min(progress, totalSteps));
   const progressRatio = totalSteps ? clampedProgress / totalSteps : 0;
+  const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
 
   const structuredSteps = steps.map((step, index) => {
     const threshold = index + 1;
@@ -1626,16 +1627,13 @@ function IntroScenarioStep({ onNext, copy }) {
     return { ...step, isActive, isCurrent };
   });
 
-  const missingIds = ['goal', 'risk', 'strategy'];
   const reactiveSteps = steps.map((step, index) => {
     const threshold = index + 1;
-    const isMissing = missingIds.includes(step.id);
-    const isActive = !isMissing && clampedProgress >= threshold;
-    const isCurrent = !isMissing && clampedProgress > threshold - 1 && clampedProgress < threshold;
+    const isMissing = reactiveMissingIds.includes(step.id);
     return {
       ...step,
-      isActive,
-      isCurrent,
+      isActive: !isMissing && clampedProgress >= threshold,
+      isCurrent: !isMissing && clampedProgress > threshold - 1 && clampedProgress < threshold,
       isMissing,
     };
   });
@@ -1675,16 +1673,13 @@ function IntroScenarioStep({ onNext, copy }) {
         >
           <View style={styles.scenarioCompareHeader}>
             <AppText style={styles.scenarioCompareLabel}>
-              {copy.introScenario.structuredLabel}
-            </AppText>
-            <AppText style={styles.scenarioCompareSubline}>
-              {copy.introScenario.structuredSubline}
+              MET PLAN
             </AppText>
           </View>
           <ScenarioCurve
             variant="stable"
             progress={progressRatio}
-            label={copy.introScenario.stableLabel}
+            label="STABIEL"
           />
           <View style={styles.scenarioCompareSteps}>
             {structuredSteps.map((step, index) => {
@@ -1737,16 +1732,13 @@ function IntroScenarioStep({ onNext, copy }) {
         >
           <View style={styles.scenarioCompareHeader}>
             <AppText style={styles.scenarioCompareLabel}>
-              {copy.introScenario.reactiveLabel}
-            </AppText>
-            <AppText style={styles.scenarioCompareSubline}>
-              {copy.introScenario.reactiveSubline}
+              ZONDER PLAN
             </AppText>
           </View>
           <ScenarioCurve
             variant="volatile"
             progress={progressRatio}
-            label={copy.introScenario.volatileLabel}
+            label="ONZEKER"
           />
           <View style={styles.scenarioCompareSteps}>
             {reactiveSteps.map((step, index) => {
@@ -3654,7 +3646,7 @@ const createStyles = (colors, components) =>
     borderColor: colors.accent.primary,
   },
   scenarioCompareNodeActiveReactive: {
-    backgroundColor: colors.text.primary,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.surface),
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareNodeCurrent: {
@@ -3676,7 +3668,7 @@ const createStyles = (colors, components) =>
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.surface),
   },
   scenarioCompareLineActiveReactive: {
-    backgroundColor: toRgba(colors.text.primary, colors.opacity.surface),
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.surface),
   },
   scenarioCompareLineMissing: {
     backgroundColor: 'transparent',
