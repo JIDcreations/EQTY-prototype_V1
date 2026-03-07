@@ -1614,314 +1614,198 @@ function ExecutionGridAnim({ styles, colors }) {
 function IntroScenarioStep({ onNext, copy }) {
   const { styles, colors, components } = useLessonStepStyles();
   const steps = copy.introScenario.steps;
-  const totalSteps = steps.length;
   const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
 
-  // Phase flow: choice → consequence → process → reveal
-  const [phase, setPhase] = useState('choice');
-  const [completedSteps, setCompletedSteps] = useState([]);
+  // Single state: which path did the user pick?
+  // null = not chosen yet, 'reactive' = nu uitvoeren, 'plan' = volg het proces
+  const [selected, setSelected] = useState(null);
+  const showComparison = selected !== null;
 
-  const processProgress = completedSteps.length / totalSteps;
-  const allStepsDone = completedSteps.length === totalSteps;
-
-  const handleCompleteStep = (stepId, index) => {
-    if (completedSteps.includes(stepId)) return;
-    if (completedSteps.length !== index) return;
-    setCompletedSteps((prev) => [...prev, stepId]);
-  };
-
-  // ─── Phase: CHOICE ────────────────────────────────────────────────────────────
-  if (phase === 'choice') {
-    return (
-      <View style={styles.stepBody}>
-        <Card style={styles.narrativeCard}>
-          <View style={styles.narrativeCharacterRow}>
-            <View style={styles.narrativeAvatar}>
-              <Ionicons
-                name="person-outline"
-                size={components.sizes.icon.md}
-                color={colors.text.secondary}
-              />
-            </View>
-            <AppText style={styles.narrativeCharacterName}>Lars</AppText>
-          </View>
-          <AppText style={styles.narrativeQuote}>
-            "Ik heb €5.000 klaarstaan. Ik heb een goed gevoel over dit aandeel."
-          </AppText>
-        </Card>
-
-        <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
-
-        <View style={styles.narrativeChoiceRow}>
-          <Pressable
-            onPress={() => setPhase('consequence')}
-            style={({ pressed }) => [
-              styles.narrativeChoiceCard,
-              styles.narrativeChoiceCardReactive,
-              pressed && styles.narrativeChoiceCardPressed,
-            ]}
-          >
-            <Ionicons
-              name="flash-outline"
-              size={components.sizes.icon.lg}
-              color={colors.text.secondary}
-            />
-            <AppText style={styles.narrativeChoiceLabel}>Nu uitvoeren</AppText>
-            <AppText style={styles.narrativeChoiceHint}>Zonder voorbereiding</AppText>
-          </Pressable>
-
-          <Pressable
-            onPress={() => setPhase('process')}
-            style={({ pressed }) => [
-              styles.narrativeChoiceCard,
-              styles.narrativeChoiceCardPlan,
-              pressed && styles.narrativeChoiceCardPressed,
-            ]}
-          >
-            <Ionicons
-              name="layers-outline"
-              size={components.sizes.icon.lg}
-              color={colors.accent.primary}
-            />
-            <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
-              Volg het proces
-            </AppText>
-            <AppText style={styles.narrativeChoiceHint}>6 stappen doorlopen</AppText>
-          </Pressable>
-        </View>
-      </View>
-    );
-  }
-
-  // ─── Phase: CONSEQUENCE ───────────────────────────────────────────────────────
-  if (phase === 'consequence') {
-    return (
-      <View style={styles.stepBody}>
-        <Card style={styles.narrativeConsequenceCard}>
-          <AppText style={styles.narrativeConsequenceHeading}>
-            Lars voert direct uit.
-          </AppText>
-          <AppText style={styles.narrativeConsequenceBody}>
-            Geen doel. Geen risicoprofiel. Geen strategie. Wat heeft hij eigenlijk gekocht?
-          </AppText>
-        </Card>
-
-        <View style={styles.narrativeFullChart}>
-          <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
-        </View>
-
-        <Card style={styles.narrativeInsightRow}>
-          <Ionicons
-            name="warning-outline"
-            size={components.sizes.icon.md}
-            color={colors.text.secondary}
-          />
-          <AppText style={styles.narrativeInsightText}>
-            {copy.introScenario.insightLine}
-          </AppText>
-        </Card>
-
-        <PrimaryButton
-          label="Zie wat anders kon"
-          onPress={() => {
-            setCompletedSteps([]);
-            setPhase('process');
-          }}
-        />
-      </View>
-    );
-  }
-
-  // ─── Phase: PROCESS ───────────────────────────────────────────────────────────
-  if (phase === 'process') {
-    return (
-      <View style={styles.stepBody}>
-        <View style={styles.narrativeFullChart}>
-          <ScenarioCurve variant="stable" progress={processProgress} label="STABIEL" />
-        </View>
-
-        <View style={styles.narrativeProcessList}>
-          {steps.map((step, index) => {
-            const isDone = completedSteps.includes(step.id);
-            const isNext = completedSteps.length === index;
-            const isLocked = !isDone && !isNext;
-            return (
-              <Pressable
-                key={step.id}
-                onPress={() => handleCompleteStep(step.id, index)}
-                disabled={isDone || isLocked}
-                style={[
-                  styles.narrativeProcessRow,
-                  isDone && styles.narrativeProcessRowDone,
-                  isNext && styles.narrativeProcessRowNext,
-                  isLocked && styles.narrativeProcessRowLocked,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.narrativeProcessDot,
-                    isDone && styles.narrativeProcessDotDone,
-                    isNext && styles.narrativeProcessDotNext,
-                  ]}
-                >
-                  {isDone ? (
-                    <Ionicons name="checkmark" size={12} color={colors.text.onAccent} />
-                  ) : (
-                    <AppText style={styles.narrativeProcessNum}>{index + 1}</AppText>
-                  )}
-                </View>
-                <AppText
-                  style={[
-                    styles.narrativeProcessLabel,
-                    isDone && styles.narrativeProcessLabelDone,
-                    isLocked && styles.narrativeProcessLabelLocked,
-                  ]}
-                >
-                  {step.label}
-                </AppText>
-                {isNext && (
-                  <AppText style={styles.narrativeProcessCta}>Tik →</AppText>
-                )}
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {allStepsDone && (
-          <PrimaryButton
-            label="Vergelijk de uitkomsten"
-            onPress={() => setPhase('reveal')}
-          />
-        )}
-      </View>
-    );
-  }
-
-  // ─── Phase: REVEAL ────────────────────────────────────────────────────────────
-  const revealStructuredSteps = steps.map((step) => ({
-    ...step,
-    isActive: true,
-    isCurrent: false,
-  }));
-  const revealReactiveSteps = steps.map((step) => {
+  // Precompute step data for both comparison panels
+  const planSteps = steps.map((step) => ({ ...step, isActive: true }));
+  const reactiveSteps = steps.map((step) => {
     const isMissing = reactiveMissingIds.includes(step.id);
-    return { ...step, isActive: !isMissing, isCurrent: false, isMissing };
+    return { ...step, isActive: !isMissing, isMissing };
   });
 
   return (
     <View style={styles.stepBody}>
-      <AppText style={styles.narrativeRevealHeading}>
-        Dezelfde belegger. Twee keuzes.
-      </AppText>
+      {/* Lars — always visible */}
+      <Card style={styles.narrativeCard}>
+        <View style={styles.narrativeCharacterRow}>
+          <View style={styles.narrativeAvatar}>
+            <Ionicons
+              name="person-outline"
+              size={components.sizes.icon.md}
+              color={colors.text.secondary}
+            />
+          </View>
+          <AppText style={styles.narrativeCharacterName}>Lars</AppText>
+        </View>
+        <AppText style={styles.narrativeQuote}>
+          "Ik heb €5.000 klaarstaan. Ik heb een goed gevoel over dit aandeel."
+        </AppText>
+      </Card>
 
-      <View style={styles.scenarioCompareGrid}>
-        <Card
-          style={[
-            styles.scenarioComparePanel,
-            {
-              backgroundColor: toRgba(
-                colors.background.surfaceActive,
-                colors.opacity.surface
-              ),
-            },
+      {/* Choice — always visible, re-selectable */}
+      <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
+
+      <View style={styles.narrativeChoiceRow}>
+        <Pressable
+          onPress={() => setSelected('reactive')}
+          style={({ pressed }) => [
+            styles.narrativeChoiceCard,
+            styles.narrativeChoiceCardReactive,
+            selected === 'reactive' && styles.narrativeChoiceCardActiveReactive,
+            pressed && styles.narrativeChoiceCardPressed,
           ]}
         >
-          <View style={styles.scenarioCompareHeader}>
-            <AppText style={styles.scenarioCompareLabel}>MET PLAN</AppText>
-          </View>
-          <ScenarioCurve variant="stable" progress={1} label="STABIEL" />
-          <View style={styles.scenarioCompareSteps}>
-            {revealStructuredSteps.map((step, index) => {
-              const isLast = index === revealStructuredSteps.length - 1;
-              return (
-                <View key={step.id} style={styles.scenarioCompareRow}>
-                  <View style={styles.scenarioCompareTrack}>
-                    <View
-                      style={[
-                        styles.scenarioCompareNode,
-                        styles.scenarioCompareNodeActive,
-                      ]}
-                    />
-                    {!isLast ? (
-                      <View
-                        style={[
-                          styles.scenarioCompareLine,
-                          styles.scenarioCompareLineActive,
-                        ]}
-                      />
-                    ) : null}
-                  </View>
-                  <AppText
-                    style={[
-                      styles.scenarioCompareStepLabel,
-                      styles.scenarioCompareStepLabelActive,
-                    ]}
-                  >
-                    {step.label}
-                  </AppText>
-                </View>
-              );
-            })}
-          </View>
-        </Card>
+          <Ionicons
+            name="flash-outline"
+            size={components.sizes.icon.lg}
+            color={colors.text.secondary}
+          />
+          <AppText style={styles.narrativeChoiceLabel}>Nu uitvoeren</AppText>
+          <AppText style={styles.narrativeChoiceHint}>Zonder voorbereiding</AppText>
+        </Pressable>
 
-        <Card
-          style={[
-            styles.scenarioComparePanel,
-            styles.scenarioComparePanelReactive,
-            {
-              backgroundColor: toRgba(
-                colors.background.surface,
-                colors.opacity.surface
-              ),
-            },
+        <Pressable
+          onPress={() => setSelected('plan')}
+          style={({ pressed }) => [
+            styles.narrativeChoiceCard,
+            styles.narrativeChoiceCardPlan,
+            selected === 'plan' && styles.narrativeChoiceCardActivePlan,
+            pressed && styles.narrativeChoiceCardPressed,
           ]}
         >
-          <View style={styles.scenarioCompareHeader}>
-            <AppText style={styles.scenarioCompareLabel}>ZONDER PLAN</AppText>
-          </View>
-          <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
-          <View style={styles.scenarioCompareSteps}>
-            {revealReactiveSteps.map((step, index) => {
-              const isLast = index === revealReactiveSteps.length - 1;
-              return (
-                <View key={step.id} style={styles.scenarioCompareRow}>
-                  <View style={styles.scenarioCompareTrack}>
-                    <View
-                      style={[
-                        styles.scenarioCompareNode,
-                        step.isMissing && styles.scenarioCompareNodeMissing,
-                        step.isActive && styles.scenarioCompareNodeActiveReactive,
-                      ]}
-                    />
-                    {!isLast ? (
-                      <View
-                        style={[
-                          styles.scenarioCompareLine,
-                          step.isMissing && styles.scenarioCompareLineMissing,
-                          step.isActive && styles.scenarioCompareLineActiveReactive,
-                        ]}
-                      />
-                    ) : null}
-                  </View>
-                  <AppText
-                    style={[
-                      styles.scenarioCompareStepLabel,
-                      step.isMissing && styles.scenarioCompareStepLabelMissing,
-                      step.isActive && styles.scenarioCompareStepLabelActive,
-                    ]}
-                  >
-                    {step.label}
-                  </AppText>
-                </View>
-              );
-            })}
-          </View>
-        </Card>
+          <Ionicons
+            name="layers-outline"
+            size={components.sizes.icon.lg}
+            color={colors.accent.primary}
+          />
+          <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
+            Volg het proces
+          </AppText>
+          <AppText style={styles.narrativeChoiceHint}>6 stappen doorlopen</AppText>
+        </Pressable>
       </View>
 
-      <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
-      <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+      {/* Comparison — revealed with a single tap, both outcomes side by side */}
+      {showComparison && (
+        <>
+          <View style={styles.scenarioCompareGrid}>
+            {/* ZONDER PLAN — mirrors "Nu uitvoeren" on the left */}
+            <Card
+              style={[
+                styles.scenarioComparePanel,
+                selected === 'reactive' && styles.narrativeComparePanelHighlight,
+                {
+                  backgroundColor: toRgba(
+                    colors.background.surface,
+                    colors.opacity.surface
+                  ),
+                },
+              ]}
+            >
+              <View style={styles.scenarioCompareHeader}>
+                <AppText style={styles.scenarioCompareLabel}>ZONDER PLAN</AppText>
+              </View>
+              <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
+              <View style={styles.scenarioCompareSteps}>
+                {reactiveSteps.map((step, index) => {
+                  const isLast = index === reactiveSteps.length - 1;
+                  return (
+                    <View key={step.id} style={styles.scenarioCompareRow}>
+                      <View style={styles.scenarioCompareTrack}>
+                        <View
+                          style={[
+                            styles.scenarioCompareNode,
+                            step.isMissing && styles.scenarioCompareNodeMissing,
+                            step.isActive && styles.scenarioCompareNodeActiveReactive,
+                          ]}
+                        />
+                        {!isLast ? (
+                          <View
+                            style={[
+                              styles.scenarioCompareLine,
+                              step.isMissing && styles.scenarioCompareLineMissing,
+                              step.isActive && styles.scenarioCompareLineActiveReactive,
+                            ]}
+                          />
+                        ) : null}
+                      </View>
+                      <AppText
+                        style={[
+                          styles.scenarioCompareStepLabel,
+                          step.isMissing && styles.scenarioCompareStepLabelMissing,
+                          step.isActive && styles.scenarioCompareStepLabelActive,
+                        ]}
+                      >
+                        {step.label}
+                      </AppText>
+                    </View>
+                  );
+                })}
+              </View>
+            </Card>
+
+            {/* MET PLAN — mirrors "Volg het proces" on the right */}
+            <Card
+              style={[
+                styles.scenarioComparePanel,
+                selected === 'plan' && styles.narrativeComparePanelHighlight,
+                {
+                  backgroundColor: toRgba(
+                    colors.background.surfaceActive,
+                    colors.opacity.surface
+                  ),
+                },
+              ]}
+            >
+              <View style={styles.scenarioCompareHeader}>
+                <AppText style={styles.scenarioCompareLabel}>MET PLAN</AppText>
+              </View>
+              <ScenarioCurve variant="stable" progress={1} label="STABIEL" />
+              <View style={styles.scenarioCompareSteps}>
+                {planSteps.map((step, index) => {
+                  const isLast = index === planSteps.length - 1;
+                  return (
+                    <View key={step.id} style={styles.scenarioCompareRow}>
+                      <View style={styles.scenarioCompareTrack}>
+                        <View
+                          style={[
+                            styles.scenarioCompareNode,
+                            styles.scenarioCompareNodeActive,
+                          ]}
+                        />
+                        {!isLast ? (
+                          <View
+                            style={[
+                              styles.scenarioCompareLine,
+                              styles.scenarioCompareLineActive,
+                            ]}
+                          />
+                        ) : null}
+                      </View>
+                      <AppText
+                        style={[
+                          styles.scenarioCompareStepLabel,
+                          styles.scenarioCompareStepLabelActive,
+                        ]}
+                      >
+                        {step.label}
+                      </AppText>
+                    </View>
+                  );
+                })}
+              </View>
+            </Card>
+          </View>
+
+          <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
+          <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+        </>
+      )}
     </View>
   );
 }
@@ -3840,7 +3724,7 @@ const createStyles = (colors, components) =>
     ...typography.styles.body,
     color: colors.text.secondary,
   },
-  // ─── Narrative redesign ───────────────────────────────────────────────────────
+  // ─── Narrative scenario ───────────────────────────────────────────────────────
   narrativeCard: {
     gap: components.layout.spacing.md,
   },
@@ -3893,6 +3777,12 @@ const createStyles = (colors, components) =>
     borderColor: toRgba(colors.accent.primary, 0.4),
     backgroundColor: toRgba(colors.accent.primary, 0.06),
   },
+  narrativeChoiceCardActiveReactive: {
+    borderColor: colors.text.primary,
+  },
+  narrativeChoiceCardActivePlan: {
+    borderColor: colors.accent.primary,
+  },
   narrativeChoiceCardPressed: {
     opacity: colors.opacity.emphasis,
     transform: [{ scale: components.transforms.scalePressed }],
@@ -3908,102 +3798,8 @@ const createStyles = (colors, components) =>
     ...typography.styles.meta,
     color: colors.text.secondary,
   },
-  narrativeConsequenceCard: {
-    gap: components.layout.spacing.sm,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-  },
-  narrativeConsequenceHeading: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
-  },
-  narrativeConsequenceBody: {
-    ...typography.styles.body,
-    color: colors.text.secondary,
-  },
-  narrativeFullChart: {
-    borderRadius: components.radius.card,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surfaceActive,
-    padding: components.layout.spacing.md,
-    overflow: 'hidden',
-  },
-  narrativeInsightRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: components.layout.spacing.sm,
-  },
-  narrativeInsightText: {
-    ...typography.styles.small,
-    color: colors.text.secondary,
-    flex: 1,
-  },
-  narrativeProcessList: {
-    borderRadius: components.radius.card,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-    overflow: 'hidden',
-  },
-  narrativeProcessRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: components.layout.spacing.md,
-    paddingVertical: components.layout.spacing.md,
-    paddingHorizontal: components.layout.spacing.lg,
-    borderBottomWidth: components.borderWidth.thin,
-    borderBottomColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-  },
-  narrativeProcessRowDone: {
-    opacity: 0.6,
-  },
-  narrativeProcessRowNext: {
-    backgroundColor: toRgba(colors.background.surfaceActive, 0.7),
-  },
-  narrativeProcessRowLocked: {
-    opacity: 0.35,
-  },
-  narrativeProcessDot: {
-    width: components.sizes.square.xs,
-    height: components.sizes.square.xs,
-    borderRadius: components.radius.pill,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surfaceActive,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  narrativeProcessDotDone: {
-    backgroundColor: colors.accent.primary,
+  narrativeComparePanelHighlight: {
     borderColor: colors.accent.primary,
-  },
-  narrativeProcessDotNext: {
-    borderColor: colors.text.primary,
-    borderWidth: 2,
-  },
-  narrativeProcessNum: {
-    ...typography.styles.meta,
-    color: colors.text.secondary,
-  },
-  narrativeProcessLabel: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  narrativeProcessLabelDone: {
-    color: colors.text.secondary,
-  },
-  narrativeProcessLabelLocked: {
-    color: colors.text.secondary,
-  },
-  narrativeProcessCta: {
-    ...typography.styles.small,
-    color: colors.accent.primary,
-  },
-  narrativeRevealHeading: {
-    ...typography.styles.h3,
-    color: colors.text.primary,
   },
   // ─── Step-tap selector (replaces slider) ────────────────────────────────────
   scenarioSelectorWrap: {
