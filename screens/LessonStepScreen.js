@@ -224,6 +224,7 @@ export default function LessonStepScreen() {
         title={stepTitle}
         onBack={() => navigation.goBack()}
         onOpenGlossary={() => setLessonGlossaryOpen(true)}
+        glossaryLabel={copy.labels.termsInLesson}
         onPressTerm={handleTermPress}
         stepLabel={flowMetaLabel}
         helperText={
@@ -309,7 +310,7 @@ export default function LessonStepScreen() {
       <BottomSheet
         visible={isLessonGlossaryOpen}
         onClose={() => setLessonGlossaryOpen(false)}
-        title="Terms in this lesson"
+        title={copy.labels.termsInLesson}
         sheetStyle={{
           height: lessonGlossarySheetMaxHeight,
           paddingBottom: components.layout.spacing.md,
@@ -337,7 +338,7 @@ export default function LessonStepScreen() {
                 <AppTextInput
                   value={lessonTermQuery}
                   onChangeText={setLessonTermQuery}
-                  placeholder="Search all terms"
+                  placeholder={copy.labels.searchAllTerms}
                   placeholderTextColor={colors.text.secondary}
                   style={styles.lessonGlossarySearchInput}
                 />
@@ -360,7 +361,7 @@ export default function LessonStepScreen() {
               </View>
               {isLessonSearchActive ? (
                 <AppText style={styles.lessonGlossarySearchLabel}>
-                  Results from full glossary
+                  {copy.labels.fullGlossaryResults}
                 </AppText>
               ) : null}
             </View>

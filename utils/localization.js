@@ -119,6 +119,9 @@ const LESSON_STEP_COPY = {
       lessonFlow: 'Lesson flow',
       investingProcess: 'Investing process',
       investingProcessStatic: 'Investing process (6 steps)',
+      termsInLesson: 'Terms in this lesson',
+      searchAllTerms: 'Search all terms',
+      fullGlossaryResults: 'Results from full glossary',
       part: 'Part',
       step: 'Step',
       lessonFlowPhases: {
@@ -320,6 +323,9 @@ const LESSON_STEP_COPY = {
       lessonFlow: 'Lesverloop',
       investingProcess: 'Beleggingsproces',
       investingProcessStatic: 'Beleggingsproces (6 stappen)',
+      termsInLesson: 'Begrippen in deze les',
+      searchAllTerms: 'Zoek in alle begrippen',
+      fullGlossaryResults: 'Resultaten uit de volledige woordenlijst',
       part: 'Onderdeel',
       step: 'Stap',
       lessonFlowPhases: {
