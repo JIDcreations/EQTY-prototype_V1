@@ -1612,35 +1612,208 @@ function ExecutionGridAnim({ styles, colors }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function IntroScenarioStep({ onNext, copy }) {
-  const { styles, colors } = useLessonStepStyles();
+  const { styles, colors, components } = useLessonStepStyles();
   const steps = copy.introScenario.steps;
   const totalSteps = steps.length;
-  const [progress, setProgress] = useState(0);
-  const clampedProgress = Math.max(0, Math.min(progress, totalSteps));
-  const progressRatio = totalSteps ? clampedProgress / totalSteps : 0;
   const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
 
-  const structuredSteps = steps.map((step, index) => {
-    const threshold = index + 1;
-    const isActive = clampedProgress >= threshold;
-    const isCurrent = clampedProgress > threshold - 1 && clampedProgress < threshold;
-    return { ...step, isActive, isCurrent };
-  });
+  // Phase flow: choice → consequence → process → reveal
+  const [phase, setPhase] = useState('choice');
+  const [completedSteps, setCompletedSteps] = useState([]);
 
-  const reactiveSteps = steps.map((step, index) => {
-    const threshold = index + 1;
+  const processProgress = completedSteps.length / totalSteps;
+  const allStepsDone = completedSteps.length === totalSteps;
+
+  const handleCompleteStep = (stepId, index) => {
+    if (completedSteps.includes(stepId)) return;
+    if (completedSteps.length !== index) return;
+    setCompletedSteps((prev) => [...prev, stepId]);
+  };
+
+  // ─── Phase: CHOICE ────────────────────────────────────────────────────────────
+  if (phase === 'choice') {
+    return (
+      <View style={styles.stepBody}>
+        <Card style={styles.narrativeCard}>
+          <View style={styles.narrativeCharacterRow}>
+            <View style={styles.narrativeAvatar}>
+              <Ionicons
+                name="person-outline"
+                size={components.sizes.icon.md}
+                color={colors.text.secondary}
+              />
+            </View>
+            <AppText style={styles.narrativeCharacterName}>Lars</AppText>
+          </View>
+          <AppText style={styles.narrativeQuote}>
+            "Ik heb €5.000 klaarstaan. Ik heb een goed gevoel over dit aandeel."
+          </AppText>
+        </Card>
+
+        <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
+
+        <View style={styles.narrativeChoiceRow}>
+          <Pressable
+            onPress={() => setPhase('consequence')}
+            style={({ pressed }) => [
+              styles.narrativeChoiceCard,
+              styles.narrativeChoiceCardReactive,
+              pressed && styles.narrativeChoiceCardPressed,
+            ]}
+          >
+            <Ionicons
+              name="flash-outline"
+              size={components.sizes.icon.lg}
+              color={colors.text.secondary}
+            />
+            <AppText style={styles.narrativeChoiceLabel}>Nu uitvoeren</AppText>
+            <AppText style={styles.narrativeChoiceHint}>Zonder voorbereiding</AppText>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setPhase('process')}
+            style={({ pressed }) => [
+              styles.narrativeChoiceCard,
+              styles.narrativeChoiceCardPlan,
+              pressed && styles.narrativeChoiceCardPressed,
+            ]}
+          >
+            <Ionicons
+              name="layers-outline"
+              size={components.sizes.icon.lg}
+              color={colors.accent.primary}
+            />
+            <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
+              Volg het proces
+            </AppText>
+            <AppText style={styles.narrativeChoiceHint}>6 stappen doorlopen</AppText>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  // ─── Phase: CONSEQUENCE ───────────────────────────────────────────────────────
+  if (phase === 'consequence') {
+    return (
+      <View style={styles.stepBody}>
+        <Card style={styles.narrativeConsequenceCard}>
+          <AppText style={styles.narrativeConsequenceHeading}>
+            Lars voert direct uit.
+          </AppText>
+          <AppText style={styles.narrativeConsequenceBody}>
+            Geen doel. Geen risicoprofiel. Geen strategie. Wat heeft hij eigenlijk gekocht?
+          </AppText>
+        </Card>
+
+        <View style={styles.narrativeFullChart}>
+          <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
+        </View>
+
+        <Card style={styles.narrativeInsightRow}>
+          <Ionicons
+            name="warning-outline"
+            size={components.sizes.icon.md}
+            color={colors.text.secondary}
+          />
+          <AppText style={styles.narrativeInsightText}>
+            {copy.introScenario.insightLine}
+          </AppText>
+        </Card>
+
+        <PrimaryButton
+          label="Zie wat anders kon"
+          onPress={() => {
+            setCompletedSteps([]);
+            setPhase('process');
+          }}
+        />
+      </View>
+    );
+  }
+
+  // ─── Phase: PROCESS ───────────────────────────────────────────────────────────
+  if (phase === 'process') {
+    return (
+      <View style={styles.stepBody}>
+        <View style={styles.narrativeFullChart}>
+          <ScenarioCurve variant="stable" progress={processProgress} label="STABIEL" />
+        </View>
+
+        <View style={styles.narrativeProcessList}>
+          {steps.map((step, index) => {
+            const isDone = completedSteps.includes(step.id);
+            const isNext = completedSteps.length === index;
+            const isLocked = !isDone && !isNext;
+            return (
+              <Pressable
+                key={step.id}
+                onPress={() => handleCompleteStep(step.id, index)}
+                disabled={isDone || isLocked}
+                style={[
+                  styles.narrativeProcessRow,
+                  isDone && styles.narrativeProcessRowDone,
+                  isNext && styles.narrativeProcessRowNext,
+                  isLocked && styles.narrativeProcessRowLocked,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.narrativeProcessDot,
+                    isDone && styles.narrativeProcessDotDone,
+                    isNext && styles.narrativeProcessDotNext,
+                  ]}
+                >
+                  {isDone ? (
+                    <Ionicons name="checkmark" size={12} color={colors.text.onAccent} />
+                  ) : (
+                    <AppText style={styles.narrativeProcessNum}>{index + 1}</AppText>
+                  )}
+                </View>
+                <AppText
+                  style={[
+                    styles.narrativeProcessLabel,
+                    isDone && styles.narrativeProcessLabelDone,
+                    isLocked && styles.narrativeProcessLabelLocked,
+                  ]}
+                >
+                  {step.label}
+                </AppText>
+                {isNext && (
+                  <AppText style={styles.narrativeProcessCta}>Tik →</AppText>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {allStepsDone && (
+          <PrimaryButton
+            label="Vergelijk de uitkomsten"
+            onPress={() => setPhase('reveal')}
+          />
+        )}
+      </View>
+    );
+  }
+
+  // ─── Phase: REVEAL ────────────────────────────────────────────────────────────
+  const revealStructuredSteps = steps.map((step) => ({
+    ...step,
+    isActive: true,
+    isCurrent: false,
+  }));
+  const revealReactiveSteps = steps.map((step) => {
     const isMissing = reactiveMissingIds.includes(step.id);
-    return {
-      ...step,
-      isActive: !isMissing && clampedProgress >= threshold,
-      isCurrent: !isMissing && clampedProgress > threshold - 1 && clampedProgress < threshold,
-      isMissing,
-    };
+    return { ...step, isActive: !isMissing, isCurrent: false, isMissing };
   });
 
   return (
     <View style={styles.stepBody}>
-      {/* Comparison panels first — charts are the primary visual outcome */}
+      <AppText style={styles.narrativeRevealHeading}>
+        Dezelfde belegger. Twee keuzes.
+      </AppText>
+
       <View style={styles.scenarioCompareGrid}>
         <Card
           style={[
@@ -1654,33 +1827,26 @@ function IntroScenarioStep({ onNext, copy }) {
           ]}
         >
           <View style={styles.scenarioCompareHeader}>
-            <AppText style={styles.scenarioCompareLabel}>
-              MET PLAN
-            </AppText>
+            <AppText style={styles.scenarioCompareLabel}>MET PLAN</AppText>
           </View>
-          <ScenarioCurve
-            variant="stable"
-            progress={progressRatio}
-            label="STABIEL"
-          />
+          <ScenarioCurve variant="stable" progress={1} label="STABIEL" />
           <View style={styles.scenarioCompareSteps}>
-            {structuredSteps.map((step, index) => {
-              const isLast = index === structuredSteps.length - 1;
+            {revealStructuredSteps.map((step, index) => {
+              const isLast = index === revealStructuredSteps.length - 1;
               return (
                 <View key={step.id} style={styles.scenarioCompareRow}>
                   <View style={styles.scenarioCompareTrack}>
                     <View
                       style={[
                         styles.scenarioCompareNode,
-                        step.isActive && styles.scenarioCompareNodeActive,
-                        step.isCurrent && styles.scenarioCompareNodeCurrent,
+                        styles.scenarioCompareNodeActive,
                       ]}
                     />
                     {!isLast ? (
                       <View
                         style={[
                           styles.scenarioCompareLine,
-                          step.isActive && styles.scenarioCompareLineActive,
+                          styles.scenarioCompareLineActive,
                         ]}
                       />
                     ) : null}
@@ -1688,8 +1854,7 @@ function IntroScenarioStep({ onNext, copy }) {
                   <AppText
                     style={[
                       styles.scenarioCompareStepLabel,
-                      step.isActive && styles.scenarioCompareStepLabelActive,
-                      step.isCurrent && styles.scenarioCompareStepLabelCurrent,
+                      styles.scenarioCompareStepLabelActive,
                     ]}
                   >
                     {step.label}
@@ -1713,18 +1878,12 @@ function IntroScenarioStep({ onNext, copy }) {
           ]}
         >
           <View style={styles.scenarioCompareHeader}>
-            <AppText style={styles.scenarioCompareLabel}>
-              ZONDER PLAN
-            </AppText>
+            <AppText style={styles.scenarioCompareLabel}>ZONDER PLAN</AppText>
           </View>
-          <ScenarioCurve
-            variant="volatile"
-            progress={progressRatio}
-            label="ONZEKER"
-          />
+          <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
           <View style={styles.scenarioCompareSteps}>
-            {reactiveSteps.map((step, index) => {
-              const isLast = index === reactiveSteps.length - 1;
+            {revealReactiveSteps.map((step, index) => {
+              const isLast = index === revealReactiveSteps.length - 1;
               return (
                 <View key={step.id} style={styles.scenarioCompareRow}>
                   <View style={styles.scenarioCompareTrack}>
@@ -1733,7 +1892,6 @@ function IntroScenarioStep({ onNext, copy }) {
                         styles.scenarioCompareNode,
                         step.isMissing && styles.scenarioCompareNodeMissing,
                         step.isActive && styles.scenarioCompareNodeActiveReactive,
-                        step.isCurrent && styles.scenarioCompareNodeCurrent,
                       ]}
                     />
                     {!isLast ? (
@@ -1751,7 +1909,6 @@ function IntroScenarioStep({ onNext, copy }) {
                       styles.scenarioCompareStepLabel,
                       step.isMissing && styles.scenarioCompareStepLabelMissing,
                       step.isActive && styles.scenarioCompareStepLabelActive,
-                      step.isCurrent && styles.scenarioCompareStepLabelCurrent,
                     ]}
                   >
                     {step.label}
@@ -1761,26 +1918,6 @@ function IntroScenarioStep({ onNext, copy }) {
             })}
           </View>
         </Card>
-      </View>
-
-      {/* Slider directly below the panels — dragging updates both charts above */}
-      <View style={styles.scenarioSliderWrap}>
-        <AppText style={styles.scenarioSliderLabel}>
-          {copy.introScenario.progressLabel}
-        </AppText>
-        <Slider
-          value={progress}
-          minimumValue={0}
-          maximumValue={totalSteps}
-          step={0.1}
-          minimumTrackTintColor={colors.accent.primary}
-          maximumTrackTintColor={colors.background.surfaceActive}
-          thumbTintColor={colors.accent.primary}
-          onValueChange={setProgress}
-        />
-        <AppText style={styles.scenarioSliderHelper}>
-          {copy.introScenario.sliderHelper}
-        </AppText>
       </View>
 
       <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
@@ -3702,6 +3839,171 @@ const createStyles = (colors, components) =>
   scenarioSliderHelper: {
     ...typography.styles.body,
     color: colors.text.secondary,
+  },
+  // ─── Narrative redesign ───────────────────────────────────────────────────────
+  narrativeCard: {
+    gap: components.layout.spacing.md,
+  },
+  narrativeCharacterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.sm,
+  },
+  narrativeAvatar: {
+    width: components.sizes.square.md,
+    height: components.sizes.square.md,
+    borderRadius: components.radius.pill,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surfaceActive,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  narrativeCharacterName: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  narrativeQuote: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    fontStyle: 'italic',
+  },
+  narrativePrompt: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+  },
+  narrativeChoiceRow: {
+    flexDirection: 'row',
+    gap: components.layout.spacing.md,
+  },
+  narrativeChoiceCard: {
+    flex: 1,
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    padding: components.layout.spacing.lg,
+    gap: components.layout.spacing.xs,
+    alignItems: 'flex-start',
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  narrativeChoiceCardReactive: {
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  narrativeChoiceCardPlan: {
+    borderColor: toRgba(colors.accent.primary, 0.4),
+    backgroundColor: toRgba(colors.accent.primary, 0.06),
+  },
+  narrativeChoiceCardPressed: {
+    opacity: colors.opacity.emphasis,
+    transform: [{ scale: components.transforms.scalePressed }],
+  },
+  narrativeChoiceLabel: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  narrativeChoiceLabelPlan: {
+    color: colors.accent.primary,
+  },
+  narrativeChoiceHint: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+  },
+  narrativeConsequenceCard: {
+    gap: components.layout.spacing.sm,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  narrativeConsequenceHeading: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+  },
+  narrativeConsequenceBody: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
+  },
+  narrativeFullChart: {
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surfaceActive,
+    padding: components.layout.spacing.md,
+    overflow: 'hidden',
+  },
+  narrativeInsightRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: components.layout.spacing.sm,
+  },
+  narrativeInsightText: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+    flex: 1,
+  },
+  narrativeProcessList: {
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    overflow: 'hidden',
+  },
+  narrativeProcessRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.md,
+    paddingVertical: components.layout.spacing.md,
+    paddingHorizontal: components.layout.spacing.lg,
+    borderBottomWidth: components.borderWidth.thin,
+    borderBottomColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  narrativeProcessRowDone: {
+    opacity: 0.6,
+  },
+  narrativeProcessRowNext: {
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.7),
+  },
+  narrativeProcessRowLocked: {
+    opacity: 0.35,
+  },
+  narrativeProcessDot: {
+    width: components.sizes.square.xs,
+    height: components.sizes.square.xs,
+    borderRadius: components.radius.pill,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surfaceActive,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  narrativeProcessDotDone: {
+    backgroundColor: colors.accent.primary,
+    borderColor: colors.accent.primary,
+  },
+  narrativeProcessDotNext: {
+    borderColor: colors.text.primary,
+    borderWidth: 2,
+  },
+  narrativeProcessNum: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+  },
+  narrativeProcessLabel: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  narrativeProcessLabelDone: {
+    color: colors.text.secondary,
+  },
+  narrativeProcessLabelLocked: {
+    color: colors.text.secondary,
+  },
+  narrativeProcessCta: {
+    ...typography.styles.small,
+    color: colors.accent.primary,
+  },
+  narrativeRevealHeading: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
   },
   // ─── Step-tap selector (replaces slider) ────────────────────────────────────
   scenarioSelectorWrap: {
