@@ -989,9 +989,7 @@ function ProcessGridFlipCard({ step, index, copy, styles, colors, cardWidth }) {
           <AppText style={styles.l1CardLabel} numberOfLines={2}>
             {step.label}
           </AppText>
-          <View style={styles.l1AnimCanvas}>
-            <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
-          </View>
+          <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
           <AppText style={styles.l1TapHint}>{copy.labels.tapDetails}</AppText>
         </Animated.View>
 
@@ -1034,94 +1032,170 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
   }
 }
 
-// ─ 1. GOAL: option dots appear, eliminate one by one, chosen locks to center ──
+// ─ 1. GOAL: a dot spirals inward and shrinks until it locks on the goal ────────
 function GoalGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
 
   useEffect(() => {
-    phase.value = withRepeat(withTiming(1, { duration: 4200, easing: Easing.linear }), -1, false);
+    phase.value = withRepeat(withTiming(1, { duration: 3600, easing: Easing.linear }), -1, false);
   }, [phase]);
 
-  // 3 option dots appear dim, eliminate one by one before chosen arrives
-  const opt1 = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.04, 0.10, 0.28, 0.40], [0, 0.38, 0.38, 0], Extrapolation.CLAMP),
-  }));
-  const opt2 = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.04, 0.10, 0.34, 0.46], [0, 0.30, 0.30, 0], Extrapolation.CLAMP),
-  }));
-  const opt3 = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.04, 0.10, 0.22, 0.34], [0, 0.24, 0.24, 0], Extrapolation.CLAMP),
-  }));
+  const orbitDotStyle = useAnimatedStyle(() => {
+    const travel = interpolate(phase.value, [0, 1], [0, 1], Extrapolation.CLAMP);
+    const turns = 2.2;
+    const angle = travel * Math.PI * 2 * turns + Math.PI * 0.15;
+    const radius = interpolate(travel, [0, 0.78, 1], [28, 6, 0], Extrapolation.CLAMP);
+    return {
+      transform: [
+        { translateX: Math.cos(angle) * radius },
+        { translateY: Math.sin(angle) * radius },
+        { scale: interpolate(travel, [0, 0.78, 1], [1, 0.55, 0.3], Extrapolation.CLAMP) },
+      ],
+    };
+  });
 
-  // Chosen dot glides from offset position to center
-  const chosenStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: interpolate(phase.value, [0.38, 0.64], [-26, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0.38, 0.64], [18, 0], Extrapolation.CLAMP) },
-    ],
-    opacity: interpolate(phase.value, [0.04, 0.10, 0.86, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
-  }));
-
-  // Lock ring contracts inward around the chosen destination
   const lockStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.64, 0.78], [2.2, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.64, 0.70, 0.88, 1], [0, 1, 0.65, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0, 0.72, 0.84, 1], [1, 1, 1.25, 1], Extrapolation.CLAMP) }],
+  }));
+
+  const centerDotStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0, 0.78, 0.9, 1], [0.9, 0.9, 1.1, 1], Extrapolation.CLAMP) }],
   }));
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <Animated.View style={[styles.l1GoalOptDot, { transform: [{ translateX: -30 }, { translateY: -18 }] }, opt1]} />
-      <Animated.View style={[styles.l1GoalOptDot, { transform: [{ translateX: 28 }, { translateY: -22 }] }, opt2]} />
-      <Animated.View style={[styles.l1GoalOptDot, { transform: [{ translateX: 26 }, { translateY: 20 }] }, opt3]} />
       <Animated.View style={[styles.l1GoalLockRing, lockStyle]} />
-      <Animated.View style={[styles.l1GoalChosenDot, chosenStyle]} />
+      <Animated.View style={[styles.l1GoalChosenDot, centerDotStyle]} />
+      <Animated.View style={[styles.l1GoalChosenDot, orbitDotStyle]} />
     </View>
   );
 }
 
-// ─ 2. RISK: gauge indicator sweeps spectrum, overshoots, settles at personal level ──
-function RiskGridAnim({ styles, colors }) {
+// ─ 2. RISK: clean and simple chart motion ──────────────────────────────────────
+function RiskGridAnim({ styles }) {
   const phase = useSharedValue(0);
+  const volatilePoints = useMemo(
+    () => [
+      { x: -42, y: 16 },
+      { x: -30, y: -4 },
+      { x: -18, y: 10 },
+      { x: -6, y: -8 },
+      { x: 8, y: 6 },
+      { x: 22, y: -12 },
+      { x: 34, y: -2 },
+      { x: 42, y: -8 },
+    ],
+    []
+  );
+  const stablePoints = useMemo(
+    () => [
+      { x: -42, y: 14 },
+      { x: -30, y: 11 },
+      { x: -18, y: 8 },
+      { x: -6, y: 5 },
+      { x: 8, y: 2 },
+      { x: 22, y: -1 },
+      { x: 34, y: -4 },
+      { x: 42, y: -6 },
+    ],
+    []
+  );
+
+  const toSegments = (points, keyPrefix) =>
+    points.slice(0, -1).map((point, index) => {
+      const next = points[index + 1];
+      const dx = next.x - point.x;
+      const dy = next.y - point.y;
+      return {
+        key: `${keyPrefix}-${index}`,
+        width: Math.hypot(dx, dy),
+        x: point.x + dx / 2,
+        y: point.y + dy / 2,
+        angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+      };
+    });
+
+  const volatileSegments = useMemo(() => toSegments(volatilePoints, 'risk-vol'), [volatilePoints]);
+  const stableSegments = useMemo(() => toSegments(stablePoints, 'risk-stable'), [stablePoints]);
+
+  const volatileInput = useMemo(
+    () => volatilePoints.map((_, index) => index / (volatilePoints.length - 1)),
+    [volatilePoints]
+  );
+  const stableInput = useMemo(
+    () => stablePoints.map((_, index) => index / (stablePoints.length - 1)),
+    [stablePoints]
+  );
+  const volatileX = useMemo(() => volatilePoints.map((point) => point.x), [volatilePoints]);
+  const volatileY = useMemo(() => volatilePoints.map((point) => point.y), [volatilePoints]);
+  const stableX = useMemo(() => stablePoints.map((point) => point.x), [stablePoints]);
+  const stableY = useMemo(() => stablePoints.map((point) => point.y), [stablePoints]);
 
   useEffect(() => {
-    phase.value = withRepeat(withTiming(1, { duration: 4400, easing: Easing.linear }), -1, false);
+    phase.value = withRepeat(withTiming(1, { duration: 3200, easing: Easing.linear }), -1, false);
   }, [phase]);
 
-  // Position: 0 = far left edge, 1 = far right edge
-  // Sweeps right, overshoots, then snaps back and holds at ~30% (personal level)
-  const HALF = 44;
-  const indicatorStyle = useAnimatedStyle(() => {
-    const pos = interpolate(
-      phase.value,
-      [0, 0.20, 0.50, 0.82, 0.92, 1],
-      [0, 1, 0.30, 0.30, 0, 0],
-      Extrapolation.CLAMP
-    );
+  const volatileDotStyle = useAnimatedStyle(() => {
+    const travel = interpolate(phase.value, [0, 1], [0, 1], Extrapolation.CLAMP);
     return {
-      transform: [{ translateX: (pos - 0.5) * HALF * 2 }],
-      opacity: interpolate(phase.value, [0, 0.06, 0.90, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+      transform: [
+        { translateX: interpolate(travel, volatileInput, volatileX, Extrapolation.CLAMP) },
+        { translateY: interpolate(travel, volatileInput, volatileY, Extrapolation.CLAMP) },
+      ],
     };
   });
 
-  // Personal zone — glows while indicator holds at settled position
-  const zoneStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.44, 0.54, 0.78, 0.88], [0, 0.55, 0.55, 0], Extrapolation.CLAMP),
-  }));
-
-  const trackStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0, 0.06, 0.90, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
-  }));
+  const stableDotStyle = useAnimatedStyle(() => {
+    const travel = interpolate(phase.value, [0, 1], [0, 1], Extrapolation.CLAMP);
+    return {
+      transform: [
+        { translateX: interpolate(travel, stableInput, stableX, Extrapolation.CLAMP) },
+        { translateY: interpolate(travel, stableInput, stableY, Extrapolation.CLAMP) },
+      ],
+    };
+  });
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.l1RiskLabelRow}>
-        <AppText style={styles.l1RiskLabel}>L</AppText>
-        <AppText style={styles.l1RiskLabel}>H</AppText>
+      <View style={styles.l1RiskSingleChart}>
+        <View style={[styles.l1RiskGridH, { transform: [{ translateY: -16 }] }]} />
+        <View style={styles.l1RiskGridH} />
+        <View style={[styles.l1RiskGridH, { transform: [{ translateY: 16 }] }]} />
+        {stableSegments.map((segment) => (
+          <View
+            key={segment.key}
+            style={[
+              styles.l1RiskStableSegment,
+              {
+                width: segment.width,
+                transform: [
+                  { translateX: segment.x },
+                  { translateY: segment.y },
+                  { rotate: `${segment.angle}deg` },
+                ],
+              },
+            ]}
+          />
+        ))}
+        {volatileSegments.map((segment) => (
+          <View
+            key={segment.key}
+            style={[
+              styles.l1RiskVolSegment,
+              {
+                width: segment.width,
+                transform: [
+                  { translateX: segment.x },
+                  { translateY: segment.y },
+                  { rotate: `${segment.angle}deg` },
+                ],
+              },
+            ]}
+          />
+        ))}
+        <Animated.View style={[styles.l1RiskStableDot, stableDotStyle]} />
+        <Animated.View style={[styles.l1RiskVolDot, volatileDotStyle]} />
       </View>
-      <Animated.View style={[styles.l1RiskTrack, trackStyle]}>
-        <Animated.View style={[styles.l1RiskZone, zoneStyle]} />
-      </Animated.View>
-      <Animated.View style={[styles.l1RiskIndicator, indicatorStyle]} />
     </View>
   );
 }
@@ -1137,33 +1211,26 @@ function StrategyGridAnim({ styles, colors }) {
   // 4 nodes appear with staggered pop, then connector lines draw between them
   const n0 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.08, 0.16], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.08, 0.14, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
   const n1 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.22, 0.30], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.22, 0.28, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
   const n2 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.36, 0.44], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.36, 0.42, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
   const n3 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.50, 0.58], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.50, 0.56, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
 
   // Connector lines draw in (scaleX from 0→1) after each pair of nodes appears
   const l0 = useAnimatedStyle(() => ({
     transform: [{ scaleX: interpolate(phase.value, [0.16, 0.26], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.16, 0.24, 0.88, 1], [0, 0.5, 0.5, 0], Extrapolation.CLAMP),
   }));
   const l1 = useAnimatedStyle(() => ({
     transform: [{ scaleX: interpolate(phase.value, [0.30, 0.40], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.30, 0.38, 0.88, 1], [0, 0.5, 0.5, 0], Extrapolation.CLAMP),
   }));
   const l2 = useAnimatedStyle(() => ({
     transform: [{ scaleX: interpolate(phase.value, [0.44, 0.54], [0, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.44, 0.52, 0.88, 1], [0, 0.5, 0.5, 0], Extrapolation.CLAMP),
   }));
 
   return (
@@ -1192,21 +1259,17 @@ function AllocationGridAnim({ styles, colors }) {
   // Source dot dims as capital flows out
   const sourceStyle = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.10, 0.32], [1, 0.5], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0, 0.06, 0.32, 0.44], [0, 1, 0.55, 0.18], Extrapolation.CLAMP),
   }));
 
   // 3 bars fill sequentially to different proportions (large → medium → small)
   const b1 = useAnimatedStyle(() => ({
     height: interpolate(phase.value, [0.18, 0.44], [0, 52], Extrapolation.CLAMP),
-    opacity: interpolate(phase.value, [0.14, 0.22, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
   const b2 = useAnimatedStyle(() => ({
     height: interpolate(phase.value, [0.28, 0.52], [0, 34], Extrapolation.CLAMP),
-    opacity: interpolate(phase.value, [0.24, 0.32, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
   const b3 = useAnimatedStyle(() => ({
     height: interpolate(phase.value, [0.38, 0.58], [0, 20], Extrapolation.CLAMP),
-    opacity: interpolate(phase.value, [0.34, 0.42, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
 
   return (
@@ -1234,26 +1297,23 @@ function VehicleGridAnim({ styles, colors }) {
   // Each token is highlighted in turn: BOND 0.08–0.38, ETF 0.38–0.68, STOCK 0.68–0.92
   const t0 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.08, 0.14, 0.32, 0.38], [0.86, 1.06, 1.06, 0.86], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0, 0.06, 0.08, 0.14, 0.32, 0.38, 1], [0, 0.32, 0.32, 1, 1, 0.32, 0], Extrapolation.CLAMP),
   }));
   const t1 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.38, 0.44, 0.62, 0.68], [0.86, 1.06, 1.06, 0.86], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0, 0.06, 0.38, 0.44, 0.62, 0.68, 1], [0, 0.32, 0.32, 1, 1, 0.32, 0], Extrapolation.CLAMP),
   }));
   const t2 = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(phase.value, [0.68, 0.74, 0.86, 0.92], [0.86, 1.06, 1.06, 0.86], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0, 0.06, 0.68, 0.74, 0.86, 0.92, 1], [0, 0.32, 0.32, 1, 1, 0.32, 0], Extrapolation.CLAMP),
   }));
 
   // Selection indicator — accent dot below selected token
   const sel0 = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.08, 0.14, 0.32, 0.38], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.08, 0.14, 0.32, 0.38], [0, 1, 1, 0], Extrapolation.CLAMP) }],
   }));
   const sel1 = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.38, 0.44, 0.62, 0.68], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.38, 0.44, 0.62, 0.68], [0, 1, 1, 0], Extrapolation.CLAMP) }],
   }));
   const sel2 = useAnimatedStyle(() => ({
-    opacity: interpolate(phase.value, [0.68, 0.74, 0.86, 0.92], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.68, 0.74, 0.86, 0.92], [0, 1, 1, 0], Extrapolation.CLAMP) }],
   }));
 
   return (
@@ -1292,34 +1352,27 @@ function ExecutionGridAnim({ styles, colors }) {
 
   // 5 check dots appear in sequence — each pops in with a crisp scale
   const c0 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.06, 0.10, 0.18], [0, 1.5, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.06, 0.10, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.06, 0.10, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
   }));
   const c1 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.16, 0.20, 0.28], [0, 1.5, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.16, 0.20, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.16, 0.20, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
   }));
   const c2 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.26, 0.30, 0.38], [0, 1.5, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.26, 0.30, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.26, 0.30, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
   }));
   const c3 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.36, 0.40, 0.48], [0, 1.5, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.36, 0.40, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.36, 0.40, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
   }));
   const c4 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.46, 0.50, 0.58], [0, 1.5, 1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.46, 0.50, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.46, 0.50, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
   }));
 
   // After all 5 are lit: one decisive execute flash
   const coreStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.64, 0.70, 0.78, 0.84], [0, 1.8, 0.9, 1.1], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.64, 0.70, 0.82, 0.90], [0, 1, 1, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.64, 0.70, 0.78, 0.84, 0.92], [0, 1.8, 0.9, 1.1, 0], Extrapolation.CLAMP) }],
   }));
   const fireStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.70, 0.88], [0.2, 3.0], Extrapolation.CLAMP) }],
-    opacity: interpolate(phase.value, [0.70, 0.76, 0.88], [0, 0.7, 0], Extrapolation.CLAMP),
+    transform: [{ scale: interpolate(phase.value, [0.70, 0.76, 0.88, 0.96], [0, 2.8, 0.6, 0], Extrapolation.CLAMP) }],
   }));
 
   return (
@@ -4379,10 +4432,7 @@ const createStyles = (colors, components) =>
   },
   l1AnimCanvas: {
     flex: 1,
-    borderRadius: components.radius.input,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, 0.2),
-    backgroundColor: toRgba(colors.background.app, 0.65),
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -4431,14 +4481,14 @@ const createStyles = (colors, components) =>
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: toRgba(colors.text.secondary, 0.55),
+    backgroundColor: toRgba(colors.text.primary, 0.78),
   },
   l1GoalChosenDot: {
     position: 'absolute',
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.text.primary,
   },
   l1GoalLockRing: {
     position: 'absolute',
@@ -4446,43 +4496,49 @@ const createStyles = (colors, components) =>
     height: 26,
     borderRadius: 13,
     borderWidth: 1.5,
-    borderColor: colors.accent.primary,
+    borderColor: toRgba(colors.text.primary, 0.9),
   },
   // ─── Risk animation ───────────────────────────────────────────────────────────
-  l1RiskLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: 92,
-    marginBottom: 4,
-  },
-  l1RiskLabel: {
-    fontFamily: typography.fonts.interMedium,
-    fontSize: 9,
-    letterSpacing: 0.8,
-    color: toRgba(colors.text.secondary, 0.6),
-  },
-  l1RiskTrack: {
-    width: 92,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: toRgba(colors.ui.divider, 0.22),
+  l1RiskSingleChart: {
+    width: '100%',
+    height: 56,
     overflow: 'hidden',
+    alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: components.layout.spacing.xs,
   },
-  l1RiskZone: {
+  l1RiskGridH: {
     position: 'absolute',
-    left: 0,
-    width: '32%',
-    height: '100%',
-    borderRadius: 3,
-    backgroundColor: toRgba(colors.accent.primary, 0.45),
+    width: '100%',
+    height: 1,
+    borderRadius: 1,
+    backgroundColor: toRgba(colors.ui.divider, 0.22),
   },
-  l1RiskIndicator: {
+  l1RiskVolSegment: {
     position: 'absolute',
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.accent.primary,
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: toRgba(colors.text.primary, 0.92),
+  },
+  l1RiskStableSegment: {
+    position: 'absolute',
+    height: 2,
+    borderRadius: 2,
+    backgroundColor: toRgba(colors.text.primary, 0.62),
+  },
+  l1RiskVolDot: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.text.primary,
+  },
+  l1RiskStableDot: {
+    position: 'absolute',
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.text.primary, 0.72),
   },
   // ─── Strategy animation ───────────────────────────────────────────────────────
   l1StratRow: {
@@ -4494,12 +4550,12 @@ const createStyles = (colors, components) =>
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.text.primary,
   },
   l1StratConnLine: {
     height: 1.5,
     width: 20,
-    backgroundColor: toRgba(colors.accent.primary, 0.5),
+    backgroundColor: toRgba(colors.text.primary, 0.78),
   },
   // ─── Allocation animation ─────────────────────────────────────────────────────
   l1AllocWrap: {
@@ -4510,7 +4566,7 @@ const createStyles = (colors, components) =>
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.text.primary,
   },
   l1AllocBarGroup: {
     flexDirection: 'row',
@@ -4520,17 +4576,17 @@ const createStyles = (colors, components) =>
   l1AllocBar1: {
     width: 16,
     borderRadius: 3,
-    backgroundColor: toRgba(colors.accent.primary, 0.92),
+    backgroundColor: toRgba(colors.text.primary, 0.96),
   },
   l1AllocBar2: {
     width: 16,
     borderRadius: 3,
-    backgroundColor: toRgba(colors.accent.primary, 0.65),
+    backgroundColor: toRgba(colors.text.primary, 0.78),
   },
   l1AllocBar3: {
     width: 16,
     borderRadius: 3,
-    backgroundColor: toRgba(colors.accent.primary, 0.38),
+    backgroundColor: toRgba(colors.text.primary, 0.58),
   },
   // ─── Vehicle animation ────────────────────────────────────────────────────────
   l1VehicleTokenRow: {
@@ -4561,7 +4617,7 @@ const createStyles = (colors, components) =>
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.text.primary,
   },
   // ─── Execution animation ──────────────────────────────────────────────────────
   l1ExecCheckRow: {
@@ -4573,7 +4629,7 @@ const createStyles = (colors, components) =>
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.text.primary,
   },
   l1ExecFireWrap: {
     width: 30,
@@ -4587,13 +4643,13 @@ const createStyles = (colors, components) =>
     height: 30,
     borderRadius: 15,
     borderWidth: 1.5,
-    borderColor: toRgba(colors.accent.primary, 0.8),
+    borderColor: toRgba(colors.text.primary, 0.9),
   },
   l1ExecFireCore: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.text.primary,
   },
   });
 
