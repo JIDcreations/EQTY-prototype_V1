@@ -1616,17 +1616,79 @@ function IntroScenarioStep({ onNext, copy }) {
   const steps = copy.introScenario.steps;
   const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
 
-  // Single state: which path did the user pick?
-  // null = not chosen yet, 'reactive' = nu uitvoeren, 'plan' = volg het proces
   const [selected, setSelected] = useState(null);
   const showComparison = selected !== null;
 
-  // Precompute step data for both comparison panels
+  // ── Animated values ──────────────────────────────────────────────────────────
+  const reactiveScale   = useSharedValue(1);
+  const planScale       = useSharedValue(1);
+  const reactiveOpacity = useSharedValue(1);
+  const planOpacity     = useSharedValue(1);
+  // Chart flash-in — brief opacity dip when a panel first becomes active
+  const reactiveChartOpacity = useSharedValue(1);
+  const planChartOpacity     = useSharedValue(1);
+
+  useEffect(() => {
+    if (selected === 'reactive') {
+      // Pulse + activate ZONDER PLAN
+      reactiveScale.value = withSequence(
+        withTiming(1.03, { duration: 150, easing: Easing.out(Easing.quad) }),
+        withTiming(1.02, { duration: 120, easing: Easing.inOut(Easing.quad) })
+      );
+      reactiveOpacity.value = withTiming(1, { duration: 180 });
+      reactiveChartOpacity.value = withSequence(
+        withTiming(0.35, { duration: 0 }),
+        withTiming(1, { duration: 300, easing: Easing.out(Easing.quad) })
+      );
+      // Dim MET PLAN
+      planScale.value   = withTiming(1,    { duration: 200 });
+      planOpacity.value = withTiming(0.55, { duration: 180 });
+    } else if (selected === 'plan') {
+      // Pulse + activate MET PLAN
+      planScale.value = withSequence(
+        withTiming(1.03, { duration: 150, easing: Easing.out(Easing.quad) }),
+        withTiming(1.02, { duration: 120, easing: Easing.inOut(Easing.quad) })
+      );
+      planOpacity.value = withTiming(1, { duration: 180 });
+      planChartOpacity.value = withSequence(
+        withTiming(0.35, { duration: 0 }),
+        withTiming(1, { duration: 300, easing: Easing.out(Easing.quad) })
+      );
+      // Dim ZONDER PLAN
+      reactiveScale.value   = withTiming(1,    { duration: 200 });
+      reactiveOpacity.value = withTiming(0.55, { duration: 180 });
+    }
+  }, [selected]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const reactiveCardAnim  = useAnimatedStyle(() => ({
+    transform: [{ scale: reactiveScale.value }],
+    opacity: reactiveOpacity.value,
+  }));
+  const planCardAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: planScale.value }],
+    opacity: planOpacity.value,
+  }));
+  const reactiveChartAnim = useAnimatedStyle(() => ({
+    opacity: reactiveChartOpacity.value,
+  }));
+  const planChartAnim = useAnimatedStyle(() => ({
+    opacity: planChartOpacity.value,
+  }));
+
+  // Precompute step data
   const planSteps = steps.map((step) => ({ ...step, isActive: true }));
   const reactiveSteps = steps.map((step) => {
     const isMissing = reactiveMissingIds.includes(step.id);
     return { ...step, isActive: !isMissing, isMissing };
   });
+
+  // Connector dot color per side
+  const reactiveDotColor = selected === 'reactive'
+    ? toRgba(colors.text.primary, 0.45)
+    : toRgba(colors.ui.divider, 0.28);
+  const planDotColor = selected === 'plan'
+    ? toRgba(colors.accent.primary, 0.55)
+    : toRgba(colors.ui.divider, 0.28);
 
   return (
     <View style={styles.stepBody}>
@@ -1647,161 +1709,195 @@ function IntroScenarioStep({ onNext, copy }) {
         </AppText>
       </Card>
 
-      {/* Choice — always visible, re-selectable */}
       <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
 
-      <View style={styles.narrativeChoiceRow}>
-        <Pressable
-          onPress={() => setSelected('reactive')}
-          style={({ pressed }) => [
-            styles.narrativeChoiceCard,
-            styles.narrativeChoiceCardReactive,
-            selected === 'reactive' && styles.narrativeChoiceCardActiveReactive,
-            pressed && styles.narrativeChoiceCardPressed,
-          ]}
-        >
-          <Ionicons
-            name="flash-outline"
-            size={components.sizes.icon.lg}
-            color={colors.text.secondary}
-          />
-          <AppText style={styles.narrativeChoiceLabel}>Nu uitvoeren</AppText>
-          <AppText style={styles.narrativeChoiceHint}>Zonder voorbereiding</AppText>
-        </Pressable>
+      {/* Choice cards + connector + comparison — tightly grouped */}
+      <View style={styles.narrativeFlowWrap}>
+        <View style={styles.narrativeChoiceRow}>
+          <Pressable
+            onPress={() => setSelected('reactive')}
+            style={({ pressed }) => [
+              styles.narrativeChoiceCard,
+              styles.narrativeChoiceCardReactive,
+              selected === 'reactive' && styles.narrativeChoiceCardActiveReactive,
+              pressed && styles.narrativeChoiceCardPressed,
+            ]}
+          >
+            <Ionicons
+              name="flash-outline"
+              size={components.sizes.icon.lg}
+              color={colors.text.secondary}
+            />
+            <AppText style={styles.narrativeChoiceLabel}>Nu uitvoeren</AppText>
+            <AppText style={styles.narrativeChoiceHint}>Zonder voorbereiding</AppText>
+          </Pressable>
 
-        <Pressable
-          onPress={() => setSelected('plan')}
-          style={({ pressed }) => [
-            styles.narrativeChoiceCard,
-            styles.narrativeChoiceCardPlan,
-            selected === 'plan' && styles.narrativeChoiceCardActivePlan,
-            pressed && styles.narrativeChoiceCardPressed,
-          ]}
-        >
-          <Ionicons
-            name="layers-outline"
-            size={components.sizes.icon.lg}
-            color={colors.accent.primary}
-          />
-          <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
-            Volg het proces
-          </AppText>
-          <AppText style={styles.narrativeChoiceHint}>6 stappen doorlopen</AppText>
-        </Pressable>
+          <Pressable
+            onPress={() => setSelected('plan')}
+            style={({ pressed }) => [
+              styles.narrativeChoiceCard,
+              styles.narrativeChoiceCardPlan,
+              selected === 'plan' && styles.narrativeChoiceCardActivePlan,
+              pressed && styles.narrativeChoiceCardPressed,
+            ]}
+          >
+            <Ionicons
+              name="layers-outline"
+              size={components.sizes.icon.lg}
+              color={colors.accent.primary}
+            />
+            <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
+              Volg het proces
+            </AppText>
+            <AppText style={styles.narrativeChoiceHint}>6 stappen doorlopen</AppText>
+          </Pressable>
+        </View>
+
+        {showComparison && (
+          <>
+            {/* Dotted connector lines — visually links each choice to its outcome */}
+            <View style={styles.narrativeConnectorRow}>
+              <View style={styles.narrativeConnectorCol}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <View
+                    key={i}
+                    style={[styles.narrativeConnectorDot, { backgroundColor: reactiveDotColor }]}
+                  />
+                ))}
+              </View>
+              <View style={styles.narrativeConnectorCol}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <View
+                    key={i}
+                    style={[styles.narrativeConnectorDot, { backgroundColor: planDotColor }]}
+                  />
+                ))}
+              </View>
+            </View>
+
+            {/* Comparison panels — animated active/inactive states */}
+            <View style={[styles.scenarioCompareGrid, styles.narrativeCompareGridOverride]}>
+              {/* ZONDER PLAN */}
+              <Animated.View style={[styles.narrativeComparePanelWrap, reactiveCardAnim]}>
+                <Card
+                  style={[
+                    styles.scenarioComparePanel,
+                    {
+                      flex: 1,
+                      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                      borderColor: selected === 'reactive'
+                        ? toRgba(colors.text.primary, 0.55)
+                        : toRgba(colors.ui.divider, colors.opacity.stroke),
+                    },
+                  ]}
+                >
+                  <View style={styles.scenarioCompareHeader}>
+                    <AppText style={styles.scenarioCompareLabel}>ZONDER PLAN</AppText>
+                  </View>
+                  <Animated.View style={reactiveChartAnim}>
+                    <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
+                  </Animated.View>
+                  <View style={styles.scenarioCompareSteps}>
+                    {reactiveSteps.map((step, index) => {
+                      const isLast = index === reactiveSteps.length - 1;
+                      return (
+                        <View key={step.id} style={styles.scenarioCompareRow}>
+                          <View style={styles.scenarioCompareTrack}>
+                            <View
+                              style={[
+                                styles.scenarioCompareNode,
+                                step.isMissing && styles.scenarioCompareNodeMissing,
+                                step.isActive && styles.scenarioCompareNodeActiveReactive,
+                              ]}
+                            />
+                            {!isLast ? (
+                              <View
+                                style={[
+                                  styles.scenarioCompareLine,
+                                  step.isMissing && styles.scenarioCompareLineMissing,
+                                  step.isActive && styles.scenarioCompareLineActiveReactive,
+                                ]}
+                              />
+                            ) : null}
+                          </View>
+                          <AppText
+                            style={[
+                              styles.scenarioCompareStepLabel,
+                              step.isMissing && styles.scenarioCompareStepLabelMissing,
+                              step.isActive && styles.scenarioCompareStepLabelActive,
+                            ]}
+                          >
+                            {step.label}
+                          </AppText>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </Card>
+              </Animated.View>
+
+              {/* MET PLAN */}
+              <Animated.View style={[styles.narrativeComparePanelWrap, planCardAnim]}>
+                <Card
+                  style={[
+                    styles.scenarioComparePanel,
+                    {
+                      flex: 1,
+                      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+                      borderColor: selected === 'plan'
+                        ? colors.accent.primary
+                        : toRgba(colors.ui.divider, colors.opacity.stroke),
+                    },
+                  ]}
+                >
+                  <View style={styles.scenarioCompareHeader}>
+                    <AppText style={styles.scenarioCompareLabel}>MET PLAN</AppText>
+                  </View>
+                  <Animated.View style={planChartAnim}>
+                    <ScenarioCurve variant="stable" progress={1} label="STABIEL" />
+                  </Animated.View>
+                  <View style={styles.scenarioCompareSteps}>
+                    {planSteps.map((step, index) => {
+                      const isLast = index === planSteps.length - 1;
+                      return (
+                        <View key={step.id} style={styles.scenarioCompareRow}>
+                          <View style={styles.scenarioCompareTrack}>
+                            <View
+                              style={[
+                                styles.scenarioCompareNode,
+                                styles.scenarioCompareNodeActive,
+                              ]}
+                            />
+                            {!isLast ? (
+                              <View
+                                style={[
+                                  styles.scenarioCompareLine,
+                                  styles.scenarioCompareLineActive,
+                                ]}
+                              />
+                            ) : null}
+                          </View>
+                          <AppText
+                            style={[
+                              styles.scenarioCompareStepLabel,
+                              styles.scenarioCompareStepLabelActive,
+                            ]}
+                          >
+                            {step.label}
+                          </AppText>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </Card>
+              </Animated.View>
+            </View>
+          </>
+        )}
       </View>
 
-      {/* Comparison — revealed with a single tap, both outcomes side by side */}
       {showComparison && (
         <>
-          <View style={styles.scenarioCompareGrid}>
-            {/* ZONDER PLAN — mirrors "Nu uitvoeren" on the left */}
-            <Card
-              style={[
-                styles.scenarioComparePanel,
-                selected === 'reactive' && styles.narrativeComparePanelHighlight,
-                {
-                  backgroundColor: toRgba(
-                    colors.background.surface,
-                    colors.opacity.surface
-                  ),
-                },
-              ]}
-            >
-              <View style={styles.scenarioCompareHeader}>
-                <AppText style={styles.scenarioCompareLabel}>ZONDER PLAN</AppText>
-              </View>
-              <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
-              <View style={styles.scenarioCompareSteps}>
-                {reactiveSteps.map((step, index) => {
-                  const isLast = index === reactiveSteps.length - 1;
-                  return (
-                    <View key={step.id} style={styles.scenarioCompareRow}>
-                      <View style={styles.scenarioCompareTrack}>
-                        <View
-                          style={[
-                            styles.scenarioCompareNode,
-                            step.isMissing && styles.scenarioCompareNodeMissing,
-                            step.isActive && styles.scenarioCompareNodeActiveReactive,
-                          ]}
-                        />
-                        {!isLast ? (
-                          <View
-                            style={[
-                              styles.scenarioCompareLine,
-                              step.isMissing && styles.scenarioCompareLineMissing,
-                              step.isActive && styles.scenarioCompareLineActiveReactive,
-                            ]}
-                          />
-                        ) : null}
-                      </View>
-                      <AppText
-                        style={[
-                          styles.scenarioCompareStepLabel,
-                          step.isMissing && styles.scenarioCompareStepLabelMissing,
-                          step.isActive && styles.scenarioCompareStepLabelActive,
-                        ]}
-                      >
-                        {step.label}
-                      </AppText>
-                    </View>
-                  );
-                })}
-              </View>
-            </Card>
-
-            {/* MET PLAN — mirrors "Volg het proces" on the right */}
-            <Card
-              style={[
-                styles.scenarioComparePanel,
-                selected === 'plan' && styles.narrativeComparePanelHighlight,
-                {
-                  backgroundColor: toRgba(
-                    colors.background.surfaceActive,
-                    colors.opacity.surface
-                  ),
-                },
-              ]}
-            >
-              <View style={styles.scenarioCompareHeader}>
-                <AppText style={styles.scenarioCompareLabel}>MET PLAN</AppText>
-              </View>
-              <ScenarioCurve variant="stable" progress={1} label="STABIEL" />
-              <View style={styles.scenarioCompareSteps}>
-                {planSteps.map((step, index) => {
-                  const isLast = index === planSteps.length - 1;
-                  return (
-                    <View key={step.id} style={styles.scenarioCompareRow}>
-                      <View style={styles.scenarioCompareTrack}>
-                        <View
-                          style={[
-                            styles.scenarioCompareNode,
-                            styles.scenarioCompareNodeActive,
-                          ]}
-                        />
-                        {!isLast ? (
-                          <View
-                            style={[
-                              styles.scenarioCompareLine,
-                              styles.scenarioCompareLineActive,
-                            ]}
-                          />
-                        ) : null}
-                      </View>
-                      <AppText
-                        style={[
-                          styles.scenarioCompareStepLabel,
-                          styles.scenarioCompareStepLabelActive,
-                        ]}
-                      >
-                        {step.label}
-                      </AppText>
-                    </View>
-                  );
-                })}
-              </View>
-            </Card>
-          </View>
-
           <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
           <PrimaryButton label={copy.buttons.next} onPress={onNext} />
         </>
@@ -3800,6 +3896,31 @@ const createStyles = (colors, components) =>
   },
   narrativeComparePanelHighlight: {
     borderColor: colors.accent.primary,
+  },
+  narrativeFlowWrap: {
+    gap: components.layout.spacing.xs,
+  },
+  narrativeConnectorRow: {
+    flexDirection: 'row',
+    gap: components.layout.spacing.md,
+    height: 24,
+  },
+  narrativeConnectorCol: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  narrativeConnectorDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+  },
+  narrativeComparePanelWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
+  narrativeCompareGridOverride: {
+    marginTop: 0,
   },
   // ─── Step-tap selector (replaces slider) ────────────────────────────────────
   scenarioSelectorWrap: {
