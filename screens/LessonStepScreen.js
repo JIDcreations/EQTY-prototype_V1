@@ -516,32 +516,7 @@ function IntroConceptStep({ content, onNext, copy }) {
 }
 
 function IntroVisualizationStep({ onNext, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
-  const steps = copy.introVisualization.steps;
-
-  return (
-    <View style={[styles.stepBody, styles.journeyBody]}>
-      <View style={styles.journeyContent}>
-        <AppText style={styles.journeySubtitle}>
-          {copy.introVisualization.subtitle}
-        </AppText>
-        {steps.map((step, index) => (
-          <JourneyFlipCard
-            key={step.id}
-            step={step}
-            index={index}
-            copy={copy}
-            styles={styles}
-            colors={colors}
-            components={components}
-          />
-        ))}
-        <View style={styles.journeyNextWrap}>
-          <PrimaryButton label={copy.buttons.next} onPress={onNext} />
-        </View>
-      </View>
-    </View>
-  );
+  return <Lesson1VisualizationStep onNext={onNext} copy={copy} />;
 }
 
 function JourneyFlipCard({ step, index, copy, styles, colors, components }) {
@@ -923,6 +898,449 @@ function ExecutionStepAnimation({ styles }) {
   );
 }
 
+// ─── Lesson 1: Process Visualization Grid ─────────────────────────────────────
+
+function Lesson1VisualizationStep({ onNext, copy }) {
+  const { styles, colors, components } = useLessonStepStyles();
+  const steps = copy.introVisualization.steps;
+  const screenW = Dimensions.get('window').width;
+  const cardWidth =
+    (screenW - components.layout.pagePaddingHorizontal * 2 - components.layout.spacing.sm) / 2;
+
+  return (
+    <View style={[styles.stepBody, styles.l1VisBody]}>
+      <AppText style={styles.journeySubtitle}>
+        {copy.introVisualization.subtitle}
+      </AppText>
+      <View style={styles.l1VisGrid}>
+        {steps.map((step, index) => (
+          <ProcessGridFlipCard
+            key={step.id}
+            step={step}
+            index={index}
+            copy={copy}
+            styles={styles}
+            colors={colors}
+            cardWidth={cardWidth}
+          />
+        ))}
+      </View>
+      <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+    </View>
+  );
+}
+
+function ProcessGridFlipCard({ step, index, copy, styles, colors, cardWidth }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipProgress = useSharedValue(0);
+
+  useEffect(() => {
+    flipProgress.value = withTiming(isFlipped ? 1 : 0, {
+      duration: 520,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [flipProgress, isFlipped]);
+
+  const frontStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(flipProgress.value, [0, 1], [0, 180]);
+    const opacity = interpolate(
+      flipProgress.value,
+      [0, 0.48, 0.55, 1],
+      [1, 1, 0, 0],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ perspective: 1200 }, { rotateY: `${rotate}deg` }],
+      opacity,
+      zIndex: flipProgress.value < 0.5 ? 2 : 0,
+    };
+  });
+
+  const backStyle = useAnimatedStyle(() => {
+    const rotate = interpolate(flipProgress.value, [0, 1], [180, 360]);
+    const opacity = interpolate(
+      flipProgress.value,
+      [0, 0.45, 0.52, 1],
+      [0, 0, 1, 1],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ perspective: 1200 }, { rotateY: `${rotate}deg` }],
+      opacity,
+      zIndex: flipProgress.value >= 0.5 ? 2 : 0,
+    };
+  });
+
+  return (
+    <Pressable
+      onPress={() => setIsFlipped((prev) => !prev)}
+      style={[styles.l1CardShell, { width: cardWidth }]}
+    >
+      <View style={styles.l1FlipCard}>
+        <Animated.View style={[styles.l1Face, styles.l1Page, frontStyle]}>
+          <View style={styles.l1CardHeaderRow}>
+            <View style={styles.l1StepChip}>
+              <AppText style={styles.l1StepChipText}>
+                {`${index + 1}`.padStart(2, '0')}
+              </AppText>
+            </View>
+            <View style={styles.l1AccentDot} />
+          </View>
+          <AppText style={styles.l1CardLabel} numberOfLines={2}>
+            {step.label}
+          </AppText>
+          <View style={styles.l1AnimCanvas}>
+            <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
+          </View>
+          <AppText style={styles.l1TapHint}>{copy.labels.tapDetails}</AppText>
+        </Animated.View>
+
+        <Animated.View style={[styles.l1Face, styles.l1Page, styles.l1BackPage, backStyle]}>
+          <View style={styles.l1CardHeaderRow}>
+            <View style={styles.l1StepChip}>
+              <AppText style={styles.l1StepChipText}>
+                {`${index + 1}`.padStart(2, '0')}
+              </AppText>
+            </View>
+            <View style={styles.l1BackBadge}>
+              <AppText style={styles.l1BackBadgeText}>{copy.labels.insight}</AppText>
+            </View>
+          </View>
+          <AppText style={styles.l1BackLabel}>{step.question}</AppText>
+          <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
+          <AppText style={styles.l1TapHint}>{copy.labels.tapReturn}</AppText>
+        </Animated.View>
+      </View>
+    </Pressable>
+  );
+}
+
+function ProcessGridStepAnimation({ stepId, styles, colors }) {
+  switch (stepId) {
+    case 'goal':
+      return <GoalGridAnim styles={styles} colors={colors} />;
+    case 'risk':
+      return <RiskGridAnim styles={styles} />;
+    case 'strategy':
+      return <StrategyGridAnim styles={styles} />;
+    case 'allocation':
+      return <AllocationGridAnim styles={styles} />;
+    case 'vehicle':
+      return <VehicleGridAnim styles={styles} />;
+    case 'execution':
+      return <ExecutionGridAnim styles={styles} />;
+    default:
+      return null;
+  }
+}
+
+// ─ 1. GOAL: option dots appear, eliminate one by one, chosen locks to center ──
+function GoalGridAnim({ styles, colors }) {
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(withTiming(1, { duration: 4200, easing: Easing.linear }), -1, false);
+  }, [phase]);
+
+  // 3 option dots appear dim, eliminate one by one before chosen arrives
+  const opt1 = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.04, 0.10, 0.28, 0.40], [0, 0.38, 0.38, 0], Extrapolation.CLAMP),
+  }));
+  const opt2 = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.04, 0.10, 0.34, 0.46], [0, 0.30, 0.30, 0], Extrapolation.CLAMP),
+  }));
+  const opt3 = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.04, 0.10, 0.22, 0.34], [0, 0.24, 0.24, 0], Extrapolation.CLAMP),
+  }));
+
+  // Chosen dot glides from offset position to center
+  const chosenStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(phase.value, [0.38, 0.64], [-26, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0.38, 0.64], [18, 0], Extrapolation.CLAMP) },
+    ],
+    opacity: interpolate(phase.value, [0.04, 0.10, 0.86, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  // Lock ring contracts inward around the chosen destination
+  const lockStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.64, 0.78], [2.2, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.64, 0.70, 0.88, 1], [0, 1, 0.65, 0], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Animated.View style={[styles.l1GoalOptDot, { transform: [{ translateX: -30 }, { translateY: -18 }] }, opt1]} />
+      <Animated.View style={[styles.l1GoalOptDot, { transform: [{ translateX: 28 }, { translateY: -22 }] }, opt2]} />
+      <Animated.View style={[styles.l1GoalOptDot, { transform: [{ translateX: 26 }, { translateY: 20 }] }, opt3]} />
+      <Animated.View style={[styles.l1GoalLockRing, lockStyle]} />
+      <Animated.View style={[styles.l1GoalChosenDot, chosenStyle]} />
+    </View>
+  );
+}
+
+// ─ 2. RISK: gauge indicator sweeps spectrum, overshoots, settles at personal level ──
+function RiskGridAnim({ styles, colors }) {
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(withTiming(1, { duration: 4400, easing: Easing.linear }), -1, false);
+  }, [phase]);
+
+  // Position: 0 = far left edge, 1 = far right edge
+  // Sweeps right, overshoots, then snaps back and holds at ~30% (personal level)
+  const HALF = 44;
+  const indicatorStyle = useAnimatedStyle(() => {
+    const pos = interpolate(
+      phase.value,
+      [0, 0.20, 0.50, 0.82, 0.92, 1],
+      [0, 1, 0.30, 0.30, 0, 0],
+      Extrapolation.CLAMP
+    );
+    return {
+      transform: [{ translateX: (pos - 0.5) * HALF * 2 }],
+      opacity: interpolate(phase.value, [0, 0.06, 0.90, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+    };
+  });
+
+  // Personal zone — glows while indicator holds at settled position
+  const zoneStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.44, 0.54, 0.78, 0.88], [0, 0.55, 0.55, 0], Extrapolation.CLAMP),
+  }));
+
+  const trackStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0, 0.06, 0.90, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.l1RiskLabelRow}>
+        <AppText style={styles.l1RiskLabel}>L</AppText>
+        <AppText style={styles.l1RiskLabel}>H</AppText>
+      </View>
+      <Animated.View style={[styles.l1RiskTrack, trackStyle]}>
+        <Animated.View style={[styles.l1RiskZone, zoneStyle]} />
+      </Animated.View>
+      <Animated.View style={[styles.l1RiskIndicator, indicatorStyle]} />
+    </View>
+  );
+}
+
+// ─ 3. STRATEGY: scattered nodes converge, then routes connect into a plan ─────
+function StrategyGridAnim({ styles, colors }) {
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(withTiming(1, { duration: 4800, easing: Easing.linear }), -1, false);
+  }, [phase]);
+
+  // 4 nodes appear with staggered pop, then connector lines draw between them
+  const n0 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.08, 0.16], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.08, 0.14, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const n1 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.22, 0.30], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.22, 0.28, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const n2 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.36, 0.44], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.36, 0.42, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const n3 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.50, 0.58], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.50, 0.56, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  // Connector lines draw in (scaleX from 0→1) after each pair of nodes appears
+  const l0 = useAnimatedStyle(() => ({
+    transform: [{ scaleX: interpolate(phase.value, [0.16, 0.26], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.16, 0.24, 0.88, 1], [0, 0.5, 0.5, 0], Extrapolation.CLAMP),
+  }));
+  const l1 = useAnimatedStyle(() => ({
+    transform: [{ scaleX: interpolate(phase.value, [0.30, 0.40], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.30, 0.38, 0.88, 1], [0, 0.5, 0.5, 0], Extrapolation.CLAMP),
+  }));
+  const l2 = useAnimatedStyle(() => ({
+    transform: [{ scaleX: interpolate(phase.value, [0.44, 0.54], [0, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.44, 0.52, 0.88, 1], [0, 0.5, 0.5, 0], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.l1StratRow}>
+        <Animated.View style={[styles.l1StratNodeDot, n0]} />
+        <Animated.View style={[styles.l1StratConnLine, l0]} />
+        <Animated.View style={[styles.l1StratNodeDot, n1]} />
+        <Animated.View style={[styles.l1StratConnLine, l1]} />
+        <Animated.View style={[styles.l1StratNodeDot, n2]} />
+        <Animated.View style={[styles.l1StratConnLine, l2]} />
+        <Animated.View style={[styles.l1StratNodeDot, n3]} />
+      </View>
+    </View>
+  );
+}
+
+// ─ 4. ALLOCATION: source capital distributes into 3 buckets of different proportions ──
+function AllocationGridAnim({ styles, colors }) {
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(withTiming(1, { duration: 4200, easing: Easing.linear }), -1, false);
+  }, [phase]);
+
+  // Source dot dims as capital flows out
+  const sourceStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.10, 0.32], [1, 0.5], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0, 0.06, 0.32, 0.44], [0, 1, 0.55, 0.18], Extrapolation.CLAMP),
+  }));
+
+  // 3 bars fill sequentially to different proportions (large → medium → small)
+  const b1 = useAnimatedStyle(() => ({
+    height: interpolate(phase.value, [0.18, 0.44], [0, 52], Extrapolation.CLAMP),
+    opacity: interpolate(phase.value, [0.14, 0.22, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const b2 = useAnimatedStyle(() => ({
+    height: interpolate(phase.value, [0.28, 0.52], [0, 34], Extrapolation.CLAMP),
+    opacity: interpolate(phase.value, [0.24, 0.32, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const b3 = useAnimatedStyle(() => ({
+    height: interpolate(phase.value, [0.38, 0.58], [0, 20], Extrapolation.CLAMP),
+    opacity: interpolate(phase.value, [0.34, 0.42, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.l1AllocWrap}>
+        <Animated.View style={[styles.l1AllocSource, sourceStyle]} />
+        <View style={styles.l1AllocBarGroup}>
+          <Animated.View style={[styles.l1AllocBar1, b1]} />
+          <Animated.View style={[styles.l1AllocBar2, b2]} />
+          <Animated.View style={[styles.l1AllocBar3, b3]} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ─ 5. VEHICLE: 3 instrument tokens, one selected at a time in rotation ────────
+function VehicleGridAnim({ styles, colors }) {
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(withTiming(1, { duration: 4800, easing: Easing.linear }), -1, false);
+  }, [phase]);
+
+  // Each token is highlighted in turn: BOND 0.08–0.38, ETF 0.38–0.68, STOCK 0.68–0.92
+  const t0 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.08, 0.14, 0.32, 0.38], [0.86, 1.06, 1.06, 0.86], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0, 0.06, 0.08, 0.14, 0.32, 0.38, 1], [0, 0.32, 0.32, 1, 1, 0.32, 0], Extrapolation.CLAMP),
+  }));
+  const t1 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.38, 0.44, 0.62, 0.68], [0.86, 1.06, 1.06, 0.86], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0, 0.06, 0.38, 0.44, 0.62, 0.68, 1], [0, 0.32, 0.32, 1, 1, 0.32, 0], Extrapolation.CLAMP),
+  }));
+  const t2 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.68, 0.74, 0.86, 0.92], [0.86, 1.06, 1.06, 0.86], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0, 0.06, 0.68, 0.74, 0.86, 0.92, 1], [0, 0.32, 0.32, 1, 1, 0.32, 0], Extrapolation.CLAMP),
+  }));
+
+  // Selection indicator — accent dot below selected token
+  const sel0 = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.08, 0.14, 0.32, 0.38], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const sel1 = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.38, 0.44, 0.62, 0.68], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const sel2 = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.68, 0.74, 0.86, 0.92], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.l1VehicleTokenRow}>
+        <View style={styles.l1VehicleTokenWrap}>
+          <Animated.View style={[styles.l1VehicleToken, t0]}>
+            <AppText style={styles.l1VehicleTokenLabel}>BOND</AppText>
+          </Animated.View>
+          <Animated.View style={[styles.l1VehicleSelDot, sel0]} />
+        </View>
+        <View style={styles.l1VehicleTokenWrap}>
+          <Animated.View style={[styles.l1VehicleToken, t1]}>
+            <AppText style={styles.l1VehicleTokenLabel}>ETF</AppText>
+          </Animated.View>
+          <Animated.View style={[styles.l1VehicleSelDot, sel1]} />
+        </View>
+        <View style={styles.l1VehicleTokenWrap}>
+          <Animated.View style={[styles.l1VehicleToken, t2]}>
+            <AppText style={styles.l1VehicleTokenLabel}>STOCK</AppText>
+          </Animated.View>
+          <Animated.View style={[styles.l1VehicleSelDot, sel2]} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// ─ 6. EXECUTION: 5 prior steps check off, then one precise fire action ────────
+function ExecutionGridAnim({ styles, colors }) {
+  const phase = useSharedValue(0);
+
+  useEffect(() => {
+    phase.value = withRepeat(withTiming(1, { duration: 4600, easing: Easing.linear }), -1, false);
+  }, [phase]);
+
+  // 5 check dots appear in sequence — each pops in with a crisp scale
+  const c0 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.06, 0.10, 0.18], [0, 1.5, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.06, 0.10, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const c1 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.16, 0.20, 0.28], [0, 1.5, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.16, 0.20, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const c2 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.26, 0.30, 0.38], [0, 1.5, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.26, 0.30, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const c3 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.36, 0.40, 0.48], [0, 1.5, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.36, 0.40, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const c4 = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.46, 0.50, 0.58], [0, 1.5, 1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.46, 0.50, 0.72, 0.82], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  // After all 5 are lit: one decisive execute flash
+  const coreStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.64, 0.70, 0.78, 0.84], [0, 1.8, 0.9, 1.1], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.64, 0.70, 0.82, 0.90], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const fireStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(phase.value, [0.70, 0.88], [0.2, 3.0], Extrapolation.CLAMP) }],
+    opacity: interpolate(phase.value, [0.70, 0.76, 0.88], [0, 0.7, 0], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.l1ExecCheckRow}>
+        <Animated.View style={[styles.l1ExecCheckDot, c0]} />
+        <Animated.View style={[styles.l1ExecCheckDot, c1]} />
+        <Animated.View style={[styles.l1ExecCheckDot, c2]} />
+        <Animated.View style={[styles.l1ExecCheckDot, c3]} />
+        <Animated.View style={[styles.l1ExecCheckDot, c4]} />
+      </View>
+      <View style={styles.l1ExecFireWrap}>
+        <Animated.View style={[styles.l1ExecFireRing, fireStyle]} />
+        <Animated.View style={[styles.l1ExecFireCore, coreStyle]} />
+      </View>
+    </View>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function IntroScenarioStep({ onNext, copy }) {
   const { styles, colors } = useLessonStepStyles();
   const steps = copy.introScenario.steps;
@@ -1184,6 +1602,10 @@ function VisualizationStep({ content, lessonId, onNext, onPressTerm, copy }) {
 
   if (lessonId === 'lesson_0') {
     return <IntroVisualizationStep onNext={onNext} copy={copy} />;
+  }
+
+  if (lessonId === 'lesson_1') {
+    return <Lesson1VisualizationStep onNext={onNext} copy={copy} />;
   }
 
   return (
@@ -3887,6 +4309,291 @@ const createStyles = (colors, components) =>
   videoText: {
     ...typography.styles.body,
     color: colors.text.primary,
+  },
+
+  // ─── Lesson 1 visualization: grid layout ────────────────────────────────────
+  l1VisBody: {
+    gap: components.layout.spacing.lg,
+  },
+  l1VisGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: components.layout.spacing.sm,
+  },
+  l1CardShell: {},
+  l1FlipCard: {
+    height: 220,
+    position: 'relative',
+    overflow: 'hidden',
+    borderRadius: components.radius.card,
+  },
+  l1Face: {
+    ...StyleSheet.absoluteFillObject,
+    backfaceVisibility: 'hidden',
+    borderRadius: components.radius.card,
+  },
+  l1Page: {
+    borderRadius: components.radius.card,
+    padding: components.layout.spacing.sm,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surface,
+    gap: components.layout.spacing.xs,
+    justifyContent: 'flex-start',
+  },
+  l1BackPage: {
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.92),
+  },
+  l1CardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  l1StepChip: {
+    paddingHorizontal: components.layout.spacing.sm,
+    paddingVertical: 3,
+    borderRadius: components.radius.pill,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.95),
+  },
+  l1StepChipText: {
+    fontFamily: typography.fonts.filsonBold,
+    fontSize: 10,
+    lineHeight: 14,
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    color: colors.text.primary,
+  },
+  l1AccentDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.accent.primary,
+  },
+  l1CardLabel: {
+    fontFamily: typography.fonts.interSemiBold,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.text.primary,
+  },
+  l1AnimCanvas: {
+    flex: 1,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, 0.2),
+    backgroundColor: toRgba(colors.background.app, 0.65),
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    minHeight: 60,
+  },
+  l1TapHint: {
+    fontFamily: typography.fonts.interRegular,
+    fontSize: 10,
+    lineHeight: 14,
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  l1BackBadge: {
+    paddingHorizontal: components.layout.spacing.sm,
+    paddingVertical: 3,
+    borderRadius: components.radius.pill,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  l1BackBadgeText: {
+    fontFamily: typography.fonts.filsonBold,
+    fontSize: 10,
+    lineHeight: 14,
+    letterSpacing: 1.0,
+    textTransform: 'uppercase',
+    color: colors.text.secondary,
+  },
+  l1BackLabel: {
+    fontFamily: typography.fonts.interSemiBold,
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.text.primary,
+  },
+  l1BackDetail: {
+    fontFamily: typography.fonts.interRegular,
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.text.secondary,
+    flex: 1,
+  },
+  // ─── Goal animation ───────────────────────────────────────────────────────────
+  l1GoalOptDot: {
+    position: 'absolute',
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.text.secondary, 0.55),
+  },
+  l1GoalChosenDot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.accent.primary,
+  },
+  l1GoalLockRing: {
+    position: 'absolute',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 1.5,
+    borderColor: colors.accent.primary,
+  },
+  // ─── Risk animation ───────────────────────────────────────────────────────────
+  l1RiskLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 92,
+    marginBottom: 4,
+  },
+  l1RiskLabel: {
+    fontFamily: typography.fonts.interMedium,
+    fontSize: 9,
+    letterSpacing: 0.8,
+    color: toRgba(colors.text.secondary, 0.6),
+  },
+  l1RiskTrack: {
+    width: 92,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.ui.divider, 0.22),
+    overflow: 'hidden',
+    justifyContent: 'center',
+  },
+  l1RiskZone: {
+    position: 'absolute',
+    left: 0,
+    width: '32%',
+    height: '100%',
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.accent.primary, 0.45),
+  },
+  l1RiskIndicator: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.accent.primary,
+  },
+  // ─── Strategy animation ───────────────────────────────────────────────────────
+  l1StratRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 0,
+  },
+  l1StratNodeDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.accent.primary,
+  },
+  l1StratConnLine: {
+    height: 1.5,
+    width: 20,
+    backgroundColor: toRgba(colors.accent.primary, 0.5),
+  },
+  // ─── Allocation animation ─────────────────────────────────────────────────────
+  l1AllocWrap: {
+    alignItems: 'center',
+    gap: 10,
+  },
+  l1AllocSource: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.accent.primary,
+  },
+  l1AllocBarGroup: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  l1AllocBar1: {
+    width: 16,
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.accent.primary, 0.92),
+  },
+  l1AllocBar2: {
+    width: 16,
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.accent.primary, 0.65),
+  },
+  l1AllocBar3: {
+    width: 16,
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.accent.primary, 0.38),
+  },
+  // ─── Vehicle animation ────────────────────────────────────────────────────────
+  l1VehicleTokenRow: {
+    flexDirection: 'row',
+    gap: 6,
+    alignItems: 'flex-start',
+  },
+  l1VehicleTokenWrap: {
+    alignItems: 'center',
+    gap: 5,
+  },
+  l1VehicleToken: {
+    paddingHorizontal: 7,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.9),
+  },
+  l1VehicleTokenLabel: {
+    fontFamily: typography.fonts.interMedium,
+    fontSize: 9,
+    lineHeight: 11,
+    letterSpacing: 0.8,
+    color: colors.text.primary,
+  },
+  l1VehicleSelDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.accent.primary,
+  },
+  // ─── Execution animation ──────────────────────────────────────────────────────
+  l1ExecCheckRow: {
+    flexDirection: 'row',
+    gap: 7,
+    marginBottom: 10,
+  },
+  l1ExecCheckDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.accent.primary,
+  },
+  l1ExecFireWrap: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  l1ExecFireRing: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1.5,
+    borderColor: toRgba(colors.accent.primary, 0.8),
+  },
+  l1ExecFireCore: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.accent.primary,
   },
   });
 
