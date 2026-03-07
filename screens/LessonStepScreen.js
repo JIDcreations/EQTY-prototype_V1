@@ -23,6 +23,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import Svg, { Path } from 'react-native-svg';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
@@ -71,6 +72,23 @@ const VOLATILE_CURVE_POINTS = [
   { x: 90, y: 78 },
   { x: 100, y: 72 },
 ];
+const L1_ALLOC_PIE_SIZE = 56;
+const L1_ALLOC_PIE_RADIUS = 24;
+
+const polarToCartesian = (cx, cy, radius, angleDeg) => {
+  const angle = (angleDeg * Math.PI) / 180;
+  return {
+    x: cx + radius * Math.cos(angle),
+    y: cy + radius * Math.sin(angle),
+  };
+};
+
+const createPieSlicePath = (cx, cy, radius, startDeg, endDeg) => {
+  const start = polarToCartesian(cx, cy, radius, startDeg);
+  const end = polarToCartesian(cx, cy, radius, endDeg);
+  const largeArc = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+};
 
 const glossaryTermIndex = glossaryTerms.reduce((acc, term) => {
   if (term?.id) acc[term.id] = term;
@@ -1022,7 +1040,7 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
     case 'strategy':
       return <StrategyGridAnim styles={styles} />;
     case 'allocation':
-      return <AllocationGridAnim styles={styles} />;
+      return <AllocationGridAnim styles={styles} colors={colors} />;
     case 'vehicle':
       return <VehicleGridAnim styles={styles} />;
     case 'execution':
@@ -1248,39 +1266,73 @@ function StrategyGridAnim({ styles, colors }) {
   );
 }
 
-// ─ 4. ALLOCATION: source capital distributes into 3 buckets of different proportions ──
+// ─ 4. ALLOCATION: filled pie slices assemble into one full circle ───────────────
 function AllocationGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
+  const slicePaths = useMemo(() => {
+    const c = L1_ALLOC_PIE_SIZE / 2;
+    return [
+      createPieSlicePath(c, c, L1_ALLOC_PIE_RADIUS, -90, 30),
+      createPieSlicePath(c, c, L1_ALLOC_PIE_RADIUS, 30, 150),
+      createPieSlicePath(c, c, L1_ALLOC_PIE_RADIUS, 150, 270),
+    ];
+  }, []);
+  const sliceColors = useMemo(
+    () => [
+      toRgba(colors.text.primary, 0.96),
+      toRgba(colors.text.primary, 0.78),
+      toRgba(colors.text.primary, 0.62),
+    ],
+    [colors.text.primary]
+  );
 
   useEffect(() => {
-    phase.value = withRepeat(withTiming(1, { duration: 4200, easing: Easing.linear }), -1, false);
+    phase.value = withRepeat(
+      withTiming(1, { duration: 3600, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      false
+    );
   }, [phase]);
 
-  // Source dot dims as capital flows out
-  const sourceStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.10, 0.32], [1, 0.5], Extrapolation.CLAMP) }],
+  const piece1Style = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(phase.value, [0, 0.62, 1], [-26, 0, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0, 0.62, 1], [-20, 0, 0], Extrapolation.CLAMP) },
+      { rotate: `${interpolate(phase.value, [0, 0.62, 1], [-20, 0, 0], Extrapolation.CLAMP)}deg` },
+    ],
   }));
-
-  // 3 bars fill sequentially to different proportions (large → medium → small)
-  const b1 = useAnimatedStyle(() => ({
-    height: interpolate(phase.value, [0.18, 0.44], [0, 52], Extrapolation.CLAMP),
+  const piece2Style = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(phase.value, [0, 0.62, 1], [28, 0, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0, 0.62, 1], [-10, 0, 0], Extrapolation.CLAMP) },
+      { rotate: `${interpolate(phase.value, [0, 0.62, 1], [18, 0, 0], Extrapolation.CLAMP)}deg` },
+    ],
   }));
-  const b2 = useAnimatedStyle(() => ({
-    height: interpolate(phase.value, [0.28, 0.52], [0, 34], Extrapolation.CLAMP),
+  const piece3Style = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(phase.value, [0, 0.62, 1], [-8, 0, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0, 0.62, 1], [28, 0, 0], Extrapolation.CLAMP) },
+      { rotate: `${interpolate(phase.value, [0, 0.62, 1], [14, 0, 0], Extrapolation.CLAMP)}deg` },
+    ],
   }));
-  const b3 = useAnimatedStyle(() => ({
-    height: interpolate(phase.value, [0.38, 0.58], [0, 20], Extrapolation.CLAMP),
-  }));
-
   return (
     <View style={styles.l1AnimCanvas}>
       <View style={styles.l1AllocWrap}>
-        <Animated.View style={[styles.l1AllocSource, sourceStyle]} />
-        <View style={styles.l1AllocBarGroup}>
-          <Animated.View style={[styles.l1AllocBar1, b1]} />
-          <Animated.View style={[styles.l1AllocBar2, b2]} />
-          <Animated.View style={[styles.l1AllocBar3, b3]} />
-        </View>
+        <Animated.View style={[styles.l1AllocSliceLayer, piece1Style]}>
+          <Svg width={L1_ALLOC_PIE_SIZE} height={L1_ALLOC_PIE_SIZE}>
+            <Path d={slicePaths[0]} fill={sliceColors[0]} />
+          </Svg>
+        </Animated.View>
+        <Animated.View style={[styles.l1AllocSliceLayer, piece2Style]}>
+          <Svg width={L1_ALLOC_PIE_SIZE} height={L1_ALLOC_PIE_SIZE}>
+            <Path d={slicePaths[1]} fill={sliceColors[1]} />
+          </Svg>
+        </Animated.View>
+        <Animated.View style={[styles.l1AllocSliceLayer, piece3Style]}>
+          <Svg width={L1_ALLOC_PIE_SIZE} height={L1_ALLOC_PIE_SIZE}>
+            <Path d={slicePaths[2]} fill={sliceColors[2]} />
+          </Svg>
+        </Animated.View>
       </View>
     </View>
   );
@@ -4559,34 +4611,15 @@ const createStyles = (colors, components) =>
   },
   // ─── Allocation animation ─────────────────────────────────────────────────────
   l1AllocWrap: {
+    width: 86,
+    height: 86,
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'center',
   },
-  l1AllocSource: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.text.primary,
-  },
-  l1AllocBarGroup: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 8,
-  },
-  l1AllocBar1: {
-    width: 16,
-    borderRadius: 3,
-    backgroundColor: toRgba(colors.text.primary, 0.96),
-  },
-  l1AllocBar2: {
-    width: 16,
-    borderRadius: 3,
-    backgroundColor: toRgba(colors.text.primary, 0.78),
-  },
-  l1AllocBar3: {
-    width: 16,
-    borderRadius: 3,
-    backgroundColor: toRgba(colors.text.primary, 0.58),
+  l1AllocSliceLayer: {
+    position: 'absolute',
+    width: L1_ALLOC_PIE_SIZE,
+    height: L1_ALLOC_PIE_SIZE,
   },
   // ─── Vehicle animation ────────────────────────────────────────────────────────
   l1VehicleTokenRow: {
