@@ -72,11 +72,54 @@ const VOLATILE_CURVE_POINTS = [
   { x: 90, y: 78 },
   { x: 100, y: 72 },
 ];
-const L1_ALLOC_PIE_SIZE = 56;
-const L1_ALLOC_PIE_RADIUS = 24;
-const INTRO_VISUALIZATION_TITLE = '6 stappen van beleggen';
+const L1_ALLOC_PIE_SIZE = 74;
+const L1_ALLOC_PIE_RADIUS = 32;
+const INTRO_VISUALIZATION_TITLE = '6 stappen vóór beleggen';
 const INTRO_VISUALIZATION_SUBTITLE =
   'Het proces vóór je een belegging uitvoert.';
+const INTRO_VISUALIZATION_STEPS = [
+  {
+    id: 'goal',
+    label: 'Doelbepaling',
+    question: 'Wat wil je met je belegging bereiken?',
+    detail:
+      'Eerst bepaal je wat je met je geld wil bereiken. Dat doel bepaalt welke stappen daarna volgen.',
+  },
+  {
+    id: 'risk',
+    label: 'Individuele risicoanalyse',
+    question: 'Hoeveel risico kan en wil ik nemen?',
+    detail:
+      'De risicoanalyse bepaalt hoeveel risico binnen jouw grenzen blijft, op basis van je tolerantie en je tijdshorizon.',
+  },
+  {
+    id: 'strategy',
+    label: 'Financiële investeringsstrategie',
+    question: 'Welke aanpak ga je volgen om je doel te bereiken?',
+    detail:
+      'Hier bepaal je hoe je wil investeren, bijvoorbeeld op lange termijn, actief of passief.',
+  },
+  {
+    id: 'allocation',
+    label: 'Kapitaalallocatie',
+    question: 'Hoe verdeel je je geld over verschillende beleggingen?',
+    detail: 'Hier bepaal je welk deel van je geld naar elke belegging gaat.',
+  },
+  {
+    id: 'vehicle',
+    label: 'Beleggingsinstrumenten',
+    question: 'In welke soort belegging ga je investeren?',
+    detail:
+      'Dit zijn de instrumenten waarmee je je plan uitvoert, zoals aandelen, ETF’s of obligaties.',
+  },
+  {
+    id: 'execution',
+    label: 'Uitvoering',
+    question: 'Hoe voer je je belegging uit?',
+    detail:
+      'Hier kies je een broker of bank en plaats je de order om je belegging daadwerkelijk aan te kopen.',
+  },
+];
 
 const polarToCartesian = (cx, cy, radius, angleDeg) => {
   const angle = (angleDeg * Math.PI) / 180;
@@ -923,8 +966,8 @@ function ExecutionStepAnimation({ styles }) {
 
 function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
   const { styles, colors } = useLessonStepStyles();
-  const steps = copy.introVisualization.steps;
   const isGuidedSequence = lessonId === 'lesson_0';
+  const steps = isGuidedSequence ? INTRO_VISUALIZATION_STEPS : copy.introVisualization.steps;
   const [completedSteps, setCompletedSteps] = useState(() => steps.map(() => false));
   const subtitle = isGuidedSequence ? INTRO_VISUALIZATION_SUBTITLE : copy.introVisualization.subtitle;
 
@@ -951,23 +994,6 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
       <AppText style={styles.journeySubtitle}>
         {subtitle}
       </AppText>
-      {isGuidedSequence ? (
-        <View style={styles.l1SequenceBanner}>
-          <View style={styles.l1SequenceBannerHeader}>
-            <AppText style={styles.l1SequenceBannerKicker}>Procesvolgorde</AppText>
-            <Ionicons
-              name={allCompleted ? 'checkmark-circle' : 'ellipse'}
-              size={14}
-              color={allCompleted ? colors.text.primary : colors.text.secondary}
-            />
-          </View>
-          <AppText style={styles.l1SequenceBannerText}>
-            {allCompleted
-              ? 'Alle stappen zijn voltooid. Je kan doorgaan.'
-              : `Volgende stap: ${String(activeIndex + 1).padStart(2, '0')}. Werk in volgorde verder.`}
-          </AppText>
-        </View>
-      ) : null}
       <View style={styles.l1VisGrid}>
         {steps.map((step, index) => {
           const isCompleted = isGuidedSequence ? completedSteps[index] : false;
@@ -979,7 +1005,6 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
               key={step.id}
               step={step}
               index={index}
-              copy={copy}
               styles={styles}
               colors={colors}
               isActive={isActive}
@@ -998,7 +1023,6 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
 function ProcessGridFlipCard({
   step,
   index,
-  copy,
   styles,
   colors,
   isActive,
@@ -1076,14 +1100,14 @@ function ProcessGridFlipCard({
   };
 
   const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
-  const ctaLabel = isLocked ? 'Eerst vorige stap' : isCompleted ? 'Bekijk stap' : 'Open stap';
-  const animationScale = isActive ? 1.2 : isCompleted ? 1.08 : 1.0;
+  const frontCtaLabel = isLocked ? 'Vergrendeld' : 'Bekijk';
+  const backCtaLabel = 'Terug';
 
   const renderStatusIndicator = () => {
     if (isCompleted) {
       return (
         <View style={[styles.l1StatusBadge, styles.l1StatusBadgeCompleted]}>
-          <Ionicons name="checkmark" size={14} color={colors.text.primary} />
+          <Ionicons name="checkmark" size={14} color={colors.accent.primary} />
         </View>
       );
     }
@@ -1118,6 +1142,7 @@ function ProcessGridFlipCard({
           style={[
             styles.l1Face,
             styles.l1Page,
+            styles.l1FrontPage,
             isActive && styles.l1PageActive,
             isCompleted && styles.l1PageCompleted,
             isLocked && styles.l1PageLocked,
@@ -1138,12 +1163,13 @@ function ProcessGridFlipCard({
               styles.l1AnimStateWrap,
               isCompleted && styles.l1AnimStateCompleted,
               isLocked && styles.l1AnimStateLocked,
-              { transform: [{ scale: animationScale }] },
             ]}
           >
             <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
           </View>
-          <AppText style={[styles.l1TapHint, isLocked && styles.l1TapHintLocked]}>{ctaLabel}</AppText>
+          <AppText style={[styles.l1TapHint, isLocked && styles.l1TapHintLocked]}>
+            {frontCtaLabel}
+          </AppText>
         </Animated.View>
 
         <Animated.View
@@ -1163,7 +1189,7 @@ function ProcessGridFlipCard({
             {renderStatusIndicator()}
           </View>
           <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
-          <AppText style={styles.l1TapHint}>{copy.labels.tapReturn}</AppText>
+          <AppText style={styles.l1TapHint}>{backCtaLabel}</AppText>
         </Animated.View>
       </View>
     </Pressable>
@@ -1201,7 +1227,7 @@ function GoalGridAnim({ styles, colors }) {
     const travel = interpolate(phase.value, [0, 1], [0, 1], Extrapolation.CLAMP);
     const turns = 2.2;
     const angle = travel * Math.PI * 2 * turns + Math.PI * 0.15;
-    const radius = interpolate(travel, [0, 0.78, 1], [28, 6, 0], Extrapolation.CLAMP);
+    const radius = interpolate(travel, [0, 0.78, 1], [34, 8, 0], Extrapolation.CLAMP);
     return {
       transform: [
         { translateX: Math.cos(angle) * radius },
@@ -1222,7 +1248,7 @@ function GoalGridAnim({ styles, colors }) {
   return (
     <View style={styles.l1AnimCanvas}>
       <Animated.View style={[styles.l1GoalLockRing, lockStyle]} />
-      <Animated.View style={[styles.l1GoalChosenDot, centerDotStyle]} />
+      <Animated.View style={[styles.l1GoalChosenDot, styles.l1GoalChosenDotAccent, centerDotStyle]} />
       <Animated.View style={[styles.l1GoalChosenDot, orbitDotStyle]} />
     </View>
   );
@@ -1397,7 +1423,7 @@ function StrategyGridAnim({ styles, colors }) {
         <Animated.View style={[styles.l1StratConnLine, l0]} />
         <Animated.View style={[styles.l1StratNodeDot, n1]} />
         <Animated.View style={[styles.l1StratConnLine, l1]} />
-        <Animated.View style={[styles.l1StratNodeDot, n2]} />
+        <Animated.View style={[styles.l1StratNodeDot, styles.l1StratNodeAccent, n2]} />
         <Animated.View style={[styles.l1StratConnLine, l2]} />
         <Animated.View style={[styles.l1StratNodeDot, n3]} />
       </View>
@@ -1419,10 +1445,10 @@ function AllocationGridAnim({ styles, colors }) {
   const sliceColors = useMemo(
     () => [
       toRgba(colors.text.primary, 0.96),
-      toRgba(colors.text.primary, 0.78),
+      toRgba(colors.accent.primary, 0.38),
       toRgba(colors.text.primary, 0.62),
     ],
-    [colors.text.primary]
+    [colors.accent.primary, colors.text.primary]
   );
 
   useEffect(() => {
@@ -1435,22 +1461,22 @@ function AllocationGridAnim({ styles, colors }) {
 
   const piece1Style = useAnimatedStyle(() => ({
     transform: [
-      { translateX: interpolate(phase.value, [0, 0.62, 1], [-26, 0, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0, 0.62, 1], [-20, 0, 0], Extrapolation.CLAMP) },
+      { translateX: interpolate(phase.value, [0, 0.62, 1], [-34, 0, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0, 0.62, 1], [-26, 0, 0], Extrapolation.CLAMP) },
       { rotate: `${interpolate(phase.value, [0, 0.62, 1], [-20, 0, 0], Extrapolation.CLAMP)}deg` },
     ],
   }));
   const piece2Style = useAnimatedStyle(() => ({
     transform: [
-      { translateX: interpolate(phase.value, [0, 0.62, 1], [28, 0, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0, 0.62, 1], [-10, 0, 0], Extrapolation.CLAMP) },
+      { translateX: interpolate(phase.value, [0, 0.62, 1], [34, 0, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0, 0.62, 1], [-14, 0, 0], Extrapolation.CLAMP) },
       { rotate: `${interpolate(phase.value, [0, 0.62, 1], [18, 0, 0], Extrapolation.CLAMP)}deg` },
     ],
   }));
   const piece3Style = useAnimatedStyle(() => ({
     transform: [
-      { translateX: interpolate(phase.value, [0, 0.62, 1], [-8, 0, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0, 0.62, 1], [28, 0, 0], Extrapolation.CLAMP) },
+      { translateX: interpolate(phase.value, [0, 0.62, 1], [-10, 0, 0], Extrapolation.CLAMP) },
+      { translateY: interpolate(phase.value, [0, 0.62, 1], [36, 0, 0], Extrapolation.CLAMP) },
       { rotate: `${interpolate(phase.value, [0, 0.62, 1], [14, 0, 0], Extrapolation.CLAMP)}deg` },
     ],
   }));
@@ -4559,28 +4585,6 @@ const createStyles = (colors, components) =>
   l1VisBody: {
     gap: components.layout.spacing.lg,
   },
-  l1SequenceBanner: {
-    borderRadius: components.radius.input,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    paddingVertical: components.layout.spacing.sm,
-    paddingHorizontal: components.layout.spacing.md,
-    gap: components.layout.spacing.xs,
-  },
-  l1SequenceBannerHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  l1SequenceBannerKicker: {
-    ...typography.styles.stepLabel,
-    color: colors.text.primary,
-  },
-  l1SequenceBannerText: {
-    ...typography.styles.meta,
-    color: colors.text.secondary,
-  },
   l1VisGrid: {
     width: '100%',
     flexDirection: 'column',
@@ -4614,6 +4618,10 @@ const createStyles = (colors, components) =>
     backgroundColor: colors.background.surface,
     gap: components.layout.spacing.sm,
     justifyContent: 'flex-start',
+  },
+  l1FrontPage: {
+    gap: components.layout.spacing.md,
+    justifyContent: 'space-between',
   },
   l1PageActive: {
     borderColor: toRgba(colors.text.primary, 0.24),
@@ -4685,6 +4693,7 @@ const createStyles = (colors, components) =>
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: components.sizes.chart.md,
   },
   l1AnimStateCompleted: {
     opacity: 0.86,
@@ -4698,10 +4707,10 @@ const createStyles = (colors, components) =>
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    minHeight: 84,
+    minHeight: components.sizes.chart.md,
   },
   l1TapHint: {
-    ...typography.styles.small,
+    ...typography.styles.meta,
     color: colors.text.secondary,
   },
   l1TapHintLocked: {
@@ -4726,23 +4735,26 @@ const createStyles = (colors, components) =>
   },
   l1GoalChosenDot: {
     position: 'absolute',
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: colors.text.primary,
+  },
+  l1GoalChosenDotAccent: {
+    backgroundColor: toRgba(colors.accent.primary, 0.88),
   },
   l1GoalLockRing: {
     position: 'absolute',
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 1.5,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 2,
     borderColor: toRgba(colors.text.primary, 0.9),
   },
   // ─── Risk animation ───────────────────────────────────────────────────────────
   l1RiskSingleChart: {
     width: '100%',
-    height: 56,
+    height: 70,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
@@ -4751,34 +4763,34 @@ const createStyles = (colors, components) =>
   l1RiskGridH: {
     position: 'absolute',
     width: '100%',
-    height: 1,
+    height: 1.5,
     borderRadius: 1,
     backgroundColor: toRgba(colors.ui.divider, 0.22),
   },
   l1RiskVolSegment: {
     position: 'absolute',
-    height: 2,
+    height: 2.5,
     borderRadius: 2,
     backgroundColor: toRgba(colors.text.primary, 0.92),
   },
   l1RiskStableSegment: {
     position: 'absolute',
-    height: 2,
+    height: 2.5,
     borderRadius: 2,
     backgroundColor: toRgba(colors.text.primary, 0.62),
   },
   l1RiskVolDot: {
     position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.text.primary,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: toRgba(colors.accent.primary, 0.86),
   },
   l1RiskStableDot: {
     position: 'absolute',
-    width: 7,
-    height: 7,
-    borderRadius: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
     backgroundColor: toRgba(colors.text.primary, 0.72),
   },
   // ─── Strategy animation ───────────────────────────────────────────────────────
@@ -4788,20 +4800,23 @@ const createStyles = (colors, components) =>
     gap: 0,
   },
   l1StratNodeDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     backgroundColor: colors.text.primary,
   },
+  l1StratNodeAccent: {
+    backgroundColor: toRgba(colors.accent.primary, 0.86),
+  },
   l1StratConnLine: {
-    height: 1.5,
-    width: 20,
+    height: 2,
+    width: 28,
     backgroundColor: toRgba(colors.text.primary, 0.78),
   },
   // ─── Allocation animation ─────────────────────────────────────────────────────
   l1AllocWrap: {
-    width: 86,
-    height: 86,
+    width: 108,
+    height: 108,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -4821,8 +4836,8 @@ const createStyles = (colors, components) =>
     gap: 5,
   },
   l1VehicleToken: {
-    paddingHorizontal: 7,
-    paddingVertical: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
@@ -4830,48 +4845,48 @@ const createStyles = (colors, components) =>
   },
   l1VehicleTokenLabel: {
     fontFamily: typography.fonts.interMedium,
-    fontSize: 9,
-    lineHeight: 11,
+    fontSize: 10,
+    lineHeight: 12,
     letterSpacing: 0.8,
     color: colors.text.primary,
   },
   l1VehicleSelDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.text.primary,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: toRgba(colors.accent.primary, 0.9),
   },
   // ─── Execution animation ──────────────────────────────────────────────────────
   l1ExecCheckRow: {
     flexDirection: 'row',
-    gap: 7,
-    marginBottom: 10,
+    gap: 9,
+    marginBottom: 12,
   },
   l1ExecCheckDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: colors.text.primary,
   },
   l1ExecFireWrap: {
-    width: 30,
-    height: 30,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
   },
   l1ExecFireRing: {
     position: 'absolute',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    borderWidth: 1.5,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 2,
     borderColor: toRgba(colors.text.primary, 0.9),
   },
   l1ExecFireCore: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.text.primary,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: toRgba(colors.accent.primary, 0.9),
   },
   });
 
