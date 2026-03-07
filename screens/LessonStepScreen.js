@@ -1692,24 +1692,26 @@ function IntroScenarioStep({ onNext, copy }) {
 
   return (
     <View style={styles.stepBody}>
-      {/* Lars — always visible */}
-      <Card style={styles.narrativeCard}>
-        <View style={styles.narrativeCharacterRow}>
-          <View style={styles.narrativeAvatar}>
-            <Ionicons
-              name="person-outline"
-              size={components.sizes.icon.md}
-              color={colors.text.secondary}
-            />
+      <View style={styles.narrativeTopSection}>
+        {/* Lars — always visible */}
+        <Card style={styles.narrativeCard}>
+          <View style={styles.narrativeCharacterRow}>
+            <View style={styles.narrativeAvatar}>
+              <Ionicons
+                name="person-outline"
+                size={components.sizes.icon.md}
+                color={colors.text.secondary}
+              />
+            </View>
+            <AppText style={styles.narrativeCharacterName}>Lars</AppText>
           </View>
-          <AppText style={styles.narrativeCharacterName}>Lars</AppText>
-        </View>
-        <AppText style={styles.narrativeQuote}>
-          "Ik heb €5.000 klaarstaan. Ik heb een goed gevoel over dit aandeel."
-        </AppText>
-      </Card>
+          <AppText style={styles.narrativeQuote}>
+            "Ik heb €5.000 klaarstaan. Ik heb een goed gevoel over dit aandeel."
+          </AppText>
+        </Card>
 
-      <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
+        <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
+      </View>
 
       {/* Choice cards + connector + comparison — tightly grouped */}
       <View style={styles.narrativeFlowWrap}>
@@ -1897,10 +1899,10 @@ function IntroScenarioStep({ onNext, copy }) {
       </View>
 
       {showComparison && (
-        <>
+        <View style={styles.narrativeOutcomeSection}>
           <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
           <PrimaryButton label={copy.buttons.next} onPress={onNext} />
-        </>
+        </View>
       )}
     </View>
   );
@@ -3821,8 +3823,12 @@ const createStyles = (colors, components) =>
     color: colors.text.secondary,
   },
   // ─── Narrative scenario ───────────────────────────────────────────────────────
+  narrativeTopSection: {
+    marginTop: 32,
+    gap: components.layout.spacing.sm,
+  },
   narrativeCard: {
-    gap: components.layout.spacing.md,
+    gap: components.layout.spacing.sm,
   },
   narrativeCharacterRow: {
     flexDirection: 'row',
@@ -3898,12 +3904,12 @@ const createStyles = (colors, components) =>
     borderColor: colors.accent.primary,
   },
   narrativeFlowWrap: {
-    gap: components.layout.spacing.xs,
+    gap: components.layout.spacing.md,
   },
   narrativeConnectorRow: {
     flexDirection: 'row',
     gap: components.layout.spacing.md,
-    height: 24,
+    height: components.layout.spacing.lg,
   },
   narrativeConnectorCol: {
     flex: 1,
@@ -3920,7 +3926,10 @@ const createStyles = (colors, components) =>
     minWidth: 0,
   },
   narrativeCompareGridOverride: {
-    marginTop: 0,
+    marginTop: components.layout.spacing.none,
+  },
+  narrativeOutcomeSection: {
+    gap: components.layout.spacing.md,
   },
   // ─── Step-tap selector (replaces slider) ────────────────────────────────────
   scenarioSelectorWrap: {
