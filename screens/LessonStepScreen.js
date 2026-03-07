@@ -74,6 +74,9 @@ const VOLATILE_CURVE_POINTS = [
 ];
 const L1_ALLOC_PIE_SIZE = 56;
 const L1_ALLOC_PIE_RADIUS = 24;
+const INTRO_VISUALIZATION_TITLE = '6 stappen van beleggen';
+const INTRO_VISUALIZATION_SUBTITLE =
+  'Het proces vóór je een belegging uitvoert.';
 
 const polarToCartesian = (cx, cy, radius, angleDeg) => {
   const angle = (angleDeg * Math.PI) / 180;
@@ -184,8 +187,8 @@ export default function LessonStepScreen() {
         return content.steps.concept.title;
       case 2:
         return lessonId === 'lesson_0'
-          ? introTitle || content.steps.visualization.title
-          : content.steps.visualization.title;
+          ? INTRO_VISUALIZATION_TITLE
+          : introTitle || content.steps.visualization.title;
       case 3:
         return content.steps.scenario.title;
       case 4:
@@ -533,8 +536,8 @@ function IntroConceptStep({ content, onNext, copy }) {
   );
 }
 
-function IntroVisualizationStep({ onNext, copy }) {
-  return <Lesson1VisualizationStep onNext={onNext} copy={copy} />;
+function IntroVisualizationStep({ onNext, copy, lessonId }) {
+  return <Lesson1VisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
 }
 
 function JourneyFlipCard({ step, index, copy, styles, colors, components }) {
@@ -918,39 +921,98 @@ function ExecutionStepAnimation({ styles }) {
 
 // ─── Lesson 1: Process Visualization Grid ─────────────────────────────────────
 
-function Lesson1VisualizationStep({ onNext, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
+function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
+  const { styles, colors } = useLessonStepStyles();
   const steps = copy.introVisualization.steps;
-  const screenW = Dimensions.get('window').width;
-  const cardWidth =
-    (screenW - components.layout.pagePaddingHorizontal * 2 - components.layout.spacing.sm) / 2;
+  const isGuidedSequence = lessonId === 'lesson_0';
+  const [completedSteps, setCompletedSteps] = useState(() => steps.map(() => false));
+  const subtitle = isGuidedSequence ? INTRO_VISUALIZATION_SUBTITLE : copy.introVisualization.subtitle;
+
+  useEffect(() => {
+    setCompletedSteps(steps.map(() => false));
+  }, [steps.length, isGuidedSequence]);
+
+  const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
+  const activeIndex = firstIncompleteIndex === -1 ? steps.length - 1 : firstIncompleteIndex;
+  const allCompleted = !isGuidedSequence || (steps.length > 0 && completedSteps.every(Boolean));
+
+  const handleStepCompleted = (index) => {
+    if (!isGuidedSequence) return;
+    setCompletedSteps((previous) => {
+      if (previous[index]) return previous;
+      const next = [...previous];
+      next[index] = true;
+      return next;
+    });
+  };
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
       <AppText style={styles.journeySubtitle}>
-        {copy.introVisualization.subtitle}
+        {subtitle}
       </AppText>
+      {isGuidedSequence ? (
+        <View style={styles.l1SequenceBanner}>
+          <View style={styles.l1SequenceBannerHeader}>
+            <AppText style={styles.l1SequenceBannerKicker}>Procesvolgorde</AppText>
+            <Ionicons
+              name={allCompleted ? 'checkmark-circle' : 'ellipse'}
+              size={14}
+              color={allCompleted ? colors.text.primary : colors.text.secondary}
+            />
+          </View>
+          <AppText style={styles.l1SequenceBannerText}>
+            {allCompleted
+              ? 'Alle stappen zijn voltooid. Je kan doorgaan.'
+              : `Volgende stap: ${String(activeIndex + 1).padStart(2, '0')}. Werk in volgorde verder.`}
+          </AppText>
+        </View>
+      ) : null}
       <View style={styles.l1VisGrid}>
-        {steps.map((step, index) => (
-          <ProcessGridFlipCard
-            key={step.id}
-            step={step}
-            index={index}
-            copy={copy}
-            styles={styles}
-            colors={colors}
-            cardWidth={cardWidth}
-          />
-        ))}
+        {steps.map((step, index) => {
+          const isCompleted = isGuidedSequence ? completedSteps[index] : false;
+          const isLocked = isGuidedSequence ? !isCompleted && index > activeIndex : false;
+          const isActive = isGuidedSequence ? !isCompleted && index === activeIndex : true;
+
+          return (
+            <ProcessGridFlipCard
+              key={step.id}
+              step={step}
+              index={index}
+              copy={copy}
+              styles={styles}
+              colors={colors}
+              isActive={isActive}
+              isCompleted={isCompleted}
+              isLocked={isLocked}
+              onStepCompleted={() => handleStepCompleted(index)}
+            />
+          );
+        })}
       </View>
-      <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+      <PrimaryButton label={copy.buttons.next} onPress={onNext} disabled={!allCompleted} />
     </View>
   );
 }
 
-function ProcessGridFlipCard({ step, index, copy, styles, colors, cardWidth }) {
+function ProcessGridFlipCard({
+  step,
+  index,
+  copy,
+  styles,
+  colors,
+  isActive,
+  isCompleted,
+  isLocked,
+  onStepCompleted,
+}) {
   const [isFlipped, setIsFlipped] = useState(false);
   const flipProgress = useSharedValue(0);
+  const activePulse = useSharedValue(0);
+
+  useEffect(() => {
+    if (isLocked && isFlipped) setIsFlipped(false);
+  }, [isLocked, isFlipped]);
 
   useEffect(() => {
     flipProgress.value = withTiming(isFlipped ? 1 : 0, {
@@ -958,6 +1020,18 @@ function ProcessGridFlipCard({ step, index, copy, styles, colors, cardWidth }) {
       easing: Easing.out(Easing.cubic),
     });
   }, [flipProgress, isFlipped]);
+
+  useEffect(() => {
+    if (!isActive) {
+      activePulse.value = 0;
+      return;
+    }
+    activePulse.value = withRepeat(
+      withTiming(1, { duration: 1200, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
+  }, [activePulse, isActive]);
 
   const frontStyle = useAnimatedStyle(() => {
     const rotate = interpolate(flipProgress.value, [0, 1], [0, 180]);
@@ -989,40 +1063,105 @@ function ProcessGridFlipCard({ step, index, copy, styles, colors, cardWidth }) {
     };
   });
 
+  const activePulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(activePulse.value, [0, 1], [0.82, 1.45]) }],
+    opacity: interpolate(activePulse.value, [0, 1], [0.38, 0]),
+  }));
+
+  const handlePress = () => {
+    if (isLocked) return;
+    const nextFlipped = !isFlipped;
+    setIsFlipped(nextFlipped);
+    if (nextFlipped && !isCompleted) onStepCompleted?.();
+  };
+
+  const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
+  const ctaLabel = isLocked ? 'Eerst vorige stap' : isCompleted ? 'Bekijk stap' : 'Open stap';
+  const animationScale = isActive ? 1.2 : isCompleted ? 1.08 : 1.0;
+
+  const renderStatusIndicator = () => {
+    if (isCompleted) {
+      return (
+        <View style={[styles.l1StatusBadge, styles.l1StatusBadgeCompleted]}>
+          <Ionicons name="checkmark" size={14} color={colors.text.primary} />
+        </View>
+      );
+    }
+    if (isLocked) {
+      return (
+        <View style={[styles.l1StatusBadge, styles.l1StatusBadgeLocked]}>
+          <Ionicons name="lock-closed" size={12} color={colors.text.secondary} />
+        </View>
+      );
+    }
+    return (
+      <View style={[styles.l1StatusBadge, styles.l1StatusBadgeActive]}>
+        <Animated.View style={[styles.l1StatusPulse, activePulseStyle]} />
+        <View style={styles.l1StatusDot} />
+      </View>
+    );
+  };
+
   return (
     <Pressable
-      onPress={() => setIsFlipped((prev) => !prev)}
-      style={[styles.l1CardShell, { width: cardWidth }]}
+      onPress={handlePress}
+      disabled={isLocked}
+      style={[
+        styles.l1CardShell,
+        isActive && styles.l1CardShellActive,
+        isCompleted && styles.l1CardShellCompleted,
+        isLocked && styles.l1CardShellLocked,
+      ]}
     >
       <View style={styles.l1FlipCard}>
-        <Animated.View style={[styles.l1Face, styles.l1Page, frontStyle]}>
+        <Animated.View
+          style={[
+            styles.l1Face,
+            styles.l1Page,
+            isActive && styles.l1PageActive,
+            isCompleted && styles.l1PageCompleted,
+            isLocked && styles.l1PageLocked,
+            frontStyle,
+          ]}
+        >
           <View style={styles.l1CardHeaderRow}>
-            <View style={styles.l1StepChip}>
-              <AppText style={styles.l1StepChipText}>
-                {`${index + 1}`.padStart(2, '0')}
+            <View style={styles.l1StepMeta}>
+              <AppText style={styles.l1StepKicker}>{stepCode}</AppText>
+              <AppText style={styles.l1CardLabel} numberOfLines={2}>
+                {step.label}
               </AppText>
             </View>
-            <View style={styles.l1AccentDot} />
+            {renderStatusIndicator()}
           </View>
-          <AppText style={styles.l1CardLabel} numberOfLines={2}>
-            {step.label}
-          </AppText>
-          <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
-          <AppText style={styles.l1TapHint}>{copy.labels.tapDetails}</AppText>
+          <View
+            style={[
+              styles.l1AnimStateWrap,
+              isCompleted && styles.l1AnimStateCompleted,
+              isLocked && styles.l1AnimStateLocked,
+              { transform: [{ scale: animationScale }] },
+            ]}
+          >
+            <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
+          </View>
+          <AppText style={[styles.l1TapHint, isLocked && styles.l1TapHintLocked]}>{ctaLabel}</AppText>
         </Animated.View>
 
-        <Animated.View style={[styles.l1Face, styles.l1Page, styles.l1BackPage, backStyle]}>
+        <Animated.View
+          style={[
+            styles.l1Face,
+            styles.l1Page,
+            styles.l1BackPage,
+            isCompleted && styles.l1PageCompleted,
+            backStyle,
+          ]}
+        >
           <View style={styles.l1CardHeaderRow}>
-            <View style={styles.l1StepChip}>
-              <AppText style={styles.l1StepChipText}>
-                {`${index + 1}`.padStart(2, '0')}
-              </AppText>
+            <View style={styles.l1StepMeta}>
+              <AppText style={styles.l1StepKicker}>{stepCode}</AppText>
+              <AppText style={styles.l1BackLabel}>{step.question}</AppText>
             </View>
-            <View style={styles.l1BackBadge}>
-              <AppText style={styles.l1BackBadgeText}>{copy.labels.insight}</AppText>
-            </View>
+            {renderStatusIndicator()}
           </View>
-          <AppText style={styles.l1BackLabel}>{step.question}</AppText>
           <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
           <AppText style={styles.l1TapHint}>{copy.labels.tapReturn}</AppText>
         </Animated.View>
@@ -1706,11 +1845,11 @@ function VisualizationStep({ content, lessonId, onNext, onPressTerm, copy }) {
   const [selected, setSelected] = useState(null);
 
   if (lessonId === 'lesson_0') {
-    return <IntroVisualizationStep onNext={onNext} copy={copy} />;
+    return <IntroVisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
   }
 
   if (lessonId === 'lesson_1') {
-    return <Lesson1VisualizationStep onNext={onNext} copy={copy} />;
+    return <Lesson1VisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
   }
 
   return (
@@ -4420,14 +4559,44 @@ const createStyles = (colors, components) =>
   l1VisBody: {
     gap: components.layout.spacing.lg,
   },
-  l1VisGrid: {
+  l1SequenceBanner: {
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    paddingVertical: components.layout.spacing.sm,
+    paddingHorizontal: components.layout.spacing.md,
+    gap: components.layout.spacing.xs,
+  },
+  l1SequenceBannerHeader: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  l1SequenceBannerKicker: {
+    ...typography.styles.stepLabel,
+    color: colors.text.primary,
+  },
+  l1SequenceBannerText: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+  },
+  l1VisGrid: {
+    width: '100%',
+    flexDirection: 'column',
     gap: components.layout.spacing.sm,
   },
-  l1CardShell: {},
+  l1CardShell: {
+    width: '100%',
+    borderRadius: components.radius.card,
+  },
+  l1CardShellActive: {
+    transform: [{ scale: 1.01 }],
+  },
+  l1CardShellCompleted: {},
+  l1CardShellLocked: {},
   l1FlipCard: {
-    height: 220,
+    height: 264,
     position: 'relative',
     overflow: 'hidden',
     borderRadius: components.radius.card,
@@ -4439,48 +4608,89 @@ const createStyles = (colors, components) =>
   },
   l1Page: {
     borderRadius: components.radius.card,
-    padding: components.layout.spacing.sm,
+    padding: components.layout.spacing.md,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surface,
-    gap: components.layout.spacing.xs,
+    gap: components.layout.spacing.sm,
     justifyContent: 'flex-start',
   },
-  l1BackPage: {
+  l1PageActive: {
+    borderColor: toRgba(colors.text.primary, 0.24),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  l1PageCompleted: {
     backgroundColor: toRgba(colors.background.surfaceActive, 0.92),
+  },
+  l1PageLocked: {
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surface,
+  },
+  l1BackPage: {
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.96),
   },
   l1CardHeaderRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
+    gap: components.layout.spacing.sm,
   },
-  l1StepChip: {
-    paddingHorizontal: components.layout.spacing.sm,
-    paddingVertical: 3,
-    borderRadius: components.radius.pill,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.background.surfaceActive, 0.95),
+  l1StepMeta: {
+    flex: 1,
+    gap: components.layout.spacing.xs,
   },
-  l1StepChipText: {
-    fontFamily: typography.fonts.filsonBold,
-    fontSize: 10,
-    lineHeight: 14,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    color: colors.text.primary,
-  },
-  l1AccentDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.accent.primary,
+  l1StepKicker: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
   },
   l1CardLabel: {
-    fontFamily: typography.fonts.interSemiBold,
-    fontSize: 13,
-    lineHeight: 18,
+    ...typography.styles.bodyStrong,
     color: colors.text.primary,
+  },
+  l1StatusBadge: {
+    width: components.sizes.square.sm,
+    height: components.sizes.square.sm,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    overflow: 'hidden',
+  },
+  l1StatusBadgeActive: {
+    borderColor: toRgba(colors.text.primary, 0.24),
+  },
+  l1StatusBadgeCompleted: {
+    borderColor: toRgba(colors.text.primary, 0.24),
+  },
+  l1StatusBadgeLocked: {
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  l1StatusPulse: {
+    position: 'absolute',
+    width: components.sizes.dot.lg,
+    height: components.sizes.dot.lg,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.text.primary, 0.2),
+  },
+  l1StatusDot: {
+    width: components.sizes.dot.xs,
+    height: components.sizes.dot.xs,
+    borderRadius: components.radius.pill,
+    backgroundColor: colors.text.primary,
+  },
+  l1AnimStateWrap: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  l1AnimStateCompleted: {
+    opacity: 0.86,
+  },
+  l1AnimStateLocked: {
+    opacity: 0.34,
   },
   l1AnimCanvas: {
     flex: 1,
@@ -4488,43 +4698,22 @@ const createStyles = (colors, components) =>
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    minHeight: 60,
+    minHeight: 84,
   },
   l1TapHint: {
-    fontFamily: typography.fonts.interRegular,
-    fontSize: 10,
-    lineHeight: 14,
+    ...typography.styles.small,
     color: colors.text.secondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
-  l1BackBadge: {
-    paddingHorizontal: components.layout.spacing.sm,
-    paddingVertical: 3,
-    borderRadius: components.radius.pill,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-  },
-  l1BackBadgeText: {
-    fontFamily: typography.fonts.filsonBold,
-    fontSize: 10,
-    lineHeight: 14,
-    letterSpacing: 1.0,
-    textTransform: 'uppercase',
-    color: colors.text.secondary,
+  l1TapHintLocked: {
+    color: toRgba(colors.text.secondary, 0.92),
   },
   l1BackLabel: {
-    fontFamily: typography.fonts.interSemiBold,
-    fontSize: 13,
-    lineHeight: 18,
+    ...typography.styles.bodyStrong,
     color: colors.text.primary,
   },
   l1BackDetail: {
-    fontFamily: typography.fonts.interRegular,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors.text.secondary,
+    ...typography.styles.body,
+    color: colors.text.primary,
     flex: 1,
   },
   // ─── Goal animation ───────────────────────────────────────────────────────────
