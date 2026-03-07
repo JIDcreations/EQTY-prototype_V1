@@ -1640,25 +1640,7 @@ function IntroScenarioStep({ onNext, copy }) {
 
   return (
     <View style={styles.stepBody}>
-      <View style={styles.scenarioSliderWrap}>
-        <AppText style={styles.scenarioSliderLabel}>
-          {copy.introScenario.progressLabel}
-        </AppText>
-        <Slider
-          value={progress}
-          minimumValue={0}
-          maximumValue={totalSteps}
-          step={0.1}
-          minimumTrackTintColor={colors.accent.primary}
-          maximumTrackTintColor={colors.background.surfaceActive}
-          thumbTintColor={colors.accent.primary}
-          onValueChange={setProgress}
-        />
-        <AppText style={styles.scenarioSliderHelper}>
-          {copy.introScenario.sliderHelper}
-        </AppText>
-      </View>
-
+      {/* Comparison panels first — charts are the primary visual outcome */}
       <View style={styles.scenarioCompareGrid}>
         <Card
           style={[
@@ -1779,6 +1761,26 @@ function IntroScenarioStep({ onNext, copy }) {
             })}
           </View>
         </Card>
+      </View>
+
+      {/* Slider directly below the panels — dragging updates both charts above */}
+      <View style={styles.scenarioSliderWrap}>
+        <AppText style={styles.scenarioSliderLabel}>
+          {copy.introScenario.progressLabel}
+        </AppText>
+        <Slider
+          value={progress}
+          minimumValue={0}
+          maximumValue={totalSteps}
+          step={0.1}
+          minimumTrackTintColor={colors.accent.primary}
+          maximumTrackTintColor={colors.background.surfaceActive}
+          thumbTintColor={colors.accent.primary}
+          onValueChange={setProgress}
+        />
+        <AppText style={styles.scenarioSliderHelper}>
+          {copy.introScenario.sliderHelper}
+        </AppText>
       </View>
 
       <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
@@ -3699,6 +3701,71 @@ const createStyles = (colors, components) =>
   },
   scenarioSliderHelper: {
     ...typography.styles.body,
+    color: colors.text.secondary,
+  },
+  // ─── Step-tap selector (replaces slider) ────────────────────────────────────
+  scenarioSelectorWrap: {
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    padding: components.layout.spacing.lg,
+    gap: components.layout.spacing.md,
+  },
+  scenarioSelectorLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  scenarioStepTrail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  scenarioStepPip: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surfaceActive,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scenarioStepPipDone: {
+    backgroundColor: colors.accent.primary,
+    borderColor: colors.accent.primary,
+  },
+  scenarioStepPipCurrent: {
+    borderColor: colors.text.primary,
+    borderWidth: 2,
+  },
+  scenarioStepPipNum: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+  },
+  scenarioStepPipNumDone: {
+    color: colors.text.onAccent,
+  },
+  scenarioStepPipNumCurrent: {
+    color: colors.text.primary,
+  },
+  scenarioStepBridge: {
+    flex: 1,
+    height: 2,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  scenarioStepBridgeDone: {
+    backgroundColor: toRgba(colors.accent.primary, 0.5),
+  },
+  scenarioStepCurrentRow: {
+    minHeight: components.layout.spacing.xl,
+    justifyContent: 'center',
+  },
+  scenarioStepCurrentLabel: {
+    ...typography.styles.small,
+    color: colors.text.primary,
+  },
+  scenarioStepCurrentHint: {
+    ...typography.styles.small,
     color: colors.text.secondary,
   },
   scenarioCurveWrap: {
