@@ -142,6 +142,8 @@ const createStyles = (components) =>
     primaryButton: {
       ...components.button.base,
       ...components.button.primary,
+      height: components.sizes.button.ctaPageHeight,
+      paddingVertical: 0,
     },
     ctaPageButton: {
       width: '100%',
@@ -162,6 +164,8 @@ const createStyles = (components) =>
     secondaryButton: {
       ...components.button.base,
       ...components.button.secondary,
+      height: components.sizes.button.ctaPageHeight,
+      paddingVertical: 0,
       position: 'relative',
       overflow: 'hidden',
     },
