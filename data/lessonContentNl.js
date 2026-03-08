@@ -79,7 +79,7 @@ export const lessonContentNl = {
         },
       },
       exercise: {
-        title: 'Bouw het proces',
+        title: 'Rangschik de stappen',
         type: 'sequence',
         description: 'Zet de stappen in de juiste volgorde voordat je uitvoert.',
         items: [

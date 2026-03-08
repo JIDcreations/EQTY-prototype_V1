@@ -18,6 +18,7 @@ export default function StepHeader({
   progressText,
   secondaryProgressText,
   helperText,
+  helperTextBelowTitle = false,
   showTitle = true,
 }) {
   const { colors, components } = useTheme();
@@ -50,8 +51,22 @@ export default function StepHeader({
         <AppText style={styles.progressInline}>{secondaryProgressText}</AppText>
       ) : null}
       <ProgressBar progress={step / total} />
-      {showTitle ? <View style={styles.titleWrap}>{titleNode}</View> : null}
-      {helperText ? <AppText style={styles.helperText}>{helperText}</AppText> : null}
+      {showTitle ? (
+        <View
+          style={[
+            styles.titleWrap,
+            helperTextBelowTitle && helperText ? styles.titleWrapWithHelper : null,
+          ]}
+        >
+          {titleNode}
+          {helperTextBelowTitle && helperText ? (
+            <AppText style={styles.helperText}>{helperText}</AppText>
+          ) : null}
+        </View>
+      ) : null}
+      {!helperTextBelowTitle && helperText ? (
+        <AppText style={styles.helperText}>{helperText}</AppText>
+      ) : null}
     </View>
   );
 }
@@ -80,6 +95,9 @@ const createStyles = (colors, components) =>
     },
     titleWrap: {
       marginTop: components.layout.spacing.xs / 2,
+    },
+    titleWrapWithHelper: {
+      gap: components.layout.spacing.xs,
     },
     helperText: {
       ...typography.styles.body,

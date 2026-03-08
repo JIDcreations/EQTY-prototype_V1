@@ -35,7 +35,7 @@ import GlossaryText from '../components/GlossaryText';
 import LessonStepContainer from '../components/LessonStepContainer';
 import ScreenBackground from '../components/ScreenBackground';
 import SurfacePillButton from '../components/SurfacePillButton';
-import StepHeader from '../components/StepHeader';
+import TOPSECTION from '../components/TOPSECTION';
 import { glossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
@@ -197,8 +197,6 @@ export default function LessonStepScreen() {
     components.layout.spacing.xl +
     components.layout.spacing.md;
   const glossary = useGlossary();
-  const isIntroScenario = lessonId === 'lesson_0' && step === 3;
-
   const content = getLessonContent(lessonId, preferences?.language);
   const lessonTermIds = useMemo(
     () => collectGlossaryTermIds(content || {}),
@@ -277,6 +275,13 @@ export default function LessonStepScreen() {
     flowPhaseLabel = 'Samenvatting';
   }
   const flowMetaLabel = `${flowPhaseLabel} · ${step}/${TOTAL_STEPS}`.toUpperCase();
+  const topSectionSubtitle = useMemo(() => {
+    if (lessonId !== 'lesson_0') return null;
+    if (step === 2) return INTRO_VISUALIZATION_SUBTITLE;
+    if (step === 3) return copy.introScenario.headerHelper;
+    if (step === 4) return 'Plaats de stappen van het beleggingsproces in de juiste volgorde.';
+    return null;
+  }, [copy.introScenario.headerHelper, lessonId, step]);
 
   return (
     <ScreenBackground variant="bg3">
@@ -284,7 +289,7 @@ export default function LessonStepScreen() {
         scrollEnabled={!disableOuterScroll && !isLessonGlossaryOpen}
         containerStyle={styles.transparentScreen}
       >
-      <StepHeader
+      <TOPSECTION
         step={step}
         total={TOTAL_STEPS}
         title={stepTitle}
@@ -293,9 +298,7 @@ export default function LessonStepScreen() {
         glossaryLabel={copy.labels.termsInLesson}
         onPressTerm={handleTermPress}
         stepLabel={flowMetaLabel}
-        helperText={
-          isIntroScenario ? copy.introScenario.headerHelper : null
-        }
+        subtitle={topSectionSubtitle}
         showTitle={!(lessonId === 'lesson_0' && step === 1)}
       />
 
@@ -971,7 +974,6 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
   const isGuidedSequence = lessonId === 'lesson_0';
   const steps = isGuidedSequence ? INTRO_VISUALIZATION_STEPS : copy.introVisualization.steps;
   const [completedSteps, setCompletedSteps] = useState(() => steps.map(() => false));
-  const subtitle = isGuidedSequence ? INTRO_VISUALIZATION_SUBTITLE : copy.introVisualization.subtitle;
 
   useEffect(() => {
     setCompletedSteps(steps.map(() => false));
@@ -993,9 +995,6 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
-      <AppText style={styles.journeySubtitle}>
-        {subtitle}
-      </AppText>
       <View style={styles.l1VisGrid}>
         {steps.map((step, index) => {
           const isCompleted = isGuidedSequence ? completedSteps[index] : false;
@@ -2329,8 +2328,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
         ) : null}
 
         {/* Slot stack */}
-        <View style={styles.exerciseSection}>
-          <AppText style={styles.exerciseSectionLabel}>{copy.labels.yourProcess}</AppText>
+        <View style={[styles.exerciseSection, styles.introExercisePrimarySection]}>
           <View style={styles.introSlotStack}>
             {slots.map((item, index) => {
               const isLocked = item?.id === lastStepId;
@@ -4356,6 +4354,9 @@ const createStyles = (colors, components) =>
   },
   exerciseSection: {
     gap: components.layout.spacing.md,
+  },
+  introExercisePrimarySection: {
+    marginTop: components.layout.sectionGap,
   },
   exerciseInstruction: {
     ...typography.styles.body,
