@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, {
   Easing,
   Extrapolation,
+  FadeInDown,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
@@ -2234,13 +2235,20 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
 }
 
 function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
-  const { styles } = useLessonStepStyles();
+  const { styles, colors, components } = useLessonStepStyles();
   const { items = [], correctOrder = [] } = exercise;
-  const [placements, setPlacements] = useState(
-    () => items.reduce((acc, item) => ({ ...acc, [item.id]: null }), {})
-  );
+  const lastStepId = correctOrder[correctOrder.length - 1];
+
+  const [placements, setPlacements] = useState(() => {
+    const initial = items.reduce((acc, item) => ({ ...acc, [item.id]: null }), {});
+    if (lastStepId) initial[lastStepId] = items.length - 1;
+    return initial;
+  });
   const [hintActive, setHintActive] = useState(false);
   const [showHint, setShowHint] = useState(false);
+
+  const slotHighlight = useSharedValue(0);
+  const shakeX = useSharedValue(0);
 
   const slots = useMemo(() => {
     const next = Array(items.length).fill(null);
@@ -2262,6 +2270,29 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
     ? slots.map((item, index) => item?.id !== correctOrder[index])
     : [];
 
+  useEffect(() => {
+    if (showError) {
+      shakeX.value = withSequence(
+        withTiming(-7, { duration: 55 }),
+        withTiming(7, { duration: 55 }),
+        withTiming(-5, { duration: 55 }),
+        withTiming(5, { duration: 55 }),
+        withTiming(-3, { duration: 55 }),
+        withTiming(0, { duration: 55 })
+      );
+    }
+  }, [showError]);
+
+  const activeHighlightStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(slotHighlight.value, [0, 1], [0, 0.20]),
+  }));
+  const dimHighlightStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(slotHighlight.value, [0, 1], [0, 0.08]),
+  }));
+  const shakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shakeX.value }],
+  }));
+
   const handlePlace = (id) => {
     if (placements[id] !== null && placements[id] !== undefined) return;
     const nextIndex = slots.findIndex((item) => !item);
@@ -2270,21 +2301,21 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
   };
 
   const handleRemove = (id) => {
+    if (id === lastStepId) return;
     setPlacements((prev) => ({ ...prev, [id]: null }));
   };
 
   const handleHint = () => {
     setHintActive(true);
     setShowHint(true);
-    setTimeout(() => {
-      setHintActive(false);
-    }, 1500);
+    setTimeout(() => setHintActive(false), 1500);
   };
 
   return (
     <View style={[styles.stepBody, styles.exerciseBody]}>
       <View style={styles.exerciseContent}>
-        <AppText style={styles.exerciseInstruction}>{copy.introExercise.instruction}</AppText>
+
+        {/* Status — inline, only when all slots are filled */}
         {isComplete ? (
           <AppText
             style={[
@@ -2296,55 +2327,116 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
           </AppText>
         ) : null}
 
+        {/* Slot stack */}
         <View style={styles.exerciseSection}>
           <AppText style={styles.exerciseSectionLabel}>{copy.labels.yourProcess}</AppText>
-          <View style={styles.exerciseSlots}>
+          <View style={styles.introSlotStack}>
             {slots.map((item, index) => {
-              const isExecutionSlot = index === slots.length - 1;
+              const isLocked = item?.id === lastStepId;
+              const isNextEmpty = !item && slots.slice(0, index).every(Boolean);
+              const isWrong = wrongSlots[index];
               return (
-                <View
-                  key={`slot-${index}`}
-                  style={[
-                    styles.exerciseSlot,
-                    isExecutionSlot && styles.exerciseSlotExecution,
-                    wrongSlots[index] && styles.exerciseSlotWrong,
-                    hintActive && index === 0 && styles.exerciseSlotHint,
-                  ]}
-                >
-                  <View style={styles.exerciseSlotIndex}>
-                    <AppText style={styles.exerciseSlotIndexText}>{index + 1}</AppText>
-                  </View>
-                  {item ? (
-                    <Pressable onPress={() => handleRemove(item.id)}>
-                      <View style={styles.exerciseChip}>
-                        <AppText style={styles.exerciseChipText}>{item.label}</AppText>
-                      </View>
-                    </Pressable>
-                  ) : (
-                    <AppText style={styles.exerciseSlotTextMuted}>
-                      {isExecutionSlot ? copy.labels.executionLast : copy.labels.emptySlot}
-                    </AppText>
-                  )}
-                </View>
+                <Animated.View key={`slot-wrap-${index}`} style={[isWrong && shakeStyle]}>
+                  <Pressable
+                    style={[
+                      styles.introSlot,
+                      item ? styles.introSlotFilled : styles.introSlotEmpty,
+                      isLocked && styles.introSlotLocked,
+                      isNextEmpty && styles.introSlotNext,
+                      isWrong && styles.introSlotWrong,
+                      isCorrect && item && styles.introSlotCorrect,
+                      hintActive && index === 0 && !item && styles.introSlotHint,
+                    ]}
+                    onPress={() => handleRemove(item?.id)}
+                    disabled={isLocked || !item}
+                  >
+                    {/* Highlight overlay on next slot while a card is held */}
+                    {isNextEmpty ? (
+                      <Animated.View
+                        style={[StyleSheet.absoluteFill, styles.introSlotHighlight, activeHighlightStyle]}
+                        pointerEvents="none"
+                      />
+                    ) : null}
+
+                    {/* Step number badge */}
+                    <View
+                      style={[
+                        styles.introSlotBadge,
+                        item && styles.introSlotBadgeFilled,
+                        isLocked && styles.introSlotBadgeLocked,
+                        isWrong && styles.introSlotBadgeWrong,
+                        isCorrect && item && styles.introSlotBadgeCorrect,
+                      ]}
+                    >
+                      {isLocked ? (
+                        <Ionicons name="lock-closed" size={9} color={colors.accent.primary} />
+                      ) : (
+                        <AppText style={[styles.introSlotBadgeText, item && styles.introSlotBadgeTextFilled]}>
+                          {index + 1}
+                        </AppText>
+                      )}
+                    </View>
+
+                    {/* Label or placeholder */}
+                    {item ? (
+                      <Animated.View key={item.id} entering={FadeInDown.duration(180)} style={styles.introSlotLabelRow}>
+                        <AppText
+                          style={[
+                            styles.introSlotLabel,
+                            isLocked && styles.introSlotLabelLocked,
+                            isCorrect && item && styles.introSlotLabelCorrect,
+                          ]}
+                        >
+                          {item.label}
+                        </AppText>
+                        {isWrong ? (
+                          <Ionicons name="close-circle" size={15} color={toRgba(colors.accent.primary, 0.7)} />
+                        ) : isCorrect && item ? (
+                          <Ionicons name="checkmark-circle" size={15} color={colors.accent.primary} />
+                        ) : !isLocked ? (
+                          <Ionicons name="close" size={13} color={toRgba(colors.text.secondary, 0.45)} />
+                        ) : null}
+                      </Animated.View>
+                    ) : (
+                      <AppText
+                        style={[
+                          styles.introSlotPlaceholder,
+                          isNextEmpty && styles.introSlotPlaceholderNext,
+                        ]}
+                      >
+                        {copy.labels.placeStepHere}
+                      </AppText>
+                    )}
+                  </Pressable>
+                </Animated.View>
               );
             })}
           </View>
         </View>
 
-        <View style={styles.exerciseSection}>
-          <AppText style={styles.exerciseSectionLabel}>{copy.labels.availableSteps}</AppText>
-          <View style={styles.exerciseChipList}>
-            {available.map((item) => {
-              return (
-                <Pressable key={item.id} onPress={() => handlePlace(item.id)}>
-                  <View style={styles.exerciseChip}>
-                    <AppText style={styles.exerciseChipText}>{item.label}</AppText>
-                  </View>
+        {/* Card pool */}
+        {available.length > 0 ? (
+          <View style={styles.exerciseSection}>
+            <AppText style={styles.exerciseSectionLabel}>{copy.labels.availableSteps}</AppText>
+            <View style={styles.introCardGrid}>
+              {available.map((item) => (
+                <Pressable
+                  key={item.id}
+                  onPressIn={() => { slotHighlight.value = withTiming(1, { duration: 120 }); }}
+                  onPressOut={() => { slotHighlight.value = withTiming(0, { duration: 250 }); }}
+                  onPress={() => handlePlace(item.id)}
+                  style={({ pressed }) => [
+                    styles.introCard,
+                    pressed && styles.introCardPressed,
+                  ]}
+                >
+                  <AppText style={styles.introCardLabel} numberOfLines={2}>{item.label}</AppText>
                 </Pressable>
-              );
-            })}
+              ))}
+            </View>
           </View>
-        </View>
+        ) : null}
+
       </View>
 
       <View style={styles.exerciseFooter}>
@@ -4372,6 +4464,146 @@ const createStyles = (colors, components) =>
     ...typography.styles.body,
     color: colors.text.primary,
   },
+  // ─── Intro exercise — Vertical slot stack design ──────────────────────────
+  introSlotStack: {
+    gap: components.layout.spacing.xs,
+  },
+  introSlot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.sm,
+    paddingVertical: components.layout.spacing.xs,
+    paddingHorizontal: components.layout.spacing.sm,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    minHeight: 44,
+    overflow: 'hidden',
+  },
+  introSlotEmpty: {
+    borderColor: toRgba(colors.ui.divider, 0.3),
+    borderStyle: 'dashed',
+    backgroundColor: toRgba(colors.background.surface, 0.4),
+  },
+  introSlotFilled: {
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    borderStyle: 'solid',
+    backgroundColor: colors.background.surface,
+  },
+  introSlotNext: {
+    borderColor: toRgba(colors.ui.divider, 0.55),
+    backgroundColor: toRgba(colors.background.surface, 0.7),
+  },
+  introSlotLocked: {
+    borderStyle: 'solid',
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke * 0.6),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  introSlotWrong: {
+    borderStyle: 'solid',
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  introSlotCorrect: {
+    borderStyle: 'solid',
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke * 0.6),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  introSlotHint: {
+    borderStyle: 'solid',
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+  },
+  introSlotHighlight: {
+    borderRadius: components.radius.input,
+    backgroundColor: colors.accent.primary,
+    opacity: 0,
+  },
+  introSlotBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.6),
+  },
+  introSlotBadgeFilled: {
+    backgroundColor: colors.background.surfaceActive,
+  },
+  introSlotBadgeLocked: {
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint * 1.5),
+  },
+  introSlotBadgeWrong: {
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  introSlotBadgeCorrect: {
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint * 1.5),
+  },
+  introSlotBadgeText: {
+    fontFamily: typography.fonts.filsonBold,
+    fontSize: 11,
+    lineHeight: 13,
+    color: colors.text.secondary,
+  },
+  introSlotBadgeTextFilled: {
+    color: colors.text.primary,
+  },
+  introSlotLabelRow: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.xs,
+  },
+  introSlotLabel: {
+    ...typography.styles.small,
+    color: colors.text.primary,
+    flex: 1,
+  },
+  introSlotLabelLocked: {
+    color: colors.accent.primary,
+  },
+  introSlotLabelCorrect: {
+    color: colors.text.primary,
+  },
+  introSlotPlaceholder: {
+    ...typography.styles.small,
+    color: toRgba(colors.text.secondary, 0.4),
+    flex: 1,
+  },
+  introSlotPlaceholderNext: {
+    color: toRgba(colors.text.secondary, 0.65),
+  },
+  introCardGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: components.layout.spacing.sm,
+  },
+  introCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+    width: '48%',
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surface,
+    minHeight: 52,
+  },
+  introCardPressed: {
+    transform: [{ scale: components.transforms.scalePressedStrong }],
+    backgroundColor: colors.background.surfaceActive,
+  },
+  introCardAccent: {
+    width: 3,
+    alignSelf: 'stretch',
+    backgroundColor: colors.accent.primary,
+  },
+  introCardLabel: {
+    ...typography.styles.small,
+    color: colors.text.primary,
+    flex: 1,
+    paddingVertical: components.layout.spacing.sm,
+    paddingHorizontal: components.layout.spacing.md,
+  },
+  // ──────────────────────────────────────────────────────────────────────────
   exerciseOutcome: {
     gap: components.layout.spacing.sm,
     padding: components.layout.spacing.md,
