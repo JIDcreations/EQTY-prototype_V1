@@ -175,9 +175,9 @@ const getSmoothPoints = (basePoints, samplesPerSegment = 10) => {
 };
 
 function useLessonStepStyles() {
-  const { colors, components } = useTheme();
-  const styles = useMemo(() => createStyles(colors, components), [colors, components]);
-  return { colors, components, styles };
+  const { colors, components, mode } = useTheme();
+  const styles = useMemo(() => createStyles(colors, components, mode), [colors, components, mode]);
+  return { colors, components, styles, mode };
 }
 
 export default function LessonStepScreen() {
@@ -2235,7 +2235,7 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
 }
 
 function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
+  const { styles, colors, components, mode } = useLessonStepStyles();
   const { items = [], correctOrder = [] } = exercise;
   const lastStepId = correctOrder[correctOrder.length - 1];
 
@@ -2361,6 +2361,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                     <View
                       style={[
                         styles.introSlotBadge,
+                        isNextEmpty && styles.introSlotBadgeNext,
                         item && styles.introSlotBadgeFilled,
                         isLocked && styles.introSlotBadgeLocked,
                         isWrong && styles.introSlotBadgeWrong,
@@ -2368,9 +2369,19 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                       ]}
                     >
                       {isLocked ? (
-                        <Ionicons name="lock-closed" size={9} color={colors.accent.primary} />
+                        <Ionicons
+                          name="lock-closed"
+                          size={9}
+                          color={mode === 'light' ? colors.text.onAccent : colors.text.primary}
+                        />
                       ) : (
-                        <AppText style={[styles.introSlotBadgeText, item && styles.introSlotBadgeTextFilled]}>
+                        <AppText
+                          style={[
+                            styles.introSlotBadgeText,
+                            isNextEmpty && styles.introSlotBadgeTextNext,
+                            item && styles.introSlotBadgeTextFilled,
+                          ]}
+                        >
                           {index + 1}
                         </AppText>
                       )}
@@ -2382,6 +2393,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                         <AppText
                           style={[
                             styles.introSlotLabel,
+                            isWrong && styles.introSlotLabelWrong,
                             isLocked && styles.introSlotLabelLocked,
                             isCorrect && item && styles.introSlotLabelCorrect,
                           ]}
@@ -2389,7 +2401,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                           {item.label}
                         </AppText>
                         {isWrong ? (
-                          <Ionicons name="close-circle" size={15} color={toRgba(colors.accent.primary, 0.7)} />
+                          <Ionicons name="close" size={14} color={colors.text.primary} />
                         ) : isCorrect && item ? (
                           <Ionicons name="checkmark-circle" size={15} color={colors.accent.primary} />
                         ) : !isLocked ? (
@@ -2434,7 +2446,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
 
       </View>
 
-      <View style={styles.exerciseFooter}>
+      <View style={[styles.exerciseFooter, styles.introExerciseFooter]}>
         <View style={styles.exerciseActionRow}>
           <SecondaryButton
             label={copy.labels.needHint}
@@ -2454,6 +2466,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
         visible={showHint}
         onClose={() => setShowHint(false)}
         title={copy.labels.hint}
+        scrimOpacity={0}
       >
         <AppText style={styles.exerciseHintBody}>
           {copy.messages.hintBody}
@@ -3185,7 +3198,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy }) {
   );
 }
 
-const createStyles = (colors, components) =>
+const createStyles = (colors, components, mode = 'dark') =>
   StyleSheet.create({
   stepBody: {
     gap: components.layout.spacing.lg,
@@ -4455,8 +4468,10 @@ const createStyles = (colors, components) =>
     width: '100%',
   },
   exerciseFooter: {
-    marginTop: 'auto',
     gap: components.layout.spacing.sm,
+  },
+  introExerciseFooter: {
+    marginTop: components.layout.sectionGap,
   },
   exerciseHintBody: {
     ...typography.styles.body,
@@ -4493,26 +4508,29 @@ const createStyles = (colors, components) =>
   },
   introSlotLocked: {
     borderStyle: 'solid',
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke * 0.6),
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor:
+      mode === 'light'
+        ? toRgba(colors.accent.primary, colors.opacity.stroke)
+        : toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: mode === 'light' ? colors.accent.primary : colors.background.surface,
   },
   introSlotWrong: {
     borderStyle: 'solid',
     borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    backgroundColor: colors.background.surface,
   },
   introSlotCorrect: {
     borderStyle: 'solid',
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke * 0.6),
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surface,
   },
   introSlotHint: {
     borderStyle: 'solid',
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderColor: toRgba(colors.ui.divider, 0.55),
   },
   introSlotHighlight: {
     borderRadius: components.radius.input,
-    backgroundColor: colors.accent.primary,
+    backgroundColor: colors.ui.divider,
     opacity: 0,
   },
   introSlotBadge: {
@@ -4521,28 +4539,41 @@ const createStyles = (colors, components) =>
     borderRadius: components.radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: toRgba(colors.background.surfaceActive, 0.6),
+    backgroundColor: colors.text.secondary,
   },
   introSlotBadgeFilled: {
-    backgroundColor: colors.background.surfaceActive,
+    backgroundColor: colors.text.secondary,
+  },
+  introSlotBadgeNext: {
+    backgroundColor: colors.text.secondary,
   },
   introSlotBadgeLocked: {
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint * 1.5),
+    backgroundColor: mode === 'light' ? colors.accent.primary : colors.background.surface,
+    borderWidth: components.borderWidth.thin,
+    borderColor:
+      mode === 'light'
+        ? toRgba(colors.accent.primary, colors.opacity.stroke)
+        : toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   introSlotBadgeWrong: {
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    backgroundColor: colors.text.secondary,
   },
   introSlotBadgeCorrect: {
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint * 1.5),
+    backgroundColor: colors.background.surface,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   introSlotBadgeText: {
     fontFamily: typography.fonts.filsonBold,
     fontSize: 11,
     lineHeight: 13,
-    color: colors.text.secondary,
+    color: colors.background.surface,
   },
   introSlotBadgeTextFilled: {
-    color: colors.text.primary,
+    color: colors.background.surface,
+  },
+  introSlotBadgeTextNext: {
+    color: colors.background.surface,
   },
   introSlotLabelRow: {
     flex: 1,
@@ -4556,10 +4587,13 @@ const createStyles = (colors, components) =>
     flex: 1,
   },
   introSlotLabelLocked: {
-    color: colors.accent.primary,
+    color: mode === 'light' ? colors.text.onAccent : colors.text.primary,
   },
   introSlotLabelCorrect: {
     color: colors.text.primary,
+  },
+  introSlotLabelWrong: {
+    color: colors.accent.primary,
   },
   introSlotPlaceholder: {
     ...typography.styles.small,
