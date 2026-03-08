@@ -3968,8 +3968,8 @@ const createStyles = (colors, components) =>
     backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   narrativeChoiceCardPlan: {
-    borderColor: toRgba(colors.accent.primary, 0.4),
-    backgroundColor: toRgba(colors.accent.primary, 0.06),
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   narrativeChoiceCardActiveReactive: {
     borderColor: colors.text.primary,
