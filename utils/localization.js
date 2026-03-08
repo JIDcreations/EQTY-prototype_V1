@@ -352,7 +352,7 @@ const LESSON_STEP_COPY = {
       availableSteps: 'Beschikbare stappen',
       executionLast: 'Uitvoering (laatst)',
       emptySlot: 'Lege plek',
-      placeStepHere: 'Plaats stap hier',
+      placeStepHere: 'Plaats hier de juiste stap',
       needHint: 'Hint nodig?',
       hint: 'Hint',
       revealImpact: 'Toon impact',
