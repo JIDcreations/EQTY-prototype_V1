@@ -2425,6 +2425,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                   onPressOut={() => { slotHighlight.value = withTiming(0, { duration: 250 }); }}
                   onPress={() => handlePlace(item.id)}
                   label={item.label}
+                  style={styles.introCardPillActive}
                 />
               ))}
             </View>
@@ -4572,6 +4573,9 @@ const createStyles = (colors, components) =>
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: components.layout.spacing.sm,
+  },
+  introCardPillActive: {
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   // ──────────────────────────────────────────────────────────────────────────
   exerciseOutcome: {
