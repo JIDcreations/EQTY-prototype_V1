@@ -34,6 +34,7 @@ import { useGlossary } from '../components/GlossaryProvider';
 import GlossaryText from '../components/GlossaryText';
 import LessonStepContainer from '../components/LessonStepContainer';
 import ScreenBackground from '../components/ScreenBackground';
+import SurfacePillButton from '../components/SurfacePillButton';
 import StepHeader from '../components/StepHeader';
 import { glossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
@@ -2420,18 +2421,13 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
             <AppText style={styles.exerciseSectionLabel}>{copy.labels.availableSteps}</AppText>
             <View style={styles.introCardGrid}>
               {available.map((item) => (
-                <Pressable
+                <SurfacePillButton
                   key={item.id}
                   onPressIn={() => { slotHighlight.value = withTiming(1, { duration: 120 }); }}
                   onPressOut={() => { slotHighlight.value = withTiming(0, { duration: 250 }); }}
                   onPress={() => handlePlace(item.id)}
-                  style={({ pressed }) => [
-                    styles.introCard,
-                    pressed && styles.introCardPressed,
-                  ]}
-                >
-                  <AppText style={styles.introCardLabel} numberOfLines={2}>{item.label}</AppText>
-                </Pressable>
+                  label={item.label}
+                />
               ))}
             </View>
           </View>
@@ -4575,33 +4571,6 @@ const createStyles = (colors, components) =>
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: components.layout.spacing.sm,
-  },
-  introCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    overflow: 'hidden',
-    width: '48%',
-    borderRadius: components.radius.input,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surface,
-    minHeight: 52,
-  },
-  introCardPressed: {
-    transform: [{ scale: components.transforms.scalePressedStrong }],
-    backgroundColor: colors.background.surfaceActive,
-  },
-  introCardAccent: {
-    width: 3,
-    alignSelf: 'stretch',
-    backgroundColor: colors.accent.primary,
-  },
-  introCardLabel: {
-    ...typography.styles.small,
-    color: colors.text.primary,
-    flex: 1,
-    paddingVertical: components.layout.spacing.sm,
-    paddingHorizontal: components.layout.spacing.md,
   },
   // ──────────────────────────────────────────────────────────────────────────
   exerciseOutcome: {

@@ -3,8 +3,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { typography, useTheme } from '../theme';
 import ProgressBar from './ProgressBar';
-import GlossaryText from './GlossaryText';
 import AppText from './AppText';
+import SurfacePillButton from './SurfacePillButton';
 
 export default function StepHeader({
   step,
@@ -41,15 +41,7 @@ export default function StepHeader({
           />
         </Pressable>
         {onOpenGlossary ? (
-          <Pressable
-            onPress={onOpenGlossary}
-            style={({ pressed }) => [
-              styles.glossaryButton,
-              pressed && styles.glossaryButtonPressed,
-            ]}
-          >
-            <AppText style={styles.glossaryLabel}>{glossaryLabel}</AppText>
-          </Pressable>
+          <SurfacePillButton label={glossaryLabel} onPress={onOpenGlossary} />
         ) : null}
       </View>
       {stepLabel ? <AppText style={styles.stepLabel}>{stepLabel}</AppText> : null}
@@ -82,21 +74,6 @@ const createStyles = (colors, components) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    glossaryButton: {
-      paddingHorizontal: components.layout.spacing.md,
-      paddingVertical: components.layout.spacing.xs,
-      borderRadius: components.radius.pill,
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-    },
-    glossaryButtonPressed: {
-      opacity: colors.opacity.emphasis,
-    },
-    glossaryLabel: {
-      ...typography.styles.small,
-      color: colors.text.primary,
-    },
     progressInline: {
       ...typography.styles.small,
       color: colors.text.secondary,
@@ -117,12 +94,3 @@ const createStyles = (colors, components) =>
       color: colors.text.primary,
     },
   });
-
-const toRgba = (hex, alpha) => {
-  const cleaned = hex.replace('#', '');
-  const value = parseInt(cleaned, 16);
-  const r = (value >> 16) & 255;
-  const g = (value >> 8) & 255;
-  const b = value & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
