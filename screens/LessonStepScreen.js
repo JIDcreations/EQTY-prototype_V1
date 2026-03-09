@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Dimensions,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Linking,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -2367,7 +2369,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                         isCorrect && item && styles.introSlotBadgeCorrect,
                       ]}
                     >
-                      {isLocked ? (
+                      {isLocked && !isCorrect ? (
                         <Ionicons
                           name="lock-closed"
                           size={9}
@@ -2379,6 +2381,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                             styles.introSlotBadgeText,
                             isNextEmpty && styles.introSlotBadgeTextNext,
                             item && styles.introSlotBadgeTextFilled,
+                            isCorrect && item && styles.introSlotBadgeTextCorrect,
                           ]}
                         >
                           {index + 1}
@@ -2902,52 +2905,54 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
   };
 
   return (
-    <View style={styles.stepBody}>
-      <View style={styles.reflectionHeader}>
-        <AppText style={styles.reflectionQuestion}>{question}</AppText>
-        <AppText style={styles.reflectionSubtitle}>
-          {copy.messages.reflectionSubtitle}
-        </AppText>
-      </View>
-      {isSubmitted ? (
-        <Animated.View
-          entering={FadeInDown.duration(350)}
-          style={styles.reflectionResultCard}
-        >
-          <AppText style={styles.reflectionAnswerText}>{submittedText}</AppText>
-          <View style={styles.reflectionResultDivider} />
-          <View style={styles.reflectionInsightBlock}>
-            <AppText style={styles.reflectionInsightLabel}>
-              {copy.labels.eqtyInsight}
-            </AppText>
-            <AppText style={styles.reflectionInsightText}>{response}</AppText>
-          </View>
-        </Animated.View>
-      ) : (
-        <View>
-          <View style={styles.reflectionTextAreaWrap}>
-            <AppTextInput
-              style={styles.reflectionTextArea}
-              value={text}
-              onChangeText={setText}
-              placeholder={placeholder}
-              placeholderTextColor={colors.text.secondary}
-              multiline
-              autoCorrect
-              textAlignVertical="top"
-            />
-          </View>
-          <AppText style={styles.reflectionPersonalizationHint}>
-            {copy.messages.reflectionPersonalizationHint}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.stepBody}>
+        <View style={styles.reflectionHeader}>
+          <AppText style={styles.reflectionQuestion}>{question}</AppText>
+          <AppText style={styles.reflectionSubtitle}>
+            {copy.messages.reflectionSubtitle}
           </AppText>
         </View>
-      )}
-      <PrimaryButton
-        label={isSubmitted ? copy.buttons.continue : copy.buttons.submitReflection}
-        onPress={handleContinue}
-        disabled={!isSubmitted && !canSubmit}
-      />
-    </View>
+        {isSubmitted ? (
+          <Animated.View
+            entering={FadeInDown.duration(350)}
+            style={styles.reflectionResultCard}
+          >
+            <AppText style={styles.reflectionAnswerText}>{submittedText}</AppText>
+            <View style={styles.reflectionResultDivider} />
+            <View style={styles.reflectionInsightBlock}>
+              <AppText style={styles.reflectionInsightLabel}>
+                {copy.labels.eqtyInsight}
+              </AppText>
+              <AppText style={styles.reflectionInsightText}>{response}</AppText>
+            </View>
+          </Animated.View>
+        ) : (
+          <View>
+            <View style={styles.reflectionTextAreaWrap}>
+              <AppTextInput
+                style={styles.reflectionTextArea}
+                value={text}
+                onChangeText={setText}
+                placeholder={placeholder}
+                placeholderTextColor={colors.text.secondary}
+                multiline
+                autoCorrect
+                textAlignVertical="top"
+              />
+            </View>
+            <AppText style={styles.reflectionPersonalizationHint}>
+              {copy.messages.reflectionPersonalizationHint}
+            </AppText>
+          </View>
+        )}
+        <PrimaryButton
+          label={isSubmitted ? copy.buttons.next : copy.buttons.submitReflection}
+          onPress={handleContinue}
+          disabled={!isSubmitted && !canSubmit}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -4510,6 +4515,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   introSlotBadgeTextNext: {
     color: colors.background.surface,
   },
+  introSlotBadgeTextCorrect: {
+    color: colors.text.primary,
+  },
   introSlotLabelRow: {
     flex: 1,
     flexDirection: 'row',
@@ -4710,9 +4718,12 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.secondary,
   },
   reflectionTextAreaWrap: {
-    borderRadius: components.radius.card,
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    padding: components.layout.spacing.xl,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, 0.6),
+    paddingHorizontal: 16,
+    paddingVertical: 20,
   },
   reflectionTextArea: {
     ...typography.styles.body,
@@ -4728,7 +4739,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   reflectionResultCard: {
     borderRadius: components.radius.card,
-    backgroundColor: colors.background.surfaceActive,
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     padding: components.layout.spacing.lg,
     gap: components.layout.spacing.md,
   },
