@@ -299,7 +299,7 @@ export default function LessonStepScreen() {
         onPressTerm={handleTermPress}
         stepLabel={flowMetaLabel}
         subtitle={topSectionSubtitle}
-        showTitle={!(lessonId === 'lesson_0' && step === 1)}
+        showTitle={!(lessonId === 'lesson_0' && step === 1) && step !== 5}
       />
 
       {step === 1 && (
@@ -355,7 +355,6 @@ export default function LessonStepScreen() {
           }}
           onPressTerm={handleTermPress}
           copy={copy}
-          keyboardOffset={keyboardOffset}
         />
       )}
       {step === 6 && (
@@ -2852,19 +2851,17 @@ function MultiExercise({ exercise, onNext, onPressTerm, copy }) {
   );
 }
 
-function ReflectionStep({ content, onSubmit, onPressTerm, copy, keyboardOffset }) {
+function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
   const { colors, components, styles } = useLessonStepStyles();
   const [text, setText] = useState('');
   const [submittedText, setSubmittedText] = useState('');
   const [response, setResponse] = useState(null);
-  const intro = content?.steps?.reflection?.intro;
   const question =
-    copy.messages.reflectionQuestion || content?.steps?.reflection?.question;
+    content?.steps?.reflection?.question || copy.messages.reflectionQuestion;
   const placeholder =
-    copy.messages.reflectionPlaceholder || content?.steps?.reflection?.placeholder;
-  const canSend = text.trim().length > 0;
-  const canContinue = !!response;
-  const isClosed = !!response;
+    content?.steps?.reflection?.placeholder || copy.messages.reflectionPlaceholder;
+  const canSubmit = text.trim().length > 0;
+  const isSubmitted = !!response;
 
   const buildResponse = (input) => {
     const normalized = (input || '').toLowerCase().trim();
@@ -2872,47 +2869,24 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy, keyboardOffset }
       return copy.messages.reflectionShort;
     }
     const structureWords = [
-      'order',
-      'sequence',
-      'step',
-      'process',
-      'structure',
-      'framework',
-      'flow',
-      'plan',
-      'planning',
-      'prior',
-      'before',
-      'clarity',
+      'order', 'sequence', 'step', 'process', 'structure',
+      'framework', 'flow', 'plan', 'planning', 'prior', 'before', 'clarity',
+      'volgorde', 'stap', 'proces', 'structuur', 'kader', 'planning',
     ];
     const emotionWords = [
-      'fear',
-      'anxiety',
-      'panic',
-      'stress',
-      'nervous',
-      'worry',
-      'emotional',
-      'impulse',
-      'impulsive',
-      'reactive',
-      'react',
-      'fomo',
+      'fear', 'anxiety', 'panic', 'stress', 'nervous', 'worry',
+      'emotional', 'impulse', 'impulsive', 'reactive', 'react', 'fomo',
+      'angst', 'zenuwachtig', 'zorgen', 'emotioneel', 'impulsief', 'reactief',
     ];
     const hasStructure = structureWords.some((word) => normalized.includes(word));
     const hasEmotion = emotionWords.some((word) => normalized.includes(word));
-    if (hasStructure) {
-      return copy.messages.reflectionStructure;
-    }
-    if (hasEmotion) {
-      return copy.messages.reflectionEmotion;
-    }
+    if (hasStructure) return copy.messages.reflectionStructure;
+    if (hasEmotion) return copy.messages.reflectionEmotion;
     return copy.messages.reflectionDefault;
   };
 
-  const handleSend = () => {
-    if (isClosed) return;
-    if (!canSend) return;
+  const handleSubmit = () => {
+    if (isSubmitted || !canSubmit) return;
     const trimmed = text.trim();
     setSubmittedText(trimmed);
     setResponse(buildResponse(trimmed));
@@ -2920,100 +2894,60 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy, keyboardOffset }
   };
 
   const handleContinue = () => {
-    if (!response) {
-      handleSend();
+    if (!isSubmitted) {
+      handleSubmit();
       return;
     }
-    onSubmit(submittedText || text, response);
+    onSubmit(submittedText, response);
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? keyboardOffset : 0}
-      style={[styles.stepBody, styles.reflectionBody]}
-    >
-      {intro ? <AppText style={styles.stepIntro}>{intro}</AppText> : null}
-      <ScrollView
-        style={styles.reflectionScroll}
-        contentContainerStyle={styles.reflectionScrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-      <View style={styles.reflectionThread}>
-          <View style={[styles.chatBubble, styles.chatBubbleSystem]}>
-            <AppText style={styles.chatLabel}>EQTY</AppText>
-            <GlossaryText text={question} style={styles.chatText} onPressTerm={onPressTerm} />
+    <View style={styles.stepBody}>
+      <View style={styles.reflectionHeader}>
+        <AppText style={styles.reflectionQuestion}>{question}</AppText>
+        <AppText style={styles.reflectionSubtitle}>
+          {copy.messages.reflectionSubtitle}
+        </AppText>
+      </View>
+      {isSubmitted ? (
+        <Animated.View
+          entering={FadeInDown.duration(350)}
+          style={styles.reflectionResultCard}
+        >
+          <AppText style={styles.reflectionAnswerText}>{submittedText}</AppText>
+          <View style={styles.reflectionResultDivider} />
+          <View style={styles.reflectionInsightBlock}>
+            <AppText style={styles.reflectionInsightLabel}>
+              {copy.labels.eqtyInsight}
+            </AppText>
+            <AppText style={styles.reflectionInsightText}>{response}</AppText>
           </View>
-          {submittedText ? (
-            <View style={[styles.chatBubble, styles.chatBubbleUser]}>
-              <AppText style={styles.chatText}>{submittedText}</AppText>
-            </View>
-          ) : null}
-          {response ? (
-            <View style={[styles.chatBubble, styles.chatBubbleSystem]}>
-              <AppText style={styles.chatLabel}>{copy.labels.eqtyInsight}</AppText>
-              <AppText style={styles.chatText}>{response}</AppText>
-            </View>
-          ) : null}
-        </View>
-      </ScrollView>
-      <View style={styles.reflectionFooter}>
-        {isClosed ? (
-          <View style={styles.reflectionClosedCard}>
-            <Ionicons
-              name="lock-closed"
-              size={components.sizes.icon.sm}
-              color={colors.text.secondary}
-            />
-            <View style={styles.reflectionClosedTextWrap}>
-              <AppText style={styles.reflectionClosedTitle}>
-                {copy.messages.reflectionLockedTitle}
-              </AppText>
-              <AppText style={styles.reflectionClosedText}>
-                {copy.messages.reflectionLockedBody}
-              </AppText>
-            </View>
-          </View>
-        ) : null}
-        <PrimaryButton
-          label={copy.buttons.continue}
-          onPress={handleContinue}
-          disabled={!canContinue}
-        />
-        {isClosed ? null : (
-          <View style={styles.reflectionComposer}>
+        </Animated.View>
+      ) : (
+        <View>
+          <View style={styles.reflectionTextAreaWrap}>
             <AppTextInput
-              style={styles.reflectionInput}
+              style={styles.reflectionTextArea}
               value={text}
-              onChangeText={(value) => {
-                if (isClosed) return;
-                setText(value);
-                setResponse(null);
-              }}
+              onChangeText={setText}
               placeholder={placeholder}
               placeholderTextColor={colors.text.secondary}
               multiline
+              autoCorrect
+              textAlignVertical="top"
             />
-            <Pressable
-              onPress={handleSend}
-              disabled={!canSend}
-              style={({ pressed }) => [
-                styles.reflectionSendButton,
-                !canSend && styles.reflectionSendButtonDisabled,
-                pressed && canSend && styles.reflectionSendButtonPressed,
-              ]}
-            >
-              <Ionicons
-                name="arrow-up"
-                size={components.sizes.icon.sm}
-                color={canSend ? colors.text.primary : colors.text.secondary}
-              />
-            </Pressable>
           </View>
-        )}
-      </View>
-    </KeyboardAvoidingView>
+          <AppText style={styles.reflectionPersonalizationHint}>
+            {copy.messages.reflectionPersonalizationHint}
+          </AppText>
+        </View>
+      )}
+      <PrimaryButton
+        label={isSubmitted ? copy.buttons.continue : copy.buttons.submitReflection}
+        onPress={handleContinue}
+        disabled={!isSubmitted && !canSubmit}
+      />
+    </View>
   );
 }
 
@@ -4339,16 +4273,17 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   optionActive: {
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
   },
   optionText: {
     ...typography.styles.small,
     color: colors.text.primary,
   },
   optionTextActive: {
+    ...typography.styles.small,
     color: colors.text.primary,
+    fontFamily: typography.fonts.interSemiBold,
   },
   insightCard: {
     gap: components.layout.spacing.xs,
@@ -4762,122 +4697,59 @@ const createStyles = (colors, components, mode = 'dark') =>
   exerciseActions: {
     gap: components.layout.spacing.md,
   },
-  reflectionThread: {
-    gap: components.layout.spacing.lg,
-  },
-  reflectionBody: {
-    flex: 1,
-    gap: components.layout.spacing.md,
-  },
-  reflectionScroll: {
-    flex: 1,
-  },
-  reflectionScrollContent: {
-    paddingTop: components.layout.spacing.sm,
-    paddingBottom: components.layout.spacing.xxl,
-  },
-  reflectionFooter: {
-    gap: components.layout.spacing.md,
-    marginTop: 'auto',
-    paddingTop: components.layout.spacing.sm,
-    borderTopWidth: components.borderWidth.thin,
-    borderTopColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-  },
-  reflectionClosedCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: components.layout.spacing.sm,
-    paddingVertical: components.layout.spacing.sm,
-    paddingHorizontal: components.layout.spacing.md,
-    borderRadius: components.radius.input,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surface,
-  },
-  reflectionClosedTextWrap: {
-    flex: 1,
+  reflectionHeader: {
     gap: components.layout.spacing.xs,
+    marginTop: components.layout.spacing.md,
   },
-  reflectionClosedTitle: {
-    ...typography.styles.small,
+  reflectionQuestion: {
+    ...typography.styles.h2,
     color: colors.text.primary,
   },
-  reflectionClosedText: {
-    ...typography.styles.small,
-    color: colors.text.secondary,
-  },
-  chatBubble: {
-    maxWidth: '92%',
-    borderRadius: components.radius.input,
-    paddingVertical: components.layout.spacing.sm,
-    paddingHorizontal: components.layout.spacing.md,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surfaceActive,
-  },
-  chatBubbleSystem: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.background.surface,
-  },
-  chatBubbleUser: {
-    alignSelf: 'flex-end',
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
-  },
-  chatLabel: {
+  reflectionSubtitle: {
     ...typography.styles.meta,
     color: colors.text.secondary,
-    marginBottom: components.layout.spacing.xs,
   },
-  chatText: {
+  reflectionTextAreaWrap: {
+    borderRadius: components.radius.card,
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    padding: components.layout.spacing.xl,
+  },
+  reflectionTextArea: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    minHeight: components.sizes.input.multilineMinHeight,
+    textAlignVertical: 'top',
+  },
+  reflectionPersonalizationHint: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+    marginTop: components.layout.spacing.xs,
+    paddingHorizontal: components.layout.spacing.xs,
+  },
+  reflectionResultCard: {
+    borderRadius: components.radius.card,
+    backgroundColor: colors.background.surfaceActive,
+    padding: components.layout.spacing.lg,
+    gap: components.layout.spacing.md,
+  },
+  reflectionAnswerText: {
     ...typography.styles.body,
     color: colors.text.primary,
   },
-  reflectionComposer: {
-    ...components.input.container,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: components.layout.spacing.sm,
+  reflectionResultDivider: {
+    height: components.borderWidth.thin,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
-  reflectionInput: {
-    flex: 1,
-    ...components.input.multiline,
-    ...components.input.text,
-    maxHeight: components.sizes.input.composerMaxHeight,
-    textAlignVertical: 'top',
-  },
-  reflectionSendButton: {
-    width: components.sizes.square.lg,
-    height: components.sizes.square.lg,
-    borderRadius: components.radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surfaceActive,
-  },
-  reflectionSendButtonPressed: {
-    transform: [{ scale: components.transforms.scalePressedStrong }],
-  },
-  reflectionSendButtonDisabled: {
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-  },
-  reflectionSavedPill: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
+  reflectionInsightBlock: {
     gap: components.layout.spacing.xs,
-    paddingVertical: components.layout.spacing.sm,
-    paddingHorizontal: components.layout.spacing.md,
-    borderRadius: components.radius.pill,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surface,
   },
-  reflectionSavedText: {
-    ...typography.styles.small,
+  reflectionInsightLabel: {
+    ...typography.styles.stepLabel,
     color: colors.text.secondary,
+  },
+  reflectionInsightText: {
+    ...typography.styles.body,
+    color: colors.text.primary,
   },
   summaryCard: {
     gap: components.layout.spacing.md,

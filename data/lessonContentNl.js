@@ -99,10 +99,8 @@ export const lessonContentNl = {
         },
       },
       reflection: {
-        title: 'Jouw inzicht',
-        intro: 'Leg de verschuiving vast in hoe je naar uitvoering kijkt.',
-        question: 'Wat is er veranderd in hoe je naar uitvoering kijkt na deze les?',
-        placeholder: 'Voorbeeld: Ik zie waarom uitvoering als laatste hoort te komen.',
+        question: 'Wat heb je geleerd uit deze les?',
+        placeholder: 'Schrijf hier je antwoord...',
       },
       summary: {
         title: 'Het volledige investeringsproces',

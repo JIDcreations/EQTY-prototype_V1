@@ -74,7 +74,7 @@ export default function StepHeader({
 const createStyles = (colors, components) =>
   StyleSheet.create({
     container: {
-      gap: components.layout.spacing.sm,
+      gap: components.layout.spacing.md,
     },
     topRow: {
       flexDirection: 'row',
@@ -94,7 +94,6 @@ const createStyles = (colors, components) =>
       color: colors.text.secondary,
     },
     titleWrap: {
-      marginTop: components.layout.spacing.xs / 2,
     },
     titleWrapWithHelper: {
       gap: components.layout.spacing.xs,
@@ -108,7 +107,7 @@ const createStyles = (colors, components) =>
       color: colors.text.primary,
     },
     title: {
-      ...typography.styles.h1,
+      ...typography.styles.h2,
       color: colors.text.primary,
     },
   });

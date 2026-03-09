@@ -105,6 +105,7 @@ const LESSON_STEP_COPY = {
       reset: 'Reset',
       completeExercise: 'Complete exercise',
       completeLesson: 'Complete lesson',
+      submitReflection: 'Save reflection',
     },
     lessonSuccess: {
       title: 'Introduction lesson is finished!',
@@ -155,6 +156,9 @@ const LESSON_STEP_COPY = {
       coverage: 'Coverage',
       keyTakeaways: 'Key takeaways',
       eqtyInsight: 'EQTY insight',
+      reflectionLabel: 'Reflection',
+      yourAnswer: 'Your answer',
+      reflectionSavedShort: 'Saved',
       tapElements: 'Tap elements to explore',
       animationPlaceholder: 'Animation placeholder',
       tapReturn: 'Tap to return',
@@ -171,6 +175,8 @@ const LESSON_STEP_COPY = {
       reflectionQuestion: 'What did you learn from this lesson?',
       reflectionPlaceholder: 'Type your response here...',
       reflectionSaved: 'Saved to personalize upcoming lessons.',
+      reflectionSubtitle: 'Write down what you take away from this lesson.',
+      reflectionPersonalizationHint: 'Your answer personalises future lessons.',
       reflectionLockedTitle: 'Response locked',
       reflectionLockedBody:
         'Saved to personalize upcoming lessons. You can’t add another response.',
@@ -310,6 +316,7 @@ const LESSON_STEP_COPY = {
       reset: 'Reset',
       completeExercise: 'Oefening afronden',
       completeLesson: 'Les afronden',
+      submitReflection: 'Antwoord opslaan',
     },
     lessonSuccess: {
       title: 'Inleidende les is afgerond!',
@@ -360,6 +367,9 @@ const LESSON_STEP_COPY = {
       coverage: 'Dekking',
       keyTakeaways: 'Belangrijkste inzichten',
       eqtyInsight: 'EQTY inzicht',
+      reflectionLabel: 'Reflectie',
+      yourAnswer: 'Jouw antwoord',
+      reflectionSavedShort: 'Opgeslagen',
       tapElements: 'Tik op elementen om te verkennen',
       animationPlaceholder: 'Animatie placeholder',
       tapReturn: 'Tik om terug te gaan',
@@ -376,6 +386,8 @@ const LESSON_STEP_COPY = {
       reflectionQuestion: 'Wat heb je geleerd uit deze les?',
       reflectionPlaceholder: 'Typ hier je antwoord...',
       reflectionSaved: 'Opgeslagen om komende lessen te personaliseren.',
+      reflectionSubtitle: 'Schrijf op wat jij meeneemt uit deze les.',
+      reflectionPersonalizationHint: 'Je antwoord personaliseert je volgende lessen.',
       reflectionLockedTitle: 'Reactie vergrendeld',
       reflectionLockedBody:
         'Opgeslagen om komende lessen te personaliseren. Je kunt geen extra antwoord sturen.',
