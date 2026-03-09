@@ -186,7 +186,7 @@ export default function LessonStepScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { lessonId, step = 1, entrySource } = route.params || {};
-  const { userContext, onboardingContext, addReflection, completeLesson, preferences } = useApp();
+  const { userContext, onboardingContext, addReflection, completeLesson, preferences, reflections } = useApp();
   const { colors, components, styles } = useLessonStepStyles();
   const [isLessonGlossaryOpen, setLessonGlossaryOpen] = useState(false);
   const [lessonTermQuery, setLessonTermQuery] = useState('');
@@ -241,9 +241,8 @@ export default function LessonStepScreen() {
       case 5:
         return content?.steps?.reflection?.title || introTitle || 'Reflection';
       case 6:
-        return lessonId === 'lesson_0'
-          ? 'Het volledige investeringsproces'
-          : introTitle || 'The full investing process';
+        if (lessonId === 'lesson_0') return 'Het volledige investeringsproces';
+        return preferences?.language === 'nl' ? 'Wat je geleerd hebt' : 'What you learned';
       default:
         return `${copy.labels.part} ${step}`;
     }
@@ -278,12 +277,17 @@ export default function LessonStepScreen() {
   }
   const flowMetaLabel = `${flowPhaseLabel} · ${step}/${TOTAL_STEPS}`.toUpperCase();
   const topSectionSubtitle = useMemo(() => {
+    if (step === 6 && lessonId !== 'lesson_0') {
+      return preferences?.language === 'nl'
+        ? 'Tik op elk inzicht om te bevestigen dat het is blijven hangen.'
+        : 'Tap each insight to confirm what stuck with you.';
+    }
     if (lessonId !== 'lesson_0') return null;
     if (step === 2) return INTRO_VISUALIZATION_SUBTITLE;
     if (step === 3) return copy.introScenario.headerHelper;
     if (step === 4) return 'Plaats de stappen van het beleggingsproces in de juiste volgorde.';
-    return null;
-  }, [copy.introScenario.headerHelper, lessonId, step]);
+    if (step === 6) return 'Herken je het proces in een echte situatie?';
+  }, [copy.introScenario.headerHelper, lessonId, preferences?.language, step]);
 
   return (
     <ScreenBackground variant="bg3">
@@ -2958,181 +2962,201 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
 
 function SummaryStep({ content, onComplete, onPressTerm, copy }) {
   const { colors, components, styles } = useLessonStepStyles();
+  const [confirmed, setConfirmed] = useState(new Set());
+
+  const takeaways = content?.steps?.summary?.takeaways || [];
+  const allConfirmed = confirmed.size === takeaways.length && takeaways.length > 0;
+
+  const handleConfirm = (index) => {
+    setConfirmed((prev) => {
+      const next = new Set(prev);
+      next.add(index);
+      return next;
+    });
+  };
+
   return (
     <View style={styles.stepBody}>
-      <Card style={styles.summaryCard}>
-        <AppText style={styles.bodyText}>{copy.labels.keyTakeaways}</AppText>
-        <View style={styles.takeawayList}>
-          {content?.steps?.summary?.takeaways?.map((item) => (
-            <View key={item} style={styles.takeawayRow}>
-              <Ionicons
-                name="checkmark-circle"
-                size={components.sizes.icon.md}
-                color={colors.accent.primary}
-              />
-              <AppText style={styles.takeawayText}>{item}</AppText>
+      {/* Journey strip — all 5 steps completed */}
+      <View style={styles.summaryJourneyRow}>
+        {[1, 2, 3, 4, 5].map((n, i) => (
+          <React.Fragment key={n}>
+            <View style={styles.summaryJourneyNode}>
+              <Ionicons name="checkmark" size={10} color={colors.accent.primary} />
             </View>
-          ))}
-        </View>
-      </Card>
+            {i < 4 && <View style={styles.summaryJourneyConnector} />}
+          </React.Fragment>
+        ))}
+      </View>
 
-      {content?.steps?.summary?.video ? (
-        <Pressable
-          onPress={() => Linking.openURL(content.steps.summary.video.url)}
-          style={styles.videoRow}
-        >
-          <Ionicons
-            name="play-circle"
-            size={components.sizes.icon.lg}
-            color={colors.accent.primary}
-          />
-          <AppText style={styles.videoText}>{content.steps.summary.video.label}</AppText>
-        </Pressable>
-      ) : null}
+      {/* Section label */}
+      <AppText style={styles.summaryInsightsLabel}>{copy.labels.keyTakeaways}</AppText>
+
+      {/* Interactive insight cards */}
+      <View style={styles.summaryInsightList}>
+        {takeaways.map((item, index) => {
+          const isConfirmed = confirmed.has(index);
+          return (
+            <Pressable
+              key={item}
+              onPress={() => handleConfirm(index)}
+              style={[
+                styles.summaryInsightCard,
+                isConfirmed && styles.summaryInsightCardConfirmed,
+              ]}
+            >
+              <View
+                style={[
+                  styles.summaryInsightIndex,
+                  isConfirmed && styles.summaryInsightIndexConfirmed,
+                ]}
+              >
+                <AppText
+                  style={[
+                    styles.summaryInsightNumber,
+                    isConfirmed && styles.summaryInsightNumberConfirmed,
+                  ]}
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </AppText>
+              </View>
+              <AppText style={styles.summaryInsightText}>{item}</AppText>
+              <Ionicons
+                name={isConfirmed ? 'checkmark-circle' : 'ellipse-outline'}
+                size={components.sizes.icon.lg}
+                color={
+                  isConfirmed
+                    ? colors.accent.primary
+                    : toRgba(colors.ui.divider, colors.opacity.stroke)
+                }
+              />
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* Status line */}
+      {allConfirmed ? (
+        <Animated.View entering={FadeInDown.duration(280)}>
+          <AppText style={styles.summaryReadyText}>
+            {copy.labels.allInsightsConfirmed}
+          </AppText>
+        </Animated.View>
+      ) : (
+        <AppText style={styles.summaryNudgeText}>
+          {copy.labels.tapInsightToConfirm}
+        </AppText>
+      )}
 
       <PrimaryButton label={copy.buttons.completeLesson} onPress={onComplete} />
     </View>
   );
 }
 
-function IntroSummaryStep({ content, onComplete, onPressTerm, copy }) {
+
+function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection }) {
   const { colors, components, styles } = useLessonStepStyles();
-  const summarySubtext =
-    'Dit is het vaste stappenplan dat elke investering structureert.';
-  const summaryHelper = 'Tik op de stappen voor meer info.';
-  const stations = [
+  const [picked, setPicked]     = useState(null);
+  const [revealed, setRevealed] = useState(false);
+
+  const options = [
     {
-      id: 'target',
-      title: 'Doelbepaling',
-      description: 'Definieer het doel en de grenzen voor uitvoering.',
-      substeps: ['Doel', 'Tijdshorizon', 'Doeltype'],
+      id: 'sell',
+      label: 'Verkopen en verlies nemen',
+      reveal: 'Niet per se fout — maar zonder doel weet Mehmet niet of dit de juiste keuze is. Verkopen op gevoel is net zo willekeurig als kopen op gevoel.',
     },
     {
-      id: 'drivers',
-      title: 'Individuele risicoanalyse',
-      description: 'Verduidelijk de randvoorwaarden die elke beslissing vormen.',
-      substeps: ['Risicocapaciteit', 'Risicotolerantie', 'Financiële middelen'],
+      id: 'hold',
+      label: 'Houden en wachten op herstel',
+      reveal: 'Geduld kan slim zijn — maar alleen als er een reden is om te houden. Zonder doel is wachten geen strategie, het is uitstelgedrag.',
     },
     {
-      id: 'strategy',
-      title: 'Financiële investeringsstrategie',
-      description: 'Zet de regels vast die beslissingen onder onzekerheid sturen.',
-      substeps: ['Liquiditeit', 'Kosten', 'Ethiek/ESG', 'Dividendvoorkeur'],
-    },
-    {
-      id: 'allocation',
-      title: 'Kapitaalallocatie',
-      description: 'Verdeel kapitaal over gedefinieerde prioriteiten.',
-      substeps: ['Activaklassen', 'Diversificatie', 'Voorbeeldallocaties'],
-    },
-    {
-      id: 'vehicles',
-      title: 'Beleggingsinstrumenten',
-      description: 'Selecteer de tools die het plan uitdrukken.',
-      substeps: ['Aandelen', 'Obligaties', "ETF's", 'Alternatieven'],
-    },
-    {
-      id: 'execution',
-      title: 'Uitvoering',
-      description: 'Plaats orders pas wanneer het systeem duidelijk is.',
-      substeps: ['Ordertypes', 'Transactiekosten', 'Uitvoering komt als laatste'],
+      id: 'process',
+      label: 'Terug naar stap één — wat was het doel?',
+      reveal: 'Dit is wat het proces zegt. Zonder doel is elke vervolgbeslissing willekeurig. Eerst het doel heroverwegen, dan pas beslissen.',
+      isKey: true,
     },
   ];
-  const [activeIndex, setActiveIndex] = useState(null);
+
+  const handlePick = (id) => {
+    if (revealed) return;
+    setPicked(id);
+  };
+
+  const pickedOption = options.find((o) => o.id === picked);
 
   return (
-    <View style={[styles.stepBody, styles.summaryBody]}>
-      <View style={styles.summaryHeaderBlock}>
-        <AppText style={styles.summarySubtitle}>{summarySubtext}</AppText>
-        <AppText style={styles.summaryHelper}>{summaryHelper}</AppText>
+    <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
+
+      {/* Scenario */}
+      <View style={styles.scenarioStoryCard}>
+        <AppText style={styles.scenarioStoryLabel}>Scenario</AppText>
+        <AppText style={styles.scenarioStoryText}>
+          Mehmet kocht impulsief aandelen groene energie voor €3.000. Nu, drie maanden later, staat hij op −18%. Zijn vriend zegt: "Hold, het komt terug." Een collega zegt: "Verkoop, begrens je verlies." Mehmet weet het niet.
+        </AppText>
       </View>
 
-      <View style={styles.summaryContent}>
-        <View style={styles.summaryScroll}>
-          <View style={[styles.processMap, styles.summaryProcessMap]}>
-            {stations.map((station, index) => {
-              const isActive = index === activeIndex;
-              return (
-                <View
-                  key={station.id}
-                  style={[styles.processStationBlock, styles.summaryStationBlock]}
-                >
-                  <Pressable
-                    onPress={() =>
-                      setActiveIndex((prev) => (prev === index ? null : index))
-                    }
-                    style={[
-                      styles.processStationRow,
-                      styles.summaryStationRow,
-                      isActive && styles.summaryStationRowActive,
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.summaryIndexChip,
-                        isActive && styles.summaryIndexChipActive,
-                      ]}
-                    >
-                      <AppText
-                        style={[
-                          styles.summaryIndexText,
-                          isActive && styles.summaryIndexTextActive,
-                        ]}
-                      >
-                        {index + 1}
-                      </AppText>
-                    </View>
-                    <View style={styles.summaryStationText}>
-                      <AppText
-                        style={[
-                          styles.processStationTitle,
-                          isActive && styles.summaryStationTitleActive,
-                        ]}
-                      >
-                        {station.title}
-                      </AppText>
-                    </View>
-                    <View
-                      style={[
-                        styles.processStationIndicator,
-                        styles.summaryStationIndicator,
-                        isActive && styles.summaryStationIndicatorActive,
-                      ]}
-                    >
-                      <Ionicons
-                        name={isActive ? 'chevron-down' : 'chevron-forward'}
-                        size={components.sizes.icon.sm}
-                        color={isActive ? colors.accent.primary : colors.text.secondary}
-                      />
-                    </View>
-                  </Pressable>
-                  {isActive ? (
-                    <View style={[styles.processPanel, styles.summaryProcessPanel]}>
-                      <AppText style={styles.processDescription}>
-                        {station.description}
-                      </AppText>
-                      <View style={styles.processSubsteps}>
-                        {station.substeps?.map((item) => (
-                          <View
-                            key={`${station.id}-${item}`}
-                            style={[styles.processChip, styles.summaryProcessChip]}
-                          >
-                            <AppText style={styles.processChipText}>{item}</AppText>
-                          </View>
-                        ))}
-                      </View>
-                    </View>
-                  ) : null}
-                </View>
-              );
-            })}
-          </View>
-        </View>
+      {/* Question */}
+      <AppText style={styles.scenarioQuestion}>
+        Wat adviseert het beleggingsproces Mehmet?
+      </AppText>
+
+      {/* Options */}
+      <View style={styles.scenarioOptionList}>
+        {options.map((opt) => {
+          const isPicked  = picked === opt.id;
+          const isKey     = revealed && opt.isKey;
+          const isDimmed  = revealed && !opt.isKey;
+          return (
+            <Pressable
+              key={opt.id}
+              onPress={() => handlePick(opt.id)}
+              style={[
+                styles.scenarioOptionChip,
+                isPicked  && !revealed && styles.scenarioOptionChipPicked,
+                isKey     && styles.scenarioOptionChipKey,
+                isDimmed  && styles.scenarioOptionChipDimmed,
+              ]}
+            >
+              <AppText
+                style={[
+                  styles.scenarioOptionLabel,
+                  isPicked  && !revealed && styles.scenarioOptionLabelPicked,
+                  isKey     && styles.scenarioOptionLabelKey,
+                  isDimmed  && styles.scenarioOptionLabelDimmed,
+                ]}
+              >
+                {opt.label}
+              </AppText>
+            </Pressable>
+          );
+        })}
       </View>
 
-      <View style={styles.summaryFooter}>
-        <PrimaryButton label={copy.buttons.continue} onPress={onComplete} />
-      </View>
+      {/* Reveal button */}
+      {!revealed && picked && (
+        <SecondaryButton label="Toon wat het proces zegt" onPress={() => setRevealed(true)} />
+      )}
+
+      {/* Reveal card — shows insight for their specific pick */}
+      {revealed && pickedOption && (
+        <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
+          <AppText style={styles.scenarioRevealLabel}>
+            {pickedOption.isKey ? 'Precies' : 'Goed gedacht — maar'}
+          </AppText>
+          <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
+          {!pickedOption.isKey && (
+            <>
+              <View style={styles.scenarioRevealDivider} />
+              <AppText style={styles.scenarioRevealText}>
+                Het proces zegt: ga terug naar stap één. Zonder een doel is elke vervolgbeslissing willekeurig.
+              </AppText>
+            </>
+          )}
+        </Animated.View>
+      )}
+
+      <PrimaryButton label={copy.buttons.continue} onPress={onComplete} />
     </View>
   );
 }
@@ -4989,6 +5013,182 @@ const createStyles = (colors, components, mode = 'dark') =>
   videoText: {
     ...typography.styles.body,
     color: colors.text.primary,
+  },
+  // ─── Summary step — interactive redesign ────────────────────────────────────
+  summaryJourneyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryJourneyNode: {
+    width: components.sizes.square.sm,
+    height: components.sizes.square.sm,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  summaryJourneyConnector: {
+    flex: 1,
+    height: components.borderWidth.thin,
+    backgroundColor: toRgba(colors.accent.primary, 0.25),
+  },
+  summaryInsightsLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  summaryInsightList: {
+    gap: components.layout.spacing.sm,
+  },
+  summaryInsightCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.md,
+    padding: components.layout.spacing.lg,
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  summaryInsightCardConfirmed: {
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  summaryInsightIndex: {
+    width: components.sizes.square.md,
+    height: components.sizes.square.md,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.9),
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  summaryInsightIndexConfirmed: {
+    backgroundColor: toRgba(colors.accent.primary, 0.15),
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+  },
+  summaryInsightNumber: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  summaryInsightNumberConfirmed: {
+    color: colors.accent.primary,
+  },
+  summaryInsightText: {
+    ...typography.styles.body,
+    flex: 1,
+    color: colors.text.primary,
+  },
+  summaryRevealedContent: {
+    flex: 1,
+    gap: components.layout.spacing.xs,
+  },
+  summaryRevealedTitle: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  summaryRevealedDesc: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+  },
+  summaryRevealHint: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+    flex: 1,
+  },
+  // ─── Intro summary — personalised scenario ──────────────────────────────────
+  scenarioStoryCard: {
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    padding: components.layout.spacing.lg,
+    gap: components.layout.spacing.xs,
+  },
+  scenarioStoryLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  scenarioStoryText: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+  },
+  scenarioQuestion: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+  },
+  scenarioOptionList: {
+    gap: components.layout.spacing.sm,
+  },
+  scenarioOptionChip: {
+    paddingVertical: components.layout.spacing.md,
+    paddingHorizontal: components.layout.spacing.lg,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  scenarioOptionChipPicked: {
+    borderColor: toRgba(colors.text.primary, 0.35),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  scenarioOptionChipKey: {
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  scenarioOptionChipDimmed: {
+    borderColor: toRgba(colors.ui.divider, 0.15),
+    backgroundColor: toRgba(colors.background.surface, 0.35),
+  },
+  scenarioOptionLabel: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+  },
+  scenarioOptionLabelPicked: {
+    color: colors.text.primary,
+  },
+  scenarioOptionLabelKey: {
+    color: colors.accent.primary,
+  },
+  scenarioOptionLabelDimmed: {
+    color: toRgba(colors.text.secondary, 0.5),
+  },
+  scenarioRevealCard: {
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    padding: components.layout.spacing.lg,
+    gap: components.layout.spacing.md,
+  },
+  scenarioRevealLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  scenarioRevealText: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+  },
+  scenarioRevealDivider: {
+    height: components.borderWidth.thin,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  scenarioRevealPersonal: {
+    ...typography.styles.body,
+    color: colors.accent.primary,
+  },
+  summaryNudgeText: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+    textAlign: 'center',
+  },
+  summaryReadyText: {
+    ...typography.styles.meta,
+    color: colors.accent.primary,
+    textAlign: 'center',
   },
 
   // ─── Lesson 1 visualization: grid layout ────────────────────────────────────

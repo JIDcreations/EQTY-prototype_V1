@@ -164,6 +164,8 @@ const LESSON_STEP_COPY = {
       tapReturn: 'Tap to return',
       tapDetails: 'Tap for details',
       tapStation: 'Tap a station to expand.',
+      tapInsightToConfirm: 'Tap each insight to confirm it.',
+      allInsightsConfirmed: "You've got it. Ready to complete the lesson.",
     },
     messages: {
       noExercise: 'No exercise is available for this lesson.',
@@ -375,6 +377,8 @@ const LESSON_STEP_COPY = {
       tapReturn: 'Tik om terug te gaan',
       tapDetails: 'Tik voor details',
       tapStation: 'Tik op een stap om uit te vouwen.',
+      tapInsightToConfirm: 'Tik op elk inzicht om het te bevestigen.',
+      allInsightsConfirmed: 'Je begrijpt het. Klaar om de les af te ronden.',
     },
     messages: {
       noExercise: 'Er is geen oefening beschikbaar voor deze les.',
