@@ -44,6 +44,7 @@ import { useApp } from '../utils/AppContext';
 import { getScenarioVariant } from '../utils/helpers';
 import { collectGlossaryTermIds } from '../utils/glossary';
 import {
+  getLocaleKey,
   getIntroStepTitle,
   getLessonContent,
   getLessonStepCopy,
@@ -187,6 +188,7 @@ export default function LessonStepScreen() {
   const route = useRoute();
   const { lessonId, step = 1, entrySource } = route.params || {};
   const { userContext, onboardingContext, addReflection, completeLesson, preferences, reflections } = useApp();
+  const locale = getLocaleKey(preferences?.language);
   const { colors, components, styles } = useLessonStepStyles();
   const [isLessonGlossaryOpen, setLessonGlossaryOpen] = useState(false);
   const [lessonTermQuery, setLessonTermQuery] = useState('');
@@ -242,11 +244,11 @@ export default function LessonStepScreen() {
         return content?.steps?.reflection?.title || introTitle || 'Reflection';
       case 6:
         if (lessonId === 'lesson_0') return 'Het volledige investeringsproces';
-        return preferences?.language === 'nl' ? 'Wat je geleerd hebt' : 'What you learned';
+        return locale === 'nl' ? 'Wat je geleerd hebt' : 'What you learned';
       default:
         return `${copy.labels.part} ${step}`;
     }
-  }, [content, copy.labels.part, lessonId, preferences?.language, step]);
+  }, [content, copy.labels.part, lessonId, locale, step]);
 
   const handleNext = () => {
     if (step < TOTAL_STEPS) {
@@ -278,7 +280,7 @@ export default function LessonStepScreen() {
   const flowMetaLabel = `${flowPhaseLabel} · ${step}/${TOTAL_STEPS}`.toUpperCase();
   const topSectionSubtitle = useMemo(() => {
     if (step === 6 && lessonId !== 'lesson_0') {
-      return preferences?.language === 'nl'
+      return locale === 'nl'
         ? 'Tik op elk inzicht om te bevestigen dat het is blijven hangen.'
         : 'Tap each insight to confirm what stuck with you.';
     }
@@ -287,7 +289,7 @@ export default function LessonStepScreen() {
     if (step === 3) return copy.introScenario.headerHelper;
     if (step === 4) return 'Plaats de stappen van het beleggingsproces in de juiste volgorde.';
     if (step === 6) return 'Herken je het proces in een echte situatie?';
-  }, [copy.introScenario.headerHelper, lessonId, preferences?.language, step]);
+  }, [copy.introScenario.headerHelper, lessonId, locale, step]);
 
   return (
     <ScreenBackground variant="bg3">
@@ -370,6 +372,7 @@ export default function LessonStepScreen() {
             onComplete={handleComplete}
             onPressTerm={handleTermPress}
             copy={copy}
+            language={preferences?.language}
           />
         ) : (
           <SummaryStep
@@ -3054,109 +3057,144 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
 }
 
 
-function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection }) {
+function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language }) {
   const { colors, components, styles } = useLessonStepStyles();
-  const [picked, setPicked]     = useState(null);
-  const [revealed, setRevealed] = useState(false);
+  const [picked, setPicked] = useState(null);
+  const isDutch = getLocaleKey(language) === 'nl';
+  const scenarioLabel = isDutch ? 'Scenario' : 'Scenario';
+  const scenarioText = isDutch
+    ? 'Bert koopt impulsief aandelen in de groene energiesector voor €3.000. Drie maanden later staat hij op -18%. Een vriend zegt: hold. Een collega zegt: verkoop. Bert weet niet wat te doen.'
+    : 'Bert impulsively buys 3,000 EUR worth of green energy stocks. Three months later, he is down 18%. A friend says: hold. A colleague says: sell. Bert does not know what to do.';
+  const questionText = isDutch
+    ? 'Wat zegt het beleggingsproces?'
+    : 'What does the investment process say?';
+  const revealExactLabel = isDutch ? 'Goed' : 'Exactly';
+  const revealNudgeLabel = isDutch ? 'Bijna juist - maar' : 'Almost right, but';
+  const processResetText = isDutch
+    ? 'Het proces zegt, ga terug naar stap 1. Zonder een doel is elke vervolgbeslissing willekeurig.'
+    : 'The process says: go back to step one. Without a goal, every next decision is arbitrary.';
 
   const options = [
     {
       id: 'sell',
-      label: 'Verkopen en verlies nemen',
-      reveal: 'Niet per se fout — maar zonder doel weet Mehmet niet of dit de juiste keuze is. Verkopen op gevoel is net zo willekeurig als kopen op gevoel.',
+      label: isDutch ? 'Verkopen en verlies nemen' : 'Sell and take the loss',
+      reveal: isDutch
+        ? 'Verkopen is niet per se fout.\nMaar zonder doel weet Bert niet of dit de juiste keuze is.'
+        : 'Not necessarily wrong, but without a goal Bert does not know if this is the right choice. Selling on instinct is just as arbitrary as buying on instinct.',
     },
     {
       id: 'hold',
-      label: 'Houden en wachten op herstel',
-      reveal: 'Geduld kan slim zijn — maar alleen als er een reden is om te houden. Zonder doel is wachten geen strategie, het is uitstelgedrag.',
+      label: isDutch ? 'Houden en wachten op herstel' : 'Hold and wait for recovery',
+      reveal: isDutch
+        ? 'Misschien herstelt het aandeel.\nMaar zonder doel is de keuze willekeurig.'
+        : 'Patience can be smart, but only if there is a reason to hold. Without a goal, waiting is not a strategy, it is procrastination.',
     },
     {
       id: 'process',
-      label: 'Terug naar stap één — wat was het doel?',
-      reveal: 'Dit is wat het proces zegt. Zonder doel is elke vervolgbeslissing willekeurig. Eerst het doel heroverwegen, dan pas beslissen.',
+      label: isDutch
+        ? 'Terug naar stap één – wat is het doel?'
+        : 'Go back to step one: what was the goal?',
+      reveal: isDutch
+        ? 'Dat is wat het proces zegt. Zonder doel is elke vervolgbeslissing willekeurig.'
+        : 'This is what the process says. Without a goal, every next decision is arbitrary. Reconsider the goal first, then decide.',
       isKey: true,
     },
   ];
 
   const handlePick = (id) => {
-    if (revealed) return;
+    if (picked) return;
     setPicked(id);
   };
 
   const pickedOption = options.find((o) => o.id === picked);
+  const isAnswered = picked !== null;
 
   return (
     <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
 
       {/* Scenario */}
       <View style={styles.scenarioStoryCard}>
-        <AppText style={styles.scenarioStoryLabel}>Scenario</AppText>
+        <AppText style={styles.scenarioStoryLabel}>{scenarioLabel}</AppText>
         <AppText style={styles.scenarioStoryText}>
-          Mehmet kocht impulsief aandelen groene energie voor €3.000. Nu, drie maanden later, staat hij op −18%. Zijn vriend zegt: "Hold, het komt terug." Een collega zegt: "Verkoop, begrens je verlies." Mehmet weet het niet.
+          {scenarioText}
         </AppText>
       </View>
 
       {/* Question */}
-      <AppText style={styles.scenarioQuestion}>
-        Wat adviseert het beleggingsproces Mehmet?
-      </AppText>
+      <AppText style={styles.scenarioQuestion}>{questionText}</AppText>
 
       {/* Options */}
       <View style={styles.scenarioOptionList}>
         {options.map((opt) => {
-          const isPicked  = picked === opt.id;
-          const isKey     = revealed && opt.isKey;
-          const isDimmed  = revealed && !opt.isKey;
+          const isPicked    = picked === opt.id;
+          const isKey       = isAnswered && opt.isKey;
+          const isWrongPick = isPicked && !opt.isKey;
+          const isDimmed    = isAnswered && !isPicked && !opt.isKey;
           return (
             <Pressable
               key={opt.id}
               onPress={() => handlePick(opt.id)}
-              style={[
+              style={({ pressed }) => [
                 styles.scenarioOptionChip,
-                isPicked  && !revealed && styles.scenarioOptionChipPicked,
-                isKey     && styles.scenarioOptionChipKey,
-                isDimmed  && styles.scenarioOptionChipDimmed,
+                styles.scenarioOptionChipRow,
+                isWrongPick && styles.scenarioOptionChipPicked,
+                isKey       && styles.scenarioOptionChipKey,
+                isDimmed    && styles.scenarioOptionChipDimmed,
+                pressed && !isAnswered && styles.scenarioOptionChipPressed,
               ]}
             >
               <AppText
                 style={[
                   styles.scenarioOptionLabel,
-                  isPicked  && !revealed && styles.scenarioOptionLabelPicked,
-                  isKey     && styles.scenarioOptionLabelKey,
-                  isDimmed  && styles.scenarioOptionLabelDimmed,
+                  styles.scenarioOptionLabelFlex,
+                  isWrongPick && styles.scenarioOptionLabelPicked,
+                  isKey       && styles.scenarioOptionLabelKey,
+                  isDimmed    && styles.scenarioOptionLabelDimmed,
                 ]}
               >
                 {opt.label}
               </AppText>
+              {isKey && (
+                <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
+              )}
+              {isWrongPick && (
+                <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+              )}
             </Pressable>
           );
         })}
       </View>
 
-      {/* Reveal button */}
-      {!revealed && picked && (
-        <SecondaryButton label="Toon wat het proces zegt" onPress={() => setRevealed(true)} />
-      )}
-
-      {/* Reveal card — shows insight for their specific pick */}
-      {revealed && pickedOption && (
+      {/* Feedback card — appears immediately after tap */}
+      {isAnswered && pickedOption && (
         <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
-          <AppText style={styles.scenarioRevealLabel}>
-            {pickedOption.isKey ? 'Precies' : 'Goed gedacht — maar'}
-          </AppText>
+          <View style={styles.scenarioRevealHeader}>
+            <Ionicons
+              name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
+              size={18}
+              color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
+            />
+            <AppText style={[styles.scenarioRevealLabel, pickedOption.isKey && styles.scenarioRevealLabelKey]}>
+              {pickedOption.isKey
+                ? revealExactLabel
+                : isDutch && pickedOption.id === 'hold'
+                  ? 'Logisch idee - maar'
+                  : revealNudgeLabel}
+            </AppText>
+          </View>
           <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
           {!pickedOption.isKey && (
             <>
               <View style={styles.scenarioRevealDivider} />
-              <AppText style={styles.scenarioRevealText}>
-                Het proces zegt: ga terug naar stap één. Zonder een doel is elke vervolgbeslissing willekeurig.
-              </AppText>
+              <AppText style={styles.scenarioRevealText}>{processResetText}</AppText>
             </>
           )}
         </Animated.View>
       )}
 
-      <PrimaryButton label={copy.buttons.continue} onPress={onComplete} />
+      {isAnswered && (
+        <PrimaryButton label={copy.buttons.continue} onPress={onComplete} />
+      )}
     </View>
   );
 }
@@ -5131,6 +5169,19 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
   },
+  scenarioOptionChipRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.sm,
+  },
+  scenarioOptionChipPressed: {
+    opacity: 0.65,
+    borderColor: toRgba(colors.text.primary, 0.35),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  scenarioOptionLabelFlex: {
+    flex: 1,
+  },
   scenarioOptionChipPicked: {
     borderColor: toRgba(colors.text.primary, 0.35),
     backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
@@ -5164,9 +5215,17 @@ const createStyles = (colors, components, mode = 'dark') =>
     padding: components.layout.spacing.lg,
     gap: components.layout.spacing.md,
   },
+  scenarioRevealHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.xs,
+  },
   scenarioRevealLabel: {
     ...typography.styles.stepLabel,
     color: colors.text.secondary,
+  },
+  scenarioRevealLabelKey: {
+    color: colors.accent.primary,
   },
   scenarioRevealText: {
     ...typography.styles.body,
