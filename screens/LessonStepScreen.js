@@ -36,6 +36,7 @@ import { useGlossary } from '../components/GlossaryProvider';
 import GlossaryText from '../components/GlossaryText';
 import LessonStepContainer from '../components/LessonStepContainer';
 import ScreenBackground from '../components/ScreenBackground';
+import SelectableOptionButton from '../components/SelectableOptionButton';
 import SurfacePillButton from '../components/SurfacePillButton';
 import TOPSECTION from '../components/TOPSECTION';
 import { glossaryTerms } from '../data/glossary';
@@ -3131,36 +3132,20 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
           const isWrongPick = isPicked && !opt.isKey;
           const isDimmed    = isAnswered && !isPicked && !opt.isKey;
           return (
-            <Pressable
+            <SelectableOptionButton
               key={opt.id}
               onPress={() => handlePick(opt.id)}
-              style={({ pressed }) => [
-                styles.scenarioOptionChip,
-                styles.scenarioOptionChipRow,
-                isWrongPick && styles.scenarioOptionChipPicked,
-                isKey       && styles.scenarioOptionChipKey,
-                isDimmed    && styles.scenarioOptionChipDimmed,
-                pressed && !isAnswered && styles.scenarioOptionChipPressed,
-              ]}
-            >
-              <AppText
-                style={[
-                  styles.scenarioOptionLabel,
-                  styles.scenarioOptionLabelFlex,
-                  isWrongPick && styles.scenarioOptionLabelPicked,
-                  isKey       && styles.scenarioOptionLabelKey,
-                  isDimmed    && styles.scenarioOptionLabelDimmed,
-                ]}
-              >
-                {opt.label}
-              </AppText>
-              {isKey && (
-                <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
-              )}
-              {isWrongPick && (
-                <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
-              )}
-            </Pressable>
+              disabled={isAnswered}
+              label={opt.label}
+              state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+              accessory={
+                isKey ? (
+                  <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
+                ) : isWrongPick ? (
+                  <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+                ) : null
+              }
+            />
           );
         })}
       </View>
@@ -5139,7 +5124,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   // ─── Intro summary — personalised scenario ──────────────────────────────────
   scenarioStoryCard: {
-    borderRadius: components.radius.card,
+    borderRadius: 16,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
@@ -5160,52 +5145,6 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioOptionList: {
     gap: components.layout.spacing.sm,
-  },
-  scenarioOptionChip: {
-    paddingVertical: components.layout.spacing.md,
-    paddingHorizontal: components.layout.spacing.lg,
-    borderRadius: components.radius.input,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-  },
-  scenarioOptionChipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: components.layout.spacing.sm,
-  },
-  scenarioOptionChipPressed: {
-    opacity: 0.65,
-    borderColor: toRgba(colors.text.primary, 0.35),
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-  },
-  scenarioOptionLabelFlex: {
-    flex: 1,
-  },
-  scenarioOptionChipPicked: {
-    borderColor: toRgba(colors.text.primary, 0.35),
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-  },
-  scenarioOptionChipKey: {
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
-  },
-  scenarioOptionChipDimmed: {
-    borderColor: toRgba(colors.ui.divider, 0.15),
-    backgroundColor: toRgba(colors.background.surface, 0.35),
-  },
-  scenarioOptionLabel: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-  },
-  scenarioOptionLabelPicked: {
-    color: colors.text.primary,
-  },
-  scenarioOptionLabelKey: {
-    color: colors.accent.primary,
-  },
-  scenarioOptionLabelDimmed: {
-    color: toRgba(colors.text.secondary, 0.5),
   },
   scenarioRevealCard: {
     borderRadius: components.radius.card,
