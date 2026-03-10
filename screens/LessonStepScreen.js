@@ -3121,33 +3121,35 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
         </AppText>
       </View>
 
-      {/* Question */}
-      <AppText style={styles.scenarioQuestion}>{questionText}</AppText>
+      <View style={styles.scenarioQuestionBlock}>
+        {/* Question */}
+        <AppText style={styles.scenarioQuestion}>{questionText}</AppText>
 
-      {/* Options */}
-      <View style={styles.scenarioOptionList}>
-        {options.map((opt) => {
-          const isPicked    = picked === opt.id;
-          const isKey       = isAnswered && opt.isKey;
-          const isWrongPick = isPicked && !opt.isKey;
-          const isDimmed    = isAnswered && !isPicked && !opt.isKey;
-          return (
-            <SelectableOptionButton
-              key={opt.id}
-              onPress={() => handlePick(opt.id)}
-              disabled={isAnswered}
-              label={opt.label}
-              state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
-              accessory={
-                isKey ? (
-                  <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
-                ) : isWrongPick ? (
-                  <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
-                ) : null
-              }
-            />
-          );
-        })}
+        {/* Options */}
+        <View style={styles.scenarioOptionList}>
+          {options.map((opt) => {
+            const isPicked    = picked === opt.id;
+            const isKey       = isAnswered && opt.isKey;
+            const isWrongPick = isPicked && !opt.isKey;
+            const isDimmed    = isAnswered && !isPicked && !opt.isKey;
+            return (
+              <SelectableOptionButton
+                key={opt.id}
+                onPress={() => handlePick(opt.id)}
+                disabled={isAnswered}
+                label={opt.label}
+                state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+                accessory={
+                  isKey ? (
+                    <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
+                  ) : isWrongPick ? (
+                    <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+                  ) : null
+                }
+              />
+            );
+          })}
+        </View>
       </View>
 
       {/* Feedback card — appears immediately after tap */}
@@ -5142,6 +5144,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioQuestion: {
     ...typography.styles.h3,
     color: colors.text.primary,
+  },
+  scenarioQuestionBlock: {
+    gap: components.layout.spacing.md,
   },
   scenarioOptionList: {
     gap: components.layout.spacing.sm,
