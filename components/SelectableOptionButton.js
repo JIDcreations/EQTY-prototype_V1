@@ -71,7 +71,7 @@ const createStyles = (colors) =>
       backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     },
     buttonCorrect: {
-      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      borderColor: colors.accent.primary,
       backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
     },
     buttonDimmed: {

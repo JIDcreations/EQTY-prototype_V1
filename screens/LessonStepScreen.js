@@ -3154,7 +3154,10 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
 
       {/* Feedback card — appears immediately after tap */}
       {isAnswered && pickedOption && (
-        <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
+        <Animated.View
+          entering={FadeInDown.duration(300)}
+          style={styles.scenarioRevealCard}
+        >
           <View style={styles.scenarioRevealHeader}>
             <Ionicons
               name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
@@ -3179,9 +3182,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
         </Animated.View>
       )}
 
-      {isAnswered && (
-        <PrimaryButton label={copy.buttons.continue} onPress={onComplete} />
-      )}
+      {isAnswered && <PrimaryButton label={copy.buttons.next} onPress={onComplete} />}
     </View>
   );
 }
@@ -5152,6 +5153,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     gap: components.layout.spacing.sm,
   },
   scenarioRevealCard: {
+    marginTop: components.layout.spacing.xs / 2,
     borderRadius: components.radius.card,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
