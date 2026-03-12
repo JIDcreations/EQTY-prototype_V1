@@ -22,8 +22,10 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withSequence,
+  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -257,9 +259,27 @@ export default function LessonStepScreen() {
     }
   };
 
+  // Completion bridge
+  const [isCompleting, setIsCompleting] = useState(false);
+  const bridgeOverlayOpacity = useSharedValue(0);
+  const bridgeBadgeScale = useSharedValue(0.5);
+  const bridgeBadgeOpacity = useSharedValue(0);
+
+  const bridgeOverlayStyle = useAnimatedStyle(() => ({
+    opacity: bridgeOverlayOpacity.value,
+  }));
+  const bridgeBadgeStyle = useAnimatedStyle(() => ({
+    opacity: bridgeBadgeOpacity.value,
+    transform: [{ scale: bridgeBadgeScale.value }],
+  }));
+
   const handleComplete = async () => {
     await completeLesson(lessonId);
-    navigation.navigate('LessonSuccess', { lessonId });
+    setIsCompleting(true);
+    bridgeOverlayOpacity.value = withTiming(1, { duration: 220 });
+    bridgeBadgeOpacity.value = withDelay(120, withTiming(1, { duration: 200 }));
+    bridgeBadgeScale.value = withDelay(120, withSpring(1, { damping: 12, stiffness: 150 }));
+    setTimeout(() => navigation.navigate('LessonSuccess', { lessonId }), 800);
   };
 
   const handleTermPress = (term) => {
@@ -293,6 +313,7 @@ export default function LessonStepScreen() {
   }, [copy.introScenario.headerHelper, lessonId, locale, step]);
 
   return (
+    <View style={styles.root}>
     <ScreenBackground variant="bg3">
       <LessonStepContainer
         scrollEnabled={!disableOuterScroll && !isLessonGlossaryOpen}
@@ -479,6 +500,19 @@ export default function LessonStepScreen() {
 
       </LessonStepContainer>
     </ScreenBackground>
+
+    {/* Completion bridge overlay */}
+    {isCompleting && (
+      <Animated.View
+        style={[StyleSheet.absoluteFill, styles.bridgeOverlay, { backgroundColor: colors.background.app }, bridgeOverlayStyle]}
+        pointerEvents="box-only"
+      >
+        <Animated.View style={[styles.bridgeBadge, { backgroundColor: colors.accent.primary }, bridgeBadgeStyle]}>
+          <AppText style={[styles.bridgeCheck, { color: colors.text.onAccent }]}>✓</AppText>
+        </Animated.View>
+      </Animated.View>
+    )}
+    </View>
   );
 }
 
@@ -3189,6 +3223,24 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
 
 const createStyles = (colors, components, mode = 'dark') =>
   StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  bridgeOverlay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bridgeBadge: {
+    width: 68,
+    height: 68,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bridgeCheck: {
+    ...typography.styles.h1,
+    lineHeight: 34,
+  },
   stepBody: {
     gap: components.layout.spacing.lg,
   },
