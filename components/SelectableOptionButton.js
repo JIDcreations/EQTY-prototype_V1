@@ -12,8 +12,8 @@ export default function SelectableOptionButton({
   style,
   labelStyle,
 }) {
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { colors, mode } = useTheme();
+  const styles = useMemo(() => createStyles(colors, mode), [colors, mode]);
   const isCorrect = state === 'correct';
   const isIncorrect = state === 'incorrect';
   const isDimmed = state === 'dimmed';
@@ -47,7 +47,7 @@ export default function SelectableOptionButton({
   );
 }
 
-const createStyles = (colors) =>
+const createStyles = (colors, mode) =>
   StyleSheet.create({
     button: {
       height: 64,
@@ -72,7 +72,8 @@ const createStyles = (colors) =>
     },
     buttonCorrect: {
       borderColor: colors.accent.primary,
-      backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+      backgroundColor:
+        mode === 'light' ? colors.accent.primary : toRgba(colors.accent.primary, colors.opacity.tint),
     },
     buttonDimmed: {
       borderColor: toRgba(colors.ui.divider, 0.15),
@@ -87,7 +88,7 @@ const createStyles = (colors) =>
       color: colors.text.primary,
     },
     labelCorrect: {
-      color: colors.accent.primary,
+      color: mode === 'light' ? colors.text.primary : colors.accent.primary,
     },
     labelDimmed: {
       color: toRgba(colors.text.secondary, 0.5),

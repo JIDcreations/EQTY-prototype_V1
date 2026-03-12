@@ -2999,7 +2999,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
 }
 
 function SummaryStep({ content, onComplete, onPressTerm, copy }) {
-  const { colors, components, styles } = useLessonStepStyles();
+  const { colors, components, styles, mode } = useLessonStepStyles();
   const [confirmed, setConfirmed] = useState(new Set());
 
   const takeaways = content?.steps?.summary?.takeaways || [];
@@ -3059,15 +3059,21 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
                 </AppText>
               </View>
               <AppText style={styles.summaryInsightText}>{item}</AppText>
-              <Ionicons
-                name={isConfirmed ? 'checkmark-circle' : 'ellipse-outline'}
-                size={components.sizes.icon.lg}
-                color={
-                  isConfirmed
-                    ? colors.accent.primary
-                    : toRgba(colors.ui.divider, colors.opacity.stroke)
-                }
-              />
+              {isConfirmed ? (
+                <View style={styles.summaryInsightCheckBadge}>
+                  <Ionicons
+                    name="checkmark"
+                    size={components.sizes.icon.md}
+                    color={mode === 'light' ? colors.text.primary : colors.accent.primary}
+                  />
+                </View>
+              ) : (
+                <Ionicons
+                  name="ellipse-outline"
+                  size={components.sizes.icon.lg}
+                  color={toRgba(colors.ui.divider, colors.opacity.stroke)}
+                />
+              )}
             </Pressable>
           );
         })}
@@ -3093,7 +3099,7 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
 
 
 function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language }) {
-  const { colors, components, styles } = useLessonStepStyles();
+  const { colors, components, styles, mode } = useLessonStepStyles();
   const [picked, setPicked] = useState(null);
   const isDutch = getLocaleKey(language) === 'nl';
   const scenarioLabel = isDutch ? 'Scenario' : 'Scenario';
@@ -3175,7 +3181,18 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                 state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
                 accessory={
                   isKey ? (
-                    <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
+                    <View
+                      style={[
+                        styles.scenarioOptionCheckBadge,
+                        mode === 'light' && styles.scenarioOptionCheckBadgeLight,
+                      ]}
+                    >
+                      <Ionicons
+                        name="checkmark"
+                        size={14}
+                        color={mode === 'light' ? colors.text.primary : colors.accent.primary}
+                      />
+                    </View>
                   ) : isWrongPick ? (
                     <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
                   ) : null
@@ -5131,8 +5148,8 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
   },
   summaryInsightCardConfirmed: {
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor: mode === 'light' ? colors.accent.primary : toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: mode === 'light' ? colors.accent.primary : toRgba(colors.accent.primary, colors.opacity.tint),
   },
   summaryInsightIndex: {
     width: components.sizes.square.md,
@@ -5145,15 +5162,33 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   summaryInsightIndexConfirmed: {
-    backgroundColor: toRgba(colors.accent.primary, 0.15),
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor:
+      mode === 'light' ? colors.background.surfaceActive : toRgba(colors.accent.primary, 0.15),
+    borderColor:
+      mode === 'light'
+        ? colors.background.surfaceActive
+        : toRgba(colors.accent.primary, colors.opacity.stroke),
   },
   summaryInsightNumber: {
     ...typography.styles.stepLabel,
     color: colors.text.secondary,
   },
   summaryInsightNumberConfirmed: {
-    color: colors.accent.primary,
+    color: mode === 'light' ? colors.text.primary : colors.accent.primary,
+  },
+  summaryInsightCheckBadge: {
+    width: components.sizes.square.md,
+    height: components.sizes.square.md,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor:
+      mode === 'light' ? colors.background.surfaceActive : colors.background.surfaceActive,
+    borderWidth: components.borderWidth.thin,
+    borderColor:
+      mode === 'light'
+        ? colors.background.surfaceActive
+        : toRgba(colors.accent.primary, colors.opacity.stroke),
   },
   summaryInsightText: {
     ...typography.styles.body,
@@ -5246,6 +5281,19 @@ const createStyles = (colors, components, mode = 'dark') =>
     ...typography.styles.meta,
     color: colors.accent.primary,
     textAlign: 'center',
+  },
+  scenarioOptionCheckBadge: {
+    width: components.sizes.square.sm,
+    height: components.sizes.square.sm,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background.surfaceActive,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+  },
+  scenarioOptionCheckBadgeLight: {
+    borderColor: colors.background.surfaceActive,
   },
 
   // ─── Lesson 1 visualization: grid layout ────────────────────────────────────
