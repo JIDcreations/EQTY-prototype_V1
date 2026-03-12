@@ -39,11 +39,15 @@ export default function LessonSuccessScreen() {
   const copy = useMemo(() => getLessonStepCopy(preferences?.language), [preferences?.language]);
   const content = getLessonContent(lessonId, preferences?.language);
   const lessonTitle = content?.title || copy.lessonSuccess.fallbackTitle;
-  const subtitle = copy.lessonSuccess.subtitle
-    ? copy.lessonSuccess.subtitle(lessonTitle)
-    : '';
+  const isIntroLesson = lessonId === 'lesson_0';
+  const subtitle =
+    isIntroLesson
+      ? copy.lessonSuccess.introSubtitle
+      : copy.lessonSuccess.subtitle
+        ? copy.lessonSuccess.subtitle(lessonTitle)
+        : '';
   const detail =
-    lessonId === 'lesson_0' ? copy.lessonSuccess.introDetail : copy.lessonSuccess.detail;
+    isIntroLesson ? copy.lessonSuccess.introDetail : copy.lessonSuccess.detail;
 
   // Entrance animations — staggered, spring badge, eased text
   const badgeScale = useSharedValue(0.4);
@@ -164,16 +168,20 @@ export default function LessonSuccessScreen() {
                 {copy.lessonSuccess.congrats}
               </AppText>
             </Animated.View>
-
-            <Animated.View style={subtitleAnimStyle}>
-              <AppText style={[styles.lessonSubtitle, { color: colors.text.secondary }]}>
-                {subtitle}
-              </AppText>
-            </Animated.View>
           </View>
 
           {/* Detail */}
           <Animated.View style={[styles.detailGroup, detailAnimStyle]}>
+            <Animated.View style={subtitleAnimStyle}>
+              <AppText
+                style={[
+                  styles.lessonSubtitle,
+                  { color: isIntroLesson ? colors.text.primary : colors.text.secondary },
+                ]}
+              >
+                {subtitle}
+              </AppText>
+            </Animated.View>
             <View
               style={[
                 styles.divider,
@@ -212,14 +220,14 @@ const createStyles = (colors, components, tabBarHeight) =>
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      gap: components.layout.spacing.lg,
+      gap: components.layout.spacing.xl,
     },
 
     // Badge
     badgeWrapper: {
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: components.layout.spacing.xs,
+      marginBottom: 8,
     },
     badgeGlow: {
       position: 'absolute',
@@ -242,8 +250,8 @@ const createStyles = (colors, components, tabBarHeight) =>
     // Tag
     completedTag: {
       alignSelf: 'center',
-      paddingHorizontal: components.layout.spacing.md,
-      paddingVertical: components.layout.spacing.xs / 2,
+      paddingHorizontal: 15,
+      paddingVertical: 8,
       borderRadius: components.radius.pill,
     },
     completedLabel: {
@@ -253,7 +261,6 @@ const createStyles = (colors, components, tabBarHeight) =>
     // Titles
     titlesGroup: {
       alignItems: 'center',
-      gap: components.layout.spacing.xs,
     },
     mainTitle: {
       ...typography.styles.display,

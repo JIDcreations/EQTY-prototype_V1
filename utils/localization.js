@@ -112,6 +112,7 @@ const LESSON_STEP_COPY = {
       completedLabel: 'LESSON COMPLETE',
       title: 'Introduction lesson is finished!',
       subtitle: (lessonTitle) => `${lessonTitle} is finished.`,
+      introSubtitle: 'You finished the introductory lesson about investing as a process.',
       detail: 'Keep going with the next lessons to deepen the full process.',
       introDetail:
         'You can now start the full lessons that cover the entire investing process in depth.',
@@ -327,9 +328,10 @@ const LESSON_STEP_COPY = {
       completedLabel: 'LES AFGEROND',
       title: 'Inleidende les is afgerond!',
       subtitle: (lessonTitle) => `Je hebt ${lessonTitle} afgerond.`,
+      introSubtitle: 'Je hebt de inleidende les over beleggen als proces afgerond.',
       detail: 'Ga verder met de volgende lessen om het volledige proces te verdiepen.',
       introDetail:
-        'Je kan nu starten met de volledige lessen over het hele investeringsproces in detail.',
+        'Je kan nu starten met de volledige lessen die het beleggingsproces stap voor stap uitleggen.',
       cta: 'Naar Home',
       fallbackTitle: 'Deze les',
     },
