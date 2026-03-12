@@ -1,14 +1,29 @@
-import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import OnboardingScreen from '../components/OnboardingScreen';
-import OnboardingStackedCard from '../components/OnboardingStackedCard';
 import AppText from '../components/AppText';
 import { PrimaryButton } from '../components/Button';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getLessonContent, getLessonStepCopy } from '../utils/localization';
+
+const toRgba = (hex, alpha) => {
+  const cleaned = hex.replace('#', '');
+  const value = parseInt(cleaned, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 export default function LessonSuccessScreen() {
   const navigation = useNavigation();
@@ -29,6 +44,74 @@ export default function LessonSuccessScreen() {
     : '';
   const detail =
     lessonId === 'lesson_0' ? copy.lessonSuccess.introDetail : copy.lessonSuccess.detail;
+
+  // Entrance animations — staggered, spring badge, eased text
+  const badgeScale = useSharedValue(0.4);
+  const badgeOpacity = useSharedValue(0);
+  const labelOpacity = useSharedValue(0);
+  const labelY = useSharedValue(10);
+  const titleOpacity = useSharedValue(0);
+  const titleY = useSharedValue(14);
+  const subtitleOpacity = useSharedValue(0);
+  const subtitleY = useSharedValue(10);
+  const detailOpacity = useSharedValue(0);
+  const footerOpacity = useSharedValue(0);
+  const footerY = useSharedValue(32);
+
+  const runAnimation = useCallback(() => {
+    badgeScale.value = 0.4;
+    badgeOpacity.value = 0;
+    labelOpacity.value = 0;
+    labelY.value = 10;
+    titleOpacity.value = 0;
+    titleY.value = 14;
+    subtitleOpacity.value = 0;
+    subtitleY.value = 10;
+    detailOpacity.value = 0;
+    footerOpacity.value = 0;
+    footerY.value = 32;
+
+    badgeOpacity.value = withDelay(60, withTiming(1, { duration: 200 }));
+    badgeScale.value = withDelay(60, withSpring(1, { damping: 13, stiffness: 160 }));
+    labelOpacity.value = withDelay(300, withTiming(1, { duration: 260 }));
+    labelY.value = withDelay(300, withTiming(0, { duration: 260 }));
+    titleOpacity.value = withDelay(400, withTiming(1, { duration: 280 }));
+    titleY.value = withDelay(400, withTiming(0, { duration: 280 }));
+    subtitleOpacity.value = withDelay(500, withTiming(1, { duration: 260 }));
+    subtitleY.value = withDelay(500, withTiming(0, { duration: 260 }));
+    detailOpacity.value = withDelay(660, withTiming(1, { duration: 280 }));
+    footerOpacity.value = withDelay(720, withTiming(1, { duration: 300 }));
+    footerY.value = withDelay(720, withTiming(0, { duration: 300 }));
+  }, []);
+
+  useEffect(() => {
+    runAnimation();
+  }, []);
+
+  const badgeAnimStyle = useAnimatedStyle(() => ({
+    opacity: badgeOpacity.value,
+    transform: [{ scale: badgeScale.value }],
+  }));
+  const labelAnimStyle = useAnimatedStyle(() => ({
+    opacity: labelOpacity.value,
+    transform: [{ translateY: labelY.value }],
+  }));
+  const titleAnimStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+    transform: [{ translateY: titleY.value }],
+  }));
+  const subtitleAnimStyle = useAnimatedStyle(() => ({
+    opacity: subtitleOpacity.value,
+    transform: [{ translateY: subtitleY.value }],
+  }));
+  const detailAnimStyle = useAnimatedStyle(() => ({
+    opacity: detailOpacity.value,
+  }));
+  const footerAnimStyle = useAnimatedStyle(() => ({
+    opacity: footerOpacity.value,
+    transform: [{ translateY: footerY.value }],
+  }));
+
   const handleReturnHome = () => {
     const parent = navigation.getParent();
     if (parent) {
@@ -46,20 +129,70 @@ export default function LessonSuccessScreen() {
     >
       <View style={styles.container}>
         <View style={styles.content}>
-          <OnboardingStackedCard>
-            <View style={styles.cardHeader}>
-              <AppText style={styles.title}>{copy.lessonSuccess.title}</AppText>
+
+          {/* Achievement badge */}
+          <Animated.View style={[styles.badgeWrapper, badgeAnimStyle]}>
+            <View
+              style={[
+                styles.badgeGlow,
+                { backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint) },
+              ]}
+            />
+            <View style={[styles.badge, { backgroundColor: colors.accent.primary }]}>
+              <AppText style={[styles.checkmark, { color: colors.text.onAccent }]}>✓</AppText>
             </View>
-            <AppText style={styles.subtitle}>{subtitle}</AppText>
-            <AppText style={styles.detail}>{detail}</AppText>
-          </OnboardingStackedCard>
+          </Animated.View>
+
+          {/* "LESSON COMPLETE" tag */}
+          <Animated.View style={labelAnimStyle}>
+            <View
+              style={[
+                styles.completedTag,
+                { backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint) },
+              ]}
+            >
+              <AppText style={[styles.completedLabel, { color: colors.accent.primary }]}>
+                {copy.lessonSuccess.completedLabel}
+              </AppText>
+            </View>
+          </Animated.View>
+
+          {/* Titles group */}
+          <View style={styles.titlesGroup}>
+            <Animated.View style={titleAnimStyle}>
+              <AppText style={[styles.mainTitle, { color: colors.text.primary }]}>
+                {copy.lessonSuccess.congrats}
+              </AppText>
+            </Animated.View>
+
+            <Animated.View style={subtitleAnimStyle}>
+              <AppText style={[styles.lessonSubtitle, { color: colors.text.secondary }]}>
+                {subtitle}
+              </AppText>
+            </Animated.View>
+          </View>
+
+          {/* Detail */}
+          <Animated.View style={[styles.detailGroup, detailAnimStyle]}>
+            <View
+              style={[
+                styles.divider,
+                { backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke) },
+              ]}
+            />
+            <AppText style={[styles.detail, { color: colors.text.secondary }]}>{detail}</AppText>
+          </Animated.View>
+
         </View>
-        <View style={styles.footer}>
-          <PrimaryButton
-            label={copy.lessonSuccess.cta}
-            onPress={handleReturnHome}
-          />
-        </View>
+
+        {/* Footer CTA */}
+        <Animated.View style={[styles.footer, footerAnimStyle]}>
+          {/* DEV ONLY — remove before final */}
+          <Pressable style={styles.replayButton} onPress={runAnimation}>
+            <AppText style={[styles.replayLabel, { color: colors.text.secondary }]}>↺ Replay</AppText>
+          </Pressable>
+          <PrimaryButton label={copy.lessonSuccess.cta} onPress={handleReturnHome} />
+        </Animated.View>
       </View>
     </OnboardingScreen>
   );
@@ -77,25 +210,87 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     content: {
       flex: 1,
+      alignItems: 'center',
       justifyContent: 'center',
-      transform: [{ translateY: components.offsets.translate.sm }],
+      gap: components.layout.spacing.lg,
     },
-    cardHeader: {
-      gap: components.layout.spacing.sm,
+
+    // Badge
+    badgeWrapper: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: components.layout.spacing.xs,
     },
-    title: {
+    badgeGlow: {
+      position: 'absolute',
+      width: 108,
+      height: 108,
+      borderRadius: components.radius.pill,
+    },
+    badge: {
+      width: 68,
+      height: 68,
+      borderRadius: components.radius.pill,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkmark: {
       ...typography.styles.h1,
-      color: colors.text.primary,
+      lineHeight: 34,
     },
-    subtitle: {
+
+    // Tag
+    completedTag: {
+      alignSelf: 'center',
+      paddingHorizontal: components.layout.spacing.md,
+      paddingVertical: components.layout.spacing.xs / 2,
+      borderRadius: components.radius.pill,
+    },
+    completedLabel: {
+      ...typography.styles.stepLabel,
+    },
+
+    // Titles
+    titlesGroup: {
+      alignItems: 'center',
+      gap: components.layout.spacing.xs,
+    },
+    mainTitle: {
+      ...typography.styles.display,
+      textAlign: 'center',
+    },
+    lessonSubtitle: {
       ...typography.styles.body,
-      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+
+    // Detail
+    detailGroup: {
+      alignItems: 'center',
+      gap: components.layout.spacing.md,
+      paddingHorizontal: components.layout.spacing.md,
+    },
+    divider: {
+      height: 1,
+      width: 40,
+      borderRadius: components.radius.pill,
     },
     detail: {
       ...typography.styles.body,
-      color: colors.text.secondary,
+      textAlign: 'center',
     },
+
+    // Footer
     footer: {
       paddingTop: components.layout.spacing.lg,
+      gap: components.layout.spacing.md,
+    },
+    replayButton: {
+      alignSelf: 'center',
+      paddingVertical: components.layout.spacing.xs,
+      paddingHorizontal: components.layout.spacing.md,
+    },
+    replayLabel: {
+      ...typography.styles.small,
     },
   });

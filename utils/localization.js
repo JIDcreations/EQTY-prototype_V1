@@ -108,6 +108,8 @@ const LESSON_STEP_COPY = {
       submitReflection: 'Save reflection',
     },
     lessonSuccess: {
+      congrats: 'Well done.',
+      completedLabel: 'LESSON COMPLETE',
       title: 'Introduction lesson is finished!',
       subtitle: (lessonTitle) => `${lessonTitle} is finished.`,
       detail: 'Keep going with the next lessons to deepen the full process.',
@@ -321,6 +323,8 @@ const LESSON_STEP_COPY = {
       submitReflection: 'Antwoord opslaan',
     },
     lessonSuccess: {
+      congrats: 'Goed gedaan.',
+      completedLabel: 'LES AFGEROND',
       title: 'Inleidende les is afgerond!',
       subtitle: (lessonTitle) => `Je hebt ${lessonTitle} afgerond.`,
       detail: 'Ga verder met de volgende lessen om het volledige proces te verdiepen.',
