@@ -155,7 +155,12 @@ export default function LessonSuccessScreen() {
                 { backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint) },
               ]}
             >
-              <AppText style={[styles.completedLabel, { color: colors.accent.primary }]}>
+              <AppText
+                style={[
+                  styles.completedLabel,
+                  { color: mode === 'light' ? colors.text.secondary : colors.accent.primary },
+                ]}
+              >
                 {copy.lessonSuccess.completedLabel}
               </AppText>
             </View>
