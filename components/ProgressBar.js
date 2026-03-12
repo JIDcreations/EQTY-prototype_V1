@@ -1,14 +1,34 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useTheme } from '../theme';
 
-export default function ProgressBar({ progress }) {
+export default function ProgressBar({ progress, animated = false }) {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
-  const width = Math.min(1, Math.max(0, progress)) * 100;
+  const clamped = Math.min(1, Math.max(0, progress));
+
+  const fillAnim = useSharedValue(animated ? 0 : clamped);
+
+  useEffect(() => {
+    if (animated) {
+      fillAnim.value = withTiming(clamped, { duration: 900 });
+    } else {
+      fillAnim.value = clamped;
+    }
+  }, [clamped]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    width: `${fillAnim.value * 100}%`,
+  }));
+
   return (
     <View style={styles.track}>
-      <View style={[styles.fill, { width: `${width}%` }]} />
+      <Animated.View style={[styles.fill, animStyle]} />
     </View>
   );
 }

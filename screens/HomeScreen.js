@@ -1,6 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
@@ -110,6 +115,24 @@ export default function HomeScreen() {
   const displaySeriesProgress =
     seriesProgress === 0 ? 0.06 : Math.min(1, Math.max(0, seriesProgress));
 
+  // Hero card entrance on every focus — subtle slide + fade
+  const heroOpacity = useSharedValue(0);
+  const heroY = useSharedValue(6);
+
+  useFocusEffect(
+    useCallback(() => {
+      heroOpacity.value = 0;
+      heroY.value = 6;
+      heroOpacity.value = withTiming(1, { duration: 380 });
+      heroY.value = withTiming(0, { duration: 380 });
+    }, [])
+  );
+
+  const heroAnimStyle = useAnimatedStyle(() => ({
+    opacity: heroOpacity.value,
+    transform: [{ translateY: heroY.value }],
+  }));
+
   const greeting = getGreeting(homeCopy);
   const displayName = getDisplayName(authUser, homeCopy);
   const lessonTitle = currentLesson?.title || homeCopy.lessonFallbackTitle;
@@ -184,12 +207,12 @@ export default function HomeScreen() {
         />
         <View style={styles.trajectoryBlock}>
           <View style={styles.trajectoryBar}>
-            <ProgressBar progress={displaySeriesProgress} />
+            <ProgressBar progress={displaySeriesProgress} animated />
           </View>
         </View>
       </View>
 
-      <View style={styles.section}>
+      <Animated.View style={[styles.section, heroAnimStyle]}>
         <Card style={[styles.heroStack, styles.heroCard]}>
           <AppText style={styles.heroStepLabel} numberOfLines={1}>
             {currentContextLabel}
@@ -211,7 +234,7 @@ export default function HomeScreen() {
             }
           />
         </Card>
-      </View>
+      </Animated.View>
 
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
