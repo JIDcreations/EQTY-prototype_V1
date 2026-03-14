@@ -207,7 +207,7 @@ function VideoThumbnail({ duration, isHero, colors }) {
           bottom: isHero ? 12 : 5,
           right: isHero ? 12 : 5,
           backgroundColor: 'rgba(0,0,0,0.5)',
-          borderRadius: 999,
+          borderRadius: 16,
           paddingHorizontal: isHero ? 8 : 5,
           paddingVertical: isHero ? 3 : 2,
         }}>
