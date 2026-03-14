@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -172,76 +172,17 @@ export default function LessonVideosScreen() {
 // Abstract generated thumbnail — rich colored background with decorative
 // geometry and a ghost lesson number. No real images needed.
 
-function VideoThumbnail({ moduleThemeIndex, lessonNumber, duration, isHero, badgeText, colors }) {
-  const moduleColor = getModuleColor(moduleThemeIndex);
+const THUMBNAIL = require('../assets/video-thumbnail/Test-Thumbnail.png');
+
+function VideoThumbnail({ duration, isHero, colors }) {
   const height = isHero ? 192 : 72;
   const playSize = isHero ? 52 : 32;
   const playIconSize = isHero ? 20 : 14;
 
   return (
-    <View style={{ height, backgroundColor: moduleColor, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
-      {/* Decorative circle — top right */}
-      <View style={{
-        position: 'absolute',
-        top: -(height * 0.45),
-        right: -(height * 0.2),
-        width: height * 0.95,
-        height: height * 0.95,
-        borderRadius: height * 0.475,
-        backgroundColor: 'rgba(255,255,255,0.07)',
-      }} />
-      {/* Decorative circle — bottom left */}
-      <View style={{
-        position: 'absolute',
-        bottom: -(height * 0.55),
-        left: -(height * 0.15),
-        width: height * 1.1,
-        height: height * 1.1,
-        borderRadius: height * 0.55,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-      }} />
-      {/* Bottom vignette — improves duration badge legibility */}
-      <View style={{
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: '45%',
-        backgroundColor: 'rgba(0,0,0,0.22)',
-      }} />
-      {/* Ghost lesson number — large background numeral */}
-      <AppText style={{
-        ...typography.styles.display,
-        position: 'absolute',
-        bottom: isHero ? -18 : -8,
-        right: isHero ? 14 : 6,
-        fontSize: isHero ? 104 : 60,
-        lineHeight: isHero ? 104 : 60,
-        color: 'rgba(255,255,255,0.12)',
-      }}>
-        {lessonNumber}
-      </AppText>
-      {/* Badge — top left (e.g. "Current lesson") */}
-      {badgeText ? (
-        <View style={{
-          position: 'absolute',
-          top: isHero ? 14 : 6,
-          left: isHero ? 14 : 6,
-          backgroundColor: 'rgba(0,0,0,0.42)',
-          borderRadius: 999,
-          paddingHorizontal: isHero ? 10 : 6,
-          paddingVertical: isHero ? 4 : 2,
-        }}>
-          <AppText style={{
-            ...typography.styles.stepLabel,
-            fontSize: isHero ? undefined : 9,
-            lineHeight: isHero ? undefined : 12,
-            color: 'rgba(255,255,255,0.9)',
-          }}>
-            {badgeText}
-          </AppText>
-        </View>
-      ) : null}
+    <View style={{ height, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
+      {/* Thumbnail image */}
+      <Image source={THUMBNAIL} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, width: '100%', height: '100%' }} resizeMode="cover" />
       {/* Play button */}
       <View style={{
         width: playSize,
@@ -293,15 +234,12 @@ function HeroCard({ entry, video, onPress, styles, colors, components, videosCop
   return (
     <View style={styles.hero}>
       <VideoThumbnail
-        moduleThemeIndex={entry.moduleThemeIndex}
-        lessonNumber={lessonNumber}
         duration={video.duration}
         isHero
-        badgeText={videosCopy.currentLessonBadge}
         colors={colors}
-        components={components}
       />
       <View style={styles.heroBody}>
+        <AppText style={styles.heroLabel}>{videosCopy.currentLessonBadge}</AppText>
         <AppText style={styles.heroTitle} numberOfLines={2}>{lesson.title}</AppText>
         {lesson.shortDescription ? (
           <AppText style={styles.heroDesc} numberOfLines={2}>{lesson.shortDescription}</AppText>
@@ -363,12 +301,9 @@ function LessonRow({ entry, video, moduleThemeIndex, onPress, isLast, styles, co
       >
         <View style={styles.lessonRowThumb}>
           <VideoThumbnail
-            moduleThemeIndex={moduleThemeIndex}
-            lessonNumber={lessonNumber}
             duration={video.duration}
             isHero={false}
             colors={colors}
-            components={components}
           />
         </View>
         <View style={styles.lessonRowInfo}>
@@ -378,7 +313,7 @@ function LessonRow({ entry, video, moduleThemeIndex, onPress, isLast, styles, co
             <AppText style={styles.lessonRowMetaText}>{video.source}</AppText>
           </View>
         </View>
-        <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} style={{ opacity: 0.45 }} />
+        <Ionicons name="open-outline" size={16} color={colors.text.secondary} style={{ opacity: 0.45 }} />
       </Pressable>
       {!isLast && <View style={styles.rowDivider} />}
     </>
@@ -514,6 +449,10 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       padding: sp.lg,
       gap: sp.sm,
     },
+    heroLabel: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
     heroTitle: {
       ...typography.styles.h3,
       color: colors.text.primary,
@@ -595,8 +534,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     lessonRowMetaText: {
       ...typography.styles.small,
-      fontSize: 11,
-      lineHeight: 14,
       color: colors.text.secondary,
     },
     rowDivider: {

@@ -1013,7 +1013,7 @@ const LESSON_VIDEOS_COPY = {
     statusCompleted: 'Completed',
     browseSectionTitle: 'Browse by topic',
     videosCountFn: (n) => `${n} video${n !== 1 ? 's' : ''}`,
-    currentLessonBadge: 'Your lesson',
+    currentLessonBadge: 'Matching your current lesson',
   },
   nl: {
     title: 'Videos',
@@ -1037,7 +1037,7 @@ const LESSON_VIDEOS_COPY = {
     statusCompleted: 'Afgerond',
     browseSectionTitle: 'Bekijk per thema',
     videosCountFn: (n) => `${n} video's`,
-    currentLessonBadge: 'Jouw les',
+    currentLessonBadge: 'Passend bij je huidige les',
   },
 };
 
