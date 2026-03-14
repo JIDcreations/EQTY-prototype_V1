@@ -277,6 +277,7 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
 
       {isExpanded ? (
         <View style={styles.resourceList}>
+          <View style={styles.resourceListDivider} />
           {resources.length === 0 ? (
             <AppText style={styles.emptyText}>{copy.noResources}</AppText>
           ) : (
@@ -411,7 +412,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
 
     // Lesson list within a module
     lessonList: {
-      gap: 8,
+      gap: 16,
     },
 
     // Lesson card
@@ -478,11 +479,13 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
 
     // Resource list (shown when expanded)
     resourceList: {
-      borderTopWidth: components.borderWidth.thin,
-      borderTopColor: dividerColor,
       paddingHorizontal: 20,
-      paddingTop: 8,
+      paddingTop: 0,
       paddingBottom: 16,
+    },
+    resourceListDivider: {
+      height: components.borderWidth.thin,
+      backgroundColor: colors.accent.primary,
     },
 
     // Resource row
@@ -490,7 +493,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       flexDirection: 'row',
       alignItems: 'flex-start',
       gap: 8,
-      paddingTop: 8,
+      paddingTop: 16,
       paddingBottom: 16,
     },
     resourceRowPressed: {
