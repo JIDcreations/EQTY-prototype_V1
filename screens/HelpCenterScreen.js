@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
-import AppTextInput from '../components/AppTextInput';
 import { SecondaryButton } from '../components/Button';
 import Card from '../components/Card';
+import SearchBar from '../components/SearchBar';
 import SettingsHeader from '../components/SettingsHeader';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
@@ -58,29 +57,11 @@ export default function HelpCenterScreen({ navigation }) {
         />
         <Card style={styles.card}>
           <AppText style={styles.sectionTitle}>{helpCopy.searchTitle}</AppText>
-          <View style={styles.searchBar}>
-            <Ionicons
-              name="search"
-              size={components.sizes.icon.md}
-              color={colors.text.secondary}
-            />
-            <AppTextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder={helpCopy.searchPlaceholder}
-              placeholderTextColor={colors.text.secondary}
-              style={styles.searchInput}
-            />
-            {query.length > 0 ? (
-              <Pressable style={styles.clearButton} onPress={() => setQuery('')}>
-                <Ionicons
-                  name="close-circle"
-                  size={components.sizes.icon.md}
-                  color={colors.text.secondary}
-                />
-              </Pressable>
-            ) : null}
-          </View>
+          <SearchBar
+            value={query}
+            onChangeText={setQuery}
+            placeholder={helpCopy.searchPlaceholder}
+          />
           <AppText style={styles.helperText}>{helpCopy.helperText}</AppText>
         </Card>
         <Card style={styles.card}>
@@ -144,22 +125,6 @@ const createStyles = (colors, components, tabBarHeight) =>
     sectionTitle: {
       ...typography.styles.h3,
       color: colors.text.primary,
-    },
-    searchBar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.background.surface,
-      borderRadius: components.radius.input,
-      paddingHorizontal: components.layout.spacing.lg,
-      paddingVertical: components.layout.spacing.md,
-      gap: components.layout.spacing.sm,
-    },
-    searchInput: {
-      flex: 1,
-      ...components.input.text,
-    },
-    clearButton: {
-      padding: components.layout.spacing.xs,
     },
     helperText: {
       ...typography.styles.small,

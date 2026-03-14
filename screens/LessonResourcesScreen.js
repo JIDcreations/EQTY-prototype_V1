@@ -1,17 +1,17 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
 import OnboardingScreen from '../components/OnboardingScreen';
-import Tag from '../components/Tag';
+import SearchBar from '../components/SearchBar';
 import TopTabHeader from '../components/TopTabHeader';
 import { lessonResources } from '../data/resources';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getLessonResourcesCopy, getLocalizedLessons, getLocalizedModules } from '../utils/localization';
-import { buildModulesWithIndexedLessons } from '../utils/helpers';
+import { buildModulesWithIndexedLessons, getLessonStatus } from '../utils/helpers';
 
 export default function LessonResourcesScreen() {
   const navigation = useNavigation();
@@ -37,12 +37,65 @@ export default function LessonResourcesScreen() {
   const [expandedLessonId, setExpandedLessonId] = useState(
     progress.currentLessonId || null
   );
+  const [query, setQuery] = useState('');
+
+  // Suppress the active tab highlight while this screen is visible.
+  // LessonResources lives inside the Lessons stack, but conceptually it does
+  // not belong to any single tab — no tab should appear selected.
+  useFocusEffect(
+    useCallback(() => {
+      const parent = navigation.getParent();
+      if (!parent) return;
+      const inactiveColor = colors.text.secondary;
+      const activeColor = mode === 'light' ? colors.text.primary : colors.accent.primary;
+      parent.setOptions({ tabBarActiveTintColor: inactiveColor });
+      return () => {
+        parent.setOptions({ tabBarActiveTintColor: activeColor });
+      };
+    }, [navigation, colors, mode])
+  );
+
+  const handleQueryChange = useCallback((text) => {
+    setQuery(text);
+    // Collapse open card when user starts a new search so results are clean
+    if (text.length > 0) setExpandedLessonId(null);
+  }, []);
+
+  const totalLessons = useMemo(
+    () => modulesWithLessons.reduce((sum, m) => sum + m.lessons.length, 0),
+    [modulesWithLessons]
+  );
+
+  const totalSources = useMemo(
+    () => Object.values(lessonResources).reduce((sum, arr) => sum + arr.length, 0),
+    []
+  );
+
+  // Flat list of all lessons used for search
+  const allLessons = useMemo(
+    () => modulesWithLessons.flatMap((m) => m.lessons),
+    [modulesWithLessons]
+  );
+
+  // Search: match on lesson title and short description
+  const searchResults = useMemo(() => {
+    if (!query.trim()) return null;
+    const q = query.trim().toLowerCase();
+    return allLessons.filter(
+      (lesson) =>
+        lesson.title.toLowerCase().includes(q) ||
+        (lesson.shortDescription || '').toLowerCase().includes(q)
+    );
+  }, [allLessons, query]);
+
+  const isSearching = query.trim().length > 0;
 
   return (
     <OnboardingScreen
       scroll
       backgroundVariant="bg3"
       contentContainerStyle={styles.content}
+      scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
     >
       <TopTabHeader
         title={copy.title}
@@ -50,85 +103,175 @@ export default function LessonResourcesScreen() {
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
-      <View style={styles.moduleList}>
-        {modulesWithLessons.map((module) => (
-          <View key={module.id} style={styles.moduleSection}>
-            <AppText style={styles.moduleSectionLabel}>
-              {copy.themeLabel(module.themeIndex)}
-              {'  ·  '}
-              {module.title}
-            </AppText>
-
-            <View style={styles.lessonList}>
-              {module.lessons.map((lesson) => {
-                const isExpanded = expandedLessonId === lesson.id;
-                const isCurrent = progress.currentLessonId === lesson.id;
-                const resources = lessonResources[lesson.id] || [];
-
-                return (
-                  <LessonCard
-                    key={lesson.id}
-                    lesson={lesson}
-                    resources={resources}
-                    isExpanded={isExpanded}
-                    isCurrent={isCurrent}
-                    copy={copy}
-                    styles={styles}
-                    colors={colors}
-                    components={components}
-                    onPress={() =>
-                      setExpandedLessonId((prev) =>
-                        prev === lesson.id ? null : lesson.id
-                      )
-                    }
-                  />
-                );
-              })}
-            </View>
-          </View>
-        ))}
+      {/* Stats row */}
+      <View style={styles.statsRow}>
+        <View style={styles.statItem}>
+          <Ionicons name="library-outline" size={components.sizes.icon.sm} color={colors.text.secondary} />
+          <AppText style={styles.statText}>{copy.lessonsCount(totalLessons)}</AppText>
+        </View>
+        <View style={styles.statDot} />
+        <View style={styles.statItem}>
+          <Ionicons name="globe-outline" size={components.sizes.icon.sm} color={colors.text.secondary} />
+          <AppText style={styles.statText}>{copy.sourcesCount(totalSources)}</AppText>
+        </View>
       </View>
+
+      {/* Search */}
+      <SearchBar
+        value={query}
+        onChangeText={handleQueryChange}
+        placeholder={copy.searchPlaceholder}
+      />
+
+      {/* Content */}
+      {isSearching ? (
+        <SearchResults
+          results={searchResults}
+          expandedLessonId={expandedLessonId}
+          setExpandedLessonId={setExpandedLessonId}
+          progress={progress}
+          copy={copy}
+          styles={styles}
+          colors={colors}
+          components={components}
+        />
+      ) : (
+        <ModuleList
+          modulesWithLessons={modulesWithLessons}
+          expandedLessonId={expandedLessonId}
+          setExpandedLessonId={setExpandedLessonId}
+          progress={progress}
+          copy={copy}
+          styles={styles}
+          colors={colors}
+          components={components}
+        />
+      )}
     </OnboardingScreen>
   );
 }
 
-// ─── Lesson card ─────────────────────────────────────────────────────────────
+// ─── Module list (default view) ───────────────────────────────────────────────
 
-function LessonCard({
-  lesson,
-  resources,
-  isExpanded,
-  isCurrent,
-  copy,
-  styles,
-  colors,
-  components,
-  onPress,
-}) {
+function ModuleList({ modulesWithLessons, expandedLessonId, setExpandedLessonId, progress, copy, styles, colors, components }) {
+  return (
+    <View style={styles.moduleList}>
+      {modulesWithLessons.map((module) => (
+        <View key={module.id} style={styles.moduleSection}>
+          <AppText style={styles.moduleSectionLabel}>
+            {copy.themeLabel(module.themeIndex)}{'  ·  '}{module.title}
+          </AppText>
+
+          <View style={styles.lessonList}>
+            {module.lessons.map((lesson) => (
+              <LessonCard
+                key={lesson.id}
+                lesson={lesson}
+                progress={progress}
+                expandedLessonId={expandedLessonId}
+                setExpandedLessonId={setExpandedLessonId}
+                copy={copy}
+                styles={styles}
+                colors={colors}
+                components={components}
+              />
+            ))}
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// ─── Search results view ──────────────────────────────────────────────────────
+
+function SearchResults({ results, expandedLessonId, setExpandedLessonId, progress, copy, styles, colors, components }) {
+  if (!results || results.length === 0) {
+    return (
+      <View style={styles.emptySearchCard}>
+        <Ionicons name="search-outline" size={components.sizes.icon.lg} color={colors.text.secondary} />
+        <AppText style={styles.emptySearchText}>{copy.noSearchResults}</AppText>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.lessonList}>
+      {results.map((lesson) => (
+        <LessonCard
+          key={lesson.id}
+          lesson={lesson}
+          progress={progress}
+          expandedLessonId={expandedLessonId}
+          setExpandedLessonId={setExpandedLessonId}
+          copy={copy}
+          styles={styles}
+          colors={colors}
+          components={components}
+        />
+      ))}
+    </View>
+  );
+}
+
+// ─── Lesson card ──────────────────────────────────────────────────────────────
+
+function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, copy, styles, colors, components }) {
+  const isExpanded = expandedLessonId === lesson.id;
+  const status = getLessonStatus(lesson.id, progress);
+  const isCompleted = status === 'completed';
+  const resources = lessonResources[lesson.id] || [];
+
   return (
     <View style={[styles.lessonCard, isExpanded && styles.lessonCardExpanded]}>
       <Pressable
-        onPress={onPress}
+        onPress={() =>
+          setExpandedLessonId((prev) => (prev === lesson.id ? null : lesson.id))
+        }
         style={({ pressed }) => [
           styles.lessonHeader,
           pressed && styles.lessonHeaderPressed,
         ]}
       >
-        <View style={styles.lessonHeaderLeft}>
+        <View style={styles.lessonHeaderContent}>
           <View style={styles.lessonTitleRow}>
-            <AppText style={styles.lessonTitle}>{lesson.title}</AppText>
-            {isCurrent ? (
-              <Tag label={copy.currentLessonTag} tone="accent" />
+            <AppText
+              style={[styles.lessonTitle, isCompleted && styles.lessonTitleCompleted]}
+              numberOfLines={2}
+            >
+              {lesson.title}
+            </AppText>
+            {isCompleted ? (
+              <Ionicons
+                name="checkmark-circle"
+                size={components.sizes.icon.md}
+                color={colors.accent.primary}
+                style={styles.chevron}
+              />
             ) : null}
           </View>
-          <AppText style={styles.lessonDescription} numberOfLines={isExpanded ? 3 : 1}>
+          <AppText
+            style={styles.lessonDescription}
+            numberOfLines={isExpanded ? 3 : 1}
+          >
             {lesson.shortDescription}
           </AppText>
+
+          {!isExpanded && resources.length > 0 ? (
+            <View style={styles.resourceCountRow}>
+              <Ionicons name="globe-outline" size={components.sizes.icon.xs} color={colors.text.secondary} />
+              <AppText style={styles.resourceCountText}>
+                {resources.length} {resources.length === 1 ? 'source' : 'sources'}
+              </AppText>
+            </View>
+          ) : null}
         </View>
+
         <Ionicons
           name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={components.sizes.icon.md}
           color={colors.text.secondary}
+          style={styles.chevron}
         />
       </Pressable>
 
@@ -157,6 +300,13 @@ function LessonCard({
 
 // ─── Resource row ─────────────────────────────────────────────────────────────
 
+function getResourceIcon(url) {
+  if (!url) return 'globe-outline';
+  if (url.includes('/articles/')) return 'reader-outline';
+  if (url.includes('/terms/')) return 'document-text-outline';
+  return 'globe-outline';
+}
+
 function ResourceRow({ resource, copy, styles, colors, components, showDivider }) {
   const handleOpen = async () => {
     if (!resource?.url) return;
@@ -176,7 +326,7 @@ function ResourceRow({ resource, copy, styles, colors, components, showDivider }
       >
         <View style={styles.resourceIconWrap}>
           <Ionicons
-            name="globe-outline"
+            name={getResourceIcon(resource.url)}
             size={components.sizes.icon.md}
             color={colors.text.secondary}
           />
@@ -186,6 +336,11 @@ function ResourceRow({ resource, copy, styles, colors, components, showDivider }
           <AppText style={styles.resourceLabel} numberOfLines={2}>
             {resource.label}
           </AppText>
+          {resource.description ? (
+            <AppText style={styles.resourceDescription} numberOfLines={2}>
+              {resource.description}
+            </AppText>
+          ) : null}
           <AppText style={styles.resourceSource} numberOfLines={1}>
             {resource.source}
           </AppText>
@@ -226,10 +381,32 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     content: {
       paddingTop: components.layout.safeArea.top + sp.xl,
       paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.md,
-      gap: components.layout.contentGap,
+      gap: sp.lg,
     },
 
-    // Module sections
+    // Stats row
+    statsRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sp.sm,
+    },
+    statItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sp.xs,
+    },
+    statText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+    statDot: {
+      width: 3,
+      height: 3,
+      borderRadius: 999,
+      backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+
+    // Module list
     moduleList: {
       gap: sp.xl,
     },
@@ -262,34 +439,52 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     // Lesson header (always visible)
     lessonHeader: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+      alignItems: 'flex-start',
       gap: sp.md,
       padding: sp.lg,
     },
     lessonHeaderPressed: {
       opacity: colors.opacity.emphasis,
     },
-    lessonHeaderLeft: {
+    lessonHeaderContent: {
       flex: 1,
       gap: sp.xs,
     },
     lessonTitleRow: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       gap: sp.sm,
-      flexWrap: 'wrap',
     },
     lessonTitle: {
       ...typography.styles.bodyStrong,
       color: colors.text.primary,
+      flex: 1,
+    },
+    lessonTitleCompleted: {
+      color: colors.text.secondary,
     },
     lessonDescription: {
       ...typography.styles.small,
       color: colors.text.secondary,
     },
+    // Slight top nudge so the chevron sits level with the title cap-height
+    chevron: {
+      marginTop: 2,
+      flexShrink: 0,
+    },
+    resourceCountRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      marginTop: 2,
+    },
+    resourceCountText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      opacity: 0.7,
+    },
 
-    // Resources (visible when expanded)
+    // Resource list (shown when expanded)
     resourceList: {
       borderTopWidth: components.borderWidth.thin,
       borderTopColor: dividerColor,
@@ -301,9 +496,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     // Resource row
     resourceRow: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-start',
       gap: sp.md,
-      paddingVertical: sp.sm,
+      paddingVertical: sp.md,
     },
     resourceRowPressed: {
       opacity: colors.opacity.emphasis,
@@ -316,26 +511,46 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       justifyContent: 'center',
       backgroundColor: toRgba(colors.ui.divider, colors.opacity.tint),
       flexShrink: 0,
+      marginTop: 1,
     },
     resourceCopy: {
       flex: 1,
-      gap: 2,
+      gap: sp.xs,
       minWidth: 0,
     },
     resourceLabel: {
       ...typography.styles.bodyStrong,
       color: colors.text.primary,
     },
+    resourceDescription: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      lineHeight: 18,
+    },
     resourceSource: {
       ...typography.styles.small,
       color: colors.text.secondary,
+      opacity: 0.65,
     },
     resourceDivider: {
       height: components.borderWidth.thin,
       backgroundColor: dividerColor,
     },
 
-    // Empty state
+    // Search empty state
+    emptySearchCard: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: sp.md,
+      paddingVertical: sp.xxl,
+    },
+    emptySearchText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+
+    // Lesson empty state
     emptyText: {
       ...typography.styles.small,
       color: colors.text.secondary,

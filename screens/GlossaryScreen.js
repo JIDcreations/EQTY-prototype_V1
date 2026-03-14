@@ -4,9 +4,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
-import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
 import Card from '../components/Card';
+import SearchBar from '../components/SearchBar';
 import OnboardingScreen from '../components/OnboardingScreen';
 import TopTabHeader from '../components/TopTabHeader';
 import { glossaryCategories, glossaryTerms } from '../data/glossary';
@@ -198,31 +198,11 @@ export default function GlossaryScreen() {
           />
 
           <View style={styles.stickyControls}>
-            <View style={styles.searchGroup}>
-              <View style={styles.searchBar}>
-                <Ionicons
-                  name="search"
-                  size={components.sizes.icon.md}
-                  color={colors.text.secondary}
-                />
-                <AppTextInput
-                  value={query}
-                  onChangeText={setQuery}
-                  placeholder={glossaryCopy.searchPlaceholder}
-                  placeholderTextColor={colors.text.secondary}
-                  style={styles.searchInput}
-                />
-                {query.length > 0 ? (
-                  <Pressable style={styles.clearButton} onPress={() => setQuery('')}>
-                    <Ionicons
-                      name="close-circle"
-                      size={components.sizes.icon.md}
-                      color={colors.text.secondary}
-                    />
-                  </Pressable>
-                ) : null}
-              </View>
-            </View>
+            <SearchBar
+              value={query}
+              onChangeText={setQuery}
+              placeholder={glossaryCopy.searchPlaceholder}
+            />
             <View style={styles.chipRow}>
               <ScrollView
                 horizontal
@@ -382,27 +362,6 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     stickyControls: {
       gap: components.layout.spacing.md,
-    },
-    searchGroup: {
-      gap: components.layout.spacing.xs,
-    },
-    searchBar: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-      borderRadius: components.radius.input,
-      paddingHorizontal: components.layout.spacing.lg,
-      paddingVertical: components.layout.spacing.md,
-      gap: components.layout.spacing.sm,
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    },
-    searchInput: {
-      flex: 1,
-      ...components.input.text,
-    },
-    clearButton: {
-      padding: components.layout.spacing.xs,
     },
     chipRow: {
       flexDirection: 'row',

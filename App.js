@@ -43,7 +43,7 @@ function Tabs() {
         tabBarIcon: ({ color, size, focused }) => {
           let iconName = 'home-outline';
           if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
-          if (route.name === 'Lessons') iconName = focused ? 'book' : 'book-outline';
+          if (route.name === 'Lessons') iconName = focused ? 'book-outline' : 'book-outline';
           if (route.name === 'Glossary') iconName = focused ? 'list' : 'list-outline';
           if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
           return (

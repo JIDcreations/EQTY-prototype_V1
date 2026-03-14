@@ -905,12 +905,17 @@ const HOME_COPY = {
 
 const LESSON_RESOURCES_COPY = {
   en: {
-    title: 'Resources',
+    title: 'Extra info',
     subtitle: 'Go deeper on the concepts behind your lessons',
     themeLabel: (n) => `Theme ${n}`,
     lessonLabel: (n) => `Lesson ${n}`,
+    searchPlaceholder: 'Search a lesson or concept',
+    noSearchResults: 'No lessons match your search.',
     openResource: 'Open',
     currentLessonTag: 'Your lesson',
+    completedTag: 'Done',
+    lessonsCount: (n) => `${n} lessons`,
+    sourcesCount: (n) => `${n} sources`,
     noResources: 'No resources available for this lesson yet.',
     topicTitles: {
       market_basics: 'Market Basics',
@@ -942,12 +947,17 @@ const LESSON_RESOURCES_COPY = {
     },
   },
   nl: {
-    title: 'Bronnen',
+    title: 'Extra info',
     subtitle: 'Verdiep je kennis over de concepten achter je lessen',
     themeLabel: (n) => `Thema ${n}`,
     lessonLabel: (n) => `Les ${n}`,
+    searchPlaceholder: 'Zoek een les of concept',
+    noSearchResults: 'Geen lessen gevonden voor je zoekopdracht.',
     openResource: 'Openen',
     currentLessonTag: 'Jouw les',
+    completedTag: 'Klaar',
+    lessonsCount: (n) => `${n} lessen`,
+    sourcesCount: (n) => `${n} bronnen`,
     noResources: 'Nog geen bronnen beschikbaar voor deze les.',
     topicTitles: {
       market_basics: 'Marktbeginselen',
