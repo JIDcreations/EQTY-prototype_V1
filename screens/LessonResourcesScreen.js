@@ -4,22 +4,14 @@ import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
-import Card from '../components/Card';
 import OnboardingScreen from '../components/OnboardingScreen';
-import SectionTitle from '../components/SectionTitle';
 import Tag from '../components/Tag';
 import TopTabHeader from '../components/TopTabHeader';
-import { glossaryTerms } from '../data/glossary';
+import { lessonResources } from '../data/resources';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import {
-  getHomeCopy,
-  getLessonContent,
-  getLessonResourcesCopy,
-  getLocalizedLessons,
-  getLocalizedModules,
-} from '../utils/localization';
-import { annotateLessonsWithThemeContext, getLessonStatus } from '../utils/helpers';
+import { getLessonResourcesCopy, getLocalizedLessons, getLocalizedModules } from '../utils/localization';
+import { buildModulesWithIndexedLessons } from '../utils/helpers';
 
 export default function LessonResourcesScreen() {
   const navigation = useNavigation();
@@ -30,53 +22,20 @@ export default function LessonResourcesScreen() {
     () => createStyles(colors, components, tabBarHeight, mode),
     [colors, components, tabBarHeight, mode]
   );
-  const resourcesCopy = useMemo(
+
+  const copy = useMemo(
     () => getLessonResourcesCopy(preferences?.language),
     [preferences?.language]
   );
-  const homeCopy = useMemo(() => getHomeCopy(preferences?.language), [preferences?.language]);
-  const localizedModules = useMemo(
-    () => getLocalizedModules(preferences?.language),
-    [preferences?.language]
-  );
 
-  const lessons = useMemo(() => {
+  const modulesWithLessons = useMemo(() => {
     const localizedLessons = getLocalizedLessons(preferences?.language);
-    return annotateLessonsWithThemeContext(localizedLessons, localizedModules);
-  }, [localizedModules, preferences?.language]);
+    const localizedModules = getLocalizedModules(preferences?.language);
+    return buildModulesWithIndexedLessons(localizedModules, localizedLessons);
+  }, [preferences?.language]);
 
   const [expandedLessonId, setExpandedLessonId] = useState(
-    progress.currentLessonId || lessons[0]?.id || null
-  );
-
-  const glossaryById = useMemo(() => {
-    const index = {};
-    glossaryTerms.forEach((term) => {
-      index[term.id] = term;
-    });
-    return index;
-  }, []);
-
-  const lessonCards = useMemo(() => {
-    return lessons.map((lesson) => {
-      const content = getLessonContent(lesson.id, preferences?.language);
-      const takeaways = getTakeaways(content, lesson.shortDescription);
-      const links = getLinksForLesson(lesson, content, glossaryById, resourcesCopy);
-      return {
-        lesson,
-        takeaways,
-        webLinks: links.web,
-        pdfLinks: links.pdf,
-      };
-    });
-  }, [glossaryById, lessons, preferences?.language, resourcesCopy]);
-
-  const completedCount = useMemo(
-    () =>
-      lessonCards.filter((item) =>
-        progress.completedLessonIds?.includes(item.lesson.id)
-      ).length,
-    [lessonCards, progress.completedLessonIds]
+    progress.currentLessonId || null
   );
 
   return (
@@ -86,377 +45,165 @@ export default function LessonResourcesScreen() {
       contentContainerStyle={styles.content}
     >
       <TopTabHeader
-        title={resourcesCopy.title}
-        subtitle={resourcesCopy.subtitle}
+        title={copy.title}
+        subtitle={copy.subtitle}
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
-      <Card style={styles.summaryCard}>
-        <SectionTitle title={resourcesCopy.summaryTitle} subtitle={resourcesCopy.summarySubtitle} />
-        <View style={styles.summaryMeta}>
-          <Tag label={resourcesCopy.lessonCount(lessons.length)} tone="default" />
-          <Tag
-            label={`${completedCount}/${lessons.length} ${resourcesCopy.statusCompleted.toLowerCase()}`}
-            tone="accent"
-          />
-        </View>
-      </Card>
+      <View style={styles.moduleList}>
+        {modulesWithLessons.map((module) => (
+          <View key={module.id} style={styles.moduleSection}>
+            <AppText style={styles.moduleSectionLabel}>
+              {copy.themeLabel(module.themeIndex)}
+              {'  ·  '}
+              {module.title}
+            </AppText>
 
-      <View style={styles.lessonList}>
-        {lessonCards.map(({ lesson, takeaways, webLinks, pdfLinks }) => {
-          const isExpanded = expandedLessonId === lesson.id;
-          const status = getLessonStatus(lesson.id, progress);
-          const statusLabel = getStatusLabel(status, resourcesCopy);
-          const lessonLabel = homeCopy.lessonShort(lesson.lessonIndexInTheme);
+            <View style={styles.lessonList}>
+              {module.lessons.map((lesson) => {
+                const isExpanded = expandedLessonId === lesson.id;
+                const isCurrent = progress.currentLessonId === lesson.id;
+                const resources = lessonResources[lesson.id] || [];
 
-          return (
-            <Card
-              key={lesson.id}
-              style={[styles.lessonCard, isExpanded && styles.lessonCardExpanded]}
-            >
-              <Pressable
-                onPress={() =>
-                  setExpandedLessonId((prev) => (prev === lesson.id ? null : lesson.id))
-                }
-                style={({ pressed }) => [styles.lessonHeader, pressed && styles.lessonHeaderPressed]}
-              >
-                <View style={styles.lessonHeaderCopy}>
-                  <AppText style={styles.lessonNumber}>{lessonLabel}</AppText>
-                  <AppText style={styles.lessonTitle}>{lesson.title}</AppText>
-                  <AppText style={styles.lessonDescription} numberOfLines={isExpanded ? 3 : 2}>
-                    {lesson.shortDescription}
-                  </AppText>
-                </View>
-                <View style={styles.lessonHeaderRight}>
-                  <Tag label={statusLabel} tone={status === 'current' ? 'accent' : 'default'} />
-                  <Ionicons
-                    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                    size={components.sizes.icon.md}
-                    color={colors.text.secondary}
+                return (
+                  <LessonCard
+                    key={lesson.id}
+                    lesson={lesson}
+                    resources={resources}
+                    isExpanded={isExpanded}
+                    isCurrent={isCurrent}
+                    copy={copy}
+                    styles={styles}
+                    colors={colors}
+                    components={components}
+                    onPress={() =>
+                      setExpandedLessonId((prev) =>
+                        prev === lesson.id ? null : lesson.id
+                      )
+                    }
                   />
-                </View>
-              </Pressable>
-
-              {isExpanded ? (
-                <View style={styles.expandedContent}>
-                  <View style={styles.resourceSection}>
-                    <AppText style={styles.sectionLabel}>{resourcesCopy.extraInfoTitle}</AppText>
-                    {takeaways.length ? (
-                      takeaways.map((item) => (
-                        <View key={`${lesson.id}-${item}`} style={styles.takeawayRow}>
-                          <View style={styles.takeawayDot} />
-                          <AppText style={styles.takeawayText}>{item}</AppText>
-                        </View>
-                      ))
-                    ) : (
-                      <AppText style={styles.emptyText}>{resourcesCopy.noExtraInfo}</AppText>
-                    )}
-                  </View>
-
-                  <View style={styles.resourceSection}>
-                    <AppText style={styles.sectionLabel}>{resourcesCopy.sitesTitle}</AppText>
-                    {webLinks.length ? (
-                      webLinks.map((link) => (
-                        <LinkRow
-                          key={link.id}
-                          link={link}
-                          styles={styles}
-                          colors={colors}
-                          components={components}
-                          fallbackLabel={resourcesCopy.openLink}
-                        />
-                      ))
-                    ) : (
-                      <AppText style={styles.emptyText}>{resourcesCopy.noLinks}</AppText>
-                    )}
-                  </View>
-
-                  <View style={styles.resourceSection}>
-                    <AppText style={styles.sectionLabel}>{resourcesCopy.pdfTitle}</AppText>
-                    {pdfLinks.length ? (
-                      pdfLinks.map((link) => (
-                        <LinkRow
-                          key={link.id}
-                          link={link}
-                          styles={styles}
-                          colors={colors}
-                          components={components}
-                          fallbackLabel={resourcesCopy.openLink}
-                        />
-                      ))
-                    ) : (
-                      <AppText style={styles.emptyText}>{resourcesCopy.noLinks}</AppText>
-                    )}
-                  </View>
-                </View>
-              ) : null}
-            </Card>
-          );
-        })}
+                );
+              })}
+            </View>
+          </View>
+        ))}
       </View>
     </OnboardingScreen>
   );
 }
 
-function LinkRow({ link, styles, colors, components, fallbackLabel }) {
-  const handleOpen = async () => {
-    if (!link?.url) return;
-    try {
-      await Linking.openURL(link.url);
-    } catch (error) {
-      // Keep this quiet; broken external links should not break the screen.
-    }
-  };
+// ─── Lesson card ─────────────────────────────────────────────────────────────
 
+function LessonCard({
+  lesson,
+  resources,
+  isExpanded,
+  isCurrent,
+  copy,
+  styles,
+  colors,
+  components,
+  onPress,
+}) {
   return (
-    <Pressable onPress={handleOpen} style={({ pressed }) => [styles.linkRow, pressed && styles.linkRowPressed]}>
-      <View style={styles.linkCopy}>
-        <AppText style={styles.linkTitle}>{link.label || fallbackLabel}</AppText>
-        {link.subtitle ? <AppText style={styles.linkSubtitle}>{link.subtitle}</AppText> : null}
-      </View>
-      <Ionicons
-        name={link.type === 'pdf' ? 'document-outline' : 'open-outline'}
-        size={components.sizes.icon.md}
-        color={colors.text.secondary}
-      />
-    </Pressable>
+    <View style={[styles.lessonCard, isExpanded && styles.lessonCardExpanded]}>
+      <Pressable
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.lessonHeader,
+          pressed && styles.lessonHeaderPressed,
+        ]}
+      >
+        <View style={styles.lessonHeaderLeft}>
+          <View style={styles.lessonTitleRow}>
+            <AppText style={styles.lessonTitle}>{lesson.title}</AppText>
+            {isCurrent ? (
+              <Tag label={copy.currentLessonTag} tone="accent" />
+            ) : null}
+          </View>
+          <AppText style={styles.lessonDescription} numberOfLines={isExpanded ? 3 : 1}>
+            {lesson.shortDescription}
+          </AppText>
+        </View>
+        <Ionicons
+          name={isExpanded ? 'chevron-up' : 'chevron-down'}
+          size={components.sizes.icon.md}
+          color={colors.text.secondary}
+        />
+      </Pressable>
+
+      {isExpanded ? (
+        <View style={styles.resourceList}>
+          {resources.length === 0 ? (
+            <AppText style={styles.emptyText}>{copy.noResources}</AppText>
+          ) : (
+            resources.map((resource, index) => (
+              <ResourceRow
+                key={resource.id}
+                resource={resource}
+                copy={copy}
+                styles={styles}
+                colors={colors}
+                components={components}
+                showDivider={index < resources.length - 1}
+              />
+            ))
+          )}
+        </View>
+      ) : null}
+    </View>
   );
 }
 
-function getTakeaways(content, fallback) {
-  const summaryTakeaways = content?.steps?.summary?.takeaways || [];
-  if (summaryTakeaways.length > 0) {
-    return summaryTakeaways.slice(0, 4);
-  }
+// ─── Resource row ─────────────────────────────────────────────────────────────
 
-  const conceptIntro = content?.steps?.concept?.intro;
-  const conceptBody = content?.steps?.concept?.body;
-  const fallbackItems = [conceptIntro, conceptBody, fallback].filter(Boolean);
-  return fallbackItems.slice(0, 3);
-}
-
-function getLinksForLesson(lesson, content, glossaryById, resourcesCopy) {
-  const queryTitle = encodeURIComponent(`${lesson.title} investing`);
-  const termIds = Array.from(collectTermIds(content?.steps || {}));
-
-  const glossaryLinks = termIds
-    .map((termId) => glossaryById[termId])
-    .filter((term) => term?.learnMoreUrl)
-    .map((term) => ({
-      id: `term-${lesson.id}-${term.id}`,
-      label: term.term,
-      subtitle: resourcesCopy.glossaryLabel,
-      type: 'site',
-      url: term.learnMoreUrl,
-    }));
-
-  const fallbackSites = [
-    {
-      id: `video-${lesson.id}`,
-      label: resourcesCopy.fallbackVideo,
-      subtitle: 'YouTube',
-      type: 'site',
-      url: `https://www.youtube.com/results?search_query=${queryTitle}`,
-    },
-    {
-      id: `article-${lesson.id}`,
-      label: resourcesCopy.fallbackArticle,
-      subtitle: 'Investopedia',
-      type: 'site',
-      url: `https://www.investopedia.com/search?q=${encodeURIComponent(lesson.title)}`,
-    },
-  ];
-
-  const pdfLinks = [
-    {
-      id: `pdf-${lesson.id}`,
-      label: resourcesCopy.fallbackPdf,
-      subtitle: 'Google',
-      type: 'pdf',
-      url: `https://www.google.com/search?q=${encodeURIComponent(`${lesson.title} investing filetype:pdf`)}`,
-    },
-  ];
-
-  return {
-    web: dedupeByUrl([...glossaryLinks.slice(0, 2), ...fallbackSites]),
-    pdf: dedupeByUrl(pdfLinks),
+function ResourceRow({ resource, copy, styles, colors, components, showDivider }) {
+  const handleOpen = async () => {
+    if (!resource?.url) return;
+    try {
+      await Linking.openURL(resource.url);
+    } catch (_) {}
   };
+
+  return (
+    <View>
+      <Pressable
+        onPress={handleOpen}
+        style={({ pressed }) => [
+          styles.resourceRow,
+          pressed && styles.resourceRowPressed,
+        ]}
+      >
+        <View style={styles.resourceIconWrap}>
+          <Ionicons
+            name="globe-outline"
+            size={components.sizes.icon.md}
+            color={colors.text.secondary}
+          />
+        </View>
+
+        <View style={styles.resourceCopy}>
+          <AppText style={styles.resourceLabel} numberOfLines={2}>
+            {resource.label}
+          </AppText>
+          <AppText style={styles.resourceSource} numberOfLines={1}>
+            {resource.source}
+          </AppText>
+        </View>
+
+        <Ionicons
+          name="open-outline"
+          size={components.sizes.icon.md}
+          color={colors.text.secondary}
+        />
+      </Pressable>
+
+      {showDivider ? <View style={styles.resourceDivider} /> : null}
+    </View>
+  );
 }
 
-function collectTermIds(node, bag = new Set()) {
-  if (Array.isArray(node)) {
-    node.forEach((item) => collectTermIds(item, bag));
-    return bag;
-  }
-
-  if (!node || typeof node !== 'object') {
-    return bag;
-  }
-
-  Object.entries(node).forEach(([key, value]) => {
-    if (key === 'termIds' && Array.isArray(value)) {
-      value.forEach((termId) => {
-        if (typeof termId === 'string' && termId.trim()) {
-          bag.add(termId);
-        }
-      });
-      return;
-    }
-    collectTermIds(value, bag);
-  });
-
-  return bag;
-}
-
-function dedupeByUrl(items = []) {
-  const seen = new Set();
-  return items.filter((item) => {
-    if (!item?.url) return false;
-    if (seen.has(item.url)) return false;
-    seen.add(item.url);
-    return true;
-  });
-}
-
-function getStatusLabel(status, resourcesCopy) {
-  if (status === 'current') return resourcesCopy.statusCurrent;
-  if (status === 'completed') return resourcesCopy.statusCompleted;
-  return resourcesCopy.statusUpcoming;
-}
-
-const createStyles = (colors, components, tabBarHeight, mode) => {
-  const isLight = mode === 'light';
-
-  return StyleSheet.create({
-    content: {
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.xl,
-      paddingBottom:
-        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.md,
-      gap: components.layout.contentGap,
-    },
-    summaryCard: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: isLight
-        ? colors.ui.divider
-        : toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-      gap: components.layout.spacing.md,
-    },
-    summaryMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: components.layout.spacing.sm,
-      flexWrap: 'wrap',
-    },
-    lessonList: {
-      gap: components.layout.spacing.md,
-    },
-    lessonCard: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-      padding: components.layout.spacing.lg,
-      gap: components.layout.spacing.md,
-    },
-    lessonCardExpanded: {
-      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    },
-    lessonHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: components.layout.spacing.md,
-    },
-    lessonHeaderPressed: {
-      opacity: colors.opacity.emphasis,
-    },
-    lessonHeaderCopy: {
-      flex: 1,
-      gap: components.layout.spacing.xs,
-    },
-    lessonHeaderRight: {
-      alignItems: 'center',
-      gap: components.layout.spacing.xs,
-    },
-    lessonNumber: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    lessonTitle: {
-      ...typography.styles.bodyStrong,
-      color: colors.text.primary,
-    },
-    lessonDescription: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    expandedContent: {
-      gap: components.layout.spacing.md,
-      borderTopWidth: components.borderWidth.thin,
-      borderTopColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      paddingTop: components.layout.spacing.md,
-    },
-    resourceSection: {
-      gap: components.layout.spacing.sm,
-    },
-    sectionLabel: {
-      ...typography.styles.stepLabel,
-      color: colors.text.secondary,
-    },
-    takeawayRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: components.layout.spacing.sm,
-    },
-    takeawayDot: {
-      width: components.sizes.dot.sm,
-      height: components.sizes.dot.sm,
-      borderRadius: components.radius.pill,
-      marginTop: components.layout.spacing.sm,
-      backgroundColor: colors.accent.primary,
-    },
-    takeawayText: {
-      ...typography.styles.body,
-      color: colors.text.primary,
-      flex: 1,
-    },
-    emptyText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    linkRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: components.layout.spacing.md,
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      borderRadius: components.radius.input,
-      paddingHorizontal: components.layout.spacing.md,
-      paddingVertical: components.layout.spacing.sm,
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-      minHeight: components.sizes.list.minItemHeight,
-    },
-    linkRowPressed: {
-      opacity: colors.opacity.emphasis,
-      transform: [{ scale: components.transforms.scalePressed }],
-    },
-    linkCopy: {
-      flex: 1,
-      gap: components.layout.spacing.xs,
-      minWidth: 0,
-    },
-    linkTitle: {
-      ...typography.styles.bodyStrong,
-      color: colors.text.primary,
-    },
-    linkSubtitle: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-  });
-};
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 function toRgba(hex, alpha) {
   const cleaned = hex.replace('#', '');
@@ -466,3 +213,133 @@ function toRgba(hex, alpha) {
   const b = value & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+const createStyles = (colors, components, tabBarHeight, mode) => {
+  const isLight = mode === 'light';
+  const sp = components.layout.spacing;
+
+  const dividerColor = isLight
+    ? colors.ui.divider
+    : toRgba(colors.ui.divider, colors.opacity.stroke);
+
+  return StyleSheet.create({
+    content: {
+      paddingTop: components.layout.safeArea.top + sp.xl,
+      paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.md,
+      gap: components.layout.contentGap,
+    },
+
+    // Module sections
+    moduleList: {
+      gap: sp.xl,
+    },
+    moduleSection: {
+      gap: sp.sm,
+    },
+    moduleSectionLabel: {
+      ...typography.styles.stepLabel,
+      color: colors.text.secondary,
+    },
+
+    // Lesson list within a module
+    lessonList: {
+      gap: sp.sm,
+    },
+
+    // Lesson card
+    lessonCard: {
+      borderRadius: components.radius.card,
+      borderWidth: components.borderWidth.thin,
+      borderColor: dividerColor,
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+      overflow: 'hidden',
+    },
+    lessonCardExpanded: {
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
+
+    // Lesson header (always visible)
+    lessonHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: sp.md,
+      padding: sp.lg,
+    },
+    lessonHeaderPressed: {
+      opacity: colors.opacity.emphasis,
+    },
+    lessonHeaderLeft: {
+      flex: 1,
+      gap: sp.xs,
+    },
+    lessonTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sp.sm,
+      flexWrap: 'wrap',
+    },
+    lessonTitle: {
+      ...typography.styles.bodyStrong,
+      color: colors.text.primary,
+    },
+    lessonDescription: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+
+    // Resources (visible when expanded)
+    resourceList: {
+      borderTopWidth: components.borderWidth.thin,
+      borderTopColor: dividerColor,
+      paddingHorizontal: sp.lg,
+      paddingTop: sp.sm,
+      paddingBottom: sp.md,
+    },
+
+    // Resource row
+    resourceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sp.md,
+      paddingVertical: sp.sm,
+    },
+    resourceRowPressed: {
+      opacity: colors.opacity.emphasis,
+    },
+    resourceIconWrap: {
+      width: components.sizes.square.md,
+      height: components.sizes.square.md,
+      borderRadius: components.radius.input,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: toRgba(colors.ui.divider, colors.opacity.tint),
+      flexShrink: 0,
+    },
+    resourceCopy: {
+      flex: 1,
+      gap: 2,
+      minWidth: 0,
+    },
+    resourceLabel: {
+      ...typography.styles.bodyStrong,
+      color: colors.text.primary,
+    },
+    resourceSource: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+    resourceDivider: {
+      height: components.borderWidth.thin,
+      backgroundColor: dividerColor,
+    },
+
+    // Empty state
+    emptyText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      paddingVertical: sp.sm,
+    },
+  });
+};
