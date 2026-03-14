@@ -268,7 +268,7 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
         </View>
 
         <Ionicons
-          name={isExpanded ? 'chevron-up' : 'chevron-down'}
+          name={isExpanded ? 'chevron-down' : 'chevron-forward'}
           size={components.sizes.icon.md}
           color={colors.text.secondary}
           style={styles.chevron}
@@ -306,7 +306,6 @@ function getResourceIcon(url) {
   if (url.includes('/terms/')) return 'document-text-outline';
   return 'globe-outline';
 }
-
 function ResourceRow({ resource, copy, styles, colors, components, showDivider }) {
   const handleOpen = async () => {
     if (!resource?.url) return;
@@ -324,14 +323,6 @@ function ResourceRow({ resource, copy, styles, colors, components, showDivider }
           pressed && styles.resourceRowPressed,
         ]}
       >
-        <View style={styles.resourceIconWrap}>
-          <Ionicons
-            name={getResourceIcon(resource.url)}
-            size={components.sizes.icon.md}
-            color={colors.text.secondary}
-          />
-        </View>
-
         <View style={styles.resourceCopy}>
           <AppText style={styles.resourceLabel} numberOfLines={2}>
             {resource.label}
@@ -408,24 +399,24 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
 
     // Module list
     moduleList: {
-      gap: sp.xl,
+      gap: 24,
     },
     moduleSection: {
       gap: sp.sm,
     },
     moduleSectionLabel: {
       ...typography.styles.stepLabel,
-      color: colors.text.secondary,
+      color: colors.text.primary,
     },
 
     // Lesson list within a module
     lessonList: {
-      gap: sp.sm,
+      gap: 8,
     },
 
     // Lesson card
     lessonCard: {
-      borderRadius: components.radius.card,
+      borderRadius: 16,
       borderWidth: components.borderWidth.thin,
       borderColor: dividerColor,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
@@ -440,15 +431,16 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     lessonHeader: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      gap: sp.md,
-      padding: sp.lg,
+      gap: 8,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
     },
     lessonHeaderPressed: {
       opacity: colors.opacity.emphasis,
     },
     lessonHeaderContent: {
       flex: 1,
-      gap: sp.xs,
+      gap: 8,
     },
     lessonTitleRow: {
       flexDirection: 'row',
@@ -488,34 +480,25 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     resourceList: {
       borderTopWidth: components.borderWidth.thin,
       borderTopColor: dividerColor,
-      paddingHorizontal: sp.lg,
-      paddingTop: sp.sm,
-      paddingBottom: sp.md,
+      paddingHorizontal: 20,
+      paddingTop: 8,
+      paddingBottom: 16,
     },
 
     // Resource row
     resourceRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      gap: sp.md,
-      paddingVertical: sp.md,
+      gap: 8,
+      paddingTop: 8,
+      paddingBottom: 16,
     },
     resourceRowPressed: {
       opacity: colors.opacity.emphasis,
     },
-    resourceIconWrap: {
-      width: components.sizes.square.md,
-      height: components.sizes.square.md,
-      borderRadius: components.radius.input,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: toRgba(colors.ui.divider, colors.opacity.tint),
-      flexShrink: 0,
-      marginTop: 1,
-    },
     resourceCopy: {
       flex: 1,
-      gap: sp.xs,
+      gap: 8,
       minWidth: 0,
     },
     resourceLabel: {
