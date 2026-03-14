@@ -1011,6 +1011,9 @@ const LESSON_VIDEOS_COPY = {
     statusCurrent: 'Current',
     statusUpcoming: 'Upcoming',
     statusCompleted: 'Completed',
+    browseSectionTitle: 'Browse by topic',
+    videosCountFn: (n) => `${n} video${n !== 1 ? 's' : ''}`,
+    currentLessonBadge: 'Your lesson',
   },
   nl: {
     title: 'Videos',
@@ -1032,6 +1035,9 @@ const LESSON_VIDEOS_COPY = {
     statusCurrent: 'Huidig',
     statusUpcoming: 'Aankomend',
     statusCompleted: 'Afgerond',
+    browseSectionTitle: 'Bekijk per thema',
+    videosCountFn: (n) => `${n} video's`,
+    currentLessonBadge: 'Jouw les',
   },
 };
 

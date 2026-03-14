@@ -1,28 +1,24 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
 import { CtaInsideButton } from '../components/Button';
-import Card from '../components/Card';
 import OnboardingScreen from '../components/OnboardingScreen';
-import SectionTitle from '../components/SectionTitle';
-import Tag from '../components/Tag';
 import TopTabHeader from '../components/TopTabHeader';
 import { glossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import {
-  getHomeCopy,
+  formatLessonUnitLabel,
+  formatThemeUnitLabel,
   getLessonContent,
   getLessonVideosCopy,
   getLocalizedLessons,
   getLocalizedModules,
 } from '../utils/localization';
-import { annotateLessonsWithThemeContext, getLessonStatus } from '../utils/helpers';
-
-const FILTER_KEYS = ['all', 'current', 'completed', 'upcoming'];
+import { buildModulesWithIndexedLessons, getLessonStatus } from '../utils/helpers';
 
 export default function LessonVideosScreen() {
   const navigation = useNavigation();
@@ -34,9 +30,12 @@ export default function LessonVideosScreen() {
     [colors, components, tabBarHeight, mode]
   );
 
-  const homeCopy = useMemo(() => getHomeCopy(preferences?.language), [preferences?.language]);
   const videosCopy = useMemo(
     () => getLessonVideosCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const localizedLessons = useMemo(
+    () => getLocalizedLessons(preferences?.language),
     [preferences?.language]
   );
   const localizedModules = useMemo(
@@ -44,58 +43,64 @@ export default function LessonVideosScreen() {
     [preferences?.language]
   );
 
-  const lessons = useMemo(() => {
-    const localized = getLocalizedLessons(preferences?.language);
-    return annotateLessonsWithThemeContext(localized, localizedModules);
-  }, [localizedModules, preferences?.language]);
-
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [expandedLessonId, setExpandedLessonId] = useState(
-    progress.currentLessonId || lessons[0]?.id || null
-  );
-
   const glossaryById = useMemo(() => {
     const index = {};
-    glossaryTerms.forEach((term) => {
-      index[term.id] = term;
-    });
+    glossaryTerms.forEach((term) => { index[term.id] = term; });
     return index;
   }, []);
 
-  const lessonEntries = useMemo(() => {
-    return lessons.map((lesson) => {
-      const content = getLessonContent(lesson.id, preferences?.language);
-      return {
-        lesson,
-        status: getLessonStatus(lesson.id, progress),
-        videos: getVideosForLesson(lesson, content, glossaryById, videosCopy),
-      };
-    });
-  }, [glossaryById, lessons, preferences?.language, progress, videosCopy]);
+  const moduleGroups = useMemo(() => {
+    const modules = buildModulesWithIndexedLessons(localizedModules, localizedLessons);
+    return modules.map((module) => ({
+      ...module,
+      lessonEntries: module.lessons.map((lesson) => {
+        const content = getLessonContent(lesson.id, preferences?.language);
+        return {
+          lesson,
+          status: getLessonStatus(lesson.id, progress),
+          videos: getVideosForLesson(lesson, content, glossaryById, videosCopy),
+        };
+      }),
+    }));
+  }, [glossaryById, localizedLessons, localizedModules, preferences?.language, progress, videosCopy]);
 
-  const featuredEntry =
-    lessonEntries.find((entry) => entry.lesson.id === progress.currentLessonId) || lessonEntries[0];
+  const featuredEntry = useMemo(() => {
+    for (const group of moduleGroups) {
+      const found = group.lessonEntries.find(
+        (entry) => entry.lesson.id === progress.currentLessonId
+      );
+      if (found) return found;
+    }
+    return moduleGroups[0]?.lessonEntries?.[0] || null;
+  }, [moduleGroups, progress.currentLessonId]);
+
   const featuredVideo = featuredEntry?.videos?.[0] || null;
 
-  const filteredEntries = useMemo(() => {
-    if (activeFilter === 'all') return lessonEntries;
-    return lessonEntries.filter((entry) => entry.status === activeFilter);
-  }, [activeFilter, lessonEntries]);
-
-  const handleOpenUrl = async (url) => {
+  const handleOpenUrl = useCallback(async (url) => {
     if (!url) return;
-    try {
-      await Linking.openURL(url);
-    } catch (error) {
-      // Keep this quiet; broken links should not block screen usage.
-    }
-  };
+    try { await Linking.openURL(url); } catch (_) {}
+  }, []);
+
+  // Suppress active tab highlight while this screen is visible
+  useFocusEffect(
+    useCallback(() => {
+      const parent = navigation.getParent();
+      if (!parent) return;
+      const inactiveColor = colors.text.secondary;
+      const activeColor = mode === 'light' ? colors.text.primary : colors.accent.primary;
+      parent.setOptions({ tabBarActiveTintColor: inactiveColor });
+      return () => {
+        parent.setOptions({ tabBarActiveTintColor: activeColor });
+      };
+    }, [navigation, colors, mode])
+  );
 
   return (
     <OnboardingScreen
       scroll
       backgroundVariant="bg3"
       contentContainerStyle={styles.content}
+      scrollProps={{ keyboardShouldPersistTaps: 'handled' }}
     >
       <TopTabHeader
         title={videosCopy.title}
@@ -103,148 +108,173 @@ export default function LessonVideosScreen() {
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
-      <Card style={styles.featuredCard}>
-        <SectionTitle
-          title={videosCopy.featuredTitle}
-          subtitle={
-            featuredEntry ? homeCopy.lessonShort(featuredEntry.lesson.lessonIndexInTheme) : null
-          }
+      {/* Featured hero */}
+      {featuredEntry && featuredVideo ? (
+        <HeroCard
+          entry={featuredEntry}
+          video={featuredVideo}
+          onPress={handleOpenUrl}
+          styles={styles}
+          colors={colors}
+          components={components}
+          videosCopy={videosCopy}
         />
+      ) : null}
 
-        {featuredEntry ? (
-          <>
-            <AppText style={styles.featuredTitle}>{featuredEntry.lesson.title}</AppText>
-            <AppText style={styles.featuredDescription} numberOfLines={2}>
-              {featuredEntry.lesson.shortDescription}
-            </AppText>
-            <View style={styles.featuredMeta}>
-              <Tag label={getStatusLabel(featuredEntry.status, videosCopy)} tone="accent" />
-              {featuredVideo ? <Tag label={featuredVideo.source} tone="default" /> : null}
-            </View>
-            {featuredVideo ? (
-              <CtaInsideButton
-                label={videosCopy.watchNow}
-                onPress={() => handleOpenUrl(featuredVideo.url)}
-              />
-            ) : (
-              <AppText style={styles.emptyText}>{videosCopy.featuredFallback}</AppText>
-            )}
-          </>
-        ) : (
-          <AppText style={styles.emptyText}>{videosCopy.featuredFallback}</AppText>
-        )}
-      </Card>
-
-      <View style={styles.filterWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-          {FILTER_KEYS.map((filterKey) => {
-            const active = filterKey === activeFilter;
-            return (
-              <Pressable
-                key={filterKey}
-                onPress={() => setActiveFilter(filterKey)}
-                style={({ pressed }) => [
-                  styles.filterChip,
-                  active && styles.filterChipActive,
-                  pressed && styles.filterChipPressed,
-                ]}
-              >
-                <AppText style={[styles.filterText, active && styles.filterTextActive]}>
-                  {getFilterLabel(filterKey, videosCopy)}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      <View style={styles.lessonList}>
-        {filteredEntries.length ? (
-          filteredEntries.map((entry) => {
-            const { lesson, status, videos } = entry;
-            const isExpanded = expandedLessonId === lesson.id;
-            return (
-              <Card
-                key={lesson.id}
-                style={[styles.lessonCard, isExpanded && styles.lessonCardExpanded]}
-              >
-                <Pressable
-                  onPress={() =>
-                    setExpandedLessonId((prev) => (prev === lesson.id ? null : lesson.id))
-                  }
-                  style={({ pressed }) => [styles.lessonHeader, pressed && styles.lessonHeaderPressed]}
-                >
-                  <View style={styles.lessonHeaderCopy}>
-                    <AppText style={styles.lessonLabel}>
-                      {homeCopy.lessonShort(lesson.lessonIndexInTheme)}
-                    </AppText>
-                    <AppText style={styles.lessonTitle}>{lesson.title}</AppText>
-                  </View>
-                  <View style={styles.lessonHeaderRight}>
-                    <Tag label={getStatusLabel(status, videosCopy)} tone={status === 'current' ? 'accent' : 'default'} />
-                    <Ionicons
-                      name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                      size={components.sizes.icon.md}
-                      color={colors.text.secondary}
-                    />
-                  </View>
-                </Pressable>
-
-                {isExpanded ? (
-                  <View style={styles.videoList}>
-                    {videos.map((video) => (
-                      <Pressable
-                        key={video.id}
-                        onPress={() => handleOpenUrl(video.url)}
-                        style={({ pressed }) => [styles.videoRow, pressed && styles.videoRowPressed]}
-                      >
-                        <View style={styles.videoIconWrap}>
-                          <Ionicons
-                            name="play"
-                            size={components.sizes.icon.sm}
-                            color={colors.text.primary}
-                          />
-                        </View>
-                        <View style={styles.videoCopy}>
-                          <AppText style={styles.videoTitle}>{video.title}</AppText>
-                          <AppText style={styles.videoMeta}>{`${video.source} · ${video.duration}`}</AppText>
-                        </View>
-                        <Ionicons
-                          name="open-outline"
-                          size={components.sizes.icon.md}
-                          color={colors.text.secondary}
-                        />
-                      </Pressable>
-                    ))}
-                  </View>
-                ) : null}
-              </Card>
-            );
-          })
-        ) : (
-          <Card style={styles.emptyCard}>
+      {/* Browse by topic shelves */}
+      <View style={styles.browseSection}>
+        <AppText style={styles.browseSectionTitle}>{videosCopy.browseSectionTitle}</AppText>
+        {moduleGroups.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="videocam-outline" size={components.sizes.icon.lg} color={colors.text.secondary} />
             <AppText style={styles.emptyText}>{videosCopy.noLessons}</AppText>
-          </Card>
+          </View>
+        ) : (
+          moduleGroups.map((group, index) => (
+            <React.Fragment key={group.id}>
+              {index > 0 ? <View style={styles.shelfSeparator} /> : null}
+              <ModuleShelf
+                group={group}
+                language={preferences?.language}
+                onPress={handleOpenUrl}
+                styles={styles}
+                colors={colors}
+                components={components}
+                videosCopy={videosCopy}
+              />
+            </React.Fragment>
+          ))
         )}
       </View>
     </OnboardingScreen>
   );
 }
 
+// ─── Hero card ────────────────────────────────────────────────────────────────
+
+function HeroCard({ entry, video, onPress, styles, colors, components, videosCopy }) {
+  const { lesson } = entry;
+  const sourceIcon = getSourceIcon(video.source);
+
+  return (
+    <View style={styles.hero}>
+      <View style={styles.heroThumb}>
+        <View style={styles.heroBadge}>
+          <AppText style={styles.heroBadgeText}>{videosCopy.currentLessonBadge}</AppText>
+        </View>
+        <View style={styles.heroPlayBtn}>
+          <Ionicons name="play" size={components.sizes.icon.lg} color={colors.text.onAccent} />
+        </View>
+        <View style={styles.heroDurationBadge}>
+          <AppText style={styles.heroDurationText}>{video.duration}</AppText>
+        </View>
+      </View>
+      <View style={styles.heroBody}>
+        <AppText style={styles.heroTitle} numberOfLines={2}>{lesson.title}</AppText>
+        {lesson.shortDescription ? (
+          <AppText style={styles.heroDesc} numberOfLines={2}>{lesson.shortDescription}</AppText>
+        ) : null}
+        <View style={styles.heroMeta}>
+          <Ionicons name={sourceIcon} size={components.sizes.icon.xs} color={colors.text.secondary} />
+          <AppText style={styles.heroMetaText}>{video.source}{'  ·  '}{video.duration}</AppText>
+        </View>
+        <CtaInsideButton label={videosCopy.watchNow} onPress={() => onPress(video.url)} />
+      </View>
+    </View>
+  );
+}
+
+// ─── Module shelf ─────────────────────────────────────────────────────────────
+
+function ModuleShelf({ group, language, onPress, styles, colors, components, videosCopy }) {
+  const totalVideos = group.lessonEntries.filter((e) => e.videos.length > 0).length;
+  const themeLabel = formatThemeUnitLabel(language, group.themeIndex);
+
+  return (
+    <View style={styles.shelf}>
+      <View style={styles.shelfHeader}>
+        <AppText style={styles.shelfLabel} numberOfLines={1}>
+          {themeLabel}{'  ·  '}{group.title}
+        </AppText>
+        {totalVideos > 0 ? (
+          <AppText style={styles.shelfCount}>{videosCopy.videosCountFn(totalVideos)}</AppText>
+        ) : null}
+      </View>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.shelfScroll}
+        contentContainerStyle={styles.shelfScrollContent}
+      >
+        {group.lessonEntries.map((entry) => {
+          const primaryVideo = entry.videos[0];
+          if (!primaryVideo) return null;
+          return (
+            <VideoCard
+              key={entry.lesson.id}
+              entry={entry}
+              video={primaryVideo}
+              language={language}
+              onPress={onPress}
+              styles={styles}
+              colors={colors}
+              components={components}
+            />
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+// ─── Video card ───────────────────────────────────────────────────────────────
+
+function VideoCard({ entry, video, language, onPress, styles, colors, components }) {
+  const { lesson } = entry;
+  const lessonLabel = formatLessonUnitLabel(language, lesson.lessonIndexInTheme);
+  const sourceIcon = getSourceIcon(video.source);
+
+  return (
+    <Pressable
+      onPress={() => onPress(video.url)}
+      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+    >
+      <View style={styles.cardThumb}>
+        <View style={styles.cardBadge}>
+          <AppText style={styles.cardBadgeText}>{lessonLabel}</AppText>
+        </View>
+        <View style={styles.cardPlayBtn}>
+          <Ionicons name="play" size={components.sizes.icon.xs} color={colors.text.onAccent} />
+        </View>
+        <View style={styles.cardDurationBadge}>
+          <AppText style={styles.cardDurationText}>{video.duration}</AppText>
+        </View>
+      </View>
+      <View style={styles.cardInfo}>
+        <AppText style={styles.cardTitle} numberOfLines={2}>{lesson.title}</AppText>
+        <View style={styles.cardSourceRow}>
+          <Ionicons name={sourceIcon} size={components.sizes.icon.xs} color={colors.text.secondary} />
+          <AppText style={styles.cardSourceText} numberOfLines={1}>{video.source}</AppText>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+// ─── Data helpers ─────────────────────────────────────────────────────────────
+
 function getVideosForLesson(lesson, content, glossaryById, videosCopy) {
   const lessonVideos = [];
   const summaryVideo = content?.steps?.summary?.video;
-
   if (summaryVideo?.url) {
     lessonVideos.push({
       id: `summary-${lesson.id}`,
       title: summaryVideo.label || videosCopy.lessonVideoLabel,
       source: videosCopy.sourceLesson,
-      duration: '~2m',
+      duration: '2m',
       url: summaryVideo.url,
     });
   }
-
   const termIds = Array.from(collectTermIds(content?.steps || {}));
   termIds
     .map((termId) => glossaryById[termId])
@@ -255,54 +285,40 @@ function getVideosForLesson(lesson, content, glossaryById, videosCopy) {
         id: `term-${lesson.id}-${term.id}`,
         title: term.term || videosCopy.glossaryVideoLabel,
         source: videosCopy.sourceGlossary,
-        duration: '~2m',
+        duration: '2m',
         url: term.learnMoreUrl,
       });
     });
-
   const searchTitle = encodeURIComponent(`${lesson.title} investing explained`);
   const fallbackVideos = [
     {
       id: `fallback-main-${lesson.id}`,
       title: videosCopy.fallbackVideoLabel,
       source: videosCopy.sourceYoutube,
-      duration: '~3m',
+      duration: '3m',
       url: `https://www.youtube.com/results?search_query=${searchTitle}`,
     },
     {
       id: `fallback-alt-${lesson.id}`,
       title: `${videosCopy.fallbackVideoLabel} 2`,
       source: videosCopy.sourceYoutube,
-      duration: '~5m',
+      duration: '5m',
       url: `https://www.youtube.com/results?search_query=${encodeURIComponent(`${lesson.title} investing tutorial`)}`,
     },
   ];
-
   return dedupeByUrl([...lessonVideos, ...fallbackVideos]).slice(0, 3);
 }
 
 function collectTermIds(node, bag = new Set()) {
-  if (Array.isArray(node)) {
-    node.forEach((item) => collectTermIds(item, bag));
-    return bag;
-  }
-
-  if (!node || typeof node !== 'object') {
-    return bag;
-  }
-
+  if (Array.isArray(node)) { node.forEach((item) => collectTermIds(item, bag)); return bag; }
+  if (!node || typeof node !== 'object') return bag;
   Object.entries(node).forEach(([key, value]) => {
     if (key === 'termIds' && Array.isArray(value)) {
-      value.forEach((termId) => {
-        if (typeof termId === 'string' && termId.trim()) {
-          bag.add(termId);
-        }
-      });
+      value.forEach((termId) => { if (typeof termId === 'string' && termId.trim()) bag.add(termId); });
       return;
     }
     collectTermIds(value, bag);
   });
-
   return bag;
 }
 
@@ -316,177 +332,16 @@ function dedupeByUrl(items = []) {
   });
 }
 
-function getStatusLabel(status, videosCopy) {
-  if (status === 'current') return videosCopy.statusCurrent;
-  if (status === 'completed') return videosCopy.statusCompleted;
-  return videosCopy.statusUpcoming;
+function getSourceIcon(source) {
+  if (!source) return 'globe-outline';
+  const s = source.toLowerCase();
+  if (s.includes('youtube')) return 'logo-youtube';
+  if (s.includes('lesson') || s.includes('les') || s.includes('summary')) return 'bookmark-outline';
+  if (s.includes('glossary')) return 'library-outline';
+  return 'globe-outline';
 }
 
-function getFilterLabel(filterKey, videosCopy) {
-  if (filterKey === 'current') return videosCopy.currentFilter;
-  if (filterKey === 'completed') return videosCopy.completedFilter;
-  if (filterKey === 'upcoming') return videosCopy.upcomingFilter;
-  return videosCopy.allFilter;
-}
-
-const createStyles = (colors, components, tabBarHeight, mode) => {
-  const isLight = mode === 'light';
-
-  return StyleSheet.create({
-    content: {
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.xl,
-      paddingBottom:
-        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.md,
-      gap: components.layout.contentGap,
-    },
-    featuredCard: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: isLight
-        ? colors.ui.divider
-        : toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-      gap: components.layout.spacing.md,
-    },
-    featuredTitle: {
-      ...typography.styles.h3,
-      color: colors.text.primary,
-    },
-    featuredDescription: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    featuredMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: components.layout.spacing.sm,
-      flexWrap: 'wrap',
-    },
-    filterWrap: {
-      marginTop: -components.layout.spacing.xs,
-    },
-    filterRow: {
-      gap: components.layout.spacing.sm,
-      paddingRight: components.layout.spacing.sm,
-    },
-    filterChip: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-      borderRadius: components.radius.pill,
-      paddingHorizontal: components.layout.spacing.md,
-      paddingVertical: components.layout.spacing.xs,
-    },
-    filterChipActive: {
-      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
-    },
-    filterChipPressed: {
-      opacity: colors.opacity.emphasis,
-    },
-    filterText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    filterTextActive: {
-      color: colors.text.primary,
-    },
-    lessonList: {
-      gap: components.layout.spacing.md,
-    },
-    lessonCard: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-      padding: components.layout.spacing.lg,
-      gap: components.layout.spacing.md,
-    },
-    lessonCardExpanded: {
-      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    },
-    lessonHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: components.layout.spacing.md,
-    },
-    lessonHeaderPressed: {
-      opacity: colors.opacity.emphasis,
-    },
-    lessonHeaderCopy: {
-      flex: 1,
-      gap: components.layout.spacing.xs,
-      minWidth: 0,
-    },
-    lessonHeaderRight: {
-      alignItems: 'center',
-      gap: components.layout.spacing.xs,
-    },
-    lessonLabel: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    lessonTitle: {
-      ...typography.styles.bodyStrong,
-      color: colors.text.primary,
-    },
-    videoList: {
-      gap: components.layout.spacing.sm,
-      borderTopWidth: components.borderWidth.thin,
-      borderTopColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      paddingTop: components.layout.spacing.md,
-    },
-    videoRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: components.layout.spacing.md,
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      borderRadius: components.radius.input,
-      paddingHorizontal: components.layout.spacing.md,
-      paddingVertical: components.layout.spacing.sm,
-      minHeight: components.sizes.list.minItemHeight,
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-    },
-    videoRowPressed: {
-      opacity: colors.opacity.emphasis,
-      transform: [{ scale: components.transforms.scalePressed }],
-    },
-    videoIconWrap: {
-      width: components.sizes.square.sm,
-      height: components.sizes.square.sm,
-      borderRadius: components.radius.pill,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-    },
-    videoCopy: {
-      flex: 1,
-      minWidth: 0,
-      gap: components.layout.spacing.xs,
-    },
-    videoTitle: {
-      ...typography.styles.bodyStrong,
-      color: colors.text.primary,
-    },
-    videoMeta: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    emptyCard: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-    },
-    emptyText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-  });
-};
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 function toRgba(hex, alpha) {
   const cleaned = hex.replace('#', '');
@@ -496,3 +351,233 @@ function toRgba(hex, alpha) {
   const b = value & 255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+const createStyles = (colors, components, tabBarHeight, mode) => {
+  const isLight = mode === 'light';
+  const sp = components.layout.spacing;
+  const ph = components.layout.pagePaddingHorizontal;
+
+  const dividerColor = isLight
+    ? colors.ui.divider
+    : toRgba(colors.ui.divider, colors.opacity.stroke);
+  const surfaceBg = toRgba(colors.background.surface, colors.opacity.surface);
+  const surfaceActiveBg = toRgba(colors.background.surfaceActive, colors.opacity.surface);
+
+  return StyleSheet.create({
+    content: {
+      paddingTop: components.layout.safeArea.top + sp.xl,
+      paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.md,
+      gap: sp.lg,
+    },
+
+    // ── Browse section ────────────────────────────────────────────────────────
+    browseSection: {
+      gap: sp.lg,
+    },
+    browseSectionTitle: {
+      ...typography.styles.stepLabel,
+      color: colors.text.secondary,
+    },
+    shelfSeparator: {
+      height: components.borderWidth.thin,
+      backgroundColor: dividerColor,
+      marginVertical: sp.lg,
+    },
+
+    // ── Hero card ─────────────────────────────────────────────────────────────
+    hero: {
+      borderRadius: components.radius.card,
+      borderWidth: components.borderWidth.thin,
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: surfaceActiveBg,
+      overflow: 'hidden',
+    },
+    heroThumb: {
+      height: 180,
+      backgroundColor: toRgba(colors.accent.primary, 0.13),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    heroBadge: {
+      position: 'absolute',
+      top: sp.lg,
+      left: sp.lg,
+      backgroundColor: toRgba(colors.background.app, 0.65),
+      borderRadius: components.radius.pill,
+      paddingHorizontal: sp.sm,
+      paddingVertical: 4,
+    },
+    heroBadgeText: {
+      ...typography.styles.stepLabel,
+      color: colors.text.secondary,
+    },
+    heroPlayBtn: {
+      width: 52,
+      height: 52,
+      borderRadius: components.radius.pill,
+      backgroundColor: colors.accent.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      // Nudge the icon slightly right to visually center the play triangle
+      paddingLeft: 3,
+    },
+    heroDurationBadge: {
+      position: 'absolute',
+      bottom: sp.sm,
+      right: sp.sm,
+      backgroundColor: toRgba(colors.background.app, 0.7),
+      borderRadius: components.radius.pill,
+      paddingHorizontal: sp.xs,
+      paddingVertical: 3,
+    },
+    heroDurationText: {
+      ...typography.styles.small,
+      fontSize: 11,
+      lineHeight: 14,
+      color: colors.text.primary,
+    },
+    heroBody: {
+      padding: sp.lg,
+      gap: sp.sm,
+    },
+    heroTitle: {
+      ...typography.styles.h3,
+      color: colors.text.primary,
+    },
+    heroDesc: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+    heroMeta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sp.xs,
+    },
+    heroMetaText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+
+    // ── Module shelf ──────────────────────────────────────────────────────────
+    shelf: {
+      gap: sp.md,
+    },
+    shelfHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: sp.md,
+    },
+    shelfLabel: {
+      ...typography.styles.stepLabel,
+      color: colors.text.secondary,
+      flex: 1,
+    },
+    shelfCount: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      opacity: 0.65,
+      flexShrink: 0,
+    },
+    shelfScroll: {
+      marginHorizontal: -ph,
+    },
+    shelfScrollContent: {
+      paddingHorizontal: ph,
+      gap: sp.sm,
+    },
+
+    // ── Video card ────────────────────────────────────────────────────────────
+    card: {
+      width: 168,
+      borderRadius: components.radius.input,
+      borderWidth: components.borderWidth.thin,
+      borderColor: dividerColor,
+      backgroundColor: surfaceBg,
+      overflow: 'hidden',
+    },
+    cardPressed: {
+      opacity: colors.opacity.emphasis,
+    },
+    cardThumb: {
+      height: 96,
+      backgroundColor: isLight
+        ? toRgba(colors.background.surfaceActive, 1)
+        : toRgba(colors.background.surfaceActive, 0.9),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    cardBadge: {
+      position: 'absolute',
+      top: 7,
+      left: 7,
+      backgroundColor: toRgba(colors.background.app, 0.65),
+      borderRadius: components.radius.pill,
+      paddingHorizontal: 7,
+      paddingVertical: 2,
+    },
+    cardBadgeText: {
+      ...typography.styles.stepLabel,
+      fontSize: 10,
+      lineHeight: 13,
+      color: colors.text.secondary,
+    },
+    cardPlayBtn: {
+      width: 34,
+      height: 34,
+      borderRadius: components.radius.pill,
+      backgroundColor: colors.accent.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingLeft: 2,
+    },
+    cardDurationBadge: {
+      position: 'absolute',
+      bottom: 7,
+      right: 7,
+      backgroundColor: toRgba(colors.background.app, 0.7),
+      borderRadius: components.radius.pill,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+    },
+    cardDurationText: {
+      ...typography.styles.small,
+      fontSize: 10,
+      lineHeight: 13,
+      color: colors.text.primary,
+    },
+    cardInfo: {
+      padding: sp.sm,
+      gap: 5,
+    },
+    cardTitle: {
+      ...typography.styles.small,
+      color: colors.text.primary,
+    },
+    cardSourceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    cardSourceText: {
+      ...typography.styles.small,
+      fontSize: 11,
+      lineHeight: 14,
+      color: colors.text.secondary,
+      opacity: 0.7,
+    },
+
+    // ── Empty state ───────────────────────────────────────────────────────────
+    emptyState: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: sp.md,
+      paddingVertical: sp.xxl,
+    },
+    emptyText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
+  });
+};
