@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,7 +11,6 @@ import { glossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import {
-  formatLessonUnitLabel,
   formatThemeUnitLabel,
   getLessonContent,
   getLessonVideosCopy,
@@ -19,6 +18,25 @@ import {
   getLocalizedModules,
 } from '../utils/localization';
 import { buildModulesWithIndexedLessons, getLessonStatus } from '../utils/helpers';
+
+// ─── Module color palette ─────────────────────────────────────────────────────
+// One rich dark color per module — used as thumbnail backgrounds
+
+const MODULE_COLORS = [
+  '#1B3668', // deep blue
+  '#1A4A42', // deep teal
+  '#3D1E5E', // deep purple
+  '#1A3D22', // deep forest
+  '#5C1F16', // deep rust
+  '#2B3A1A', // deep olive
+  '#1C2E4A', // deep navy
+];
+
+function getModuleColor(themeIndex) {
+  return MODULE_COLORS[(themeIndex ?? 0) % MODULE_COLORS.length];
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
 
 export default function LessonVideosScreen() {
   const navigation = useNavigation();
@@ -64,14 +82,17 @@ export default function LessonVideosScreen() {
     }));
   }, [glossaryById, localizedLessons, localizedModules, preferences?.language, progress, videosCopy]);
 
+  // Find current lesson entry + its module color index
   const featuredEntry = useMemo(() => {
     for (const group of moduleGroups) {
       const found = group.lessonEntries.find(
         (entry) => entry.lesson.id === progress.currentLessonId
       );
-      if (found) return found;
+      if (found) return { ...found, moduleThemeIndex: group.themeIndex };
     }
-    return moduleGroups[0]?.lessonEntries?.[0] || null;
+    const firstGroup = moduleGroups[0];
+    const first = firstGroup?.lessonEntries?.[0];
+    return first ? { ...first, moduleThemeIndex: firstGroup?.themeIndex ?? 0 } : null;
   }, [moduleGroups, progress.currentLessonId]);
 
   const featuredVideo = featuredEntry?.videos?.[0] || null;
@@ -81,7 +102,6 @@ export default function LessonVideosScreen() {
     try { await Linking.openURL(url); } catch (_) {}
   }, []);
 
-  // Suppress active tab highlight while this screen is visible
   useFocusEffect(
     useCallback(() => {
       const parent = navigation.getParent();
@@ -108,7 +128,7 @@ export default function LessonVideosScreen() {
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
-      {/* Featured hero */}
+      {/* Featured hero — current lesson */}
       {featuredEntry && featuredVideo ? (
         <HeroCard
           entry={featuredEntry}
@@ -121,7 +141,7 @@ export default function LessonVideosScreen() {
         />
       ) : null}
 
-      {/* Browse by topic shelves */}
+      {/* Browse by topic — vertical module groups */}
       <View style={styles.browseSection}>
         <AppText style={styles.browseSectionTitle}>{videosCopy.browseSectionTitle}</AppText>
         {moduleGroups.length === 0 ? (
@@ -130,19 +150,17 @@ export default function LessonVideosScreen() {
             <AppText style={styles.emptyText}>{videosCopy.noLessons}</AppText>
           </View>
         ) : (
-          moduleGroups.map((group, index) => (
-            <React.Fragment key={group.id}>
-              {index > 0 ? <View style={styles.shelfSeparator} /> : null}
-              <ModuleShelf
-                group={group}
-                language={preferences?.language}
-                onPress={handleOpenUrl}
-                styles={styles}
-                colors={colors}
-                components={components}
-                videosCopy={videosCopy}
-              />
-            </React.Fragment>
+          moduleGroups.map((group) => (
+            <ModuleGroup
+              key={group.id}
+              group={group}
+              language={preferences?.language}
+              onPress={handleOpenUrl}
+              styles={styles}
+              colors={colors}
+              components={components}
+              videosCopy={videosCopy}
+            />
           ))
         )}
       </View>
@@ -150,114 +168,222 @@ export default function LessonVideosScreen() {
   );
 }
 
+// ─── Video thumbnail ──────────────────────────────────────────────────────────
+// Abstract generated thumbnail — rich colored background with decorative
+// geometry and a ghost lesson number. No real images needed.
+
+function VideoThumbnail({ moduleThemeIndex, lessonNumber, duration, isHero, badgeText, colors }) {
+  const moduleColor = getModuleColor(moduleThemeIndex);
+  const height = isHero ? 192 : 72;
+  const playSize = isHero ? 52 : 32;
+  const playIconSize = isHero ? 20 : 14;
+
+  return (
+    <View style={{ height, backgroundColor: moduleColor, overflow: 'hidden', justifyContent: 'center', alignItems: 'center' }}>
+      {/* Decorative circle — top right */}
+      <View style={{
+        position: 'absolute',
+        top: -(height * 0.45),
+        right: -(height * 0.2),
+        width: height * 0.95,
+        height: height * 0.95,
+        borderRadius: height * 0.475,
+        backgroundColor: 'rgba(255,255,255,0.07)',
+      }} />
+      {/* Decorative circle — bottom left */}
+      <View style={{
+        position: 'absolute',
+        bottom: -(height * 0.55),
+        left: -(height * 0.15),
+        width: height * 1.1,
+        height: height * 1.1,
+        borderRadius: height * 0.55,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+      }} />
+      {/* Bottom vignette — improves duration badge legibility */}
+      <View style={{
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '45%',
+        backgroundColor: 'rgba(0,0,0,0.22)',
+      }} />
+      {/* Ghost lesson number — large background numeral */}
+      <AppText style={{
+        ...typography.styles.display,
+        position: 'absolute',
+        bottom: isHero ? -18 : -8,
+        right: isHero ? 14 : 6,
+        fontSize: isHero ? 104 : 60,
+        lineHeight: isHero ? 104 : 60,
+        color: 'rgba(255,255,255,0.12)',
+      }}>
+        {lessonNumber}
+      </AppText>
+      {/* Badge — top left (e.g. "Current lesson") */}
+      {badgeText ? (
+        <View style={{
+          position: 'absolute',
+          top: isHero ? 14 : 6,
+          left: isHero ? 14 : 6,
+          backgroundColor: 'rgba(0,0,0,0.42)',
+          borderRadius: 999,
+          paddingHorizontal: isHero ? 10 : 6,
+          paddingVertical: isHero ? 4 : 2,
+        }}>
+          <AppText style={{
+            ...typography.styles.stepLabel,
+            fontSize: isHero ? undefined : 9,
+            lineHeight: isHero ? undefined : 12,
+            color: 'rgba(255,255,255,0.9)',
+          }}>
+            {badgeText}
+          </AppText>
+        </View>
+      ) : null}
+      {/* Play button */}
+      <View style={{
+        width: playSize,
+        height: playSize,
+        borderRadius: playSize / 2,
+        backgroundColor: colors.accent.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingLeft: isHero ? 3 : 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        elevation: 5,
+      }}>
+        <Ionicons name="play" size={playIconSize} color={colors.text.onAccent} />
+      </View>
+      {/* Duration badge — bottom right */}
+      {duration ? (
+        <View style={{
+          position: 'absolute',
+          bottom: isHero ? 12 : 5,
+          right: isHero ? 12 : 5,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          borderRadius: 999,
+          paddingHorizontal: isHero ? 8 : 5,
+          paddingVertical: isHero ? 3 : 2,
+        }}>
+          <AppText style={{
+            ...typography.styles.small,
+            fontSize: isHero ? 12 : 9,
+            lineHeight: isHero ? 15 : 11,
+            color: 'rgba(255,255,255,0.95)',
+          }}>
+            {duration}
+          </AppText>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 // ─── Hero card ────────────────────────────────────────────────────────────────
 
 function HeroCard({ entry, video, onPress, styles, colors, components, videosCopy }) {
   const { lesson } = entry;
-  const sourceIcon = getSourceIcon(video.source);
+  const lessonNumber = (lesson.lessonIndexInTheme ?? 0) + 1;
 
   return (
     <View style={styles.hero}>
-      <View style={styles.heroThumb}>
-        <View style={styles.heroBadge}>
-          <AppText style={styles.heroBadgeText}>{videosCopy.currentLessonBadge}</AppText>
-        </View>
-        <View style={styles.heroPlayBtn}>
-          <Ionicons name="play" size={components.sizes.icon.lg} color={colors.text.onAccent} />
-        </View>
-        <View style={styles.heroDurationBadge}>
-          <AppText style={styles.heroDurationText}>{video.duration}</AppText>
-        </View>
-      </View>
+      <VideoThumbnail
+        moduleThemeIndex={entry.moduleThemeIndex}
+        lessonNumber={lessonNumber}
+        duration={video.duration}
+        isHero
+        badgeText={videosCopy.currentLessonBadge}
+        colors={colors}
+        components={components}
+      />
       <View style={styles.heroBody}>
         <AppText style={styles.heroTitle} numberOfLines={2}>{lesson.title}</AppText>
         {lesson.shortDescription ? (
           <AppText style={styles.heroDesc} numberOfLines={2}>{lesson.shortDescription}</AppText>
         ) : null}
-        <View style={styles.heroMeta}>
-          <Ionicons name={sourceIcon} size={components.sizes.icon.xs} color={colors.text.secondary} />
-          <AppText style={styles.heroMetaText}>{video.source}{'  ·  '}{video.duration}</AppText>
-        </View>
         <CtaInsideButton label={videosCopy.watchNow} onPress={() => onPress(video.url)} />
       </View>
     </View>
   );
 }
 
-// ─── Module shelf ─────────────────────────────────────────────────────────────
+// ─── Module group ─────────────────────────────────────────────────────────────
 
-function ModuleShelf({ group, language, onPress, styles, colors, components, videosCopy }) {
-  const totalVideos = group.lessonEntries.filter((e) => e.videos.length > 0).length;
+function ModuleGroup({ group, language, onPress, styles, colors, components, videosCopy }) {
+  const entries = group.lessonEntries.filter((e) => e.videos.length > 0);
+  if (entries.length === 0) return null;
+
   const themeLabel = formatThemeUnitLabel(language, group.themeIndex);
+  const moduleColor = getModuleColor(group.themeIndex);
 
   return (
-    <View style={styles.shelf}>
-      <View style={styles.shelfHeader}>
-        <AppText style={styles.shelfLabel} numberOfLines={1}>
-          {themeLabel}{'  ·  '}{group.title}
-        </AppText>
-        {totalVideos > 0 ? (
-          <AppText style={styles.shelfCount}>{videosCopy.videosCountFn(totalVideos)}</AppText>
-        ) : null}
+    <View style={styles.moduleGroup}>
+      {/* Module header */}
+      <View style={styles.moduleHeader}>
+        <View style={[styles.moduleColorDot, { backgroundColor: moduleColor }]} />
+        <View style={styles.moduleHeaderText}>
+          <AppText style={styles.moduleThemeLabel}>{themeLabel}</AppText>
+          <AppText style={styles.moduleTitle} numberOfLines={1}>{group.title}</AppText>
+        </View>
+        <AppText style={styles.moduleCount}>{videosCopy.videosCountFn(entries.length)}</AppText>
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.shelfScroll}
-        contentContainerStyle={styles.shelfScrollContent}
-      >
-        {group.lessonEntries.map((entry) => {
-          const primaryVideo = entry.videos[0];
-          if (!primaryVideo) return null;
-          return (
-            <VideoCard
-              key={entry.lesson.id}
-              entry={entry}
-              video={primaryVideo}
-              language={language}
-              onPress={onPress}
-              styles={styles}
-              colors={colors}
-              components={components}
-            />
-          );
-        })}
-      </ScrollView>
+      {/* Lesson rows */}
+      {entries.map((entry, idx) => (
+        <LessonRow
+          key={entry.lesson.id}
+          entry={entry}
+          video={entry.videos[0]}
+          moduleThemeIndex={group.themeIndex}
+          onPress={onPress}
+          isLast={idx === entries.length - 1}
+          styles={styles}
+          colors={colors}
+          components={components}
+        />
+      ))}
     </View>
   );
 }
 
-// ─── Video card ───────────────────────────────────────────────────────────────
+// ─── Lesson row ───────────────────────────────────────────────────────────────
 
-function VideoCard({ entry, video, language, onPress, styles, colors, components }) {
+function LessonRow({ entry, video, moduleThemeIndex, onPress, isLast, styles, colors, components }) {
   const { lesson } = entry;
-  const lessonLabel = formatLessonUnitLabel(language, lesson.lessonIndexInTheme);
+  const lessonNumber = (lesson.lessonIndexInTheme ?? 0) + 1;
   const sourceIcon = getSourceIcon(video.source);
 
   return (
-    <Pressable
-      onPress={() => onPress(video.url)}
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
-    >
-      <View style={styles.cardThumb}>
-        <View style={styles.cardBadge}>
-          <AppText style={styles.cardBadgeText}>{lessonLabel}</AppText>
+    <>
+      <Pressable
+        onPress={() => onPress(video.url)}
+        style={({ pressed }) => [styles.lessonRow, pressed && styles.lessonRowPressed]}
+      >
+        <View style={styles.lessonRowThumb}>
+          <VideoThumbnail
+            moduleThemeIndex={moduleThemeIndex}
+            lessonNumber={lessonNumber}
+            duration={video.duration}
+            isHero={false}
+            colors={colors}
+            components={components}
+          />
         </View>
-        <View style={styles.cardPlayBtn}>
-          <Ionicons name="play" size={components.sizes.icon.xs} color={colors.text.onAccent} />
+        <View style={styles.lessonRowInfo}>
+          <AppText style={styles.lessonRowTitle} numberOfLines={2}>{lesson.title}</AppText>
+          <View style={styles.lessonRowMeta}>
+            <Ionicons name={sourceIcon} size={12} color={colors.text.secondary} />
+            <AppText style={styles.lessonRowMetaText}>{video.source}</AppText>
+          </View>
         </View>
-        <View style={styles.cardDurationBadge}>
-          <AppText style={styles.cardDurationText}>{video.duration}</AppText>
-        </View>
-      </View>
-      <View style={styles.cardInfo}>
-        <AppText style={styles.cardTitle} numberOfLines={2}>{lesson.title}</AppText>
-        <View style={styles.cardSourceRow}>
-          <Ionicons name={sourceIcon} size={components.sizes.icon.xs} color={colors.text.secondary} />
-          <AppText style={styles.cardSourceText} numberOfLines={1}>{video.source}</AppText>
-        </View>
-      </View>
-    </Pressable>
+        <Ionicons name="chevron-forward" size={16} color={colors.text.secondary} style={{ opacity: 0.45 }} />
+      </Pressable>
+      {!isLast && <View style={styles.rowDivider} />}
+    </>
   );
 }
 
@@ -355,13 +481,11 @@ function toRgba(hex, alpha) {
 const createStyles = (colors, components, tabBarHeight, mode) => {
   const isLight = mode === 'light';
   const sp = components.layout.spacing;
-  const ph = components.layout.pagePaddingHorizontal;
 
   const dividerColor = isLight
     ? colors.ui.divider
     : toRgba(colors.ui.divider, colors.opacity.stroke);
   const surfaceBg = toRgba(colors.background.surface, colors.opacity.surface);
-  const surfaceActiveBg = toRgba(colors.background.surfaceActive, colors.opacity.surface);
 
   return StyleSheet.create({
     content: {
@@ -372,16 +496,12 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
 
     // ── Browse section ────────────────────────────────────────────────────────
     browseSection: {
-      gap: sp.lg,
+      gap: sp.md,
     },
     browseSectionTitle: {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
-    },
-    shelfSeparator: {
-      height: components.borderWidth.thin,
-      backgroundColor: dividerColor,
-      marginVertical: sp.lg,
+      marginBottom: sp.xs,
     },
 
     // ── Hero card ─────────────────────────────────────────────────────────────
@@ -389,52 +509,8 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       borderRadius: components.radius.card,
       borderWidth: components.borderWidth.thin,
       borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-      backgroundColor: surfaceActiveBg,
+      backgroundColor: surfaceBg,
       overflow: 'hidden',
-    },
-    heroThumb: {
-      height: 180,
-      backgroundColor: toRgba(colors.accent.primary, 0.13),
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    heroBadge: {
-      position: 'absolute',
-      top: sp.lg,
-      left: sp.lg,
-      backgroundColor: toRgba(colors.background.app, 0.65),
-      borderRadius: components.radius.pill,
-      paddingHorizontal: sp.sm,
-      paddingVertical: 4,
-    },
-    heroBadgeText: {
-      ...typography.styles.stepLabel,
-      color: colors.text.secondary,
-    },
-    heroPlayBtn: {
-      width: 52,
-      height: 52,
-      borderRadius: components.radius.pill,
-      backgroundColor: colors.accent.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      // Nudge the icon slightly right to visually center the play triangle
-      paddingLeft: 3,
-    },
-    heroDurationBadge: {
-      position: 'absolute',
-      bottom: sp.sm,
-      right: sp.sm,
-      backgroundColor: toRgba(colors.background.app, 0.7),
-      borderRadius: components.radius.pill,
-      paddingHorizontal: sp.xs,
-      paddingVertical: 3,
-    },
-    heroDurationText: {
-      ...typography.styles.small,
-      fontSize: 11,
-      lineHeight: 14,
-      color: colors.text.primary,
     },
     heroBody: {
       padding: sp.lg,
@@ -448,123 +524,94 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       ...typography.styles.small,
       color: colors.text.secondary,
     },
-    heroMeta: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: sp.xs,
-    },
-    heroMetaText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
 
-    // ── Module shelf ──────────────────────────────────────────────────────────
-    shelf: {
-      gap: sp.md,
-    },
-    shelfHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: sp.md,
-    },
-    shelfLabel: {
-      ...typography.styles.stepLabel,
-      color: colors.text.secondary,
-      flex: 1,
-    },
-    shelfCount: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-      opacity: 0.65,
-      flexShrink: 0,
-    },
-    shelfScroll: {
-      marginHorizontal: -ph,
-    },
-    shelfScrollContent: {
-      paddingHorizontal: ph,
-      gap: sp.sm,
-    },
-
-    // ── Video card ────────────────────────────────────────────────────────────
-    card: {
-      width: 168,
-      borderRadius: components.radius.input,
+    // ── Module group ──────────────────────────────────────────────────────────
+    moduleGroup: {
+      borderRadius: components.radius.card,
       borderWidth: components.borderWidth.thin,
       borderColor: dividerColor,
       backgroundColor: surfaceBg,
       overflow: 'hidden',
     },
-    cardPressed: {
-      opacity: colors.opacity.emphasis,
-    },
-    cardThumb: {
-      height: 96,
-      backgroundColor: isLight
-        ? toRgba(colors.background.surfaceActive, 1)
-        : toRgba(colors.background.surfaceActive, 0.9),
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    cardBadge: {
-      position: 'absolute',
-      top: 7,
-      left: 7,
-      backgroundColor: toRgba(colors.background.app, 0.65),
-      borderRadius: components.radius.pill,
-      paddingHorizontal: 7,
-      paddingVertical: 2,
-    },
-    cardBadgeText: {
-      ...typography.styles.stepLabel,
-      fontSize: 10,
-      lineHeight: 13,
-      color: colors.text.secondary,
-    },
-    cardPlayBtn: {
-      width: 34,
-      height: 34,
-      borderRadius: components.radius.pill,
-      backgroundColor: colors.accent.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingLeft: 2,
-    },
-    cardDurationBadge: {
-      position: 'absolute',
-      bottom: 7,
-      right: 7,
-      backgroundColor: toRgba(colors.background.app, 0.7),
-      borderRadius: components.radius.pill,
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-    },
-    cardDurationText: {
-      ...typography.styles.small,
-      fontSize: 10,
-      lineHeight: 13,
-      color: colors.text.primary,
-    },
-    cardInfo: {
-      padding: sp.sm,
-      gap: 5,
-    },
-    cardTitle: {
-      ...typography.styles.small,
-      color: colors.text.primary,
-    },
-    cardSourceRow: {
+    moduleHeader: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 4,
+      gap: sp.sm,
+      padding: sp.lg,
+      paddingBottom: sp.md,
+      borderBottomWidth: components.borderWidth.thin,
+      borderBottomColor: dividerColor,
     },
-    cardSourceText: {
+    moduleColorDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      flexShrink: 0,
+    },
+    moduleHeaderText: {
+      flex: 1,
+      gap: 2,
+    },
+    moduleThemeLabel: {
+      ...typography.styles.stepLabel,
+      fontSize: 11,
+      lineHeight: 14,
+      color: colors.text.secondary,
+    },
+    moduleTitle: {
+      ...typography.styles.bodyStrong,
+      color: colors.text.primary,
+    },
+    moduleCount: {
       ...typography.styles.small,
       fontSize: 11,
       lineHeight: 14,
       color: colors.text.secondary,
-      opacity: 0.7,
+      opacity: 0.6,
+      flexShrink: 0,
+    },
+
+    // ── Lesson row ────────────────────────────────────────────────────────────
+    lessonRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sp.md,
+      padding: sp.md,
+    },
+    lessonRowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, 0.5),
+    },
+    lessonRowThumb: {
+      width: 120,
+      height: 72,
+      borderRadius: components.radius.input,
+      overflow: 'hidden',
+      flexShrink: 0,
+    },
+    lessonRowInfo: {
+      flex: 1,
+      gap: 5,
+    },
+    lessonRowTitle: {
+      ...typography.styles.small,
+      color: colors.text.primary,
+    },
+    lessonRowMeta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    lessonRowMetaText: {
+      ...typography.styles.small,
+      fontSize: 11,
+      lineHeight: 14,
+      color: colors.text.secondary,
+    },
+    rowDivider: {
+      height: components.borderWidth.thin,
+      backgroundColor: dividerColor,
+      // indent to align with text, skipping thumbnail + gap
+      marginLeft: sp.md + 120 + sp.md,
     },
 
     // ── Empty state ───────────────────────────────────────────────────────────
