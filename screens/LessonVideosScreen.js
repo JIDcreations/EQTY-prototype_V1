@@ -319,13 +319,11 @@ function ModuleGroup({ group, language, onPress, styles, colors, components, vid
   if (entries.length === 0) return null;
 
   const themeLabel = formatThemeUnitLabel(language, group.themeIndex);
-  const moduleColor = getModuleColor(group.themeIndex);
 
   return (
     <View style={styles.moduleGroup}>
       {/* Module header */}
       <View style={styles.moduleHeader}>
-        <View style={[styles.moduleColorDot, { backgroundColor: moduleColor }]} />
         <View style={styles.moduleHeaderText}>
           <AppText style={styles.moduleThemeLabel}>{themeLabel}</AppText>
           <AppText style={styles.moduleTitle} numberOfLines={1}>{group.title}</AppText>
@@ -541,12 +539,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       paddingBottom: sp.md,
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: dividerColor,
-    },
-    moduleColorDot: {
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      flexShrink: 0,
     },
     moduleHeaderText: {
       flex: 1,
