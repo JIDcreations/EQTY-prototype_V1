@@ -424,7 +424,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     content: {
       paddingTop: components.layout.safeArea.top + sp.xl,
       paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.md,
-      gap: sp.lg,
+      gap: sp.xl,
     },
 
     // ── Browse section ────────────────────────────────────────────────────────
@@ -441,7 +441,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     hero: {
       borderRadius: components.radius.card,
       borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      borderColor: colors.accent.primary,
       backgroundColor: surfaceBg,
       overflow: 'hidden',
     },
@@ -474,19 +474,18 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       flexDirection: 'row',
       alignItems: 'center',
       gap: sp.sm,
-      padding: sp.lg,
-      paddingBottom: sp.md,
+      paddingHorizontal: sp.lg,
+      paddingTop: sp.md,
+      paddingBottom: sp.xs,
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: dividerColor,
     },
     moduleHeaderText: {
       flex: 1,
-      gap: 2,
+      gap: 1,
     },
     moduleThemeLabel: {
       ...typography.styles.stepLabel,
-      fontSize: 11,
-      lineHeight: 14,
       color: colors.text.secondary,
     },
     moduleTitle: {
@@ -495,8 +494,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     moduleCount: {
       ...typography.styles.small,
-      fontSize: 11,
-      lineHeight: 14,
       color: colors.text.secondary,
       opacity: 0.6,
       flexShrink: 0,
@@ -539,8 +536,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     rowDivider: {
       height: components.borderWidth.thin,
       backgroundColor: dividerColor,
-      // indent to align with text, skipping thumbnail + gap
-      marginLeft: sp.md + 120 + sp.md,
     },
 
     // ── Empty state ───────────────────────────────────────────────────────────
