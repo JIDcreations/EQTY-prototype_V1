@@ -22,9 +22,11 @@ export default function SettingsHeader({ title, subtitle, onBack, rightAction })
         ) : (
           <View style={styles.backSpacer} />
         )}
+        <View style={styles.titleWrap}>
+          <AppText style={styles.title}>{title}</AppText>
+        </View>
         {rightAction ? rightAction : <View style={styles.backSpacer} />}
       </View>
-      <AppText style={styles.title}>{title}</AppText>
       {subtitle ? <AppText style={styles.subtitle}>{subtitle}</AppText> : null}
     </View>
   );
@@ -37,8 +39,8 @@ const createStyles = (colors, components) =>
     },
     row: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
       alignItems: 'center',
+      gap: components.layout.spacing.md,
     },
     backButton: {
       width: components.sizes.square.lg,
@@ -51,6 +53,11 @@ const createStyles = (colors, components) =>
     backSpacer: {
       width: components.sizes.square.lg,
       height: components.sizes.square.lg,
+      flexShrink: 0,
+    },
+    titleWrap: {
+      flex: 1,
+      minWidth: 0,
     },
     title: {
       ...typography.styles.h1,

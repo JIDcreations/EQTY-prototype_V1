@@ -125,6 +125,7 @@ export default function LessonVideosScreen() {
       <TopTabHeader
         title={videosCopy.title}
         subtitle={videosCopy.subtitle}
+        onBack={() => navigation.goBack()}
         onPressProfile={() => navigation.navigate('Profile')}
       />
 

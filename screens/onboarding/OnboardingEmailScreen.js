@@ -192,13 +192,15 @@ const createStyles = (colors, components) =>
       gap: components.layout.spacing.xxl,
     },
     header: {
-      gap: components.layout.spacing.none,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.md,
     },
     headerTitle: {
       ...typography.styles.h1,
       color: colors.text.primary,
       textAlign: 'left',
-      marginTop: components.layout.spacing.xxl,
+      flex: 1,
     },
     backButton: {
       width: components.sizes.square.lg,

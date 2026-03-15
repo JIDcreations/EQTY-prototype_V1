@@ -35,14 +35,16 @@ export default function OnboardingLanguageScreen({ navigation, route }) {
       <View style={styles.layout}>
         <View style={styles.header}>
           <View style={styles.titleBlock}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-              <Ionicons
-                name="chevron-back"
-                size={components.sizes.icon.lg}
-                color={colors.text.secondary}
-              />
-            </Pressable>
-            <AppText style={styles.headerTitle}>{copy.language.title}</AppText>
+            <View style={styles.titleRow}>
+              <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+                <Ionicons
+                  name="chevron-back"
+                  size={components.sizes.icon.lg}
+                  color={colors.text.secondary}
+                />
+              </Pressable>
+              <AppText style={styles.headerTitle}>{copy.language.title}</AppText>
+            </View>
             <AppText style={styles.subtitle}>{copy.language.subtitle}</AppText>
           </View>
         </View>
@@ -108,6 +110,11 @@ const createStyles = (colors, components) =>
       gap: components.layout.spacing.none,
       paddingTop: components.layout.spacing.sm,
     },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.md,
+    },
     titleBlock: {
       gap: components.layout.spacing.xs,
     },
@@ -115,7 +122,7 @@ const createStyles = (colors, components) =>
       ...typography.styles.h1,
       color: colors.text.primary,
       textAlign: 'left',
-      marginTop: components.layout.spacing.xxl,
+      flex: 1,
     },
     backButton: {
       width: components.sizes.square.lg,

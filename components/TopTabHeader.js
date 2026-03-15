@@ -13,29 +13,45 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-export default function TopTabHeader({ title, subtitle, onPressProfile }) {
+export default function TopTabHeader({ title, subtitle, onBack, onPressProfile }) {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
+        {onBack ? (
+          <Pressable
+            onPress={onBack}
+            style={styles.iconButton}
+            hitSlop={components.layout.spacing.sm}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={components.sizes.icon.lg}
+              color={colors.text.primary}
+            />
+          </Pressable>
+        ) : null}
         <View style={styles.titleWrap}>
           <AppText style={styles.title} numberOfLines={1}>
             {title}
           </AppText>
         </View>
-        <Pressable
-          onPress={onPressProfile}
-          style={styles.profileButton}
-          hitSlop={components.layout.spacing.sm}
-        >
-          <Ionicons
-            name="person-outline"
-            size={components.sizes.icon.lg}
-            color={colors.text.primary}
-          />
-        </Pressable>
+        {onPressProfile ? (
+          <Pressable
+            onPress={onPressProfile}
+            style={styles.iconButton}
+            hitSlop={components.layout.spacing.sm}
+          >
+            <Ionicons
+              name="person-outline"
+              size={components.sizes.icon.lg}
+              color={colors.text.primary}
+            />
+          </Pressable>
+        ) : null}
+        {!onPressProfile && onBack ? <View style={styles.iconSpacer} /> : null}
       </View>
       {subtitle ? (
         <AppText style={styles.subtitle}>{subtitle}</AppText>
@@ -52,7 +68,6 @@ const createStyles = (colors, components) =>
     row: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
       gap: components.layout.spacing.md,
     },
     titleWrap: {
@@ -67,7 +82,7 @@ const createStyles = (colors, components) =>
       ...typography.styles.small,
       color: colors.text.secondary,
     },
-    profileButton: {
+    iconButton: {
       flexShrink: 0,
       width: components.sizes.square.lg,
       height: components.sizes.square.lg,
@@ -77,5 +92,10 @@ const createStyles = (colors, components) =>
       borderWidth: components.borderWidth.thin,
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    },
+    iconSpacer: {
+      width: components.sizes.square.lg,
+      height: components.sizes.square.lg,
+      flexShrink: 0,
     },
   });

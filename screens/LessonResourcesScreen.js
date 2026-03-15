@@ -100,6 +100,7 @@ export default function LessonResourcesScreen() {
       <TopTabHeader
         title={copy.title}
         subtitle={copy.subtitle}
+        onBack={() => navigation.goBack()}
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
