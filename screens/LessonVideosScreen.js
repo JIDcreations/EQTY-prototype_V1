@@ -201,7 +201,7 @@ function VideoThumbnail({ duration, isHero, colors }) {
         <Ionicons name="play" size={playIconSize} color={colors.text.onAccent} />
       </View>
       {/* Duration badge — bottom right */}
-      {duration ? (
+      {isHero && duration ? (
         <View style={{
           position: 'absolute',
           bottom: isHero ? 12 : 5,
@@ -434,7 +434,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     browseSectionTitle: {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
-      marginBottom: sp.xs,
     },
 
     // ── Hero card ─────────────────────────────────────────────────────────────
@@ -464,7 +463,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
 
     // ── Module group ──────────────────────────────────────────────────────────
     moduleGroup: {
-      borderRadius: components.radius.card,
+      borderRadius: components.radius.input,
       borderWidth: components.borderWidth.thin,
       borderColor: dividerColor,
       backgroundColor: surfaceBg,
@@ -476,7 +475,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       gap: sp.sm,
       paddingHorizontal: sp.lg,
       paddingTop: sp.md,
-      paddingBottom: sp.xs,
+      paddingBottom: sp.md,
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: dividerColor,
     },
