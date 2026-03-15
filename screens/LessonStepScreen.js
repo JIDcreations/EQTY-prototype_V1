@@ -3720,7 +3720,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: 'transparent',
   },
   conceptTrackBarActive: {
-    backgroundColor: colors.accent.primary,
+    backgroundColor: 'transparent',
   },
   conceptTrackBarFirst: {
     marginTop: components.layout.spacing.xs,
