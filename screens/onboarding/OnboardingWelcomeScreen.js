@@ -31,7 +31,7 @@ export default function OnboardingWelcomeScreen({ navigation }) {
         </View>
         <View style={styles.actions}>
           <PrimaryButton
-            label="Start"
+            label={copy.welcome.primaryCta}
             onPress={handleCreateAccount}
           />
           <SecondaryButton

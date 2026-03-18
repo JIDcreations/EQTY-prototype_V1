@@ -6,29 +6,13 @@ import { PrimaryButton } from '../../components/Button';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import { typography, useTheme } from '../../theme';
 import { useApp } from '../../utils/AppContext';
+import { getOnboardingCopy } from '../../utils/localization';
 
 export default function OnboardingWhatIsEqtyScreen({ navigation }) {
   const { updatePreferences, preferences } = useApp();
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
-  const normalizedLanguage = String(preferences?.language || '').toLowerCase();
-  const isDutch =
-    normalizedLanguage === 'nl' ||
-    normalizedLanguage.includes('dutch') ||
-    normalizedLanguage.includes('neder');
-  const title = isDutch ? 'Beleggen als een proces' : 'Investing as a process';
-  const copy = isDutch
-    ? {
-        intro: 'EQTY leert je stap voor stap welke voorbereiding nodig is vóór je begint met investeren.',
-        emphasis: 'Beleggen als een proces is een vaste methode met duidelijke stappen.',
-        outro: 'Na alle lessen weet je wat nodig is om te beginnen met beleggen.',
-      }
-    : {
-        intro: 'EQTY teaches you step by step what preparation is needed before you start investing.',
-        emphasis: 'Investing as a process is a fixed method with clear steps.',
-        outro: 'After all lessons, you will know what is needed to start investing.',
-      };
-  const ctaLabel = isDutch ? 'Account aanmaken' : 'Create account';
+  const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
 
   const handleCreateAccount = async () => {
     await updatePreferences({ hasOnboarded: false });
@@ -56,17 +40,17 @@ export default function OnboardingWhatIsEqtyScreen({ navigation }) {
         </View>
         <View style={styles.editorialWrap}>
           <View style={styles.copyBlock}>
-            <AppText style={styles.title}>{title}</AppText>
+            <AppText style={styles.title}>{copy.whatIsEqty.title}</AppText>
             <View style={styles.paragraphBlock}>
-              <AppText style={styles.paragraph}>{copy.intro}</AppText>
-              <AppText style={styles.emphasis}>{copy.emphasis}</AppText>
-              <AppText style={styles.paragraph}>{copy.outro}</AppText>
+              <AppText style={styles.paragraph}>{copy.whatIsEqty.intro}</AppText>
+              <AppText style={styles.emphasis}>{copy.whatIsEqty.emphasis}</AppText>
+              <AppText style={styles.paragraph}>{copy.whatIsEqty.outro}</AppText>
             </View>
           </View>
         </View>
         <View style={styles.actions}>
           <PrimaryButton
-            label={ctaLabel}
+            label={copy.whatIsEqty.button}
             onPress={handleCreateAccount}
           />
         </View>

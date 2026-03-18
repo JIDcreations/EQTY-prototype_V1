@@ -561,6 +561,13 @@ const ONBOARDING_COPY = {
       secondaryCta: 'Log in',
       tapHint: 'Tap to continue',
     },
+    whatIsEqty: {
+      title: 'Investing as a process',
+      intro: 'EQTY teaches you step by step what preparation is needed before you start investing.',
+      emphasis: 'Investing as a process is a fixed method with clear steps.',
+      outro: 'After all lessons, you will know what is needed to start investing.',
+      button: 'Continue',
+    },
     positioning: {
       stepLabel: 'Step 02',
       badge: 'EQTY positioning',
@@ -699,9 +706,16 @@ const ONBOARDING_COPY = {
       title: 'Welkom bij EQTY',
       subtitle:
         'EQTY biedt een gestructureerde voorbereiding op beleggen, met focus op inzicht vóór actie.',
-      primaryCta: 'Maak account',
+      primaryCta: 'Maak een account',
       secondaryCta: 'Log in',
       tapHint: 'Tik om door te gaan',
+    },
+    whatIsEqty: {
+      title: 'Beleggen als een proces',
+      intro: 'EQTY leert je stap voor stap welke voorbereiding nodig is vóór je begint met investeren.',
+      emphasis: 'Beleggen als een proces is een vaste methode met duidelijke stappen.',
+      outro: 'Na alle lessen weet je wat nodig is om te beginnen met beleggen.',
+      button: 'Doorgaan',
     },
     positioning: {
       stepLabel: 'Stap 02',
