@@ -13,7 +13,13 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-export default function TopTabHeader({ title, subtitle, onBack, onPressProfile }) {
+export default function TopTabHeader({
+  title,
+  subtitle,
+  subtitleStyle,
+  onBack,
+  onPressProfile,
+}) {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
 
@@ -54,7 +60,7 @@ export default function TopTabHeader({ title, subtitle, onBack, onPressProfile }
         {!onPressProfile && onBack ? <View style={styles.iconSpacer} /> : null}
       </View>
       {subtitle ? (
-        <AppText style={styles.subtitle}>{subtitle}</AppText>
+        <AppText style={[styles.subtitle, subtitleStyle]}>{subtitle}</AppText>
       ) : null}
     </View>
   );

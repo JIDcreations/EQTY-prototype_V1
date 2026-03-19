@@ -186,6 +186,7 @@ export default function HomeScreen() {
         <TopTabHeader
           title={greetingLine}
           subtitle={currentContextLabel}
+          subtitleStyle={styles.headerStepLabel}
           onPressProfile={() => navigation.navigate('Profile')}
         />
         <View style={styles.trajectoryBlock}>
@@ -195,45 +196,47 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <Animated.View style={[styles.section, heroAnimStyle]}>
-        <Card style={[styles.heroStack, styles.heroCard]}>
-          <AppText style={styles.heroStepLabel} numberOfLines={1}>
-            {currentContextLabel}
-          </AppText>
-          <AppText style={styles.heroTitle}>{lessonTitle}</AppText>
-          {heroDescription ? (
-            <AppText style={styles.heroSubtitle}>{heroDescription}</AppText>
-          ) : null}
-          <CtaInsideButton
-            label={primaryCtaLabel}
-            onPress={() =>
-              navigation.navigate('Lessons', {
-                screen: 'LessonOverview',
-                params: {
-                  lessonId: currentLesson?.id,
-                  entrySource: 'Home',
-                },
-              })
-            }
-          />
-        </Card>
-      </Animated.View>
-
-      {insightCard ? (
-        <View style={styles.section}>
-          <Card style={[styles.heroStack, styles.insightCard]}>
-            <AppText style={styles.insightLabel} numberOfLines={1}>
-              {insightCard.label}
+      <View style={styles.heroGroup}>
+        <Animated.View style={[styles.section, heroAnimStyle]}>
+          <Card style={[styles.heroStack, styles.heroCard]}>
+            <AppText style={styles.heroStepLabel} numberOfLines={1}>
+              {currentContextLabel}
             </AppText>
-            <AppText style={styles.insightTitle}>{insightCard.title}</AppText>
-            <AppText style={styles.insightBody}>
-              {insightCard.bodyBefore}
-              <Text style={styles.insightBodyAccent}>{insightCard.bodyHighlight}</Text>
-              {insightCard.bodyAfter}
-            </AppText>
+            <AppText style={styles.heroTitle}>{lessonTitle}</AppText>
+            {heroDescription ? (
+              <AppText style={styles.heroSubtitle}>{heroDescription}</AppText>
+            ) : null}
+            <CtaInsideButton
+              label={primaryCtaLabel}
+              onPress={() =>
+                navigation.navigate('Lessons', {
+                  screen: 'LessonOverview',
+                  params: {
+                    lessonId: currentLesson?.id,
+                    entrySource: 'Home',
+                  },
+                })
+              }
+            />
           </Card>
-        </View>
-      ) : null}
+        </Animated.View>
+
+        {insightCard ? (
+          <View style={styles.section}>
+            <Card style={[styles.heroStack, styles.insightCard]}>
+              <AppText style={styles.insightLabel} numberOfLines={1}>
+                {insightCard.label}
+              </AppText>
+              <AppText style={styles.insightTitle}>{insightCard.title}</AppText>
+              <AppText style={styles.insightBody}>
+                {insightCard.bodyBefore}
+                <Text style={styles.insightBodyAccent}>{insightCard.bodyHighlight}</Text>
+                {insightCard.bodyAfter}
+              </AppText>
+            </Card>
+          </View>
+        ) : null}
+      </View>
 
       <View style={styles.section}>
         <SectionTitle title="Hulpmiddelen" />
@@ -276,6 +279,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     topBlock: {
       gap: components.layout.spacing.md,
     },
+    heroGroup: {
+      gap: components.layout.spacing.xl,
+    },
     section: {
       gap: components.layout.spacing.md,
     },
@@ -300,6 +306,10 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
       maxWidth: '100%',
+    },
+    headerStepLabel: {
+      ...typography.styles.stepLabel,
+      color: colors.text.secondary,
     },
     heroTitle: {
       ...typography.styles.h1,
@@ -336,6 +346,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       color: colors.text.secondary,
     },
     insightBodyAccent: {
+      ...typography.styles.stepLabel,
       color: colors.text.primary,
     },
     actionRow: {

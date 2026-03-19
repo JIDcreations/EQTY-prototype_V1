@@ -1826,10 +1826,12 @@ export function getHomeLessonCardCopy(lessonId, language, themeIndex, lessonInde
   const locale = getLocaleKey(language);
   const localized = HOME_LESSON_CARD_COPY[locale] || HOME_LESSON_CARD_COPY.en;
   const entry = localized?.[lessonId] || localized.default || HOME_LESSON_CARD_COPY.en.default;
-  const contextLabel =
-    locale === 'nl'
-      ? `Thema ${themeIndex} · Les ${lessonIndexInTheme}`
-      : `Theme ${themeIndex} · Lesson ${lessonIndexInTheme}`;
+  const contextLabel = formatThemeLessonContextLabel(
+    language,
+    themeIndex,
+    lessonIndexInTheme,
+    'dot'
+  );
 
   return {
     label: entry.label,
