@@ -917,6 +917,35 @@ const HOME_COPY = {
   },
 };
 
+const HOME_LESSON_CARD_COPY = {
+  en: {
+    default: {
+      label: 'In this lesson',
+      title: 'Investing follows a process',
+      body: 'You learn how decisions build on each other before you start investing.',
+    },
+    lesson_0: {
+      label: 'In this lesson',
+      title: 'Investing is not a single action, but a process',
+      body:
+        'You learn how each decision builds on the previous one before you actually start investing.',
+    },
+  },
+  nl: {
+    default: {
+      label: 'In deze les',
+      title: 'Beleggen volgt een proces',
+      body: 'Je leert hoe beslissingen op elkaar voortbouwen vóór je begint te investeren.',
+    },
+    lesson_0: {
+      label: 'In deze les',
+      title: 'Beleggen is geen losse actie, maar een proces',
+      body:
+        'Je leert hoe elke beslissing op de vorige voortbouwt, nog vóór je effectief begint te investeren.',
+    },
+  },
+};
+
 const LESSON_RESOURCES_COPY = {
   en: {
     title: 'Extra info',
@@ -1775,6 +1804,12 @@ export function getOnboardingCopy(language) {
 export function getHomeCopy(language) {
   const locale = getLocaleKey(language);
   return HOME_COPY[locale] || HOME_COPY.en;
+}
+
+export function getHomeLessonCardCopy(lessonId, language) {
+  const locale = getLocaleKey(language);
+  const localized = HOME_LESSON_CARD_COPY[locale] || HOME_LESSON_CARD_COPY.en;
+  return localized?.[lessonId] || localized.default || HOME_LESSON_CARD_COPY.en.default;
 }
 
 export function getLessonResourcesCopy(language) {
