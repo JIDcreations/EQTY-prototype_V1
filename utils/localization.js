@@ -921,27 +921,43 @@ const HOME_LESSON_CARD_COPY = {
   en: {
     default: {
       label: 'In this lesson',
-      title: 'Investing follows a process',
-      body: 'You learn how decisions build on each other before you start investing.',
+      title: 'Investing as a process',
+      bodyParts: (contextLabel) => ({
+        before: 'In ',
+        highlight: contextLabel,
+        after:
+          ', you learn how investing follows a structured process before action or product choices.',
+      }),
     },
     lesson_0: {
       label: 'In this lesson',
-      title: 'Investing is not a single action, but a process',
-      body:
-        'You learn how each decision builds on the previous one before you actually start investing.',
+      title: 'Investing as a process',
+      bodyParts: (contextLabel) => ({
+        before: 'In ',
+        highlight: contextLabel,
+        after:
+          ', you learn how each decision builds on the previous one.',
+      }),
     },
   },
   nl: {
     default: {
       label: 'In deze les',
-      title: 'Beleggen volgt een proces',
-      body: 'Je leert hoe beslissingen op elkaar voortbouwen vóór je begint te investeren.',
+      title: 'Beleggen als proces',
+      bodyParts: (contextLabel) => ({
+        before: 'In ',
+        highlight: contextLabel,
+        after: ' leer je hoe beleggen een gestructureerd proces volgt vóór actie of productkeuzes.',
+      }),
     },
     lesson_0: {
       label: 'In deze les',
-      title: 'Beleggen is geen losse actie, maar een proces',
-      body:
-        'Je leert hoe elke beslissing op de vorige voortbouwt, nog vóór je effectief begint te investeren.',
+      title: 'Beleggen als proces',
+      bodyParts: (contextLabel) => ({
+        before: 'In ',
+        highlight: contextLabel,
+        after: ' leer je hoe elke beslissing op de vorige voortbouwt.',
+      }),
     },
   },
 };
@@ -1806,10 +1822,25 @@ export function getHomeCopy(language) {
   return HOME_COPY[locale] || HOME_COPY.en;
 }
 
-export function getHomeLessonCardCopy(lessonId, language) {
+export function getHomeLessonCardCopy(lessonId, language, themeIndex, lessonIndexInTheme) {
   const locale = getLocaleKey(language);
   const localized = HOME_LESSON_CARD_COPY[locale] || HOME_LESSON_CARD_COPY.en;
-  return localized?.[lessonId] || localized.default || HOME_LESSON_CARD_COPY.en.default;
+  const entry = localized?.[lessonId] || localized.default || HOME_LESSON_CARD_COPY.en.default;
+  const contextLabel =
+    locale === 'nl'
+      ? `Thema ${themeIndex} · Les ${lessonIndexInTheme}`
+      : `Theme ${themeIndex} · Lesson ${lessonIndexInTheme}`;
+
+  return {
+    label: entry.label,
+    title: entry.title,
+    bodyBefore:
+      typeof entry.bodyParts === 'function' ? entry.bodyParts(contextLabel).before : '',
+    bodyHighlight:
+      typeof entry.bodyParts === 'function' ? entry.bodyParts(contextLabel).highlight : '',
+    bodyAfter:
+      typeof entry.bodyParts === 'function' ? entry.bodyParts(contextLabel).after : '',
+  };
 }
 
 export function getLessonResourcesCopy(language) {

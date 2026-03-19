@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Animated, {
   useAnimatedStyle,
@@ -108,8 +108,14 @@ export default function HomeScreen() {
   const displaySeriesProgress =
     seriesProgress === 0 ? 0.06 : Math.min(1, Math.max(0, seriesProgress));
   const insightCard = useMemo(
-    () => getHomeLessonCardCopy(currentLesson?.id, preferences?.language),
-    [currentLesson?.id, preferences?.language]
+    () =>
+      getHomeLessonCardCopy(
+        currentLesson?.id,
+        preferences?.language,
+        currentThemeIndex,
+        currentLessonIndexInTheme
+      ),
+    [currentLesson?.id, currentLessonIndexInTheme, currentThemeIndex, preferences?.language]
   );
 
   // Hero card entrance on every focus — subtle slide + fade
@@ -220,7 +226,11 @@ export default function HomeScreen() {
               {insightCard.label}
             </AppText>
             <AppText style={styles.insightTitle}>{insightCard.title}</AppText>
-            <AppText style={styles.insightBody}>{insightCard.body}</AppText>
+            <AppText style={styles.insightBody}>
+              {insightCard.bodyBefore}
+              <Text style={styles.insightBodyAccent}>{insightCard.bodyHighlight}</Text>
+              {insightCard.bodyAfter}
+            </AppText>
           </Card>
         </View>
       ) : null}
@@ -324,6 +334,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     insightBody: {
       ...components.card.body,
       color: colors.text.secondary,
+    },
+    insightBodyAccent: {
+      color: colors.text.primary,
     },
     actionRow: {
       flexDirection: 'row',
