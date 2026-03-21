@@ -1245,7 +1245,7 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
     case 'goal':
       return <GoalGridAnim styles={styles} colors={colors} />;
     case 'risk':
-      return <RiskGridAnim styles={styles} />;
+      return <RiskGridAnim styles={styles} colors={colors} />;
     case 'strategy':
       return <StrategyGridAnim styles={styles} />;
     case 'allocation':
@@ -1298,89 +1298,105 @@ function GoalGridAnim({ styles, colors }) {
   );
 }
 
-// ─ 2. RISK: clean and simple chart motion ──────────────────────────────────────
-function RiskGridAnim({ styles }) {
+// ─ 2. RISK: chart builds up like daytrading, then crashes dramatically ──────────
+
+const CRASH_CHART_POINTS = [
+  { x: -42, y: 20 },
+  { x: -35, y: 15 },
+  { x: -28, y: 18 },
+  { x: -20, y: 10 },
+  { x: -13, y: 13 },
+  { x: -6,  y:  4 },
+  { x:   1, y:  7 },
+  { x:   8, y: -4 },
+  { x:  15, y: -1 },
+  { x:  22, y: -16 },
+  { x:  28, y:  10 },
+  { x:  35, y:  22 },
+  { x:  42, y:  28 },
+];
+const CRASH_START_SEG = 9;
+
+const CRASH_CHART_SEGS = CRASH_CHART_POINTS.slice(0, -1).map((point, i) => {
+  const next = CRASH_CHART_POINTS[i + 1];
+  const dx = next.x - point.x;
+  const dy = next.y - point.y;
+  const isCrash = i >= CRASH_START_SEG;
+  const revealStart = isCrash
+    ? 0.64 + (i - CRASH_START_SEG) * 0.05
+    : 0.04 + i * 0.065;
+  return {
+    key: `cc-${i}`,
+    width: Math.hypot(dx, dy),
+    cx: point.x + dx / 2,
+    cy: point.y + dy / 2,
+    angle: (Math.atan2(dy, dx) * 180) / Math.PI,
+    isCrash,
+    revealStart,
+    revealEnd: revealStart + (isCrash ? 0.022 : 0.020),
+    endX: next.x,
+    endY: next.y,
+  };
+});
+const CRASH_DOT_PHASE_INPUTS = CRASH_CHART_SEGS.map((s) => s.revealEnd);
+const CRASH_DOT_X_OUTPUTS = CRASH_CHART_SEGS.map((s) => s.endX);
+const CRASH_DOT_Y_OUTPUTS = CRASH_CHART_SEGS.map((s) => s.endY);
+const CRASH_START_PHASE = CRASH_CHART_SEGS[CRASH_START_SEG].revealStart;
+
+function CrashChartSeg({ phase, seg, styles }) {
+  const revealStart = seg.revealStart;
+  const revealEnd = seg.revealEnd;
+  const segStyle = useAnimatedStyle(() => {
+    const appear = interpolate(phase.value, [revealStart, revealEnd], [0, 1], Extrapolation.CLAMP);
+    const fade = interpolate(phase.value, [0.87, 0.97], [1, 0], Extrapolation.CLAMP);
+    return { opacity: appear * fade };
+  });
+  return (
+    <Animated.View
+      style={[
+        seg.isCrash ? styles.l1RiskCrashSegment : styles.l1RiskBuildSegment,
+        {
+          width: seg.width,
+          transform: [
+            { translateX: seg.cx },
+            { translateY: seg.cy },
+            { rotate: `${seg.angle}deg` },
+          ],
+        },
+        segStyle,
+      ]}
+    />
+  );
+}
+
+function CrashChartDot({ phase, styles, colors }) {
+  const accentColor = toRgba(colors.accent.primary, 0.92);
+  const dotStyle = useAnimatedStyle(() => {
+    const p = phase.value;
+    const tx = interpolate(p, CRASH_DOT_PHASE_INPUTS, CRASH_DOT_X_OUTPUTS, Extrapolation.CLAMP);
+    const ty = interpolate(p, CRASH_DOT_PHASE_INPUTS, CRASH_DOT_Y_OUTPUTS, Extrapolation.CLAMP);
+    const appear = interpolate(p, [0.04, 0.07], [0, 1], Extrapolation.CLAMP);
+    const fade = interpolate(p, [0.87, 0.97], [1, 0], Extrapolation.CLAMP);
+    const isCrashing = p >= CRASH_START_PHASE;
+    return {
+      transform: [{ translateX: tx }, { translateY: ty }],
+      opacity: appear * fade,
+      backgroundColor: isCrashing ? '#FF3B30' : accentColor,
+    };
+  });
+  return <Animated.View style={[styles.l1RiskChartDot, dotStyle]} />;
+}
+
+function RiskGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
-  const volatilePoints = useMemo(
-    () => [
-      { x: -42, y: 16 },
-      { x: -30, y: -4 },
-      { x: -18, y: 10 },
-      { x: -6, y: -8 },
-      { x: 8, y: 6 },
-      { x: 22, y: -12 },
-      { x: 34, y: -2 },
-      { x: 42, y: -8 },
-    ],
-    []
-  );
-  const stablePoints = useMemo(
-    () => [
-      { x: -42, y: 14 },
-      { x: -30, y: 11 },
-      { x: -18, y: 8 },
-      { x: -6, y: 5 },
-      { x: 8, y: 2 },
-      { x: 22, y: -1 },
-      { x: 34, y: -4 },
-      { x: 42, y: -6 },
-    ],
-    []
-  );
-
-  const toSegments = (points, keyPrefix) =>
-    points.slice(0, -1).map((point, index) => {
-      const next = points[index + 1];
-      const dx = next.x - point.x;
-      const dy = next.y - point.y;
-      return {
-        key: `${keyPrefix}-${index}`,
-        width: Math.hypot(dx, dy),
-        x: point.x + dx / 2,
-        y: point.y + dy / 2,
-        angle: (Math.atan2(dy, dx) * 180) / Math.PI,
-      };
-    });
-
-  const volatileSegments = useMemo(() => toSegments(volatilePoints, 'risk-vol'), [volatilePoints]);
-  const stableSegments = useMemo(() => toSegments(stablePoints, 'risk-stable'), [stablePoints]);
-
-  const volatileInput = useMemo(
-    () => volatilePoints.map((_, index) => index / (volatilePoints.length - 1)),
-    [volatilePoints]
-  );
-  const stableInput = useMemo(
-    () => stablePoints.map((_, index) => index / (stablePoints.length - 1)),
-    [stablePoints]
-  );
-  const volatileX = useMemo(() => volatilePoints.map((point) => point.x), [volatilePoints]);
-  const volatileY = useMemo(() => volatilePoints.map((point) => point.y), [volatilePoints]);
-  const stableX = useMemo(() => stablePoints.map((point) => point.x), [stablePoints]);
-  const stableY = useMemo(() => stablePoints.map((point) => point.y), [stablePoints]);
 
   useEffect(() => {
-    phase.value = withRepeat(withTiming(1, { duration: 3200, easing: Easing.linear }), -1, false);
+    phase.value = withRepeat(
+      withTiming(1, { duration: 4800, easing: Easing.linear }),
+      -1,
+      false
+    );
   }, [phase]);
-
-  const volatileDotStyle = useAnimatedStyle(() => {
-    const travel = interpolate(phase.value, [0, 1], [0, 1], Extrapolation.CLAMP);
-    return {
-      transform: [
-        { translateX: interpolate(travel, volatileInput, volatileX, Extrapolation.CLAMP) },
-        { translateY: interpolate(travel, volatileInput, volatileY, Extrapolation.CLAMP) },
-      ],
-    };
-  });
-
-  const stableDotStyle = useAnimatedStyle(() => {
-    const travel = interpolate(phase.value, [0, 1], [0, 1], Extrapolation.CLAMP);
-    return {
-      transform: [
-        { translateX: interpolate(travel, stableInput, stableX, Extrapolation.CLAMP) },
-        { translateY: interpolate(travel, stableInput, stableY, Extrapolation.CLAMP) },
-      ],
-    };
-  });
 
   return (
     <View style={styles.l1AnimCanvas}>
@@ -1388,40 +1404,10 @@ function RiskGridAnim({ styles }) {
         <View style={[styles.l1RiskGridH, { transform: [{ translateY: -16 }] }]} />
         <View style={styles.l1RiskGridH} />
         <View style={[styles.l1RiskGridH, { transform: [{ translateY: 16 }] }]} />
-        {stableSegments.map((segment) => (
-          <View
-            key={segment.key}
-            style={[
-              styles.l1RiskStableSegment,
-              {
-                width: segment.width,
-                transform: [
-                  { translateX: segment.x },
-                  { translateY: segment.y },
-                  { rotate: `${segment.angle}deg` },
-                ],
-              },
-            ]}
-          />
+        {CRASH_CHART_SEGS.map((seg) => (
+          <CrashChartSeg key={seg.key} phase={phase} seg={seg} styles={styles} />
         ))}
-        {volatileSegments.map((segment) => (
-          <View
-            key={segment.key}
-            style={[
-              styles.l1RiskVolSegment,
-              {
-                width: segment.width,
-                transform: [
-                  { translateX: segment.x },
-                  { translateY: segment.y },
-                  { rotate: `${segment.angle}deg` },
-                ],
-              },
-            ]}
-          />
-        ))}
-        <Animated.View style={[styles.l1RiskStableDot, stableDotStyle]} />
-        <Animated.View style={[styles.l1RiskVolDot, volatileDotStyle]} />
+        <CrashChartDot phase={phase} styles={styles} colors={colors} />
       </View>
     </View>
   );
@@ -5483,31 +5469,23 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: 1,
     backgroundColor: toRgba(colors.ui.divider, 0.22),
   },
-  l1RiskVolSegment: {
+  l1RiskBuildSegment: {
     position: 'absolute',
     height: 2.5,
     borderRadius: 2,
-    backgroundColor: toRgba(colors.text.primary, 0.92),
+    backgroundColor: toRgba(colors.text.primary, 0.88),
   },
-  l1RiskStableSegment: {
+  l1RiskCrashSegment: {
     position: 'absolute',
-    height: 2.5,
+    height: 3,
     borderRadius: 2,
-    backgroundColor: toRgba(colors.text.primary, 0.62),
+    backgroundColor: '#FF3B30',
   },
-  l1RiskVolDot: {
+  l1RiskChartDot: {
     position: 'absolute',
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: toRgba(colors.accent.primary, 0.86),
-  },
-  l1RiskStableDot: {
-    position: 'absolute',
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
-    backgroundColor: toRgba(colors.text.primary, 0.72),
   },
   // ─── Strategy animation ───────────────────────────────────────────────────────
   l1StratRow: {
