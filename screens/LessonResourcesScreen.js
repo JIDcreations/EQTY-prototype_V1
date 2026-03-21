@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -61,16 +61,6 @@ export default function LessonResourcesScreen() {
     if (text.length > 0) setExpandedLessonId(null);
   }, []);
 
-  const totalLessons = useMemo(
-    () => modulesWithLessons.reduce((sum, m) => sum + m.lessons.length, 0),
-    [modulesWithLessons]
-  );
-
-  const totalSources = useMemo(
-    () => Object.values(lessonResources).reduce((sum, arr) => sum + arr.length, 0),
-    []
-  );
-
   // Flat list of all lessons used for search
   const allLessons = useMemo(
     () => modulesWithLessons.flatMap((m) => m.lessons),
@@ -104,25 +94,22 @@ export default function LessonResourcesScreen() {
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
-      {/* Stats row */}
-      <View style={styles.statsRow}>
-        <View style={styles.statItem}>
-          <Ionicons name="library-outline" size={components.sizes.icon.sm} color={colors.text.secondary} />
-          <AppText style={styles.statText}>{copy.lessonsCount(totalLessons)}</AppText>
-        </View>
-        <View style={styles.statDot} />
-        <View style={styles.statItem}>
-          <Ionicons name="globe-outline" size={components.sizes.icon.sm} color={colors.text.secondary} />
-          <AppText style={styles.statText}>{copy.sourcesCount(totalSources)}</AppText>
-        </View>
-      </View>
-
       {/* Search */}
       <SearchBar
         value={query}
         onChangeText={handleQueryChange}
         placeholder={copy.searchPlaceholder}
       />
+
+      {/* Search suggestions — visible when idle */}
+      {!isSearching && copy.searchSuggestions?.length > 0 ? (
+        <SearchSuggestions
+          suggestions={copy.searchSuggestions}
+          onSelect={handleQueryChange}
+          styles={styles}
+          colors={colors}
+        />
+      ) : null}
 
       {/* Content */}
       {isSearching ? (
@@ -215,12 +202,39 @@ function SearchResults({ results, expandedLessonId, setExpandedLessonId, progres
   );
 }
 
+// ─── Search suggestions ───────────────────────────────────────────────────────
+
+function SearchSuggestions({ suggestions, onSelect, styles, colors }) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.suggestionsRow}
+      keyboardShouldPersistTaps="handled"
+    >
+      {suggestions.map((s) => (
+        <Pressable
+          key={s}
+          onPress={() => onSelect(s)}
+          style={({ pressed }) => [
+            styles.suggestionChip,
+            pressed && styles.suggestionChipPressed,
+          ]}
+        >
+          <AppText style={styles.suggestionChipText}>{s}</AppText>
+        </Pressable>
+      ))}
+    </ScrollView>
+  );
+}
+
 // ─── Lesson card ──────────────────────────────────────────────────────────────
 
 function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, copy, styles, colors, components }) {
   const isExpanded = expandedLessonId === lesson.id;
   const status = getLessonStatus(lesson.id, progress);
   const isCompleted = status === 'completed';
+  const isCurrent = lesson.id === progress.currentLessonId;
   const resources = lessonResources[lesson.id] || [];
 
   return (
@@ -242,6 +256,9 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
             >
               {lesson.title}
             </AppText>
+            {isCurrent && !isCompleted ? (
+              <View style={styles.currentDot} />
+            ) : null}
             {isCompleted ? (
               <Ionicons
                 name="checkmark-circle"
@@ -377,26 +394,36 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       gap: sp.lg,
     },
 
-    // Stats row
-    statsRow: {
+    // Search suggestions
+    suggestionsRow: {
       flexDirection: 'row',
-      alignItems: 'center',
-      gap: sp.sm,
-    },
-    statItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
       gap: sp.xs,
+      paddingVertical: 2,
     },
-    statText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    statDot: {
-      width: 3,
-      height: 3,
+    suggestionChip: {
       borderRadius: 999,
-      backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      borderWidth: components.borderWidth.thin,
+      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+      paddingHorizontal: sp.sm,
+      paddingVertical: 6,
+    },
+    suggestionChipPressed: {
+      opacity: 0.6,
+    },
+    suggestionChipText: {
+      ...typography.styles.small,
+      color: colors.text.primary,
+    },
+
+    // Current lesson dot
+    currentDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 999,
+      backgroundColor: colors.accent.primary,
+      flexShrink: 0,
+      marginTop: 6,
     },
 
     // Module list

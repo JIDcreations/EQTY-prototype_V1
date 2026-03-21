@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useCallback } from 'react';
-import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -204,12 +204,7 @@ export default function GlossaryScreen() {
               placeholder={glossaryCopy.searchPlaceholder}
             />
             <View style={styles.chipRow}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.filterScrollContent}
-                style={styles.filterScroll}
-              >
+              <View style={styles.filterScrollContent}>
                 <Pressable
                   onPress={() => setActiveCategory('all')}
                   style={({ pressed }) => [
@@ -250,7 +245,7 @@ export default function GlossaryScreen() {
                     </Pressable>
                   );
                 })}
-              </ScrollView>
+              </View>
             </View>
           </View>
         </View>
@@ -367,27 +362,21 @@ const createStyles = (colors, components, tabBarHeight) =>
       flexDirection: 'row',
       alignItems: 'center',
     },
-    filterScroll: {
-      flex: 1,
-      marginHorizontal: -components.layout.pagePaddingHorizontal,
-    },
     filterScrollContent: {
       flexDirection: 'row',
-      flexWrap: 'nowrap',
+      flexWrap: 'wrap',
       gap: components.layout.spacing.xs,
-      paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingRight: components.layout.pagePaddingHorizontal + components.layout.spacing.sm,
+      width: '100%',
     },
     filterChip: {
       paddingHorizontal: components.layout.spacing.md,
       paddingVertical: components.layout.spacing.xs,
-      borderRadius: components.radius.pill,
+      borderRadius: components.radius.input,
       borderWidth: components.borderWidth.thin,
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
     },
     filterChipActive: {
-      backgroundColor: colors.accent.primary,
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
     filterChipPressed: {
@@ -398,7 +387,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.primary,
     },
     filterChipTextActive: {
-      color: colors.text.onAccent,
+      color: colors.text.primary,
     },
     termsBlock: {
       gap: components.layout.spacing.sm,
