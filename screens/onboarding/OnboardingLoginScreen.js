@@ -109,7 +109,6 @@ export default function OnboardingLoginScreen({ navigation }) {
               <PrimaryButton
                 label={copy.login.button}
                 onPress={handleDone}
-                style={styles.primaryButton}
               />
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
@@ -287,9 +286,5 @@ const createStyles = (colors, components) =>
     footer: {
       paddingTop: components.layout.spacing.sm,
       alignItems: 'center',
-    },
-    primaryButton: {
-      paddingVertical: components.layout.spacing.md,
-      minHeight: components.sizes.input.minHeight,
     },
   });
