@@ -1254,7 +1254,7 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
     case 'vehicle':
       return <VehicleGridAnim styles={styles} />;
     case 'execution':
-      return <ExecutionGridAnim styles={styles} />;
+      return <ExecutionGridAnim styles={styles} colors={colors} />;
     default:
       return null;
   }
@@ -1669,51 +1669,69 @@ function VehicleGridAnim({ styles, colors }) {
   );
 }
 
-// ─ 6. EXECUTION: 5 prior steps check off, then one precise fire action ────────
+// ─ 6. EXECUTION: download broker → deposit coin → place order ────────────────
 function ExecutionGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
 
   useEffect(() => {
-    phase.value = withRepeat(withTiming(1, { duration: 4600, easing: Easing.linear }), -1, false);
+    phase.value = withRepeat(withTiming(1, { duration: 5000, easing: Easing.linear }), -1, false);
   }, [phase]);
 
-  // 5 check dots appear in sequence — each pops in with a crisp scale
-  const c0 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.06, 0.10, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
-  }));
-  const c1 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.16, 0.20, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
-  }));
-  const c2 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.26, 0.30, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
-  }));
-  const c3 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.36, 0.40, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
-  }));
-  const c4 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.46, 0.50, 0.72, 0.82], [0, 1.5, 1, 0], Extrapolation.CLAMP) }],
+  // Phone fades in with everything, fades out at end
+  const phoneStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0, 0.05, 0.84, 0.96], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
 
-  // After all 5 are lit: one decisive execute flash
-  const coreStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.64, 0.70, 0.78, 0.84, 0.92], [0, 1.8, 0.9, 1.1, 0], Extrapolation.CLAMP) }],
+  // Phase 1 (0.06–0.36): download progress bar grows left→right
+  // Bar width=18, half=9. translateX(-9*(1-t)) + scaleX(t) anchors the left edge.
+  const progressStyle = useAnimatedStyle(() => {
+    const t = interpolate(phase.value, [0.06, 0.36], [0, 1], Extrapolation.CLAMP);
+    const fade = interpolate(phase.value, [0.36, 0.42], [1, 0], Extrapolation.CLAMP);
+    return {
+      opacity: fade,
+      transform: [{ translateX: -9 * (1 - t) }, { scaleX: t }],
+    };
+  });
+
+  // Phase 2 (0.44–0.62): € coin drops from above phone into it
+  const coinStyle = useAnimatedStyle(() => {
+    const ty = interpolate(phase.value, [0.44, 0.60], [0, 16], Extrapolation.CLAMP);
+    const opacity = interpolate(phase.value, [0.44, 0.48, 0.58, 0.62], [0, 1, 1, 0], Extrapolation.CLAMP);
+    return { transform: [{ translateY: ty }], opacity };
+  });
+
+  // Phase 3 (0.64–0.84): screen flashes accent = order confirmed
+  const flashStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.64, 0.70, 0.80, 0.84], [0, 0.92, 0.4, 0], Extrapolation.CLAMP),
   }));
-  const fireStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.70, 0.76, 0.88, 0.96], [0, 2.8, 0.6, 0], Extrapolation.CLAMP) }],
-  }));
+
+  // Phase 3: pulse ring expands out from phone center
+  const pulseStyle = useAnimatedStyle(() => {
+    const scale = interpolate(phase.value, [0.64, 0.84], [0.3, 2.6], Extrapolation.CLAMP);
+    const opacity = interpolate(phase.value, [0.64, 0.68, 0.78, 0.84], [0, 0.75, 0.25, 0], Extrapolation.CLAMP);
+    return { transform: [{ scale }], opacity };
+  });
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.l1ExecCheckRow}>
-        <Animated.View style={[styles.l1ExecCheckDot, c0]} />
-        <Animated.View style={[styles.l1ExecCheckDot, c1]} />
-        <Animated.View style={[styles.l1ExecCheckDot, c2]} />
-        <Animated.View style={[styles.l1ExecCheckDot, c3]} />
-        <Animated.View style={[styles.l1ExecCheckDot, c4]} />
-      </View>
-      <View style={styles.l1ExecFireWrap}>
-        <Animated.View style={[styles.l1ExecFireRing, fireStyle]} />
-        <Animated.View style={[styles.l1ExecFireCore, coreStyle]} />
+      <View style={styles.l1ExecScene}>
+        {/* € coin — sits above phone in flex flow, drops down into it */}
+        <Animated.View style={[styles.l1ExecCoin, coinStyle]}>
+          <AppText style={styles.l1ExecCoinLabel}>€</AppText>
+        </Animated.View>
+
+        {/* Phone body */}
+        <Animated.View style={[styles.l1ExecPhone, phoneStyle]}>
+          <View style={styles.l1ExecScreen}>
+            <View style={styles.l1ExecProgressTrack}>
+              <Animated.View style={[styles.l1ExecProgressBar, progressStyle]} />
+            </View>
+            <Animated.View style={[styles.l1ExecScreenFlash, flashStyle]} />
+          </View>
+        </Animated.View>
+
+        {/* Confirm pulse ring centered on phone */}
+        <Animated.View style={[styles.l1ExecPulseRing, pulseStyle]} />
       </View>
     </View>
   );
@@ -5618,36 +5636,76 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.accent.primary, 0.9),
   },
   // ─── Execution animation ──────────────────────────────────────────────────────
-  l1ExecCheckRow: {
-    flexDirection: 'row',
-    gap: 9,
-    marginBottom: 12,
-  },
-  l1ExecCheckDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.text.primary,
-  },
-  l1ExecFireWrap: {
-    width: 38,
-    height: 38,
+  l1ExecScene: {
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 0,
   },
-  l1ExecFireRing: {
-    position: 'absolute',
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  l1ExecPhone: {
+    width: 36,
+    height: 60,
+    borderRadius: 7,
     borderWidth: 2,
-    borderColor: toRgba(colors.text.primary, 0.9),
+    borderColor: toRgba(colors.text.primary, 0.8),
+    backgroundColor: toRgba(colors.text.primary, 0.06),
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  l1ExecFireCore: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: toRgba(colors.accent.primary, 0.9),
+  l1ExecScreen: {
+    width: 26,
+    height: 44,
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.text.primary, 0.08),
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  l1ExecProgressTrack: {
+    width: 18,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: toRgba(colors.text.primary, 0.15),
+    overflow: 'hidden',
+  },
+  l1ExecProgressBar: {
+    width: 18,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.accent.primary,
+  },
+  l1ExecScreenFlash: {
+    position: 'absolute',
+    width: 26,
+    height: 44,
+    borderRadius: 3,
+    backgroundColor: colors.accent.primary,
+  },
+  l1ExecCoin: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.accent.primary,
+    backgroundColor: toRgba(colors.accent.primary, 0.18),
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: -4,
+    zIndex: 2,
+  },
+  l1ExecCoinLabel: {
+    fontSize: 10,
+    lineHeight: 12,
+    color: colors.accent.primary,
+    fontWeight: '700',
+  },
+  l1ExecPulseRing: {
+    position: 'absolute',
+    width: 36,
+    height: 60,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: toRgba(colors.accent.primary, 0.7),
   },
   });
 
