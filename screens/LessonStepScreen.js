@@ -20,6 +20,7 @@ import Animated, {
   Extrapolation,
   FadeInDown,
   interpolate,
+  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -1247,7 +1248,7 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
     case 'risk':
       return <RiskGridAnim styles={styles} colors={colors} />;
     case 'strategy':
-      return <StrategyGridAnim styles={styles} />;
+      return <StrategyGridAnim styles={styles} colors={colors} />;
     case 'allocation':
       return <AllocationGridAnim styles={styles} colors={colors} />;
     case 'vehicle':
@@ -1413,50 +1414,129 @@ function RiskGridAnim({ styles, colors }) {
   );
 }
 
-// ─ 3. STRATEGY: scattered nodes converge, then routes connect into a plan ─────
+// ─ 3. STRATEGY: two lines from same start — flat/noisy vs steady growth ─────────
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+
+const STRAT_SVG_W = 90;
+const STRAT_SVG_H = 70;
+const STRAT_SVG_CX = 45;
+const STRAT_SVG_CY = 35;
+
+const STRAT_GROWTH_POINTS = [
+  { x: -42, y: 18 },
+  { x: -33, y: 13 },
+  { x: -24, y:  9 },
+  { x: -15, y:  4 },
+  { x:  -6, y:  0 },
+  { x:   3, y: -4 },
+  { x:  12, y: -9 },
+  { x:  21, y: -13 },
+  { x:  30, y: -17 },
+  { x:  42, y: -21 },
+];
+const STRAT_FLAT_POINTS = [
+  { x: -42, y: 18 },
+  { x: -33, y: 13 },
+  { x: -24, y: 20 },
+  { x: -15, y: 12 },
+  { x:  -6, y: 18 },
+  { x:   3, y: 10 },
+  { x:  12, y: 16 },
+  { x:  21, y:  9 },
+  { x:  30, y: 14 },
+  { x:  42, y:  9 },
+];
+
+const toStratSvgPath = (pts) =>
+  pts.map((pt, i) => `${i === 0 ? 'M' : 'L'} ${STRAT_SVG_CX + pt.x} ${STRAT_SVG_CY + pt.y}`).join(' ');
+
+const calcPathLen = (pts) =>
+  pts.slice(0, -1).reduce((sum, pt, i) => {
+    const next = pts[i + 1];
+    return sum + Math.hypot(next.x - pt.x, next.y - pt.y);
+  }, 0);
+
+const STRAT_GROWTH_PATH_D = toStratSvgPath(STRAT_GROWTH_POINTS);
+const STRAT_FLAT_PATH_D = toStratSvgPath(STRAT_FLAT_POINTS);
+const STRAT_GROWTH_LEN = calcPathLen(STRAT_GROWTH_POINTS);
+const STRAT_FLAT_LEN = calcPathLen(STRAT_FLAT_POINTS);
+
+// Last point of the growth line in SVG coords — where the tip dot sits
+const STRAT_TIP_X = STRAT_SVG_CX + STRAT_GROWTH_POINTS[STRAT_GROWTH_POINTS.length - 1].x;
+const STRAT_TIP_Y = STRAT_SVG_CY + STRAT_GROWTH_POINTS[STRAT_GROWTH_POINTS.length - 1].y;
+
 function StrategyGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
 
   useEffect(() => {
-    phase.value = withRepeat(withTiming(1, { duration: 4800, easing: Easing.linear }), -1, false);
+    phase.value = withRepeat(withTiming(1, { duration: 4600, easing: Easing.linear }), -1, false);
   }, [phase]);
 
-  // 4 nodes appear with staggered pop, then connector lines draw between them
-  const n0 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.08, 0.16], [0, 1], Extrapolation.CLAMP) }],
-  }));
-  const n1 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.22, 0.30], [0, 1], Extrapolation.CLAMP) }],
-  }));
-  const n2 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.36, 0.44], [0, 1], Extrapolation.CLAMP) }],
-  }));
-  const n3 = useAnimatedStyle(() => ({
-    transform: [{ scale: interpolate(phase.value, [0.50, 0.58], [0, 1], Extrapolation.CLAMP) }],
+  const accentColor = toRgba(colors.accent.primary, 0.92);
+  const dimColor = toRgba(colors.text.primary, 0.38);
+  const growthLen = STRAT_GROWTH_LEN;
+  const flatLen = STRAT_FLAT_LEN;
+
+  const growthProps = useAnimatedProps(() => {
+    const t = interpolate(phase.value, [0.05, 0.72], [0, 1], Extrapolation.CLAMP);
+    return { strokeDashoffset: growthLen * (1 - t) };
+  });
+
+  const flatProps = useAnimatedProps(() => {
+    const t = interpolate(phase.value, [0.05, 0.72], [0, 1], Extrapolation.CLAMP);
+    return { strokeDashoffset: flatLen * (1 - t) };
+  });
+
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0, 0.04, 0.84, 0.96], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
 
-  // Connector lines draw in (scaleX from 0→1) after each pair of nodes appears
-  const l0 = useAnimatedStyle(() => ({
-    transform: [{ scaleX: interpolate(phase.value, [0.16, 0.26], [0, 1], Extrapolation.CLAMP) }],
-  }));
-  const l1 = useAnimatedStyle(() => ({
-    transform: [{ scaleX: interpolate(phase.value, [0.30, 0.40], [0, 1], Extrapolation.CLAMP) }],
-  }));
-  const l2 = useAnimatedStyle(() => ({
-    transform: [{ scaleX: interpolate(phase.value, [0.44, 0.54], [0, 1], Extrapolation.CLAMP) }],
+  const tipStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(phase.value, [0.70, 0.76, 0.84, 0.96], [0, 1, 1, 0], Extrapolation.CLAMP),
+    backgroundColor: accentColor,
   }));
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.l1StratRow}>
-        <Animated.View style={[styles.l1StratNodeDot, n0]} />
-        <Animated.View style={[styles.l1StratConnLine, l0]} />
-        <Animated.View style={[styles.l1StratNodeDot, n1]} />
-        <Animated.View style={[styles.l1StratConnLine, l1]} />
-        <Animated.View style={[styles.l1StratNodeDot, styles.l1StratNodeAccent, n2]} />
-        <Animated.View style={[styles.l1StratConnLine, l2]} />
-        <Animated.View style={[styles.l1StratNodeDot, n3]} />
-      </View>
+      <Animated.View style={[styles.l1RiskSingleChart, containerStyle]}>
+        <View style={[styles.l1RiskGridH, { transform: [{ translateY: -16 }] }]} />
+        <View style={styles.l1RiskGridH} />
+        <View style={[styles.l1RiskGridH, { transform: [{ translateY: 16 }] }]} />
+        <Svg
+          width={STRAT_SVG_W}
+          height={STRAT_SVG_H}
+          style={{ position: 'absolute' }}
+        >
+          <AnimatedPath
+            d={STRAT_FLAT_PATH_D}
+            stroke={dimColor}
+            strokeWidth={2}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={flatLen}
+            animatedProps={flatProps}
+          />
+          <AnimatedPath
+            d={STRAT_GROWTH_PATH_D}
+            stroke={accentColor}
+            strokeWidth={2.5}
+            fill="none"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={growthLen}
+            animatedProps={growthProps}
+          />
+        </Svg>
+        <Animated.View
+          style={[
+            styles.l1StratTipDot,
+            { transform: [{ translateX: STRAT_TIP_X - STRAT_SVG_CX }, { translateY: STRAT_TIP_Y - STRAT_SVG_CY }] },
+            tipStyle,
+          ]}
+        />
+      </Animated.View>
     </View>
   );
 }
@@ -5488,24 +5568,11 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: 5,
   },
   // ─── Strategy animation ───────────────────────────────────────────────────────
-  l1StratRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 0,
-  },
-  l1StratNodeDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: colors.text.primary,
-  },
-  l1StratNodeAccent: {
-    backgroundColor: toRgba(colors.accent.primary, 0.86),
-  },
-  l1StratConnLine: {
-    height: 2,
-    width: 28,
-    backgroundColor: toRgba(colors.text.primary, 0.78),
+  l1StratTipDot: {
+    position: 'absolute',
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
   },
   // ─── Allocation animation ─────────────────────────────────────────────────────
   l1AllocWrap: {
