@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
@@ -38,22 +38,6 @@ export default function LessonResourcesScreen() {
     progress.currentLessonId || null
   );
   const [query, setQuery] = useState('');
-
-  // Suppress the active tab highlight while this screen is visible.
-  // LessonResources lives inside the Lessons stack, but conceptually it does
-  // not belong to any single tab — no tab should appear selected.
-  useFocusEffect(
-    useCallback(() => {
-      const parent = navigation.getParent();
-      if (!parent) return;
-      const inactiveColor = colors.text.secondary;
-      const activeColor = mode === 'light' ? colors.text.primary : colors.accent.primary;
-      parent.setOptions({ tabBarActiveTintColor: inactiveColor });
-      return () => {
-        parent.setOptions({ tabBarActiveTintColor: activeColor });
-      };
-    }, [navigation, colors, mode])
-  );
 
   const handleQueryChange = useCallback((text) => {
     setQuery(text);

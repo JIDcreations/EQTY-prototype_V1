@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
@@ -101,19 +101,6 @@ export default function LessonVideosScreen() {
     if (!url) return;
     try { await Linking.openURL(url); } catch (_) {}
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      const parent = navigation.getParent();
-      if (!parent) return;
-      const inactiveColor = colors.text.secondary;
-      const activeColor = mode === 'light' ? colors.text.primary : colors.accent.primary;
-      parent.setOptions({ tabBarActiveTintColor: inactiveColor });
-      return () => {
-        parent.setOptions({ tabBarActiveTintColor: activeColor });
-      };
-    }, [navigation, colors, mode])
-  );
 
   return (
     <OnboardingScreen

@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -32,30 +32,43 @@ function Tabs() {
   return (
     <Tab.Navigator
       tabBar={(props) => <AppTabBar {...props} />}
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: isLight ? colors.text.primary : colors.accent.primary,
-        tabBarInactiveTintColor: colors.text.secondary,
-        tabBarShowLabel: false,
-        tabBarItemStyle: {
-          borderRadius: components.radius.pill,
-        },
-        tabBarIcon: ({ color, size, focused }) => {
-          let iconName = 'home-outline';
-          if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
-          if (route.name === 'Lessons') iconName = focused ? 'book-outline' : 'book-outline';
-          if (route.name === 'Glossary') iconName = focused ? 'list' : 'list-outline';
-          if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
-          return (
-            <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-              <Ionicons name={iconName} size={size} color={color} />
-              <Text style={{ ...typography.styles.meta, fontSize: 12, color }}>
-                {route.name}
-              </Text>
-            </View>
-          );
-        },
-      })}
+      screenOptions={({ route }) => {
+        const focusedRouteName = getFocusedRouteNameFromRoute(route) ?? 'LessonsHome';
+        const suppressLessonsSelection =
+          route.name === 'Lessons' &&
+          (focusedRouteName === 'LessonResources' || focusedRouteName === 'LessonVideos');
+        const activeTintColor = suppressLessonsSelection
+          ? colors.text.secondary
+          : isLight
+            ? colors.text.primary
+            : colors.accent.primary;
+
+        return {
+          headerShown: false,
+          tabBarActiveTintColor: activeTintColor,
+          tabBarInactiveTintColor: colors.text.secondary,
+          tabBarShowLabel: false,
+          tabBarItemStyle: {
+            borderRadius: components.radius.pill,
+          },
+          tabBarIcon: ({ color, size, focused }) => {
+            const isActive = focused && !suppressLessonsSelection;
+            let iconName = 'home-outline';
+            if (route.name === 'Home') iconName = isActive ? 'home' : 'home-outline';
+            if (route.name === 'Lessons') iconName = isActive ? 'book' : 'book-outline';
+            if (route.name === 'Glossary') iconName = isActive ? 'list' : 'list-outline';
+            if (route.name === 'Profile') iconName = isActive ? 'person' : 'person-outline';
+            return (
+              <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                <Ionicons name={iconName} size={size} color={color} />
+                <Text style={{ ...typography.styles.meta, fontSize: 12, color }}>
+                  {route.name}
+                </Text>
+              </View>
+            );
+          },
+        };
+      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen
