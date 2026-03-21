@@ -15,7 +15,7 @@ function toRgba(hex, alpha) {
 
 /**
  * Reusable search bar — shared across all screens.
- * Dimensions: paddingHorizontal 22, paddingVertical 14, gap 12, borderRadius 16.
+ * Slightly taller than 45 via padding and input normalization for better optical centering.
  */
 export default function SearchBar({ value, onChangeText, placeholder, style }) {
   const { colors, components } = useTheme();
@@ -46,7 +46,7 @@ export default function SearchBar({ value, onChangeText, placeholder, style }) {
         clearButtonMode="never"
         autoCorrect={false}
         autoCapitalize="none"
-        style={{ flex: 1, color: colors.text.primary }}
+        style={[styles.input, { color: colors.text.primary }]}
       />
       {value.length > 0 ? (
         <Pressable onPress={() => onChangeText('')} hitSlop={8}>
@@ -67,7 +67,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 16,
     paddingHorizontal: 22,
-    paddingVertical: 22,
+    paddingVertical: 11,
     gap: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    lineHeight: 18,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    margin: 0,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
 });
