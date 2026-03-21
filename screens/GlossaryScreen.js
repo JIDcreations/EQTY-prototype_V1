@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState, useCallback } from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -204,7 +204,12 @@ export default function GlossaryScreen() {
               placeholder={glossaryCopy.searchPlaceholder}
             />
             <View style={styles.chipRow}>
-              <View style={styles.filterScrollContent}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.filterScrollContent}
+                style={styles.filterScroll}
+              >
                 <Pressable
                   onPress={() => setActiveCategory('all')}
                   style={({ pressed }) => [
@@ -245,7 +250,7 @@ export default function GlossaryScreen() {
                     </Pressable>
                   );
                 })}
-              </View>
+              </ScrollView>
             </View>
           </View>
         </View>
@@ -362,11 +367,16 @@ const createStyles = (colors, components, tabBarHeight) =>
       flexDirection: 'row',
       alignItems: 'center',
     },
+    filterScroll: {
+      flex: 1,
+      marginHorizontal: -components.layout.pagePaddingHorizontal,
+    },
     filterScrollContent: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
+      flexWrap: 'nowrap',
       gap: components.layout.spacing.xs,
-      width: '100%',
+      paddingHorizontal: components.layout.pagePaddingHorizontal,
+      paddingRight: components.layout.pagePaddingHorizontal + components.layout.spacing.sm,
     },
     filterChip: {
       paddingHorizontal: components.layout.spacing.md,

@@ -148,7 +148,7 @@ export default function HomeScreen() {
     () => [
       {
         id: 'resources',
-        title: 'Sources',
+        title: 'Bronnen',
         subtitle: 'Sources and deeper context',
         icon: 'book-outline',
         target: 'Lessons',
