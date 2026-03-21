@@ -81,8 +81,11 @@ const VOLATILE_CURVE_POINTS = [
   { x: 90, y: 78 },
   { x: 100, y: 72 },
 ];
-const L1_ALLOC_PIE_SIZE = 74;
-const L1_ALLOC_PIE_RADIUS = 32;
+const L1_ALLOC_SVG_SIZE = 90;
+const L1_ALLOC_CX = 45;
+const L1_ALLOC_CY = 45;
+const L1_ALLOC_R = 33;
+// Slice start angles: -90°, 30°, 150°. Each sweeps 120°.
 const INTRO_VISUALIZATION_TITLE = '6 stappen vóór beleggen';
 const INTRO_VISUALIZATION_SUBTITLE =
   'Het proces vóór je een belegging uitvoert.';
@@ -130,20 +133,6 @@ const INTRO_VISUALIZATION_STEPS = [
   },
 ];
 
-const polarToCartesian = (cx, cy, radius, angleDeg) => {
-  const angle = (angleDeg * Math.PI) / 180;
-  return {
-    x: cx + radius * Math.cos(angle),
-    y: cy + radius * Math.sin(angle),
-  };
-};
-
-const createPieSlicePath = (cx, cy, radius, startDeg, endDeg) => {
-  const start = polarToCartesian(cx, cy, radius, startDeg);
-  const end = polarToCartesian(cx, cy, radius, endDeg);
-  const largeArc = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-  return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
-};
 
 const glossaryTermIndex = glossaryTerms.reduce((acc, term) => {
   if (term?.id) acc[term.id] = term;
@@ -1541,74 +1530,79 @@ function StrategyGridAnim({ styles, colors }) {
   );
 }
 
-// ─ 4. ALLOCATION: filled pie slices assemble into one full circle ───────────────
+// ─ 4. ALLOCATION: 3 filled pie slices sweep in one-by-one then pulse ─────────
 function AllocationGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
-  const slicePaths = useMemo(() => {
-    const c = L1_ALLOC_PIE_SIZE / 2;
-    return [
-      createPieSlicePath(c, c, L1_ALLOC_PIE_RADIUS, -90, 30),
-      createPieSlicePath(c, c, L1_ALLOC_PIE_RADIUS, 30, 150),
-      createPieSlicePath(c, c, L1_ALLOC_PIE_RADIUS, 150, 270),
-    ];
-  }, []);
-  const sliceColors = useMemo(
-    () => [
-      toRgba(colors.text.primary, 0.96),
-      toRgba(colors.accent.primary, 0.38),
-      toRgba(colors.text.primary, 0.62),
-    ],
-    [colors.accent.primary, colors.text.primary]
-  );
+
+  const col1 = toRgba(colors.text.primary, 0.9);
+  const col2 = toRgba(colors.accent.primary, 0.95);
+  const col3 = toRgba(colors.text.primary, 0.5);
+  const cx = L1_ALLOC_CX;
+  const cy = L1_ALLOC_CY;
+  const r = L1_ALLOC_R;
 
   useEffect(() => {
     phase.value = withRepeat(
-      withTiming(1, { duration: 3600, easing: Easing.inOut(Easing.quad) }),
+      withTiming(1, { duration: 4400, easing: Easing.linear }),
       -1,
       false
     );
   }, [phase]);
 
-  const piece1Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: interpolate(phase.value, [0, 0.62, 1], [-34, 0, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0, 0.62, 1], [-26, 0, 0], Extrapolation.CLAMP) },
-      { rotate: `${interpolate(phase.value, [0, 0.62, 1], [-20, 0, 0], Extrapolation.CLAMP)}deg` },
-    ],
-  }));
-  const piece2Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: interpolate(phase.value, [0, 0.62, 1], [34, 0, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0, 0.62, 1], [-14, 0, 0], Extrapolation.CLAMP) },
-      { rotate: `${interpolate(phase.value, [0, 0.62, 1], [18, 0, 0], Extrapolation.CLAMP)}deg` },
-    ],
-  }));
-  const piece3Style = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: interpolate(phase.value, [0, 0.62, 1], [-10, 0, 0], Extrapolation.CLAMP) },
-      { translateY: interpolate(phase.value, [0, 0.62, 1], [36, 0, 0], Extrapolation.CLAMP) },
-      { rotate: `${interpolate(phase.value, [0, 0.62, 1], [14, 0, 0], Extrapolation.CLAMP)}deg` },
-    ],
-  }));
+  // Each slice sweeps from its startAngle to startAngle+120°
+  // Path built inside worklet: M cx cy L startX startY A r r 0 largeArc 1 endX endY Z
+  const slice1Props = useAnimatedProps(() => {
+    const prog = interpolate(phase.value, [0.04, 0.32], [0, 1], Extrapolation.CLAMP);
+    if (prog <= 0.001) return { d: `M ${cx} ${cy}` };
+    const sRad = (-90 * Math.PI) / 180;
+    const eRad = ((-90 + prog * 120) * Math.PI) / 180;
+    const sx = cx + r * Math.cos(sRad);
+    const sy = cy + r * Math.sin(sRad);
+    const ex = cx + r * Math.cos(eRad);
+    const ey = cy + r * Math.sin(eRad);
+    return { d: `M ${cx} ${cy} L ${sx.toFixed(2)} ${sy.toFixed(2)} A ${r} ${r} 0 0 1 ${ex.toFixed(2)} ${ey.toFixed(2)} Z` };
+  });
+
+  const slice2Props = useAnimatedProps(() => {
+    const prog = interpolate(phase.value, [0.32, 0.60], [0, 1], Extrapolation.CLAMP);
+    if (prog <= 0.001) return { d: `M ${cx} ${cy}` };
+    const sRad = (30 * Math.PI) / 180;
+    const eRad = ((30 + prog * 120) * Math.PI) / 180;
+    const sx = cx + r * Math.cos(sRad);
+    const sy = cy + r * Math.sin(sRad);
+    const ex = cx + r * Math.cos(eRad);
+    const ey = cy + r * Math.sin(eRad);
+    return { d: `M ${cx} ${cy} L ${sx.toFixed(2)} ${sy.toFixed(2)} A ${r} ${r} 0 0 1 ${ex.toFixed(2)} ${ey.toFixed(2)} Z` };
+  });
+
+  const slice3Props = useAnimatedProps(() => {
+    const prog = interpolate(phase.value, [0.60, 0.88], [0, 1], Extrapolation.CLAMP);
+    if (prog <= 0.001) return { d: `M ${cx} ${cy}` };
+    const sRad = (150 * Math.PI) / 180;
+    const eRad = ((150 + prog * 120) * Math.PI) / 180;
+    const sx = cx + r * Math.cos(sRad);
+    const sy = cy + r * Math.sin(sRad);
+    const ex = cx + r * Math.cos(eRad);
+    const ey = cy + r * Math.sin(eRad);
+    return { d: `M ${cx} ${cy} L ${sx.toFixed(2)} ${sy.toFixed(2)} A ${r} ${r} 0 0 1 ${ex.toFixed(2)} ${ey.toFixed(2)} Z` };
+  });
+
+  // Whole pie pulses once complete, then fades out
+  const wrapStyle = useAnimatedStyle(() => {
+    const scale = interpolate(phase.value, [0.88, 0.93, 0.97, 1.0], [1, 1.07, 1, 1], Extrapolation.CLAMP);
+    const opacity = interpolate(phase.value, [0, 0.04, 0.95, 1.0], [0, 1, 1, 0], Extrapolation.CLAMP);
+    return { transform: [{ scale }], opacity };
+  });
+
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.l1AllocWrap}>
-        <Animated.View style={[styles.l1AllocSliceLayer, piece1Style]}>
-          <Svg width={L1_ALLOC_PIE_SIZE} height={L1_ALLOC_PIE_SIZE}>
-            <Path d={slicePaths[0]} fill={sliceColors[0]} />
-          </Svg>
-        </Animated.View>
-        <Animated.View style={[styles.l1AllocSliceLayer, piece2Style]}>
-          <Svg width={L1_ALLOC_PIE_SIZE} height={L1_ALLOC_PIE_SIZE}>
-            <Path d={slicePaths[1]} fill={sliceColors[1]} />
-          </Svg>
-        </Animated.View>
-        <Animated.View style={[styles.l1AllocSliceLayer, piece3Style]}>
-          <Svg width={L1_ALLOC_PIE_SIZE} height={L1_ALLOC_PIE_SIZE}>
-            <Path d={slicePaths[2]} fill={sliceColors[2]} />
-          </Svg>
-        </Animated.View>
-      </View>
+      <Animated.View style={wrapStyle}>
+        <Svg width={L1_ALLOC_SVG_SIZE} height={L1_ALLOC_SVG_SIZE}>
+          <AnimatedPath fill={col1} animatedProps={slice1Props} />
+          <AnimatedPath fill={col2} animatedProps={slice2Props} />
+          <AnimatedPath fill={col3} animatedProps={slice3Props} />
+        </Svg>
+      </Animated.View>
     </View>
   );
 }
@@ -5593,17 +5587,6 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: 4.5,
   },
   // ─── Allocation animation ─────────────────────────────────────────────────────
-  l1AllocWrap: {
-    width: 108,
-    height: 108,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  l1AllocSliceLayer: {
-    position: 'absolute',
-    width: L1_ALLOC_PIE_SIZE,
-    height: L1_ALLOC_PIE_SIZE,
-  },
   // ─── Vehicle animation ────────────────────────────────────────────────────────
   l1VehicleTokenRow: {
     flexDirection: 'row',
