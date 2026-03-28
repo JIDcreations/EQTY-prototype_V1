@@ -174,12 +174,9 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
                       onPress={() => handleSelectOption(optionLabel)}
                       state={isSelected ? 'correct' : 'default'}
                       accessory={
-                        <SelectionIndicator
-                          isSelected={isSelected}
-                          selectionMode={questionVariant.selectionMode}
-                          colors={colors}
-                          components={components}
-                        />
+                        <View style={[styles.radio, isSelected && styles.radioActive]}>
+                          {isSelected ? <View style={styles.radioDot} /> : null}
+                        </View>
                       }
                       style={styles.optionButton}
                     />
@@ -208,45 +205,6 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
     </OnboardingScreen>
   );
 }
-
-function SelectionIndicator({ isSelected, selectionMode, colors, components }) {
-  return (
-    <View
-      style={[
-        indicatorStyles.base,
-        {
-          width: components.sizes.square.sm,
-          height: components.sizes.square.sm,
-          borderRadius: components.radius.pill,
-          borderColor: isSelected
-            ? colors.accent.primary
-            : toRgba(colors.ui.divider, colors.opacity.stroke),
-          backgroundColor: isSelected
-            ? toRgba(colors.accent.primary, colors.opacity.tint)
-            : 'transparent',
-        },
-      ]}
-    >
-      {isSelected ? (
-        (
-          <Ionicons
-            name="checkmark"
-            size={selectionMode === 'multi' ? components.sizes.icon.sm : components.sizes.icon.xs}
-            color={colors.accent.primary}
-          />
-        )
-      ) : null}
-    </View>
-  );
-}
-
-const indicatorStyles = StyleSheet.create({
-  base: {
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 function getInitialAnswer(value, questionVariant) {
   const storedValue = typeof value === 'string' ? value.trim() : '';
@@ -323,8 +281,26 @@ const createStyles = (colors, components) =>
       gap: components.layout.spacing.sm,
     },
     optionButton: {
-      height: components.sizes.list.minItemHeight,
-      paddingVertical: components.layout.spacing.sm,
+      height: 64,
+      paddingVertical: components.layout.spacing.none,
+    },
+    radio: {
+      width: components.sizes.track.sm,
+      height: components.sizes.track.sm,
+      borderRadius: components.radius.pill,
+      borderWidth: components.borderWidth.thin,
+      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    radioActive: {
+      borderColor: colors.accent.primary,
+    },
+    radioDot: {
+      width: components.sizes.dot.sm,
+      height: components.sizes.dot.sm,
+      borderRadius: components.radius.pill,
+      backgroundColor: colors.accent.primary,
     },
     input: {
       ...components.input.container,

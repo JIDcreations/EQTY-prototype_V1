@@ -72,8 +72,7 @@ const createStyles = (colors, mode) =>
     },
     buttonCorrect: {
       borderColor: colors.accent.primary,
-      backgroundColor:
-        mode === 'light' ? colors.accent.primary : toRgba(colors.accent.primary, colors.opacity.tint),
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
     },
     buttonDimmed: {
       borderColor: toRgba(colors.ui.divider, 0.15),
@@ -88,7 +87,7 @@ const createStyles = (colors, mode) =>
       color: colors.text.primary,
     },
     labelCorrect: {
-      color: mode === 'light' ? colors.text.primary : colors.accent.primary,
+      color: colors.text.primary,
     },
     labelDimmed: {
       color: toRgba(colors.text.secondary, 0.5),

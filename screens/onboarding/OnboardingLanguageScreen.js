@@ -153,7 +153,7 @@ const createStyles = (colors, components) =>
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
     rowActive: {
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      borderColor: colors.accent.primary,
     },
     rowLeft: {
       flexDirection: 'row',

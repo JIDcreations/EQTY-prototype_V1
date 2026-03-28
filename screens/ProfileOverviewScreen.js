@@ -90,7 +90,11 @@ export default function ProfileOverviewScreen() {
           updatePreferences({ textSize: option.value });
           toast.show('Saved');
         }}
-        style={[styles.textSizeRow, index !== TEXT_SIZE_OPTIONS.length - 1 && styles.rowDivider]}
+        style={[
+          styles.textSizeRow,
+          index !== TEXT_SIZE_OPTIONS.length - 1 && styles.rowDivider,
+          isActive && styles.textSizeRowActive,
+        ]}
       >
         <View style={styles.textSizeLeft}>
           <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -394,6 +398,11 @@ const createStyles = (colors, components) =>
       ...components.list.row,
       paddingHorizontal: components.layout.spacing.lg,
       backgroundColor: colors.background.surfaceActive,
+    },
+    textSizeRowActive: {
+      borderWidth: components.borderWidth.thin,
+      borderColor: colors.accent.primary,
+      borderRadius: components.radius.input,
     },
     rowDivider: {
       borderBottomWidth: components.borderWidth.thin,

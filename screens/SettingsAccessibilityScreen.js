@@ -38,7 +38,7 @@ export default function SettingsAccessibilityScreen({ navigation }) {
           updatePreferences({ textSize: option.value });
           toast.show(settingsCopy.saved);
         }}
-        style={styles.textSizeRow}
+        style={[styles.textSizeRow, isActive && styles.textSizeRowActive]}
       >
         <View style={styles.textSizeLeft}>
           <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -107,6 +107,9 @@ const createStyles = (colors, components, tabBarHeight) =>
       ...components.input.container,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+    textSizeRowActive: {
+      borderColor: colors.accent.primary,
     },
     textSizeLeft: {
       flexDirection: 'row',

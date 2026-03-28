@@ -49,7 +49,7 @@ export default function LanguageScreen({ navigation }) {
                   updatePreferences({ language: option.value });
                   toast.show(settingsCopy.saved);
                 }}
-                style={[styles.row, index !== options.length - 1 && styles.rowDivider]}
+                style={[styles.row, index !== options.length - 1 && styles.rowDivider, isActive && styles.rowActive]}
               >
                 <View style={styles.rowLeft}>
                   <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -96,6 +96,11 @@ const createStyles = (colors, components) =>
     rowDivider: {
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+    rowActive: {
+      borderWidth: components.borderWidth.thin,
+      borderColor: colors.accent.primary,
+      borderRadius: components.radius.input,
     },
     rowLeft: {
       flexDirection: 'row',

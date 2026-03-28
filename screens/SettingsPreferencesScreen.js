@@ -133,7 +133,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
     languageRowActive: {
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      borderColor: colors.accent.primary,
     },
     rowLeft: {
       flexDirection: 'row',
