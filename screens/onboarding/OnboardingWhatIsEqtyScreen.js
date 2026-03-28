@@ -16,7 +16,7 @@ export default function OnboardingWhatIsEqtyScreen({ navigation }) {
 
   const handleCreateAccount = async () => {
     await updatePreferences({ hasOnboarded: false });
-    navigation.navigate('OnboardingEmail');
+    navigation.navigate('OnboardingQuestionsIntro');
   };
 
   return (

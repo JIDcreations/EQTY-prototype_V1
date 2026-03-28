@@ -13,7 +13,7 @@ export default function OnboardingWelcomeScreen({ navigation }) {
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
 
-  const handleCreateAccount = () => navigation.navigate('OnboardingWhatIsEqty');
+  const handleCreateAccount = () => navigation.navigate('OnboardingEmail');
 
   return (
     <OnboardingScreen

@@ -29,7 +29,7 @@ export default function OnboardingEmailScreen({ navigation }) {
     if (trimmed) {
       await updateAuthUser({ email: trimmed });
     }
-    navigation.navigate('OnboardingQuestionsIntro');
+    navigation.navigate('OnboardingWhatIsEqty');
   };
 
   const handleApple = async () => {
@@ -38,7 +38,7 @@ export default function OnboardingEmailScreen({ navigation }) {
     if (trimmedUsername) {
       await updateAuthUser({ username: trimmedUsername });
     }
-    navigation.navigate('OnboardingQuestionsIntro');
+    navigation.navigate('OnboardingWhatIsEqty');
   };
 
   const handleGoogle = async () => {
@@ -47,7 +47,7 @@ export default function OnboardingEmailScreen({ navigation }) {
     if (trimmedUsername) {
       await updateAuthUser({ username: trimmedUsername });
     }
-    navigation.navigate('OnboardingQuestionsIntro');
+    navigation.navigate('OnboardingWhatIsEqty');
   };
 
   return (
