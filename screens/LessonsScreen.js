@@ -63,7 +63,7 @@ export default function LessonsScreen() {
           <View key={module.id} style={styles.themeSection}>
             <View style={styles.themeHeader}>
               <AppText style={styles.themeTitle}>
-                {formatThemeUnitLabel(preferences?.language, module.themeIndex)} - {module.title}
+                {formatThemeUnitLabel(preferences?.language, module.themeIndex)} · {module.title}
               </AppText>
             </View>
 
