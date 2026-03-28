@@ -6,9 +6,61 @@ import AppTextInput from '../../components/AppTextInput';
 import OnboardingProgress from '../../components/OnboardingProgress';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import { PrimaryButton } from '../../components/Button';
+import SelectableOptionButton from '../../components/SelectableOptionButton';
 import { typography, useTheme } from '../../theme';
 import { useApp } from '../../utils/AppContext';
-import { formatOnboardingQuestionLabel, getOnboardingCopy } from '../../utils/localization';
+import {
+  formatOnboardingQuestionLabel,
+  getLocaleKey,
+  getOnboardingCopy,
+} from '../../utils/localization';
+
+const QUESTION_VARIANTS = {
+  en: {
+    experienceAnswer: {
+      title: 'Choose what feels closest to your situation',
+      selectionMode: 'single',
+      options: [
+        'Never invested before',
+        'Looked into it a bit',
+        'Invested before',
+      ],
+    },
+    knowledgeAnswer: {
+      title: 'What already sounds familiar?',
+      selectionMode: 'multi',
+      options: [
+        'Stocks',
+        'ETFs',
+        'Spreading risk',
+        'Long-term investing',
+        'Honestly no idea',
+      ],
+    },
+  },
+  nl: {
+    experienceAnswer: {
+      title: 'Kies wat het dichtst bij jouw situatie ligt',
+      selectionMode: 'single',
+      options: [
+        'Nog nooit geinvesteerd',
+        'Al wat opgezocht',
+        'Al eens geinvesteerd',
+      ],
+    },
+    knowledgeAnswer: {
+      title: 'Wat klinkt jou al bekend?',
+      selectionMode: 'multi',
+      options: [
+        'Aandelen',
+        "ETF's",
+        'Risico spreiden',
+        'Lange termijn investeren',
+        'Geen idee eerlijk gezegd',
+      ],
+    },
+  },
+};
 
 export default function OnboardingQuestionScreen({ navigation, route }) {
   const { question, field, step, total, nextRoute, isLast, returnTo, returnParams, exitToTabs, setHasOnboardedOnComplete } =
@@ -17,12 +69,21 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
-  const [answer, setAnswer] = useState(onboardingContext?.[field] || '');
-  const localizedQuestion = copy.question.questions[field] || question;
+  const locale = getLocaleKey(preferences?.language);
+  const questionVariant = QUESTION_VARIANTS[locale]?.[field] || QUESTION_VARIANTS.en[field] || null;
+  const [answer, setAnswer] = useState(() =>
+    getInitialAnswer(onboardingContext?.[field], questionVariant)
+  );
+  const localizedQuestion = questionVariant?.title || copy.question.questions[field] || question;
   const primaryLabel = isLast ? copy.question.finishButton : copy.question.button;
+  const canContinue = questionVariant
+    ? questionVariant.selectionMode === 'multi'
+      ? answer.length > 0
+      : Boolean(answer)
+    : true;
 
   const handleNext = async () => {
-    const trimmed = answer.trim();
+    const trimmed = serializeAnswer(answer, questionVariant).trim();
     const updates = { [field]: trimmed };
     if (isLast) {
       updates.onboardingComplete = true;
@@ -60,6 +121,19 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
     });
   };
 
+  const handleSelectOption = (optionLabel) => {
+    if (!questionVariant) return;
+    if (questionVariant.selectionMode === 'multi') {
+      setAnswer((current) =>
+        current.includes(optionLabel)
+          ? current.filter((item) => item !== optionLabel)
+          : [...current, optionLabel]
+      );
+      return;
+    }
+    setAnswer(optionLabel);
+  };
+
   return (
     <OnboardingScreen backgroundVariant="bg3" contentContainerStyle={styles.screen}>
       <KeyboardAvoidingView
@@ -85,24 +159,115 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
         <View style={styles.contentBlock}>
           <View style={styles.content}>
             <AppText style={styles.title}>{localizedQuestion}</AppText>
-            <AppTextInput
-              value={answer}
-              onChangeText={setAnswer}
-              placeholder={copy.question.placeholder}
-              placeholderTextColor={colors.text.secondary}
-              multiline
-              style={styles.input}
-            />
+            {questionVariant ? (
+              <View style={styles.optionList}>
+                {questionVariant.options.map((optionLabel) => {
+                  const isSelected =
+                    questionVariant.selectionMode === 'multi'
+                      ? answer.includes(optionLabel)
+                      : answer === optionLabel;
+
+                  return (
+                    <SelectableOptionButton
+                      key={optionLabel}
+                      label={optionLabel}
+                      onPress={() => handleSelectOption(optionLabel)}
+                      state={isSelected ? 'correct' : 'default'}
+                      accessory={
+                        <SelectionIndicator
+                          isSelected={isSelected}
+                          selectionMode={questionVariant.selectionMode}
+                          colors={colors}
+                          components={components}
+                        />
+                      }
+                      style={styles.optionButton}
+                    />
+                  );
+                })}
+              </View>
+            ) : (
+              <AppTextInput
+                value={answer}
+                onChangeText={setAnswer}
+                placeholder={copy.question.placeholder}
+                placeholderTextColor={colors.text.secondary}
+                multiline
+                style={styles.input}
+              />
+            )}
           </View>
           <PrimaryButton
             label={primaryLabel}
             onPress={handleNext}
             style={styles.primaryButton}
+            disabled={!canContinue}
           />
         </View>
       </KeyboardAvoidingView>
     </OnboardingScreen>
   );
+}
+
+function SelectionIndicator({ isSelected, selectionMode, colors, components }) {
+  return (
+    <View
+      style={[
+        indicatorStyles.base,
+        {
+          width: components.sizes.square.sm,
+          height: components.sizes.square.sm,
+          borderRadius: components.radius.pill,
+          borderColor: isSelected
+            ? colors.accent.primary
+            : toRgba(colors.ui.divider, colors.opacity.stroke),
+          backgroundColor: isSelected
+            ? toRgba(colors.accent.primary, colors.opacity.tint)
+            : 'transparent',
+        },
+      ]}
+    >
+      {isSelected ? (
+        (
+          <Ionicons
+            name="checkmark"
+            size={selectionMode === 'multi' ? components.sizes.icon.sm : components.sizes.icon.xs}
+            color={colors.accent.primary}
+          />
+        )
+      ) : null}
+    </View>
+  );
+}
+
+const indicatorStyles = StyleSheet.create({
+  base: {
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
+function getInitialAnswer(value, questionVariant) {
+  const storedValue = typeof value === 'string' ? value.trim() : '';
+  if (!questionVariant) return storedValue;
+  if (questionVariant.selectionMode === 'multi') {
+    if (!storedValue) return [];
+    const tokens = storedValue
+      .split(/,|\n|•/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return questionVariant.options.filter((option) => tokens.includes(option));
+  }
+  return questionVariant.options.includes(storedValue) ? storedValue : '';
+}
+
+function serializeAnswer(value, questionVariant) {
+  if (!questionVariant) return value;
+  if (questionVariant.selectionMode === 'multi') {
+    return questionVariant.options.filter((option) => value.includes(option)).join(', ');
+  }
+  return value;
 }
 
 const toRgba = (hex, alpha) => {
@@ -153,6 +318,13 @@ const createStyles = (colors, components) =>
     title: {
       ...typography.styles.h1,
       color: colors.text.primary,
+    },
+    optionList: {
+      gap: components.layout.spacing.sm,
+    },
+    optionButton: {
+      height: components.sizes.list.minItemHeight,
+      paddingVertical: components.layout.spacing.sm,
     },
     input: {
       ...components.input.container,
