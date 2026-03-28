@@ -236,6 +236,9 @@ const createStyles = (colors, components) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: components.layout.spacing.sm,
+      height: components.layout.spacing.md * 2 + typography.styles.body.lineHeight,
+      minHeight: components.layout.spacing.md * 2 + typography.styles.body.lineHeight,
+      paddingVertical: components.layout.spacing.none,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
@@ -246,7 +249,10 @@ const createStyles = (colors, components) =>
       paddingHorizontal: components.layout.spacing.none,
     },
     eyeButton: {
-      padding: components.layout.spacing.xs,
+      width: components.sizes.square.md,
+      height: components.sizes.square.md,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     hint: {
       ...components.input.helper,
