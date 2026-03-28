@@ -56,7 +56,7 @@ const QUESTION_VARIANTS = {
         "ETF's",
         'Risico spreiden',
         'Lange termijn investeren',
-        'Geen idee eerlijk gezegd',
+        'Geen van deze bovenste',
       ],
     },
   },
