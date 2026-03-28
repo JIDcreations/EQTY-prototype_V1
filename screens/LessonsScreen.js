@@ -97,7 +97,13 @@ export default function LessonsScreen() {
                               lesson.lessonIndexInTheme
                             )}
                           </AppText>
-                          <AppText style={styles.lessonTitle} numberOfLines={1}>
+                          <AppText
+                            style={[
+                              styles.lessonTitle,
+                              status === 'upcoming' && styles.lessonTitleUpcoming,
+                            ]}
+                            numberOfLines={1}
+                          >
                             {lesson.title}
                           </AppText>
                         </View>
@@ -106,15 +112,16 @@ export default function LessonsScreen() {
                           {status === 'completed' ? (
                             <Ionicons
                               name="checkmark-circle"
-                              size={components.sizes.icon.md}
+                              size={components.sizes.icon.lg}
                               color={colors.accent.primary}
                             />
-                          ) : null}
-                          <Ionicons
-                            name="chevron-forward"
-                            size={components.sizes.icon.sm}
-                            color={colors.text.secondary}
-                          />
+                          ) : (
+                            <Ionicons
+                              name="chevron-forward"
+                              size={components.sizes.icon.sm}
+                              color={colors.text.secondary}
+                            />
+                          )}
                         </View>
                       </View>
                     )}
@@ -179,9 +186,10 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     lessonRowCurrent: {
       borderColor: colors.accent.primary,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     },
     lessonRowCompleted: {
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
     },
     lessonRowPressed: {
       opacity: colors.opacity.emphasis,
@@ -208,5 +216,8 @@ const createStyles = (colors, components, tabBarHeight) =>
       ...typography.styles.bodyStrong,
       color: colors.text.primary,
       flex: 1,
+    },
+    lessonTitleUpcoming: {
+      color: colors.text.secondary,
     },
   });
