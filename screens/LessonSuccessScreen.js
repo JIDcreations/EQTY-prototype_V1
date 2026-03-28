@@ -118,6 +118,7 @@ export default function LessonSuccessScreen() {
 
   const handleReturnHome = () => {
     const parent = navigation.getParent();
+    navigation.popToTop();
     if (parent) {
       parent.navigate('Home');
     } else {
