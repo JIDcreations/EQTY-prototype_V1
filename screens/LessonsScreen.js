@@ -54,7 +54,7 @@ export default function LessonsScreen() {
     >
       <TopTabHeader
         title="Lesoverzicht"
-        subtitle="Bouw de mindset van het investeringsproces"
+        subtitle="Bekijk alle lessen per thema"
         onPressProfile={() => navigation.navigate('Profile')}
       />
 
