@@ -304,7 +304,7 @@ const LESSON_STEP_COPY = {
         "By going through the process first, Lars doesn't decide on instinct, but on insight. That leads to more structure and a more predictable outcome.",
       feedbackIncorrectTitle: 'Not the best choice',
       feedbackIncorrectBody:
-        'Without preparation, Lars invests on instinct. That makes the outcome unpredictable and hard to control.\n\nBy following the process first, he builds a well-informed decision.',
+        'Without preparation, Lars invests on instinct. That makes the outcome unpredictable and hard to control.',
       steps: [
         { id: 'goal', label: 'Goal' },
         { id: 'risk', label: 'Risk' },
@@ -530,7 +530,7 @@ const LESSON_STEP_COPY = {
         'Door het proces eerst te doorlopen, neemt Lars geen beslissing op gevoel.\nDit zorgt voor meer structuur en een beter voorspelbaar resultaat.',
       feedbackIncorrectTitle: 'Niet de beste keuze',
       feedbackIncorrectBody:
-        'Zonder voorbereiding investeert Lars op gevoel. Dat maakt het resultaat onvoorspelbaar en moeilijk te controleren.\n\nDoor eerst het proces te volgen, bouwt hij een onderbouwde beslissing op.',
+        'Zonder voorbereiding investeert Lars op gevoel. Dat maakt het resultaat onvoorspelbaar en moeilijk te controleren.',
       steps: [
         { id: 'goal', label: 'Doel' },
         { id: 'risk', label: 'Risico' },
