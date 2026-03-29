@@ -47,7 +47,7 @@ export const lessonContentNl = {
         ],
       },
       scenario: {
-        title: 'Plan vs geen plan',
+        title: 'Handelen of eerst het proces?',
         intro: 'Vergelijk een gestructureerd proces met een reactieve aanpak terwijl het zich ontvouwt.',
         variants: {
           new: {

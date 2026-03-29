@@ -1832,7 +1832,7 @@ function IntroScenarioStep({ onNext, copy }) {
           </AppText>
         </Card>
 
-        <AppText style={styles.narrativePrompt}>Wat doet Lars?</AppText>
+        <AppText style={styles.narrativePrompt}>Wat zou jij doen in deze situatie?</AppText>
       </View>
 
       {/* Choice cards + connector + comparison — tightly grouped */}
@@ -1879,6 +1879,30 @@ function IntroScenarioStep({ onNext, copy }) {
 
         {showComparison && (
           <>
+            {/* Feedback — appears immediately after selection, in viewport */}
+            <Animated.View
+              entering={FadeInDown.duration(300)}
+              style={styles.scenarioRevealCard}
+            >
+              <View style={styles.scenarioRevealHeader}>
+                <Ionicons
+                  name={selected === 'plan' ? 'checkmark-circle' : 'information-circle'}
+                  size={18}
+                  color={selected === 'plan' ? colors.accent.primary : colors.text.secondary}
+                />
+                <AppText style={[styles.scenarioRevealLabel, selected === 'plan' && styles.scenarioRevealLabelKey]}>
+                  {selected === 'plan'
+                    ? copy.introScenario.feedbackCorrectTitle
+                    : copy.introScenario.feedbackIncorrectTitle}
+                </AppText>
+              </View>
+              <AppText style={styles.scenarioRevealText}>
+                {selected === 'plan'
+                  ? copy.introScenario.feedbackCorrectBody
+                  : copy.introScenario.feedbackIncorrectBody}
+              </AppText>
+            </Animated.View>
+
             {/* Dotted connector lines — visually links each choice to its outcome */}
             <View style={styles.narrativeConnectorRow}>
               <View style={styles.narrativeConnectorCol}>
