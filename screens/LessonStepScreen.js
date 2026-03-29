@@ -88,7 +88,7 @@ const L1_ALLOC_R = 33;
 // Slice start angles: -90°, 30°, 150°. Each sweeps 120°.
 const INTRO_VISUALIZATION_TITLE = '6 stappen vóór beleggen';
 const INTRO_VISUALIZATION_SUBTITLE =
-  'Het proces vóór je een belegging uitvoert.';
+  'Klik op een stap en bekijk de animatie met uitleg.';
 const INTRO_VISUALIZATION_STEPS = [
   {
     id: 'goal',
@@ -1079,6 +1079,7 @@ function ProcessGridFlipCard({
     });
   }, [flipProgress, isFlipped]);
 
+
   useEffect(() => {
     if (!isActive) {
       activePulse.value = 0;
@@ -1134,7 +1135,7 @@ function ProcessGridFlipCard({
   };
 
   const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
-  const frontCtaLabel = isLocked ? 'Bekijk eerst de stappen hierboven' : 'Bekijk';
+  const frontCtaLabel = isLocked ? 'Bekijk eerst de stappen hierboven' : 'Ontdek stap';
   const backCtaLabel = 'Terug';
 
   const renderStatusIndicator = () => {
@@ -1201,9 +1202,16 @@ function ProcessGridFlipCard({
           >
             <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
           </View>
-          <AppText style={[styles.l1TapHint, isLocked && styles.l1TapHintLocked]}>
-            {frontCtaLabel}
-          </AppText>
+          {isLocked ? (
+            <AppText style={[styles.l1TapHint, styles.l1TapHintLocked]}>
+              {frontCtaLabel}
+            </AppText>
+          ) : (
+            <View style={styles.l1CtaPill}>
+              <AppText style={styles.l1CtaPillLabel}>{frontCtaLabel}</AppText>
+              <AppText style={styles.l1CtaPillArrow}>{'→'}</AppText>
+            </View>
+          )}
         </Animated.View>
 
         <Animated.View
@@ -1223,7 +1231,10 @@ function ProcessGridFlipCard({
             {renderStatusIndicator()}
           </View>
           <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
-          <AppText style={styles.l1TapHint}>{backCtaLabel}</AppText>
+          <View style={styles.l1CtaPill}>
+            <AppText style={styles.l1CtaPillArrow}>{'←'}</AppText>
+            <AppText style={styles.l1CtaPillLabel}>{backCtaLabel}</AppText>
+          </View>
         </Animated.View>
       </View>
     </Pressable>
@@ -5401,6 +5412,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   // ─── Lesson 1 visualization: grid layout ────────────────────────────────────
   l1VisBody: {
     gap: components.layout.spacing.lg,
+    paddingTop: components.layout.spacing.xxl,
   },
   l1VisGrid: {
     width: '100%',
@@ -5526,6 +5538,19 @@ const createStyles = (colors, components, mode = 'dark') =>
     justifyContent: 'center',
     overflow: 'hidden',
     minHeight: components.sizes.chart.md,
+  },
+  l1CtaPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  l1CtaPillLabel: {
+    ...typography.styles.small,
+    color: colors.accent.primary,
+  },
+  l1CtaPillArrow: {
+    ...typography.styles.small,
+    color: colors.accent.primary,
   },
   l1TapHint: {
     ...typography.styles.meta,
