@@ -88,7 +88,7 @@ const L1_ALLOC_R = 33;
 // Slice start angles: -90°, 30°, 150°. Each sweeps 120°.
 const INTRO_VISUALIZATION_TITLE = '6 stappen vóór beleggen';
 const INTRO_VISUALIZATION_SUBTITLE =
-  'Klik op een stap en bekijk de animatie met uitleg.';
+  'Klik op een stap voor de uitleg van een animatie.';
 const INTRO_VISUALIZATION_STEPS = [
   {
     id: 'goal',
