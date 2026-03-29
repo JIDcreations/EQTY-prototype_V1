@@ -2447,15 +2447,12 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
 }
 
 function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary, copy }) {
-  const { styles, colors, components, mode } = useLessonStepStyles();
+  const { styles, colors, components } = useLessonStepStyles();
   const { items = [], correctOrder = [] } = exercise;
-  const lastStepId = correctOrder[correctOrder.length - 1];
 
-  const [placements, setPlacements] = useState(() => {
-    const initial = items.reduce((acc, item) => ({ ...acc, [item.id]: null }), {});
-    if (lastStepId) initial[lastStepId] = items.length - 1;
-    return initial;
-  });
+  const [placements, setPlacements] = useState(() =>
+    items.reduce((acc, item) => ({ ...acc, [item.id]: null }), {})
+  );
   const slotHighlight = useSharedValue(0);
   const shakeX = useSharedValue(0);
 
@@ -2510,7 +2507,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
   };
 
   const handleRemove = (id) => {
-    if (id === lastStepId) return;
     setPlacements((prev) => ({ ...prev, [id]: null }));
   };
 
@@ -2534,7 +2530,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
         <View style={[styles.exerciseSection, styles.introExercisePrimarySection]}>
           <View style={styles.introSlotStack}>
             {slots.map((item, index) => {
-              const isLocked = item?.id === lastStepId;
               const isNextEmpty = !item && slots.slice(0, index).every(Boolean);
               const isWrong = wrongSlots[index];
               return (
@@ -2543,13 +2538,12 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                     style={[
                       styles.introSlot,
                       item ? styles.introSlotFilled : styles.introSlotEmpty,
-                      isLocked && styles.introSlotLocked,
                       isNextEmpty && styles.introSlotNext,
                       isWrong && styles.introSlotWrong,
                       isCorrect && item && styles.introSlotCorrect,
                     ]}
                     onPress={() => handleRemove(item?.id)}
-                    disabled={isLocked || !item}
+                    disabled={!item}
                   >
                     {/* Highlight overlay on next slot while a card is held */}
                     {isNextEmpty ? (
@@ -2565,29 +2559,20 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                         styles.introSlotBadge,
                         isNextEmpty && styles.introSlotBadgeNext,
                         item && styles.introSlotBadgeFilled,
-                        isLocked && styles.introSlotBadgeLocked,
                         isWrong && styles.introSlotBadgeWrong,
                         isCorrect && item && styles.introSlotBadgeCorrect,
                       ]}
                     >
-                      {isLocked && !isCorrect ? (
-                        <Ionicons
-                          name="lock-closed"
-                          size={9}
-                          color={mode === 'light' ? colors.text.onAccent : colors.text.primary}
-                        />
-                      ) : (
-                        <AppText
-                          style={[
-                            styles.introSlotBadgeText,
-                            isNextEmpty && styles.introSlotBadgeTextNext,
-                            item && styles.introSlotBadgeTextFilled,
-                            isCorrect && item && styles.introSlotBadgeTextCorrect,
-                          ]}
-                        >
-                          {index + 1}
-                        </AppText>
-                      )}
+                      <AppText
+                        style={[
+                          styles.introSlotBadgeText,
+                          isNextEmpty && styles.introSlotBadgeTextNext,
+                          item && styles.introSlotBadgeTextFilled,
+                          isCorrect && item && styles.introSlotBadgeTextCorrect,
+                        ]}
+                      >
+                        {index + 1}
+                      </AppText>
                     </View>
 
                     {/* Label or placeholder */}
@@ -2597,7 +2582,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                           style={[
                             styles.introSlotLabel,
                             isWrong && styles.introSlotLabelWrong,
-                            isLocked && styles.introSlotLabelLocked,
                             isCorrect && item && styles.introSlotLabelCorrect,
                           ]}
                         >
@@ -2607,9 +2591,9 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                           <Ionicons name="close" size={14} color={colors.text.primary} />
                         ) : isCorrect && item ? (
                           <Ionicons name="checkmark-circle" size={15} color={colors.accent.primary} />
-                        ) : !isLocked ? (
+                        ) : (
                           <Ionicons name="close" size={13} color={toRgba(colors.text.secondary, 0.45)} />
-                        ) : null}
+                        )}
                       </Animated.View>
                     ) : (
                       <AppText
