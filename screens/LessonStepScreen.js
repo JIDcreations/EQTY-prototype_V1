@@ -1007,9 +1007,11 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
   const isGuidedSequence = lessonId === 'lesson_0';
   const steps = isGuidedSequence ? INTRO_VISUALIZATION_STEPS : copy.introVisualization.steps;
   const [completedSteps, setCompletedSteps] = useState(() => steps.map(() => false));
+  const [focusedStepIndex, setFocusedStepIndex] = useState(null);
 
   useEffect(() => {
     setCompletedSteps(steps.map(() => false));
+    setFocusedStepIndex(null);
   }, [steps.length, isGuidedSequence]);
 
   const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
@@ -1024,6 +1026,15 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
       next[index] = true;
       return next;
     });
+  };
+
+  const handleCardFocus = (index) => {
+    if (!isGuidedSequence) return;
+    const nextFocusedIndex = focusedStepIndex === index ? null : index;
+    setFocusedStepIndex(nextFocusedIndex);
+    if (nextFocusedIndex !== null && !completedSteps[index]) {
+      handleStepCompleted(index);
+    }
   };
 
   return (
@@ -1044,6 +1055,8 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
               isActive={isActive}
               isCompleted={isCompleted}
               isLocked={isLocked}
+              controlledFlipped={isGuidedSequence ? focusedStepIndex === index : undefined}
+              onToggleFlipped={isGuidedSequence ? () => handleCardFocus(index) : undefined}
               onStepCompleted={() => handleStepCompleted(index)}
             />
           );
@@ -1062,22 +1075,38 @@ function ProcessGridFlipCard({
   isActive,
   isCompleted,
   isLocked,
+  controlledFlipped,
+  onToggleFlipped,
   onStepCompleted,
 }) {
-  const [isFlipped, setIsFlipped] = useState(false);
+  const [uncontrolledFlipped, setUncontrolledFlipped] = useState(false);
+  const isControlled = typeof controlledFlipped === 'boolean';
+  const isFlipped = isControlled ? controlledFlipped : uncontrolledFlipped;
   const flipProgress = useSharedValue(0);
   const activePulse = useSharedValue(0);
+  const isSubtleCompleted = isCompleted && !isFlipped;
 
   useEffect(() => {
-    if (isLocked && isFlipped) setIsFlipped(false);
-  }, [isLocked, isFlipped]);
+    if (isLocked && uncontrolledFlipped) setUncontrolledFlipped(false);
+  }, [isLocked, uncontrolledFlipped]);
 
   useEffect(() => {
+    if (isControlled) {
+      if (isFlipped) {
+        flipProgress.value = withTiming(1, {
+          duration: 520,
+          easing: Easing.out(Easing.cubic),
+        });
+      } else {
+        flipProgress.value = 0;
+      }
+      return;
+    }
     flipProgress.value = withTiming(isFlipped ? 1 : 0, {
       duration: 520,
       easing: Easing.out(Easing.cubic),
     });
-  }, [flipProgress, isFlipped]);
+  }, [flipProgress, isControlled, isFlipped]);
 
 
   useEffect(() => {
@@ -1129,13 +1158,18 @@ function ProcessGridFlipCard({
 
   const handlePress = () => {
     if (isLocked) return;
-    const nextFlipped = !isFlipped;
-    setIsFlipped(nextFlipped);
+    if (isControlled) {
+      onToggleFlipped?.(!isFlipped);
+      return;
+    }
+    const nextFlipped = !uncontrolledFlipped;
+    setUncontrolledFlipped(nextFlipped);
     if (nextFlipped && !isCompleted) onStepCompleted?.();
   };
 
   const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
   const frontCtaLabel = isLocked ? 'Bekijk eerst de stappen hierboven' : 'Ontdek stap';
+  const completedCtaLabel = 'Bekijk opnieuw';
   const backCtaLabel = 'Terug';
 
   const renderStatusIndicator = () => {
@@ -1181,13 +1215,19 @@ function ProcessGridFlipCard({
             isActive && styles.l1PageActive,
             isCompleted && styles.l1PageCompleted,
             isLocked && styles.l1PageLocked,
+            isSubtleCompleted && styles.l1PageSubtle,
             frontStyle,
           ]}
         >
           <View style={styles.l1CardHeaderRow}>
             <View style={styles.l1StepMeta}>
-              <AppText style={styles.l1StepKicker}>{stepCode}</AppText>
-              <AppText style={styles.l1CardLabel} numberOfLines={2}>
+              <AppText style={[styles.l1StepKicker, isSubtleCompleted && styles.l1StepKickerSubtle]}>
+                {stepCode}
+              </AppText>
+              <AppText
+                style={[styles.l1CardLabel, isSubtleCompleted && styles.l1CardLabelSubtle]}
+                numberOfLines={2}
+              >
                 {step.label}
               </AppText>
             </View>
@@ -1198,13 +1238,19 @@ function ProcessGridFlipCard({
               styles.l1AnimStateWrap,
               isCompleted && styles.l1AnimStateCompleted,
               isLocked && styles.l1AnimStateLocked,
+              isSubtleCompleted && styles.l1AnimStateSubtle,
             ]}
           >
             <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
           </View>
-          {isLocked ? (
-            <AppText style={[styles.l1TapHint, styles.l1TapHintLocked]}>
-              {frontCtaLabel}
+          {isLocked || isSubtleCompleted ? (
+            <AppText
+              style={[
+                styles.l1TapHint,
+                isLocked ? styles.l1TapHintLocked : styles.l1TapHintSubtle,
+              ]}
+            >
+              {isLocked ? frontCtaLabel : completedCtaLabel}
             </AppText>
           ) : (
             <View style={styles.l1CtaPill}>
@@ -5460,6 +5506,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   l1PageCompleted: {
     backgroundColor: toRgba(colors.background.surfaceActive, 0.92),
   },
+  l1PageSubtle: {
+    borderColor: toRgba(colors.ui.divider, 0.12),
+    backgroundColor: toRgba(colors.background.surface, 0.94),
+  },
   l1PageLocked: {
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surface,
@@ -5481,9 +5531,15 @@ const createStyles = (colors, components, mode = 'dark') =>
     ...typography.styles.stepLabel,
     color: colors.text.secondary,
   },
+  l1StepKickerSubtle: {
+    color: toRgba(colors.text.secondary, 0.78),
+  },
   l1CardLabel: {
     ...typography.styles.bodyStrong,
     color: colors.text.primary,
+  },
+  l1CardLabelSubtle: {
+    color: toRgba(colors.text.primary, 0.82),
   },
   l1StatusBadge: {
     width: components.sizes.square.sm,
@@ -5528,6 +5584,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   l1AnimStateCompleted: {
     opacity: 0.86,
   },
+  l1AnimStateSubtle: {
+    opacity: 0.48,
+    transform: [{ scale: 0.94 }],
+  },
   l1AnimStateLocked: {
     opacity: 0.34,
   },
@@ -5558,6 +5618,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   l1TapHintLocked: {
     color: toRgba(colors.text.secondary, 0.92),
+  },
+  l1TapHintSubtle: {
+    color: toRgba(colors.text.secondary, 0.68),
   },
   l1BackLabel: {
     ...typography.styles.bodyStrong,
