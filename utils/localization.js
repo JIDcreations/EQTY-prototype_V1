@@ -301,10 +301,10 @@ const LESSON_STEP_COPY = {
         'When execution happens too early, the outcome becomes unpredictable.',
       feedbackCorrectTitle: 'Good choice',
       feedbackCorrectBody:
-        "By going through the process first, Lars doesn't decide on instinct — but on insight.\n\nThat leads to more structure and a more predictable outcome.",
+        "By going through the process first, Lars doesn't decide on instinct, but on insight. That leads to more structure and a more predictable outcome.",
       feedbackIncorrectTitle: 'Not the best choice',
       feedbackIncorrectBody:
-        'Without preparation, Lars invests on instinct.\nThat makes the outcome unpredictable and hard to control.\n\nBy following the process first, he builds a well-informed decision.',
+        'Without preparation, Lars invests on instinct. That makes the outcome unpredictable and hard to control.\n\nBy following the process first, he builds a well-informed decision.',
       steps: [
         { id: 'goal', label: 'Goal' },
         { id: 'risk', label: 'Risk' },
@@ -517,7 +517,7 @@ const LESSON_STEP_COPY = {
       reactiveLabel: 'Zonder stappenplan',
       reactiveSubline: 'Uitvoeren\nzonder plan.',
       headerHelper:
-        'Zie het verschil tussen direct investeren zonder plan en investeren als een doordacht proces.',
+        'Zie het verschil tussen investeren zonder plan en investeren als een doordacht proces.',
       progressLabel: 'Procesvoortgang',
       sliderHelper:
         'Schuif om te zien wat er gebeurt wanneer uitvoering te vroeg gebeurt.',
@@ -530,7 +530,7 @@ const LESSON_STEP_COPY = {
         'Door het proces eerst te doorlopen, neemt Lars geen beslissing op gevoel, maar op basis van inzicht.\n\nDat zorgt voor meer structuur en een beter voorspelbaar resultaat.',
       feedbackIncorrectTitle: 'Niet de beste keuze',
       feedbackIncorrectBody:
-        'Zonder voorbereiding investeert Lars op gevoel.\nDat maakt het resultaat onvoorspelbaar en moeilijk te controleren.\n\nDoor eerst het proces te volgen, bouwt hij een onderbouwde beslissing op.',
+        'Zonder voorbereiding investeert Lars op gevoel. Dat maakt het resultaat onvoorspelbaar en moeilijk te controleren.\n\nDoor eerst het proces te volgen, bouwt hij een onderbouwde beslissing op.',
       steps: [
         { id: 'goal', label: 'Doel' },
         { id: 'risk', label: 'Risico' },
