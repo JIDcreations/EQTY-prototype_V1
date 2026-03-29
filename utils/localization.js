@@ -527,7 +527,7 @@ const LESSON_STEP_COPY = {
         'Wanneer uitvoering te vroeg gebeurt, wordt het resultaat onvoorspelbaar.',
       feedbackCorrectTitle: 'Goede keuze',
       feedbackCorrectBody:
-        'Door het proces eerst te doorlopen, neemt Lars geen beslissing op gevoel, maar op basis van inzicht.\n\nDat zorgt voor meer structuur en een beter voorspelbaar resultaat.',
+        'Door het proces eerst te doorlopen, neemt Lars geen beslissing op gevoel.\nDit zorgt voor meer structuur en een beter voorspelbaar resultaat.',
       feedbackIncorrectTitle: 'Niet de beste keuze',
       feedbackIncorrectBody:
         'Zonder voorbereiding investeert Lars op gevoel. Dat maakt het resultaat onvoorspelbaar en moeilijk te controleren.\n\nDoor eerst het proces te volgen, bouwt hij een onderbouwde beslissing op.',
