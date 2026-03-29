@@ -132,6 +132,14 @@ const INTRO_VISUALIZATION_STEPS = [
       'Hier kies je een broker of bank en plaats je de order om je belegging daadwerkelijk aan te kopen.',
   },
 ];
+const INTRO_PROCESS_GLOSSARY_TERM_IDS = [
+  'eqty_goal_definition',
+  'eqty_risk_analysis',
+  'eqty_capital_allocation',
+  'eqty_investment_strategy',
+  'eqty_investment_vehicle',
+  'eqty_execution',
+];
 
 
 const glossaryTermIndex = glossaryTerms.reduce((acc, term) => {
@@ -199,10 +207,10 @@ export default function LessonStepScreen() {
     () => collectGlossaryTermIds(content || {}),
     [content]
   );
-  const lessonTerms = useMemo(
-    () => lessonTermIds.map((termId) => glossaryTermIndex[termId]).filter(Boolean),
-    [lessonTermIds]
-  );
+  const lessonTerms = useMemo(() => {
+    const termIds = lessonId === 'lesson_0' ? INTRO_PROCESS_GLOSSARY_TERM_IDS : lessonTermIds;
+    return termIds.map((termId) => glossaryTermIndex[termId]).filter(Boolean);
+  }, [lessonId, lessonTermIds]);
   const isLessonSearchActive = lessonTermQuery.trim().length > 0;
   const globalSearchResults = useMemo(() => {
     const query = lessonTermQuery.trim().toLowerCase();
@@ -363,6 +371,7 @@ export default function LessonStepScreen() {
           lessonId={lessonId}
           onNext={handleNext}
           onPressTerm={handleTermPress}
+          onOpenLessonGlossary={() => setLessonGlossaryOpen(true)}
           copy={copy}
         />
       )}
@@ -2276,7 +2285,7 @@ function ScenarioStep({ content, userContext, onNext, onPressTerm, copy }) {
   );
 }
 
-function ExerciseStep({ content, lessonId, onNext, onPressTerm, copy }) {
+function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlossary, copy }) {
   const { styles } = useLessonStepStyles();
   const exercise = content?.steps?.exercise;
 
@@ -2297,6 +2306,7 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, copy }) {
         exercise={exercise}
         onNext={onNext}
         onPressTerm={onPressTerm}
+        onOpenLessonGlossary={onOpenLessonGlossary}
         copy={copy}
       />
     );
@@ -2436,7 +2446,7 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
   );
 }
 
-function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
+function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary, copy }) {
   const { styles, colors, components, mode } = useLessonStepStyles();
   const { items = [], correctOrder = [] } = exercise;
   const lastStepId = correctOrder[correctOrder.length - 1];
@@ -2446,9 +2456,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
     if (lastStepId) initial[lastStepId] = items.length - 1;
     return initial;
   });
-  const [hintActive, setHintActive] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-
   const slotHighlight = useSharedValue(0);
   const shakeX = useSharedValue(0);
 
@@ -2507,12 +2514,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
     setPlacements((prev) => ({ ...prev, [id]: null }));
   };
 
-  const handleHint = () => {
-    setHintActive(true);
-    setShowHint(true);
-    setTimeout(() => setHintActive(false), 1500);
-  };
-
   return (
     <View style={[styles.stepBody, styles.exerciseBody]}>
       <View style={styles.exerciseContent}>
@@ -2546,7 +2547,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
                       isNextEmpty && styles.introSlotNext,
                       isWrong && styles.introSlotWrong,
                       isCorrect && item && styles.introSlotCorrect,
-                      hintActive && index === 0 && !item && styles.introSlotHint,
                     ]}
                     onPress={() => handleRemove(item?.id)}
                     disabled={isLocked || !item}
@@ -2652,8 +2652,8 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
       <View style={[styles.exerciseFooter, styles.introExerciseFooter]}>
         <View style={styles.exerciseActionRow}>
           <SecondaryButton
-            label={copy.labels.needHint}
-            onPress={handleHint}
+            label={copy.labels.viewTerms}
+            onPress={onOpenLessonGlossary}
             style={styles.exerciseHintButton}
           />
           <PrimaryButton
@@ -2664,17 +2664,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, copy }) {
           />
         </View>
       </View>
-
-      <BottomSheet
-        visible={showHint}
-        onClose={() => setShowHint(false)}
-        title={copy.labels.hint}
-        scrimOpacity={0}
-      >
-        <AppText style={styles.exerciseHintBody}>
-          {copy.messages.hintBody}
-        </AppText>
-      </BottomSheet>
     </View>
   );
 }
