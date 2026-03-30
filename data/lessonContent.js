@@ -101,7 +101,7 @@ export const lessonContent = {
       reflection: {
         title: 'Your takeaway',
         intro: 'Capture the shift in how you think about execution.',
-        question: 'What changed in how you think about execution after this lesson?',
+        question: "If there's one thing you take away from this lesson, what is it?",
         placeholder: 'Example: I see why execution should come last.',
       },
       summary: {

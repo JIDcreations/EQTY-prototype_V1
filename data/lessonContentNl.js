@@ -99,7 +99,7 @@ export const lessonContentNl = {
         },
       },
       reflection: {
-        question: 'Wat heb je geleerd uit deze les?',
+        question: 'Als er één ding is dat je geleerd hebt uit deze les, wat is het?',
         placeholder: 'Schrijf hier je antwoord...',
       },
       summary: {

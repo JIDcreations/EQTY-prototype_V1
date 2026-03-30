@@ -3265,8 +3265,8 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
     {
       id: 'process',
       label: isDutch
-        ? 'Terug naar stap één – wat is het doel?'
-        : 'Go back to step one: what was the goal?',
+        ? 'Je oorspronkelijke doel herbekijken'
+        : 'Revisit your original goal',
       reveal: isDutch
         ? 'Dat is wat het proces zegt. Zonder doel is elke vervolgbeslissing willekeurig.'
         : 'This is what the process says. Without a goal, every next decision is arbitrary. Reconsider the goal first, then decide.',
