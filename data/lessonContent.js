@@ -183,7 +183,37 @@ export const lessonContent = {
         visualHint: 'Goals turn noise into direction.',
       },
       visualization: {
-        title: 'Goal clarity drives choices',
+        title: 'Examples of investment goals',
+        cards: [
+          {
+            id: 'house',
+            label: 'House',
+            question: 'A home as a goal',
+            detail:
+              'Investing with a goal like a home gives direction to how much you need and by when.',
+          },
+          {
+            id: 'car',
+            label: 'Car',
+            question: 'Plan for a later purchase',
+            detail:
+              'A concrete goal helps you align decisions with a purchase you want to make later.',
+          },
+          {
+            id: 'travel',
+            label: 'Travel',
+            question: 'Shorter goals still count',
+            detail:
+              'Smaller or shorter-term goals can also be a reason to save or invest.',
+          },
+          {
+            id: 'retirement',
+            label: 'Retirement',
+            question: 'Long-term goals need patience',
+            detail:
+              'Long-term goals often need a different approach and more patience.',
+          },
+        ],
         segments: [
           {
             id: 'segment_1',

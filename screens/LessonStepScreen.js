@@ -620,8 +620,15 @@ function DropdownConceptStep({ content, lessonId, onNext, copy }) {
   );
 }
 
-function IntroVisualizationStep({ onNext, copy, lessonId }) {
-  return <Lesson1VisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
+function IntroVisualizationStep({ content, onNext, copy, lessonId }) {
+  return (
+    <Lesson1VisualizationStep
+      content={content}
+      onNext={onNext}
+      copy={copy}
+      lessonId={lessonId}
+    />
+  );
 }
 
 function JourneyFlipCard({ step, index, copy, styles, colors, components }) {
@@ -1005,10 +1012,16 @@ function ExecutionStepAnimation({ styles }) {
 
 // ─── Lesson 1: Process Visualization Grid ─────────────────────────────────────
 
-function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
+function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
   const { styles, colors } = useLessonStepStyles();
-  const isGuidedSequence = lessonId === 'lesson_0';
-  const steps = isGuidedSequence ? INTRO_VISUALIZATION_STEPS : copy.introVisualization.steps;
+  const isProcessSequence = lessonId === 'lesson_0';
+  const isGoalSequence = lessonId === 'lesson_1';
+  const isGuidedSequence = isProcessSequence || isGoalSequence;
+  const steps = isProcessSequence
+    ? INTRO_VISUALIZATION_STEPS
+    : isGoalSequence
+      ? content?.steps?.visualization?.cards || []
+      : copy.introVisualization.steps;
   const [completedSteps, setCompletedSteps] = useState(() => steps.map(() => false));
   const [focusedStepIndex, setFocusedStepIndex] = useState(null);
 
@@ -1062,7 +1075,11 @@ function Lesson1VisualizationStep({ onNext, copy, lessonId }) {
               onToggleFlipped={isGuidedSequence ? () => handleCardFocus(index) : undefined}
               onStepCompleted={() => handleStepCompleted(index)}
               renderAnimation={() => (
-                <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                isProcessSequence ? (
+                  <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                ) : (
+                  <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                )
               )}
             />
           );
@@ -1090,6 +1107,162 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
     default:
       return null;
   }
+}
+
+function GoalExampleStepAnimation({ stepId, styles, colors }) {
+  switch (stepId) {
+    case 'house':
+      return <HouseGoalAnim styles={styles} colors={colors} />;
+    case 'car':
+      return <CarGoalAnim styles={styles} colors={colors} />;
+    case 'travel':
+      return <TravelGoalAnim styles={styles} colors={colors} />;
+    case 'retirement':
+      return <RetirementGoalAnim styles={styles} colors={colors} />;
+    default:
+      return null;
+  }
+}
+
+function HouseGoalAnim({ styles, colors }) {
+  const pulse = useSharedValue(0);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
+  }, [pulse]);
+
+  const windowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pulse.value, [0, 1], [0.35, 1]),
+    transform: [{ scale: interpolate(pulse.value, [0, 1], [0.92, 1.06]) }],
+  }));
+
+  const haloStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pulse.value, [0, 1], [0.18, 0.42]),
+    transform: [{ scale: interpolate(pulse.value, [0, 1], [0.92, 1.1]) }],
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Animated.View style={[styles.goalHouseHalo, haloStyle]} />
+      <View style={styles.goalHouseRoof} />
+      <View style={styles.goalHouseBody}>
+        <Animated.View style={[styles.goalHouseWindow, windowStyle]} />
+        <View style={styles.goalHouseDoor} />
+      </View>
+      <View style={styles.goalHouseBase} />
+    </View>
+  );
+}
+
+function CarGoalAnim({ styles, colors }) {
+  const drive = useSharedValue(0);
+
+  useEffect(() => {
+    drive.value = withRepeat(
+      withTiming(1, { duration: 2400, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true
+    );
+  }, [drive]);
+
+  const bodyStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(drive.value, [0, 1], [-18, 18]) }],
+  }));
+
+  const wheelStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${interpolate(drive.value, [0, 1], [0, 180])}deg` }],
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.goalRoad} />
+      <Animated.View style={[styles.goalCarWrap, bodyStyle]}>
+        <View style={styles.goalCarRoof} />
+        <View style={styles.goalCarBody} />
+        <Animated.View style={[styles.goalCarWheel, styles.goalCarWheelLeft, wheelStyle]} />
+        <Animated.View style={[styles.goalCarWheel, styles.goalCarWheelRight, wheelStyle]} />
+      </Animated.View>
+    </View>
+  );
+}
+
+function TravelGoalAnim({ styles, colors }) {
+  const travel = useSharedValue(0);
+
+  useEffect(() => {
+    travel.value = withRepeat(
+      withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
+  }, [travel]);
+
+  const planeStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(travel.value, [0, 1], [-34, 34]) },
+      { translateY: interpolate(travel.value, [0, 0.5, 1], [10, -12, 10]) },
+      { rotate: `${interpolate(travel.value, [0, 1], [-12, 12])}deg` },
+    ],
+  }));
+
+  const stampStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(travel.value, [0, 0.5, 1], [0.2, 0.95, 0.2]),
+    transform: [{ scale: interpolate(travel.value, [0, 0.5, 1], [0.82, 1, 0.82]) }],
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.goalTravelSun} />
+      <View style={styles.goalTravelPath} />
+      <Animated.View style={[styles.goalTravelPlane, planeStyle]} />
+      <Animated.View style={[styles.goalTravelStamp, stampStyle]} />
+    </View>
+  );
+}
+
+function RetirementGoalAnim({ styles, colors }) {
+  const grow = useSharedValue(0);
+
+  useEffect(() => {
+    grow.value = withRepeat(
+      withTiming(1, { duration: 2800, easing: Easing.inOut(Easing.quad) }),
+      -1,
+      true
+    );
+  }, [grow]);
+
+  const leftBarStyle = useAnimatedStyle(() => ({
+    height: interpolate(grow.value, [0, 1], [24, 42]),
+  }));
+
+  const centerBarStyle = useAnimatedStyle(() => ({
+    height: interpolate(grow.value, [0, 1], [34, 58]),
+  }));
+
+  const rightBarStyle = useAnimatedStyle(() => ({
+    height: interpolate(grow.value, [0, 1], [44, 74]),
+  }));
+
+  const sunStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: interpolate(grow.value, [0, 1], [10, -10]) }],
+    opacity: interpolate(grow.value, [0, 1], [0.45, 0.95]),
+  }));
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <View style={styles.goalRetireHorizon} />
+      <Animated.View style={[styles.goalRetireSun, sunStyle]} />
+      <View style={styles.goalRetireBars}>
+        <Animated.View style={[styles.goalRetireBar, leftBarStyle]} />
+        <Animated.View style={[styles.goalRetireBar, centerBarStyle]} />
+        <Animated.View style={[styles.goalRetireBar, rightBarStyle]} />
+      </View>
+    </View>
+  );
 }
 
 // ─ 1. GOAL: a dot spirals inward and shrinks until it locks on the goal ────────
@@ -1972,8 +2145,15 @@ function VisualizationStep({ content, lessonId, onNext, onPressTerm, copy }) {
   const { styles } = useLessonStepStyles();
   const [selected, setSelected] = useState(null);
 
-  if (lessonId === 'lesson_0') {
-    return <IntroVisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
+  if (lessonId === 'lesson_0' || lessonId === 'lesson_1') {
+    return (
+      <IntroVisualizationStep
+        content={content}
+        onNext={onNext}
+        copy={copy}
+        lessonId={lessonId}
+      />
+    );
   }
 
   return (
@@ -5448,6 +5628,166 @@ const createStyles = (colors, components, mode = 'dark') =>
     justifyContent: 'center',
     overflow: 'hidden',
     minHeight: components.sizes.chart.md,
+  },
+  goalHouseHalo: {
+    position: 'absolute',
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: toRgba(colors.accent.primary, 0.12),
+  },
+  goalHouseRoof: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 38,
+    borderRightWidth: 38,
+    borderBottomWidth: 30,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: toRgba(colors.text.primary, 0.88),
+    marginBottom: -2,
+  },
+  goalHouseBody: {
+    width: 76,
+    height: 58,
+    borderRadius: 14,
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.94),
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    paddingBottom: 10,
+    flexDirection: 'row',
+    gap: 14,
+  },
+  goalHouseWindow: {
+    width: 16,
+    height: 16,
+    borderRadius: 5,
+    backgroundColor: toRgba(colors.accent.primary, 0.82),
+  },
+  goalHouseDoor: {
+    width: 14,
+    height: 26,
+    borderRadius: 6,
+    backgroundColor: toRgba(colors.text.primary, 0.74),
+  },
+  goalHouseBase: {
+    width: 96,
+    height: 6,
+    borderRadius: 999,
+    marginTop: 12,
+    backgroundColor: toRgba(colors.ui.divider, 0.28),
+  },
+  goalRoad: {
+    position: 'absolute',
+    bottom: 38,
+    width: '82%',
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: toRgba(colors.ui.divider, 0.28),
+  },
+  goalCarWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  goalCarRoof: {
+    width: 34,
+    height: 16,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+    backgroundColor: toRgba(colors.text.primary, 0.82),
+    marginBottom: -4,
+  },
+  goalCarBody: {
+    width: 92,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: toRgba(colors.accent.primary, 0.86),
+  },
+  goalCarWheel: {
+    position: 'absolute',
+    bottom: -10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 4,
+    borderColor: toRgba(colors.text.primary, 0.88),
+    backgroundColor: colors.background.surface,
+  },
+  goalCarWheelLeft: {
+    left: 16,
+  },
+  goalCarWheelRight: {
+    right: 16,
+  },
+  goalTravelSun: {
+    position: 'absolute',
+    top: 28,
+    right: 42,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: toRgba(colors.accent.primary, 0.85),
+  },
+  goalTravelPath: {
+    position: 'absolute',
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: toRgba(colors.ui.divider, 0.42),
+  },
+  goalTravelPlane: {
+    width: 38,
+    height: 20,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 12,
+    backgroundColor: toRgba(colors.text.primary, 0.84),
+  },
+  goalTravelStamp: {
+    position: 'absolute',
+    bottom: 28,
+    left: 42,
+    width: 26,
+    height: 26,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: toRgba(colors.accent.primary, 0.72),
+    backgroundColor: toRgba(colors.accent.primary, 0.12),
+  },
+  goalRetireHorizon: {
+    position: 'absolute',
+    bottom: 42,
+    width: '82%',
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: toRgba(colors.ui.divider, 0.3),
+  },
+  goalRetireSun: {
+    position: 'absolute',
+    top: 26,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: toRgba(colors.accent.primary, 0.82),
+  },
+  goalRetireBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 10,
+    marginTop: 28,
+  },
+  goalRetireBar: {
+    width: 18,
+    borderTopLeftRadius: 9,
+    borderTopRightRadius: 9,
+    backgroundColor: toRgba(colors.text.primary, 0.84),
   },
   l1CtaPill: {
     flexDirection: 'row',

@@ -12,6 +12,15 @@ import Animated, {
 } from 'react-native-reanimated';
 import AppText from './AppText';
 
+const toRgba = (hex, alpha) => {
+  const cleaned = hex.replace('#', '');
+  const value = parseInt(cleaned, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export default function ProcessGridFlipCard({
   step,
   index,
@@ -31,6 +40,7 @@ export default function ProcessGridFlipCard({
   const flipProgress = useSharedValue(0);
   const activePulse = useSharedValue(0);
   const isSubtleCompleted = isCompleted && !isFlipped;
+  const cardBorderColor = toRgba(colors.ui.divider, 0.35);
 
   useEffect(() => {
     if (isLocked && uncontrolledFlipped) setUncontrolledFlipped(false);
@@ -113,8 +123,8 @@ export default function ProcessGridFlipCard({
   };
 
   const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
-  const frontCtaLabel = isLocked ? 'Bekijk eerst de stappen hierboven' : 'Ontdek stap';
-  const completedCtaLabel = 'Bekijk opnieuw';
+  const frontCtaLabel = 'Ontdek stap';
+  const lockedCtaLabel = 'Bekijk eerst de volgende stappen hierboven';
   const backCtaLabel = 'Terug';
 
   const renderStatusIndicator = () => {
@@ -161,6 +171,10 @@ export default function ProcessGridFlipCard({
             isCompleted && styles.l1PageCompleted,
             isLocked && styles.l1PageLocked,
             isSubtleCompleted && styles.l1PageSubtle,
+            isSubtleCompleted && {
+              backgroundColor: toRgba(colors.background.surface, 0.6),
+            },
+            { borderColor: cardBorderColor },
             frontStyle,
           ]}
         >
@@ -188,15 +202,20 @@ export default function ProcessGridFlipCard({
           >
             {renderAnimation?.()}
           </View>
-          {isLocked || isSubtleCompleted ? (
+          {isLocked ? (
             <AppText
               style={[
                 styles.l1TapHint,
-                isLocked ? styles.l1TapHintLocked : styles.l1TapHintSubtle,
+                styles.l1TapHintLocked,
               ]}
             >
-              {isLocked ? frontCtaLabel : completedCtaLabel}
+              {lockedCtaLabel}
             </AppText>
+          ) : isSubtleCompleted ? (
+            <View style={styles.l1CtaPill}>
+              <AppText style={styles.l1CtaPillLabel}>{frontCtaLabel}</AppText>
+              <AppText style={styles.l1CtaPillArrow}>{'→'}</AppText>
+            </View>
           ) : (
             <View style={styles.l1CtaPill}>
               <AppText style={styles.l1CtaPillLabel}>{frontCtaLabel}</AppText>
@@ -211,6 +230,7 @@ export default function ProcessGridFlipCard({
             styles.l1Page,
             styles.l1BackPage,
             isCompleted && styles.l1PageCompleted,
+            { borderColor: cardBorderColor },
             backStyle,
           ]}
         >

@@ -181,7 +181,37 @@ export const lessonContentNl = {
         visualHint: 'Doelen maken van ruis richting.',
       },
       visualization: {
-        title: 'Doelhelderheid stuurt keuzes',
+        title: 'Voorbeelden van beleggingsdoelen',
+        cards: [
+          {
+            id: 'house',
+            label: 'Huis',
+            question: 'Een woning als doel',
+            detail:
+              'Investeren met een doel zoals een woning geeft richting aan hoeveel je nodig hebt en tegen wanneer.',
+          },
+          {
+            id: 'car',
+            label: 'Auto',
+            question: 'Een aankoop later plannen',
+            detail:
+              'Een concreet doel helpt je om keuzes af te stemmen op een aankoop later.',
+          },
+          {
+            id: 'travel',
+            label: 'Reis',
+            question: 'Ook kortere doelen tellen mee',
+            detail:
+              'Ook kleinere of kortere termijn doelen kunnen een reden zijn om te sparen of investeren.',
+          },
+          {
+            id: 'retirement',
+            label: 'Pensioen',
+            question: 'Lange termijn vraagt geduld',
+            detail:
+              'Lange termijn doelen vragen vaak een andere aanpak en meer geduld.',
+          },
+        ],
         segments: [
           {
             id: 'segment_1',
