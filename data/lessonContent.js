@@ -160,8 +160,26 @@ export const lessonContent = {
     steps: {
       concept: {
         title: 'Investing is a means, not a goal',
-        body:
-          'Investing only makes sense when it serves a personal objective. Without a goal, decisions lack direction and feel reactive. A clear goal guides every later step.',
+        intro: 'A clear goal gives direction to every choice that follows.',
+        sectionLabel: 'Your goal determines:',
+        sectionHint: 'Tap a factor to understand why.',
+        drivers: [
+          {
+            id: 'time',
+            label: 'Time',
+            detail: 'how long you can afford to wait',
+          },
+          {
+            id: 'risk',
+            label: 'Risk',
+            detail: 'how much loss you can absorb',
+          },
+          {
+            id: 'personal',
+            label: 'Personal situation',
+            detail: 'what is actually achievable for you',
+          },
+        ],
         visualHint: 'Goals turn noise into direction.',
       },
       visualization: {
@@ -169,27 +187,17 @@ export const lessonContent = {
         segments: [
           {
             id: 'segment_1',
-            label: 'Goal',
-            value: 0.3,
-            description: 'The outcome you want the money to serve.',
+            label: 'Without a goal',
+            value: 0.5,
+            description:
+              'Decisions feel arbitrary. Risk is hard to assess. You react to news and hype instead of following a plan.',
           },
           {
             id: 'segment_2',
-            label: 'Direction',
-            value: 0.25,
-            description: 'Goals set the direction for risk and time.',
-          },
-          {
-            id: 'segment_3',
-            label: 'Trade-offs',
-            value: 0.25,
-            description: 'Goals make trade-offs easier to accept.',
-          },
-          {
-            id: 'segment_4',
-            label: 'Commitment',
-            value: 0.2,
-            description: 'A goal makes consistency feel purposeful.',
+            label: 'With a goal',
+            value: 0.5,
+            description:
+              'Decisions have direction. Risk aligns with your time horizon. You have an anchor to return to when uncertainty hits.',
           },
         ],
       },
@@ -197,18 +205,19 @@ export const lessonContent = {
         title: 'Start with the why',
         variants: {
           new: {
-            prompt: 'A friend says investing is always smart. What do you ask yourself?',
-            options: ['What is my goal?', 'Which stock is best?', 'How fast can I grow this?'],
-            insight: 'Your goal is the anchor. It tells you what the money is for.',
+            prompt: 'A friend says investing is always smart. What do you do?',
+            options: ['Invest immediately', 'Define your goal first'],
+            insight:
+              'Without a goal, every investment is a guess. Your goal tells you why you are investing and what you want to achieve.',
           },
           growing: {
             prompt: 'You want to get serious about investing. What comes first?',
-            options: ['Define the purpose', 'Pick a strategy', 'Set a return target'],
+            options: ['Pick a strategy', 'Define your goal first'],
             insight: 'Purpose comes first. Strategy follows the goal, not the other way around.',
           },
           seasoned: {
             prompt: 'You are reviewing your plan. What keeps it coherent?',
-            options: ['Revisit the goal', 'Chase a new theme', 'Adjust for headlines'],
+            options: ['Adjust for headlines', 'Revisit the goal'],
             insight: 'Reconnecting to the goal keeps your plan consistent across cycles.',
           },
         },
@@ -216,32 +225,60 @@ export const lessonContent = {
       exercise: {
         type: 'choice',
         description:
-          'Pick a strategy without defining a goal. Then see what is missing.',
+          'Pick the most concrete investment goal. A good goal has a time horizon, an amount, and a clear outcome.',
         options: [
           {
-            id: 'growth',
-            label: 'Aggressive growth focus',
+            id: 'vague',
+            label: 'I want to grow my money',
             reveal:
-              'This could fit a long-term growth goal. Without that goal, the risk feels random.',
+              'This is a wish, not a goal. It lacks a time horizon and a concrete outcome. Without these anchors, you cannot build a plan.',
           },
           {
-            id: 'income',
-            label: 'Steady income focus',
+            id: 'partial',
+            label: 'I want to build a financial cushion',
             reveal:
-              'This can support a cash-flow goal. Without a goal, it may feel slow or unclear.',
+              'Better than nothing, but still incomplete. How much? By when? A goal needs specificity to guide decisions.',
           },
           {
-            id: 'safety',
-            label: 'Short-term safety focus',
+            id: 'concrete',
+            label: 'I want to have €25,000 saved in 7 years for a house down payment',
             reveal:
-              'This fits near-term needs. Without a goal, it can limit growth without reason.',
+              'This is a concrete goal. It has a time horizon (7 years), an amount (€25,000), and a clear outcome. This drives every investment decision.',
           },
         ],
       },
       reflection: {
-        question: 'What is one real-world goal you want your money to serve?'
+        title: 'Reflection',
+        question: 'What would your goal be if you were to invest?',
+        placeholder: 'Write your answer here...',
       },
       summary: {
+        scenario: {
+          text:
+            'Lena has saved €3,000 and decides to invest because a friend had good results. She picks a random mix of stocks and ETFs. Six months later she is down 12% and does not know whether to buy more or sell.',
+          question: 'What is missing from Lena\'s approach?',
+          options: [
+            {
+              id: 'knowledge',
+              label: 'More knowledge about investments',
+              reveal:
+                'Knowledge helps, but even experienced investors make poor decisions without a clear goal. The problem runs deeper.',
+            },
+            {
+              id: 'goal',
+              label: 'A concrete investment goal',
+              reveal:
+                'Without a goal, every decision is arbitrary. Buy more or sell? Lena does not know, because she never defined what the money is supposed to do for her.',
+              isKey: true,
+            },
+            {
+              id: 'capital',
+              label: 'A larger starting amount',
+              reveal:
+                'More money does not solve the problem. With €10,000 and no goal, Lena faces the exact same dilemma, but with higher stakes.',
+            },
+          ],
+        },
         takeaways: [
           'Investing is a tool, not the goal itself.',
           'Goals give direction to every decision.',

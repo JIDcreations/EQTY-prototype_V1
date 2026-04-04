@@ -158,8 +158,26 @@ export const lessonContentNl = {
     steps: {
       concept: {
         title: 'Investeren is een middel, geen doel',
-        body:
-          'Investeren heeft alleen zin als het een persoonlijk doel dient. Zonder doel missen beslissingen richting en voelen ze reactief. Een helder doel stuurt elke volgende stap.',
+        intro: 'Een duidelijk doel geeft richting aan elke volgende keuze.',
+        sectionLabel: 'Je doel bepaalt:',
+        sectionHint: 'Tik op een factor om te begrijpen waarom.',
+        drivers: [
+          {
+            id: 'time',
+            label: 'Tijd',
+            detail: 'hoe lang je kan wachten',
+          },
+          {
+            id: 'risk',
+            label: 'Risico',
+            detail: 'hoeveel verlies je aankan',
+          },
+          {
+            id: 'personal',
+            label: 'Persoonlijke situatie',
+            detail: 'wat voor jou haalbaar is',
+          },
+        ],
         visualHint: 'Doelen maken van ruis richting.',
       },
       visualization: {
@@ -167,27 +185,17 @@ export const lessonContentNl = {
         segments: [
           {
             id: 'segment_1',
-            label: 'Doel',
-            value: 0.3,
-            description: 'De uitkomst die je met het geld wilt bereiken.',
+            label: 'Zonder doel',
+            value: 0.5,
+            description:
+              'Beslissingen voelen willekeurig. Risico is moeilijk te beoordelen. Je reageert op nieuws en hypes in plaats van een plan te volgen.',
           },
           {
             id: 'segment_2',
-            label: 'Richting',
-            value: 0.25,
-            description: 'Doelen geven richting aan risico en tijd.',
-          },
-          {
-            id: 'segment_3',
-            label: 'Afwegingen',
-            value: 0.25,
-            description: 'Doelen maken afwegingen makkelijker te accepteren.',
-          },
-          {
-            id: 'segment_4',
-            label: 'Toewijding',
-            value: 0.2,
-            description: 'Een doel maakt consistentie doelgericht.',
+            label: 'Met doel',
+            value: 0.5,
+            description:
+              'Beslissingen hebben richting. Risico sluit aan bij je tijdshorizon. Je hebt een anker om op terug te vallen bij onzekerheid.',
           },
         ],
       },
@@ -195,18 +203,19 @@ export const lessonContentNl = {
         title: 'Begin met het waarom',
         variants: {
           new: {
-            prompt: 'Een vriend zegt dat investeren altijd slim is. Wat vraag je jezelf?',
-            options: ['Wat is mijn doel?', 'Welk aandeel is het best?', 'Hoe snel kan ik dit laten groeien?'],
-            insight: 'Je doel is het anker. Het vertelt je waar het geld voor dient.',
+            prompt: 'Een vriend zegt dat investeren altijd slim is. Wat doe je?',
+            options: ['Investeer meteen', 'Bepaal eerst je doel'],
+            insight:
+              'Zonder doel is elke investering een gok. Je doel vertelt je waarom je belegt en wat je ermee wilt bereiken.',
           },
           growing: {
             prompt: 'Je wilt serieus beginnen met investeren. Wat komt eerst?',
-            options: ['Bepaal het doel', 'Kies een strategie', 'Stel een rendementsdoel'],
+            options: ['Kies een strategie', 'Bepaal eerst je doel'],
             insight: 'Eerst komt het doel. Strategie volgt het doel, niet andersom.',
           },
           seasoned: {
             prompt: 'Je herbekijkt je plan. Wat houdt het coherent?',
-            options: ['Herbekijk het doel', 'Jaag een nieuw thema na', 'Pas je aan aan het nieuws'],
+            options: ['Pas je aan aan het nieuws', 'Herbekijk het doel'],
             insight: 'Terugkoppelen naar het doel houdt je plan consistent over cycli.',
           },
         },
@@ -214,37 +223,64 @@ export const lessonContentNl = {
       exercise: {
         type: 'choice',
         description:
-          'Kies een strategie zonder een doel te definieren. Bekijk daarna wat er ontbreekt.',
+          'Kies het meest concrete beleggingsdoel. Een goed doel heeft een tijdshorizon, een bedrag en een duidelijk resultaat.',
         options: [
           {
-            id: 'growth',
-            label: 'Focus op agressieve groei',
+            id: 'vague',
+            label: 'Ik wil geld laten groeien',
             reveal:
-              'Dit kan passen bij een langetermijndoel voor groei. Zonder dat doel voelt het risico willekeurig.',
+              'Dit is een wens, geen doel. Het mist een tijdshorizon en een concreet resultaat. Zonder deze ankerpunten kun je geen plan opstellen.',
           },
           {
-            id: 'income',
-            label: 'Focus op stabiele inkomsten',
+            id: 'partial',
+            label: 'Ik wil een financieel buffer opbouwen',
             reveal:
-              'Dit kan passen bij een cashflowdoel. Zonder doel voelt het traag of onduidelijk.',
+              'Beter dan niets, maar nog onvolledig. Hoeveel buffer? Tegen wanneer? Een doel heeft specificiteit nodig om beslissingen te sturen.',
           },
           {
-            id: 'safety',
-            label: 'Focus op kortetermijnveiligheid',
+            id: 'concrete',
+            label: 'Ik wil over 7 jaar €25.000 gespaard hebben voor een aanbetaling op een woning',
             reveal:
-              'Dit past bij nabije behoeften. Zonder doel beperkt het groei zonder reden.',
+              'Dit is een concreet doel. Het bevat een tijdshorizon (7 jaar), een bedrag (€25.000) en een duidelijk resultaat. Dit stuurt al je beleggingsbeslissingen.',
           },
         ],
       },
       reflection: {
         title: 'Reflectie',
-        question: 'Wat is een echt doel dat je wilt dat je geld dient?'
+        question: 'Wat is jouw doel als je zou investeren?',
+        placeholder: 'Schrijf hier je antwoord...',
       },
       summary: {
+        scenario: {
+          text:
+            'Lena heeft €3.000 gespaard en besluit te investeren omdat een vriend goede resultaten boekte. Ze kiest willekeurig een aantal aandelen en ETFs. Na zes maanden staat ze op -12% en vraagt zich af: bijkopen of verkopen?',
+          question: 'Wat ontbreekt er in Lena\'s aanpak?',
+          options: [
+            {
+              id: 'knowledge',
+              label: 'Meer kennis over beleggingen',
+              reveal:
+                'Kennis helpt, maar ook ervaren beleggers maken slechte keuzes zonder een duidelijk doel. Het probleem zit dieper.',
+            },
+            {
+              id: 'goal',
+              label: 'Een concreet beleggingsdoel',
+              reveal:
+                'Zonder doel is elke beslissing willekeurig. Bijkopen of verkopen? Lena weet het niet, omdat ze nooit heeft bepaald wat het geld voor haar moet doen.',
+              isKey: true,
+            },
+            {
+              id: 'capital',
+              label: 'Een groter startkapitaal',
+              reveal:
+                'Meer geld lost het probleem niet op. Met €10.000 en geen doel staat Lena voor exact hetzelfde dilemma, maar dan met hogere inzet.',
+            },
+          ],
+        },
         takeaways: [
           'Investeren is een tool, niet het doel zelf.',
           'Doelen geven richting aan elke beslissing.',
-          'Zonder doel voelen strategieen willekeurig.',
+          'Zonder doel voelen strategieën willekeurig.',
         ],
       },
     },

@@ -298,6 +298,12 @@ export default function LessonStepScreen() {
   }
   const flowMetaLabel = `${flowPhaseLabel} · ${step}/${TOTAL_STEPS}`.toUpperCase();
   const topSectionSubtitle = useMemo(() => {
+    if (step === 1 && lessonId === 'lesson_1') {
+      return content?.steps?.concept?.intro || null;
+    }
+    if (step === 6 && lessonId === 'lesson_1') {
+      return locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?';
+    }
     if (step === 6 && lessonId !== 'lesson_0') {
       return locale === 'nl'
         ? 'Tik op elk inzicht om te bevestigen dat het is blijven hangen.'
@@ -308,7 +314,7 @@ export default function LessonStepScreen() {
     if (step === 3) return copy.introScenario.headerHelper;
     if (step === 4) return 'Plaats de stappen van het beleggingsproces in de juiste volgorde.';
     if (step === 6) return 'Herken je het proces in een echte situatie?';
-  }, [copy.introScenario.headerHelper, lessonId, locale, step]);
+  }, [content, copy.introScenario.headerHelper, lessonId, locale, step]);
 
   return (
     <View style={styles.root}>
@@ -394,6 +400,12 @@ export default function LessonStepScreen() {
             onPressTerm={handleTermPress}
             copy={copy}
             language={preferences?.language}
+          />
+        ) : lessonId === 'lesson_1' ? (
+          <Lesson1SummaryStep
+            content={content}
+            onComplete={handleComplete}
+            copy={copy}
           />
         ) : (
           <SummaryStep
@@ -522,6 +534,10 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
     return <IntroConceptStep content={content} onNext={onNext} copy={copy} />;
   }
 
+  if (lessonId === 'lesson_1') {
+    return <Lesson1ConceptStep content={content} onNext={onNext} copy={copy} />;
+  }
+
   return (
     <View style={styles.stepBody}>
       <Card style={styles.conceptCard}>
@@ -611,6 +627,76 @@ function IntroConceptStep({ content, onNext, copy }) {
                     </View>
                     {isActive ? (
                       <AppText style={styles.conceptTrackDetail}>{step.detail}</AppText>
+                    ) : null}
+                  </View>
+                </Pressable>
+                {!isLast ? <View style={styles.conceptTrackDivider} /> : null}
+              </View>
+            );
+          })}
+        </View>
+      </View>
+
+      <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+    </View>
+  );
+}
+
+function Lesson1ConceptStep({ content, onNext, copy }) {
+  const { colors, components, styles } = useLessonStepStyles();
+  const concept = content?.steps?.concept;
+  const drivers = concept?.drivers || [];
+  const [activeIndex, setActiveIndex] = useState(null);
+
+  return (
+    <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
+      <View style={styles.conceptTrackWrap}>
+        <View style={styles.conceptTrackHeader}>
+          <AppText style={styles.conceptTrackHeaderLabel}>{concept?.sectionLabel}</AppText>
+          <AppText style={styles.conceptTrackHeaderHint}>{concept?.sectionHint}</AppText>
+        </View>
+        <View style={styles.conceptTrack}>
+          {drivers.map((driver, index) => {
+            const isActive = index === activeIndex;
+            const isFirst = index === 0;
+            const isLast = index === drivers.length - 1;
+            return (
+              <View key={driver.id}>
+                <Pressable
+                  onPress={() =>
+                    setActiveIndex((prev) => (prev === index ? null : index))
+                  }
+                  style={styles.conceptTrackRow}
+                >
+                  <View
+                    style={[
+                      styles.conceptTrackBar,
+                      isActive && styles.conceptTrackBarActive,
+                      isFirst && styles.conceptTrackBarFirst,
+                      isLast && styles.conceptTrackBarLast,
+                    ]}
+                  />
+                  <View style={styles.conceptTrackBody}>
+                    <View style={styles.conceptTrackBodyRow}>
+                      <AppText
+                        style={[
+                          styles.conceptTrackIndex,
+                          isActive && styles.conceptTrackIndexActive,
+                        ]}
+                      >
+                        {String(index + 1).padStart(2, '0')}
+                      </AppText>
+                      <View style={styles.conceptTrackContent}>
+                        <AppText style={styles.conceptTrackName}>{driver.label}</AppText>
+                      </View>
+                      <Ionicons
+                        name={isActive ? 'chevron-down' : 'chevron-forward'}
+                        size={components.sizes.icon.sm}
+                        color={isActive ? colors.accent.primary : colors.text.secondary}
+                      />
+                    </View>
+                    {isActive ? (
+                      <AppText style={styles.conceptTrackDetail}>{driver.detail}</AppText>
                     ) : null}
                   </View>
                 </Pressable>
@@ -2199,10 +2285,6 @@ function VisualizationStep({ content, lessonId, onNext, onPressTerm, copy }) {
     return <IntroVisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
   }
 
-  if (lessonId === 'lesson_1') {
-    return <Lesson1VisualizationStep onNext={onNext} copy={copy} lessonId={lessonId} />;
-  }
-
   return (
     <View style={styles.stepBody}>
       <Card style={styles.visualCard}>
@@ -3229,6 +3311,110 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
   );
 }
 
+
+function Lesson1SummaryStep({ content, onComplete, copy }) {
+  const { colors, components, styles, mode } = useLessonStepStyles();
+  const [picked, setPicked] = useState(null);
+
+  const summaryScenario = content?.steps?.summary?.scenario;
+  const scenarioText = summaryScenario?.text || '';
+  const questionText = summaryScenario?.question || '';
+  const options = summaryScenario?.options || [];
+  const processResetText =
+    'Investeren zonder doel is handelen op instinct. Bepaal eerst het doel voordat je de volgende stap zet.';
+  const revealExactLabel = 'Precies';
+  const revealNudgeLabel = 'Niet helemaal — maar';
+
+  const handlePick = (id) => {
+    if (picked) return;
+    setPicked(id);
+  };
+
+  const pickedOption = options.find((o) => o.id === picked);
+  const isAnswered = picked !== null;
+
+  return (
+    <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
+
+      <View style={styles.scenarioStoryCard}>
+        <AppText style={styles.scenarioStoryLabel}>Scenario</AppText>
+        <AppText style={styles.scenarioStoryText}>{scenarioText}</AppText>
+      </View>
+
+      <View style={styles.scenarioQuestionBlock}>
+        <AppText style={styles.scenarioQuestion}>{questionText}</AppText>
+
+        <View style={styles.scenarioOptionList}>
+          {options.map((opt) => {
+            const isPicked    = picked === opt.id;
+            const isKey       = isAnswered && opt.isKey;
+            const isWrongPick = isPicked && !opt.isKey;
+            const isDimmed    = isAnswered && !isPicked && !opt.isKey;
+            return (
+              <SelectableOptionButton
+                key={opt.id}
+                onPress={() => handlePick(opt.id)}
+                disabled={isAnswered}
+                label={opt.label}
+                state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+                accessory={
+                  isKey ? (
+                    <View
+                      style={[
+                        styles.scenarioOptionCheckBadge,
+                        mode === 'light' && styles.scenarioOptionCheckBadgeLight,
+                      ]}
+                    >
+                      <Ionicons
+                        name="checkmark"
+                        size={14}
+                        color={mode === 'light' ? colors.text.primary : colors.accent.primary}
+                      />
+                    </View>
+                  ) : isWrongPick ? (
+                    <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+                  ) : null
+                }
+              />
+            );
+          })}
+        </View>
+      </View>
+
+      {isAnswered && pickedOption && (
+        <Animated.View
+          entering={FadeInDown.duration(300)}
+          style={styles.scenarioRevealCard}
+        >
+          <View style={styles.scenarioRevealHeader}>
+            <Ionicons
+              name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
+              size={18}
+              color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
+            />
+            <AppText
+              style={[
+                styles.scenarioRevealLabel,
+                pickedOption.isKey && styles.scenarioRevealLabelKey,
+              ]}
+            >
+              {pickedOption.isKey ? revealExactLabel : revealNudgeLabel}
+            </AppText>
+          </View>
+          <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
+          {!pickedOption.isKey && (
+            <>
+              <View style={styles.scenarioRevealDivider} />
+              <AppText style={styles.scenarioRevealText}>{processResetText}</AppText>
+            </>
+          )}
+        </Animated.View>
+      )}
+
+      {isAnswered && <PrimaryButton label={copy.buttons.next} onPress={onComplete} />}
+    </View>
+  );
+}
 
 function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language }) {
   const { colors, components, styles, mode } = useLessonStepStyles();
