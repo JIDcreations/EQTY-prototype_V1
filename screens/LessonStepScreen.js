@@ -34,6 +34,7 @@ import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
 import Card from '../components/Card';
+import ConceptDropdownMenu from '../components/ConceptDropdownMenu';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
 import { useGlossary } from '../components/GlossaryProvider';
 import GlossaryText from '../components/GlossaryText';
@@ -534,8 +535,15 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
     return <IntroConceptStep content={content} onNext={onNext} copy={copy} />;
   }
 
-  if (lessonId === 'lesson_1') {
-    return <Lesson1ConceptStep content={content} onNext={onNext} copy={copy} />;
+  if (content?.steps?.concept?.drivers?.length) {
+    return (
+      <DropdownConceptStep
+        content={content}
+        lessonId={lessonId}
+        onNext={onNext}
+        copy={copy}
+      />
+    );
   }
 
   return (
@@ -565,12 +573,7 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
 
 function IntroConceptStep({ content, onNext, copy }) {
   const { colors, components, styles } = useLessonStepStyles();
-  const intro = content?.steps?.concept?.intro;
-  const introSubtitleNl =
-    'Investeren werkt wanneer elke beslissing voortbouwt op de vorige.';
-  const isLessonSubtitle = intro === introSubtitleNl;
   const steps = copy.introConcept.steps;
-  const [activeIndex, setActiveIndex] = useState(null);
   const paragraph = copy.introConcept.paragraph;
 
   return (
@@ -580,132 +583,36 @@ function IntroConceptStep({ content, onNext, copy }) {
         <AppText style={styles.conceptDefBody}>{paragraph}</AppText>
       </View>
 
-      <View style={styles.conceptTrackWrap}>
-        <View style={styles.conceptTrackHeader}>
-          <AppText style={styles.conceptTrackHeaderLabel}>{copy.introConcept.processTitle}</AppText>
-          <AppText style={styles.conceptTrackHeaderHint}>{copy.introConcept.processHint}</AppText>
-        </View>
-        <View style={styles.conceptTrack}>
-          {steps.map((step, index) => {
-            const isActive = index === activeIndex;
-            const isFirst = index === 0;
-            const isLast = index === steps.length - 1;
-            return (
-              <View key={step.id}>
-                <Pressable
-                  onPress={() =>
-                    setActiveIndex((prev) => (prev === index ? null : index))
-                  }
-                  style={styles.conceptTrackRow}
-                >
-                  <View
-                    style={[
-                      styles.conceptTrackBar,
-                      isActive && styles.conceptTrackBarActive,
-                      isFirst && styles.conceptTrackBarFirst,
-                      isLast && styles.conceptTrackBarLast,
-                    ]}
-                  />
-                  <View style={styles.conceptTrackBody}>
-                    <View style={styles.conceptTrackBodyRow}>
-                      <AppText
-                        style={[
-                          styles.conceptTrackIndex,
-                          isActive && styles.conceptTrackIndexActive,
-                        ]}
-                      >
-                        {String(index + 1).padStart(2, '0')}
-                      </AppText>
-                      <View style={styles.conceptTrackContent}>
-                        <AppText style={styles.conceptTrackName}>{step.label}</AppText>
-                      </View>
-                      <Ionicons
-                        name={isActive ? 'chevron-down' : 'chevron-forward'}
-                        size={components.sizes.icon.sm}
-                        color={isActive ? colors.accent.primary : colors.text.secondary}
-                      />
-                    </View>
-                    {isActive ? (
-                      <AppText style={styles.conceptTrackDetail}>{step.detail}</AppText>
-                    ) : null}
-                  </View>
-                </Pressable>
-                {!isLast ? <View style={styles.conceptTrackDivider} /> : null}
-              </View>
-            );
-          })}
-        </View>
-      </View>
+      <ConceptDropdownMenu
+        headerLabel={copy.introConcept.processTitle}
+        headerHint={copy.introConcept.processHint}
+        items={steps}
+        styles={styles}
+        colors={colors}
+        components={components}
+      />
 
       <PrimaryButton label={copy.buttons.next} onPress={onNext} />
     </View>
   );
 }
 
-function Lesson1ConceptStep({ content, onNext, copy }) {
+function DropdownConceptStep({ content, lessonId, onNext, copy }) {
   const { colors, components, styles } = useLessonStepStyles();
   const concept = content?.steps?.concept;
-  const drivers = concept?.drivers || [];
-  const [activeIndex, setActiveIndex] = useState(null);
+  const topSpacing = lessonId === 'lesson_1' ? 32 : components.layout.spacing.xxl;
 
   return (
-    <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
-      <View style={styles.conceptTrackWrap}>
-        <View style={styles.conceptTrackHeader}>
-          <AppText style={styles.conceptTrackHeaderLabel}>{concept?.sectionLabel}</AppText>
-          <AppText style={styles.conceptTrackHeaderHint}>{concept?.sectionHint}</AppText>
-        </View>
-        <View style={styles.conceptTrack}>
-          {drivers.map((driver, index) => {
-            const isActive = index === activeIndex;
-            const isFirst = index === 0;
-            const isLast = index === drivers.length - 1;
-            return (
-              <View key={driver.id}>
-                <Pressable
-                  onPress={() =>
-                    setActiveIndex((prev) => (prev === index ? null : index))
-                  }
-                  style={styles.conceptTrackRow}
-                >
-                  <View
-                    style={[
-                      styles.conceptTrackBar,
-                      isActive && styles.conceptTrackBarActive,
-                      isFirst && styles.conceptTrackBarFirst,
-                      isLast && styles.conceptTrackBarLast,
-                    ]}
-                  />
-                  <View style={styles.conceptTrackBody}>
-                    <View style={styles.conceptTrackBodyRow}>
-                      <AppText
-                        style={[
-                          styles.conceptTrackIndex,
-                          isActive && styles.conceptTrackIndexActive,
-                        ]}
-                      >
-                        {String(index + 1).padStart(2, '0')}
-                      </AppText>
-                      <View style={styles.conceptTrackContent}>
-                        <AppText style={styles.conceptTrackName}>{driver.label}</AppText>
-                      </View>
-                      <Ionicons
-                        name={isActive ? 'chevron-down' : 'chevron-forward'}
-                        size={components.sizes.icon.sm}
-                        color={isActive ? colors.accent.primary : colors.text.secondary}
-                      />
-                    </View>
-                    {isActive ? (
-                      <AppText style={styles.conceptTrackDetail}>{driver.detail}</AppText>
-                    ) : null}
-                  </View>
-                </Pressable>
-                {!isLast ? <View style={styles.conceptTrackDivider} /> : null}
-              </View>
-            );
-          })}
-        </View>
-      </View>
+    <View style={[styles.stepBody, { marginTop: topSpacing }]}>
+      <ConceptDropdownMenu
+        headerLabel={concept?.sectionLabel}
+        headerHint={concept?.sectionHint}
+        items={concept?.drivers}
+        styles={styles}
+        colors={colors}
+        components={components}
+        wrapStyle={lessonId === 'lesson_1' ? { marginTop: 0 } : null}
+      />
 
       <PrimaryButton label={copy.buttons.next} onPress={onNext} />
     </View>

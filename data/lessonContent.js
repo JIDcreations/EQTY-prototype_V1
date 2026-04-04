@@ -384,6 +384,30 @@ export const lessonContent = {
         title: 'Risk is more than loss',
         body:
           'Risk is not only financial. Emotional responses, uncertainty, and recovery time matter. Understanding your perception of risk comes before chasing returns.',
+        sectionLabel: 'Risk can show up as:',
+        sectionHint: 'Tap a layer to understand it.',
+        drivers: [
+          {
+            id: 'financial',
+            label: 'Financial impact',
+            detail: 'Potential drawdowns or losses.',
+          },
+          {
+            id: 'emotional',
+            label: 'Emotional impact',
+            detail: 'Stress, regret, and confidence.',
+          },
+          {
+            id: 'uncertainty',
+            label: 'Uncertainty',
+            detail: 'How predictable the outcome feels.',
+          },
+          {
+            id: 'recovery',
+            label: 'Recovery time',
+            detail: 'How long it takes to bounce back.',
+          },
+        ],
         visualHint: 'Two people can experience the same risk differently.',
       },
       visualization: {
