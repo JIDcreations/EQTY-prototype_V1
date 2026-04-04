@@ -29,7 +29,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, G, Circle, Ellipse } from 'react-native-svg';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
@@ -1127,143 +1127,391 @@ function GoalExampleStepAnimation({ stepId, styles, colors }) {
   }
 }
 
+// ─── Huis: European front-facing house, warm lights come on in windows ──────────
 function HouseGoalAnim({ styles, colors }) {
-  const pulse = useSharedValue(0);
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    pulse.value = withRepeat(
-      withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.quad) }),
-      -1,
-      true
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 7200, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(300, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
     );
-  }, [pulse]);
+  }, [progress]);
 
-  const windowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(pulse.value, [0, 1], [0.35, 1]),
-    transform: [{ scale: interpolate(pulse.value, [0, 1], [0.92, 1.06]) }],
+  const bodyProps   = useAnimatedProps(() => ({ opacity: interpolate(progress.value, [0, 0.10], [0, 1], Extrapolation.CLAMP) }));
+  const detailProps = useAnimatedProps(() => ({ opacity: interpolate(progress.value, [0.07, 0.20], [0, 1], Extrapolation.CLAMP) }));
+  const glowProps   = useAnimatedProps(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0.18, 0.34, 0.52, 0.68, 0.84, 1],
+      [0,    0.52, 0.28, 0.48, 0.28, 0],
+      Extrapolation.CLAMP
+    ),
   }));
 
-  const haloStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(pulse.value, [0, 1], [0.18, 0.42]),
-    transform: [{ scale: interpolate(pulse.value, [0, 1], [0.92, 1.1]) }],
-  }));
+  const facade    = toRgba(colors.background.surfaceActive, 0.88);
+  const facadeS   = toRgba(colors.text.primary, 0.28);
+  const roofCol   = toRgba(colors.text.primary, 0.80);
+  const frameCol  = toRgba(colors.text.primary, 0.54);
+  const glassDark = toRgba(colors.background.surface, 0.80);
+  const glowCol   = toRgba(colors.accent.primary, 1);
+  const shutterC  = toRgba(colors.text.primary, 0.45);
+  const doorCol   = toRgba(colors.text.primary, 0.68);
+  const stepCol   = toRgba(colors.text.primary, 0.20);
+  const panelLine = toRgba(colors.text.primary, 0.26);
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <Animated.View style={[styles.goalHouseHalo, haloStyle]} />
-      <View style={styles.goalHouseRoof} />
-      <View style={styles.goalHouseBody}>
-        <Animated.View style={[styles.goalHouseWindow, windowStyle]} />
-        <View style={styles.goalHouseDoor} />
-      </View>
-      <View style={styles.goalHouseBase} />
+      <Svg width={160} height={96}>
+
+        {/* ── Structure: facade + roof + chimney + steps ── */}
+        <AnimatedG animatedProps={bodyProps}>
+          {/* Main facade wall */}
+          <Path d="M 24 30 L 136 30 L 136 86 L 24 86 Z"
+            stroke={facadeS} strokeWidth={0.8} fill={facade} />
+          {/* Roof */}
+          <Path d="M 22 31 L 138 31 L 80 5 Z" fill={roofCol} />
+          {/* Chimney shaft */}
+          <Path d="M 95 9 L 95 31 L 106 31 L 106 9 Z" fill={roofCol} />
+          {/* Chimney cap */}
+          <Path d="M 92 9 L 109 9"
+            stroke={roofCol} strokeWidth={3.5} strokeLinecap="round" fill="none" />
+          {/* Steps */}
+          <Path d="M 60 86 L 100 86 L 105 91 L 55 91 Z" fill={stepCol} />
+          <Path d="M 55 91 L 105 91 L 111 96 L 49 96 Z" fill={stepCol} />
+        </AnimatedG>
+
+        {/* ── Details: shutters + window frames + door ── */}
+        <AnimatedG animatedProps={detailProps}>
+
+          {/* LEFT WINDOW GROUP */}
+          {/* Shutter left */}
+          <Path d="M 26 38 L 26 60 L 33 60 L 33 38 Z" fill={shutterC} />
+          <Path d="M 27 42 L 32 42 M 27 46 L 32 46 M 27 50 L 32 50 M 27 54 L 32 54 M 27 58 L 32 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          {/* Shutter right */}
+          <Path d="M 57 38 L 57 60 L 64 60 L 64 38 Z" fill={shutterC} />
+          <Path d="M 58 42 L 63 42 M 58 46 L 63 46 M 58 50 L 63 50 M 58 54 L 63 54 M 58 58 L 63 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          {/* Window frame + dark glass */}
+          <Path d="M 34 40 L 34 58 L 56 58 L 56 40 Z"
+            stroke={frameCol} strokeWidth={1.5} fill={glassDark} />
+          {/* Pane divisions */}
+          <Path d="M 45 40 L 45 58 M 34 49 L 56 49"
+            stroke={frameCol} strokeWidth={1} fill="none" />
+
+          {/* RIGHT WINDOW GROUP */}
+          <Path d="M 96 38 L 96 60 L 103 60 L 103 38 Z" fill={shutterC} />
+          <Path d="M 97 42 L 102 42 M 97 46 L 102 46 M 97 50 L 102 50 M 97 54 L 102 54 M 97 58 L 102 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          <Path d="M 127 38 L 127 60 L 134 60 L 134 38 Z" fill={shutterC} />
+          <Path d="M 128 42 L 133 42 M 128 46 L 133 46 M 128 50 L 133 50 M 128 54 L 133 54 M 128 58 L 133 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          <Path d="M 104 40 L 104 58 L 126 58 L 126 40 Z"
+            stroke={frameCol} strokeWidth={1.5} fill={glassDark} />
+          <Path d="M 115 40 L 115 58 M 104 49 L 126 49"
+            stroke={frameCol} strokeWidth={1} fill="none" />
+
+          {/* DOOR: arched top */}
+          <Path d="M 68 86 L 68 70 A 12 12 0 0 1 92 70 L 92 86 Z"
+            fill={doorCol} />
+          {/* Door panels */}
+          <Path d="M 70 84 L 70 72 L 79 72 L 79 84 Z"
+            fill="none" stroke={panelLine} strokeWidth={0.8} />
+          <Path d="M 81 84 L 81 72 L 90 72 L 90 84 Z"
+            fill="none" stroke={panelLine} strokeWidth={0.8} />
+          {/* Door handle */}
+          <Circle cx={89} cy={77} r={1.5} fill={toRgba(colors.accent.primary, 0.70)} />
+        </AnimatedG>
+
+        {/* ── Warm window glow (breathes) ── */}
+        <AnimatedG animatedProps={glowProps}>
+          <Path d="M 35 41 L 35 57 L 55 57 L 55 41 Z" fill={glowCol} />
+          <Path d="M 105 41 L 105 57 L 125 57 L 125 41 Z" fill={glowCol} />
+        </AnimatedG>
+
+      </Svg>
     </View>
   );
 }
 
+// ─── Auto: Porsche 911 profile glides in with spring easing ─────────────────────
 function CarGoalAnim({ styles, colors }) {
-  const drive = useSharedValue(0);
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    drive.value = withRepeat(
-      withTiming(1, { duration: 2400, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2800, easing: Easing.bezier(0.34, 1.24, 0.64, 1) }),
+        withDelay(1000, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
     );
-  }, [drive]);
+  }, [progress]);
 
-  const bodyStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(drive.value, [0, 1], [-18, 18]) }],
+  const carStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: interpolate(progress.value, [0, 1], [-174, 0]) }],
+    opacity: interpolate(progress.value, [0, 0.06, 1], [0, 1, 1], Extrapolation.CLAMP),
   }));
 
-  const wheelStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${interpolate(drive.value, [0, 1], [0, 180])}deg` }],
-  }));
+  const road      = toRgba(colors.ui.divider, 0.30);
+  const roadDash  = toRgba(colors.ui.divider, 0.16);
+  const postColor = toRgba(colors.text.primary, 0.35);
+  const flagColor = toRgba(colors.accent.primary, 0.70);
+  // Car colors
+  const bodyColor = toRgba(colors.accent.primary, 0.90);
+  const bodyDark  = toRgba(colors.accent.primary, 0.60);
+  const glassCol  = toRgba(colors.background.surface, 0.28);
+  const darkMetal = toRgba(colors.text.primary, 0.80);
+  const trim      = toRgba(colors.text.primary, 0.55);
+  const tire      = toRgba(colors.text.primary, 0.86);
+  const rimOuter  = toRgba(colors.text.primary, 0.55);
+  const rimInner  = toRgba(colors.background.surface, 0.95);
+  const headlight = toRgba(colors.accent.primary, 0.95);
+  const taillight = toRgba(colors.accent.primary, 0.80);
+
+  // Porsche 911 side profile (fastback silhouette)
+  // Ground: y=68, front wheel cx=44 r=13, rear wheel cx=118 r=13
+  // Wheel arches: front x=31–57, rear x=105–131
+  const bodyPath =
+    'M 22 66 L 22 58 Q 26 48 38 44 Q 46 38 54 34 L 68 16 Q 74 12 82 11 Q 92 11 102 16 L 120 40 L 124 42 Q 130 44 132 50 L 133 62 L 133 66 L 131 66 A 13 13 0 0 0 105 66 L 57 66 A 13 13 0 0 0 31 66 Z';
+
+  // Glass greenhouse (windshield + side + fastback rear window)
+  const glassPath =
+    'M 56 34 L 68 16 Q 82 12 102 16 L 120 40 L 98 32 L 58 36 Z';
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.goalRoad} />
-      <Animated.View style={[styles.goalCarWrap, bodyStyle]}>
-        <View style={styles.goalCarRoof} />
-        <View style={styles.goalCarBody} />
-        <Animated.View style={[styles.goalCarWheel, styles.goalCarWheelLeft, wheelStyle]} />
-        <Animated.View style={[styles.goalCarWheel, styles.goalCarWheelRight, wheelStyle]} />
+      {/* Static: road + destination flag */}
+      <Svg width={160} height={76} style={StyleSheet.absoluteFill}>
+        <Path d="M 0 68 L 160 68" stroke={road} strokeWidth={2} />
+        <Path d="M 0 64 L 160 64"
+          stroke={roadDash} strokeWidth={0.8} strokeDasharray="8,14" />
+        <Path d="M 150 52 L 150 68" stroke={postColor} strokeWidth={1.5} />
+        <Path d="M 150 52 L 159 55 L 150 58 Z" fill={flagColor} />
+      </Svg>
+
+      {/* Porsche 911 */}
+      <Animated.View style={[styles.goalCarSvgWrap, carStyle]}>
+        <Svg width={150} height={76}>
+          {/* Body silhouette */}
+          <Path d={bodyPath} fill={bodyColor} />
+
+          {/* Subtle body shadow/depth on lower body */}
+          <Path
+            d="M 22 62 Q 46 58 80 56 Q 110 54 133 58 L 133 66 L 131 66 A 13 13 0 0 0 105 66 L 57 66 A 13 13 0 0 0 31 66 L 22 66 Z"
+            fill={bodyDark}
+          />
+
+          {/* Glass: windshield + roof + fastback rear window */}
+          <Path d={glassPath} fill={glassCol} />
+
+          {/* Roof rail line */}
+          <Path d="M 74 13 L 96 15"
+            stroke={trim} strokeWidth={1.2} fill="none" strokeLinecap="round" />
+
+          {/* Door shut line */}
+          <Path d="M 64 30 Q 92 28 102 20"
+            stroke={trim} strokeWidth={0.7} fill="none" />
+
+          {/* FRONT headlight (round, iconic 911) */}
+          <Circle cx={26} cy={52} r={5.5} fill={darkMetal} />
+          <Circle cx={26} cy={52} r={4}   fill={headlight} />
+          <Circle cx={26} cy={52} r={1.5} fill={darkMetal} />
+
+          {/* REAR taillights (stacked round — 911 signature) */}
+          <Circle cx={130} cy={47} r={4.5} fill={darkMetal} />
+          <Circle cx={130} cy={47} r={3}   fill={taillight} />
+          <Circle cx={130} cy={56} r={3.5} fill={darkMetal} />
+          <Circle cx={130} cy={56} r={2}   fill={taillight} />
+
+          {/* FRONT WHEEL: tire + rim rings */}
+          <Circle cx={44} cy={66} r={13}  fill={tire} />
+          <Circle cx={44} cy={66} r={9.5} fill={rimOuter} />
+          <Circle cx={44} cy={66} r={7.5} fill={rimInner} />
+          <Circle cx={44} cy={66} r={3}   fill={rimOuter} />
+
+          {/* REAR WHEEL */}
+          <Circle cx={118} cy={66} r={13}  fill={tire} />
+          <Circle cx={118} cy={66} r={9.5} fill={rimOuter} />
+          <Circle cx={118} cy={66} r={7.5} fill={rimInner} />
+          <Circle cx={118} cy={66} r={3}   fill={rimOuter} />
+        </Svg>
       </Animated.View>
     </View>
   );
 }
 
+// ─── Reis: spinning globe with animated longitude lines + flight path reveal ────
 function TravelGoalAnim({ styles, colors }) {
-  const travel = useSharedValue(0);
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    travel.value = withRepeat(
-      withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.quad) }),
-      -1,
-      true
+    progress.value = withRepeat(
+      withTiming(1, { duration: 5200, easing: Easing.linear }),
+      -1, false
     );
-  }, [travel]);
+  }, [progress]);
 
-  const planeStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: interpolate(travel.value, [0, 1], [-34, 34]) },
-      { translateY: interpolate(travel.value, [0, 0.5, 1], [10, -12, 10]) },
-      { rotate: `${interpolate(travel.value, [0, 1], [-12, 12])}deg` },
-    ],
+  const ell1Props = useAnimatedProps(() => ({
+    rx: Math.abs(32 * Math.cos(progress.value * Math.PI * 2.5)),
+  }));
+  const ell2Props = useAnimatedProps(() => ({
+    rx: Math.abs(32 * Math.cos(progress.value * Math.PI * 2.5 + (2 * Math.PI / 3))),
+  }));
+  const ell3Props = useAnimatedProps(() => ({
+    rx: Math.abs(32 * Math.cos(progress.value * Math.PI * 2.5 + (4 * Math.PI / 3))),
   }));
 
-  const stampStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(travel.value, [0, 0.5, 1], [0.2, 0.95, 0.2]),
-    transform: [{ scale: interpolate(travel.value, [0, 0.5, 1], [0.82, 1, 0.82]) }],
+  const pathProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.04, 0.54], [112, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.04, 0.10, 0.72, 0.84], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
+
+  const dotProps = useAnimatedProps(() => {
+    const t = interpolate(progress.value, [0.04, 0.54], [0, 1], Extrapolation.CLAMP);
+    return {
+      cx: (1 - t) * (1 - t) * 50 + 2 * (1 - t) * t * 82 + t * t * 120,
+      cy: (1 - t) * (1 - t) * 28 + 2 * (1 - t) * t * 10 + t * t * 60,
+      opacity: interpolate(progress.value, [0.04, 0.10, 0.72, 0.84], [0, 1, 1, 0], Extrapolation.CLAMP),
+    };
+  });
+
+  const globeStroke = toRgba(colors.text.primary, 0.50);
+  const lonStroke   = toRgba(colors.text.primary, 0.20);
+  const latStroke   = toRgba(colors.text.primary, 0.14);
+  const pathStroke  = toRgba(colors.accent.primary, 0.88);
+  const dotFill     = toRgba(colors.accent.primary, 1);
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.goalTravelSun} />
-      <View style={styles.goalTravelPath} />
-      <Animated.View style={[styles.goalTravelPlane, planeStyle]} />
-      <Animated.View style={[styles.goalTravelStamp, stampStyle]} />
+      <Svg width={160} height={88}>
+        {/* Globe circle */}
+        <Circle cx={80} cy={44} r={32} stroke={globeStroke} strokeWidth={1} fill="none" />
+
+        {/* Latitude lines (static) */}
+        <Ellipse cx={80} cy={44} rx={32} ry={7}
+          stroke={latStroke} strokeWidth={0.8} fill="none" />
+        <Ellipse cx={80} cy={34} rx={28} ry={5}
+          stroke={latStroke} strokeWidth={0.6} fill="none" />
+
+        {/* Animated longitude lines */}
+        <AnimatedEllipse cx={80} cy={44} ry={32}
+          stroke={lonStroke} strokeWidth={0.8} fill="none"
+          animatedProps={ell1Props} />
+        <AnimatedEllipse cx={80} cy={44} ry={32}
+          stroke={lonStroke} strokeWidth={0.8} fill="none"
+          animatedProps={ell2Props} />
+        <AnimatedEllipse cx={80} cy={44} ry={32}
+          stroke={lonStroke} strokeWidth={0.8} fill="none"
+          animatedProps={ell3Props} />
+
+        {/* Flight path */}
+        <AnimatedPath
+          d="M 50 28 Q 82 10 120 60"
+          stroke={pathStroke}
+          strokeWidth={1.5}
+          fill="none"
+          strokeDasharray={112}
+          animatedProps={pathProps}
+        />
+
+        {/* Moving dot along path */}
+        <AnimatedCircle r={4} fill={dotFill} animatedProps={dotProps} />
+
+        {/* Origin marker */}
+        <Circle cx={50} cy={28} r={3} fill={toRgba(colors.text.primary, 0.35)} />
+        {/* Destination marker */}
+        <Circle cx={120} cy={60} r={4} fill={toRgba(colors.accent.primary, 0.55)} />
+      </Svg>
     </View>
   );
 }
 
+// ─── Pensioen: compound growth curve drawn progressively, endpoint glows ────────
+const GROWTH_PATH_D = 'M 14 72 C 30 70, 50 58, 70 44 S 110 20, 146 10';
+const GROWTH_FILL_D = 'M 14 72 C 30 70, 50 58, 70 44 S 110 20, 146 10 L 146 72 Z';
+const GROWTH_LEN    = 165;
+
 function RetirementGoalAnim({ styles, colors }) {
-  const grow = useSharedValue(0);
+  const progress = useSharedValue(0);
 
   useEffect(() => {
-    grow.value = withRepeat(
-      withTiming(1, { duration: 2800, easing: Easing.inOut(Easing.quad) }),
-      -1,
-      true
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 4200, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(900, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
     );
-  }, [grow]);
+  }, [progress]);
 
-  const leftBarStyle = useAnimatedStyle(() => ({
-    height: interpolate(grow.value, [0, 1], [24, 42]),
+  const curveProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0, 0.82], [GROWTH_LEN, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0, 0.04, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
   }));
 
-  const centerBarStyle = useAnimatedStyle(() => ({
-    height: interpolate(grow.value, [0, 1], [34, 58]),
+  const fillProps = useAnimatedProps(() => ({
+    opacity: interpolate(progress.value, [0.12, 0.36, 0.88, 1], [0, 0.18, 0.18, 0], Extrapolation.CLAMP),
   }));
 
-  const rightBarStyle = useAnimatedStyle(() => ({
-    height: interpolate(grow.value, [0, 1], [44, 74]),
-  }));
+  const dotProps = useAnimatedProps(() => {
+    const t = interpolate(progress.value, [0, 0.82], [0, 1], Extrapolation.CLAMP);
+    return {
+      cx: (1 - t) * (1 - t) * 14 + 2 * (1 - t) * t * 80 + t * t * 146,
+      cy: (1 - t) * (1 - t) * 72 + 2 * (1 - t) * t * 20 + t * t * 10,
+      opacity: interpolate(progress.value, [0.04, 0.10, 0.86, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+    };
+  });
 
-  const sunStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: interpolate(grow.value, [0, 1], [10, -10]) }],
-    opacity: interpolate(grow.value, [0, 1], [0.45, 0.95]),
-  }));
+  const glowProps = useAnimatedProps(() => {
+    const t = interpolate(progress.value, [0, 0.82], [0, 1], Extrapolation.CLAMP);
+    return {
+      cx: (1 - t) * (1 - t) * 14 + 2 * (1 - t) * t * 80 + t * t * 146,
+      cy: (1 - t) * (1 - t) * 72 + 2 * (1 - t) * t * 20 + t * t * 10,
+      r: interpolate(progress.value, [0.76, 0.86, 0.92, 1], [0, 14, 14, 0], Extrapolation.CLAMP),
+      opacity: interpolate(progress.value, [0.76, 0.84, 0.92, 1], [0, 0.28, 0.28, 0], Extrapolation.CLAMP),
+    };
+  });
+
+  const grid    = toRgba(colors.ui.divider, 0.20);
+  const axis    = toRgba(colors.ui.divider, 0.28);
+  const curve   = toRgba(colors.accent.primary, 0.92);
+  const fill    = toRgba(colors.accent.primary, 1);
+  const dot     = toRgba(colors.accent.primary, 1);
 
   return (
     <View style={styles.l1AnimCanvas}>
-      <View style={styles.goalRetireHorizon} />
-      <Animated.View style={[styles.goalRetireSun, sunStyle]} />
-      <View style={styles.goalRetireBars}>
-        <Animated.View style={[styles.goalRetireBar, leftBarStyle]} />
-        <Animated.View style={[styles.goalRetireBar, centerBarStyle]} />
-        <Animated.View style={[styles.goalRetireBar, rightBarStyle]} />
-      </View>
+      <Svg width={160} height={84}>
+        {/* Grid */}
+        <Path d="M 14 18 L 146 18" stroke={grid} strokeWidth={0.7} />
+        <Path d="M 14 36 L 146 36" stroke={grid} strokeWidth={0.7} />
+        <Path d="M 14 54 L 146 54" stroke={grid} strokeWidth={0.7} />
+        <Path d="M 14 72 L 146 72" stroke={axis} strokeWidth={0.8} />
+        <Path d="M 14 12 L 14 72"  stroke={axis} strokeWidth={0.8} />
+
+        {/* Fill area under curve */}
+        <AnimatedPath d={GROWTH_FILL_D} fill={fill} animatedProps={fillProps} />
+
+        {/* Growth curve */}
+        <AnimatedPath
+          d={GROWTH_PATH_D}
+          stroke={curve}
+          strokeWidth={2}
+          fill="none"
+          strokeDasharray={GROWTH_LEN}
+          animatedProps={curveProps}
+        />
+
+        {/* Endpoint glow */}
+        <AnimatedCircle fill={dot} animatedProps={glowProps} />
+
+        {/* Endpoint dot */}
+        <AnimatedCircle r={4.5} fill={dot} animatedProps={dotProps} />
+      </Svg>
     </View>
   );
 }
@@ -1425,6 +1673,9 @@ function RiskGridAnim({ styles, colors }) {
 // ─ 3. STRATEGY: two lines from same start — flat/noisy vs steady growth ─────────
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedG = Animated.createAnimatedComponent(G);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedEllipse = Animated.createAnimatedComponent(Ellipse);
 
 const STRAT_SVG_W = 90;
 const STRAT_SVG_H = 70;
@@ -5657,23 +5908,12 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surfaceActive, 0.94),
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    alignItems: 'center',
+    overflow: 'hidden',
     justifyContent: 'flex-end',
-    paddingBottom: 10,
-    flexDirection: 'row',
-    gap: 14,
   },
-  goalHouseWindow: {
-    width: 16,
-    height: 16,
-    borderRadius: 5,
-    backgroundColor: toRgba(colors.accent.primary, 0.82),
-  },
-  goalHouseDoor: {
-    width: 14,
-    height: 26,
-    borderRadius: 6,
-    backgroundColor: toRgba(colors.text.primary, 0.74),
+  goalHouseFill: {
+    width: '100%',
+    backgroundColor: toRgba(colors.accent.primary, 0.22),
   },
   goalHouseBase: {
     width: 96,
@@ -5682,115 +5922,101 @@ const createStyles = (colors, components, mode = 'dark') =>
     marginTop: 12,
     backgroundColor: toRgba(colors.ui.divider, 0.28),
   },
-  goalRoad: {
+  goalCarInner: {
+    width: 160,
+    height: 60,
+    position: 'relative',
+  },
+  goalCarTrack: {
     position: 'absolute',
-    bottom: 38,
-    width: '82%',
-    height: 6,
-    borderRadius: 999,
+    bottom: 8,
+    left: 0,
+    width: 152,
+    height: 2,
+    borderRadius: 1,
     backgroundColor: toRgba(colors.ui.divider, 0.28),
   },
-  goalCarWrap: {
+  goalCarTrackFill: {
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: toRgba(colors.accent.primary, 0.58),
+  },
+  goalCarDestMarker: {
+    position: 'absolute',
+    bottom: 3,
+    left: 146,
+    width: 2,
+    height: 12,
+    borderRadius: 1,
+    backgroundColor: toRgba(colors.text.primary, 0.38),
+  },
+  goalCarUnit: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   goalCarRoof: {
-    width: 34,
-    height: 16,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-    backgroundColor: toRgba(colors.text.primary, 0.82),
-    marginBottom: -4,
+    width: 22,
+    height: 11,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    backgroundColor: toRgba(colors.text.primary, 0.72),
+    marginBottom: -2,
   },
   goalCarBody: {
-    width: 92,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: toRgba(colors.accent.primary, 0.86),
-  },
-  goalCarWheel: {
-    position: 'absolute',
-    bottom: -10,
-    width: 18,
+    width: 54,
     height: 18,
-    borderRadius: 9,
-    borderWidth: 4,
-    borderColor: toRgba(colors.text.primary, 0.88),
-    backgroundColor: colors.background.surface,
-  },
-  goalCarWheelLeft: {
-    left: 16,
-  },
-  goalCarWheelRight: {
-    right: 16,
-  },
-  goalTravelSun: {
-    position: 'absolute',
-    top: 28,
-    right: 42,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: toRgba(colors.accent.primary, 0.85),
-  },
-  goalTravelPath: {
-    position: 'absolute',
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: toRgba(colors.ui.divider, 0.42),
-  },
-  goalTravelPlane: {
-    width: 38,
-    height: 20,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 8,
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 12,
-    backgroundColor: toRgba(colors.text.primary, 0.84),
-  },
-  goalTravelStamp: {
-    position: 'absolute',
-    bottom: 28,
-    left: 42,
-    width: 26,
-    height: 26,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: toRgba(colors.accent.primary, 0.72),
-    backgroundColor: toRgba(colors.accent.primary, 0.12),
-  },
-  goalRetireHorizon: {
-    position: 'absolute',
-    bottom: 42,
-    width: '82%',
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: toRgba(colors.ui.divider, 0.3),
-  },
-  goalRetireSun: {
-    position: 'absolute',
-    top: 26,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
     backgroundColor: toRgba(colors.accent.primary, 0.82),
+  },
+  goalTravelInner: {
+    width: 160,
+    height: 80,
+    position: 'relative',
+  },
+  goalTravelMarker: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.ui.divider, 0.45),
+  },
+  goalTravelDestMarker: {
+    backgroundColor: toRgba(colors.accent.primary, 0.72),
+  },
+  goalTravelDot: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.accent.primary, 0.92),
+  },
+  goalCarSvgWrap: {
+    position: 'absolute',
+    left: 8,
+    top: 0,
   },
   goalRetireBars: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 10,
-    marginTop: 28,
+    gap: 12,
   },
   goalRetireBar: {
-    width: 18,
-    borderTopLeftRadius: 9,
-    borderTopRightRadius: 9,
-    backgroundColor: toRgba(colors.text.primary, 0.84),
+    width: 20,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  goalRetireBarMuted: {
+    backgroundColor: toRgba(colors.text.primary, 0.42),
+  },
+  goalRetireBarAccent: {
+    backgroundColor: toRgba(colors.accent.primary, 0.72),
   },
   l1CtaPill: {
     flexDirection: 'row',
