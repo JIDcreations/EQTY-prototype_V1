@@ -181,7 +181,9 @@ export const lessonContentNl = {
         visualHint: 'Doelen maken van ruis richting.',
       },
       visualization: {
-        title: 'Voorbeelden van beleggingsdoelen',
+        title: 'Wat kan je doel zijn?',
+        subtitle:
+          'Ontdek voorbeelden van doelen waarvoor mensen investeren.',
         cards: [
           {
             id: 'house',

@@ -303,6 +303,9 @@ export default function LessonStepScreen() {
     if (step === 1 && lessonId === 'lesson_1') {
       return content?.steps?.concept?.intro || null;
     }
+    if (step === 2 && lessonId === 'lesson_1') {
+      return content?.steps?.visualization?.subtitle || null;
+    }
     if (step === 6 && lessonId === 'lesson_1') {
       return locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?';
     }
