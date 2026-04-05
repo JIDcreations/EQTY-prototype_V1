@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import LottieView from 'lottie-react-native';
 import {
   Dimensions,
   FlatList,
@@ -1238,94 +1239,38 @@ function HouseGoalAnim({ styles, colors }) {
   );
 }
 
-// ─── Auto: flat-design car drives across ──────────────────────────────────────
+// ─── Auto: Lottie car animation ───────────────────────────────────────────────
 function CarGoalAnim({ styles, colors }) {
-  const drive    = useSharedValue(0);
-  const wheelRot = useSharedValue(0);
-
-  useEffect(() => {
-    drive.value = withRepeat(
-      withTiming(1, { duration: 3000, easing: Easing.linear }),
-      -1, false
-    );
-    wheelRot.value = withRepeat(
-      withTiming(1, { duration: 500, easing: Easing.linear }),
-      -1, false
-    );
-  }, [drive, wheelRot]);
-
-  const carStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(drive.value, [0, 1], [-160, 175], Extrapolation.CLAMP) }],
-  }));
-
-  const fWheelProps = useAnimatedProps(() => ({
-    transform: 'rotate(' + (wheelRot.value * 360) + ', 34, 62)',
-  }));
-  const rWheelProps = useAnimatedProps(() => ({
-    transform: 'rotate(' + (wheelRot.value * 360) + ', 106, 62)',
-  }));
-
-  const body   = toRgba(colors.text.primary, 0.86);
-  const cabin  = toRgba(colors.text.primary, 0.64);
-  const glass  = toRgba(colors.background.surface, 0.40);
-  const led    = toRgba(colors.accent.primary, 1.0);
-  const ledD   = toRgba(colors.accent.primary, 0.65);
-  const tire   = toRgba(colors.text.primary, 0.88);
-  const rim    = toRgba(colors.background.surface, 0.78);
-  const rimD   = toRgba(colors.text.primary, 0.62);
-  const road   = toRgba(colors.text.primary, 0.14);
-  const roadDash = toRgba(colors.text.primary, 0.07);
-
-  // Rounded-rect paths (no Rect import needed)
-  // Body: x=10, y=28, w=120, h=34, rx=12
-  const bodyP   = 'M 22 28 L 118 28 Q 130 28 130 40 L 130 50 Q 130 62 118 62 L 22 62 Q 10 62 10 50 L 10 40 Q 10 28 22 28 Z';
-  // Cabin: x=30, y=10, w=70, h=24, rx=8
-  const cabinP  = 'M 38 10 L 92 10 Q 100 10 100 18 L 100 28 Q 100 34 92 34 L 38 34 Q 30 34 30 28 L 30 18 Q 30 10 38 10 Z';
-  // Window: x=34, y=14, w=62, h=16, rx=5
-  const windowP = 'M 39 14 L 91 14 Q 96 14 96 19 L 96 26 Q 96 30 91 30 L 39 30 Q 34 30 34 26 L 34 19 Q 34 14 39 14 Z';
-
+  const outlineColor = colors.ui.divider;
   return (
     <View style={styles.l1AnimCanvas}>
-      {/* Road */}
-      <Svg width={160} height={80} style={StyleSheet.absoluteFill}>
-        <Path d="M 0 74 L 160 74" stroke={road} strokeWidth={1.5} />
-        <Path d="M 0 70 L 160 70" stroke={roadDash} strokeWidth={0.6} strokeDasharray="10,14" />
-      </Svg>
-
-      {/* Flat-design car */}
-      <Animated.View style={[{ position: 'absolute', left: 0, top: 0 }, carStyle]}>
-        <Svg width={140} height={76}>
-          {/* Tires first — body will cover upper half */}
-          <Circle cx={34}  cy={62} r={11} fill={tire} />
-          <Circle cx={34}  cy={62} r={8}  fill={rim} />
-          <Circle cx={106} cy={62} r={11} fill={tire} />
-          <Circle cx={106} cy={62} r={8}  fill={rim} />
-
-          {/* Spinning cross — looks like spokes */}
-          <AnimatedG animatedProps={fWheelProps}>
-            <Path d="M 34 51 L 34 73 M 23 62 L 45 62" stroke={rimD} strokeWidth={2.2} fill="none" strokeLinecap="round" />
-            <Circle cx={34} cy={62} r={2} fill={rimD} />
-          </AnimatedG>
-          <AnimatedG animatedProps={rWheelProps}>
-            <Path d="M 106 51 L 106 73 M 95 62 L 117 62" stroke={rimD} strokeWidth={2.2} fill="none" strokeLinecap="round" />
-            <Circle cx={106} cy={62} r={2} fill={rimD} />
-          </AnimatedG>
-
-          {/* Body */}
-          <Path d={bodyP} fill={body} />
-          {/* Cabin */}
-          <Path d={cabinP} fill={cabin} />
-          {/* Window */}
-          <Path d={windowP} fill={glass} />
-          {/* Centre post dividing windshield/rear window */}
-          <Path d="M 65 14 L 65 30" stroke={body} strokeWidth={1.5} fill="none" />
-
-          {/* Headlight dot */}
-          <Circle cx={12} cy={43} r={3.5} fill={led} />
-          {/* Taillight dot */}
-          <Circle cx={128} cy={43} r={3.5} fill={ledD} />
-        </Svg>
-      </Animated.View>
+      <LottieView
+        source={require('../assets/animations/carr.json')}
+        autoPlay
+        loop
+        style={styles.goalCarLottie}
+        resizeMode="contain"
+        colorFilters={[
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 1', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 2', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 3', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 4', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 5', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 8', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 9', color: outlineColor },
+          { keypath: 'Shape Layer 1', color: outlineColor },
+          { keypath: 'Shape Layer 2', color: outlineColor },
+          { keypath: 'Shape Layer 3', color: outlineColor },
+          { keypath: 'Shape Layer 4', color: outlineColor },
+          { keypath: 'Shape Layer 5', color: outlineColor },
+          { keypath: 'Shape Layer 6', color: outlineColor },
+          { keypath: 'Shape Layer 7', color: outlineColor },
+          { keypath: 'Shape Layer 8', color: outlineColor },
+          { keypath: 'WhR', color: outlineColor },
+          { keypath: 'WhL', color: outlineColor },
+          { keypath: 'Base', color: outlineColor },
+        ]}
+      />
     </View>
   );
 }
@@ -5986,6 +5931,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     position: 'absolute',
     left: 8,
     top: 0,
+  },
+  goalCarLottie: {
+    width: '156%',
+    height: '156%',
   },
   goalRetireBars: {
     flexDirection: 'row',
