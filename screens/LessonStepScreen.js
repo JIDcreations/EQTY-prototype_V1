@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import LottieView from 'lottie-react-native';
 import {
   Dimensions,
   FlatList,
@@ -1315,6 +1316,338 @@ function ProcessGridStepAnimation({ stepId, styles, colors }) {
   }
 }
 
+function GoalExampleStepAnimation({ stepId, styles, colors }) {
+  switch (stepId) {
+    case 'house':
+      return <HouseGoalAnim styles={styles} colors={colors} />;
+    case 'car':
+      return <CarGoalAnim styles={styles} colors={colors} />;
+    case 'travel':
+      return <TravelGoalAnim styles={styles} colors={colors} />;
+    case 'retirement':
+      return <RetirementGoalAnim styles={styles} colors={colors} />;
+    default:
+      return null;
+  }
+}
+
+// ─── Huis: European front-facing house, warm lights come on in windows ──────────
+function HouseGoalAnim({ styles, colors }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 7200, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(300, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
+    );
+  }, [progress]);
+
+  const bodyProps   = useAnimatedProps(() => ({ opacity: interpolate(progress.value, [0, 0.10], [0, 1], Extrapolation.CLAMP) }));
+  const detailProps = useAnimatedProps(() => ({ opacity: interpolate(progress.value, [0.07, 0.20], [0, 1], Extrapolation.CLAMP) }));
+  const glowProps   = useAnimatedProps(() => ({
+    opacity: interpolate(
+      progress.value,
+      [0.18, 0.34, 0.52, 0.68, 0.84, 1],
+      [0,    0.52, 0.28, 0.48, 0.28, 0],
+      Extrapolation.CLAMP
+    ),
+  }));
+
+  const facade    = toRgba(colors.background.surfaceActive, 0.88);
+  const facadeS   = toRgba(colors.text.primary, 0.28);
+  const roofCol   = toRgba(colors.text.primary, 0.80);
+  const frameCol  = toRgba(colors.text.primary, 0.54);
+  const glassDark = toRgba(colors.background.surface, 0.80);
+  const glowCol   = toRgba(colors.accent.primary, 1);
+  const shutterC  = toRgba(colors.text.primary, 0.45);
+  const doorCol   = toRgba(colors.text.primary, 0.68);
+  const stepCol   = toRgba(colors.text.primary, 0.20);
+  const panelLine = toRgba(colors.text.primary, 0.26);
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Svg width={160} height={96}>
+
+        {/* ── Structure: facade + roof + chimney + steps ── */}
+        <AnimatedG animatedProps={bodyProps}>
+          {/* Main facade wall */}
+          <Path d="M 24 30 L 136 30 L 136 86 L 24 86 Z"
+            stroke={facadeS} strokeWidth={0.8} fill={facade} />
+          {/* Roof */}
+          <Path d="M 22 31 L 138 31 L 80 5 Z" fill={roofCol} />
+          {/* Chimney shaft */}
+          <Path d="M 95 9 L 95 31 L 106 31 L 106 9 Z" fill={roofCol} />
+          {/* Chimney cap */}
+          <Path d="M 92 9 L 109 9"
+            stroke={roofCol} strokeWidth={3.5} strokeLinecap="round" fill="none" />
+          {/* Steps */}
+          <Path d="M 60 86 L 100 86 L 105 91 L 55 91 Z" fill={stepCol} />
+          <Path d="M 55 91 L 105 91 L 111 96 L 49 96 Z" fill={stepCol} />
+        </AnimatedG>
+
+        {/* ── Details: shutters + window frames + door ── */}
+        <AnimatedG animatedProps={detailProps}>
+
+          {/* LEFT WINDOW GROUP */}
+          {/* Shutter left */}
+          <Path d="M 26 38 L 26 60 L 33 60 L 33 38 Z" fill={shutterC} />
+          <Path d="M 27 42 L 32 42 M 27 46 L 32 46 M 27 50 L 32 50 M 27 54 L 32 54 M 27 58 L 32 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          {/* Shutter right */}
+          <Path d="M 57 38 L 57 60 L 64 60 L 64 38 Z" fill={shutterC} />
+          <Path d="M 58 42 L 63 42 M 58 46 L 63 46 M 58 50 L 63 50 M 58 54 L 63 54 M 58 58 L 63 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          {/* Window frame + dark glass */}
+          <Path d="M 34 40 L 34 58 L 56 58 L 56 40 Z"
+            stroke={frameCol} strokeWidth={1.5} fill={glassDark} />
+          {/* Pane divisions */}
+          <Path d="M 45 40 L 45 58 M 34 49 L 56 49"
+            stroke={frameCol} strokeWidth={1} fill="none" />
+
+          {/* RIGHT WINDOW GROUP */}
+          <Path d="M 96 38 L 96 60 L 103 60 L 103 38 Z" fill={shutterC} />
+          <Path d="M 97 42 L 102 42 M 97 46 L 102 46 M 97 50 L 102 50 M 97 54 L 102 54 M 97 58 L 102 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          <Path d="M 127 38 L 127 60 L 134 60 L 134 38 Z" fill={shutterC} />
+          <Path d="M 128 42 L 133 42 M 128 46 L 133 46 M 128 50 L 133 50 M 128 54 L 133 54 M 128 58 L 133 58"
+            stroke={facade} strokeWidth={0.8} fill="none" />
+          <Path d="M 104 40 L 104 58 L 126 58 L 126 40 Z"
+            stroke={frameCol} strokeWidth={1.5} fill={glassDark} />
+          <Path d="M 115 40 L 115 58 M 104 49 L 126 49"
+            stroke={frameCol} strokeWidth={1} fill="none" />
+
+          {/* DOOR: arched top */}
+          <Path d="M 68 86 L 68 70 A 12 12 0 0 1 92 70 L 92 86 Z"
+            fill={doorCol} />
+          {/* Door panels */}
+          <Path d="M 70 84 L 70 72 L 79 72 L 79 84 Z"
+            fill="none" stroke={panelLine} strokeWidth={0.8} />
+          <Path d="M 81 84 L 81 72 L 90 72 L 90 84 Z"
+            fill="none" stroke={panelLine} strokeWidth={0.8} />
+          {/* Door handle */}
+          <Circle cx={89} cy={77} r={1.5} fill={toRgba(colors.accent.primary, 0.70)} />
+        </AnimatedG>
+
+        {/* ── Warm window glow (breathes) ── */}
+        <AnimatedG animatedProps={glowProps}>
+          <Path d="M 35 41 L 35 57 L 55 57 L 55 41 Z" fill={glowCol} />
+          <Path d="M 105 41 L 105 57 L 125 57 L 125 41 Z" fill={glowCol} />
+        </AnimatedG>
+
+      </Svg>
+    </View>
+  );
+}
+
+// ─── Auto: Lottie car animation ───────────────────────────────────────────────
+function CarGoalAnim({ styles, colors }) {
+  const outlineColor = colors.ui.divider;
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <LottieView
+        source={require('../assets/animations/carr.json')}
+        autoPlay
+        loop
+        style={styles.goalCarLottie}
+        resizeMode="contain"
+        colorFilters={[
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 1', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 2', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 3', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 4', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 5', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 8', color: outlineColor },
+          { keypath: 'Layer 2/CarTypes_t Outlines - Group 9', color: outlineColor },
+          { keypath: 'Shape Layer 1', color: outlineColor },
+          { keypath: 'Shape Layer 2', color: outlineColor },
+          { keypath: 'Shape Layer 3', color: outlineColor },
+          { keypath: 'Shape Layer 4', color: outlineColor },
+          { keypath: 'Shape Layer 5', color: outlineColor },
+          { keypath: 'Shape Layer 6', color: outlineColor },
+          { keypath: 'Shape Layer 7', color: outlineColor },
+          { keypath: 'Shape Layer 8', color: outlineColor },
+          { keypath: 'WhR', color: outlineColor },
+          { keypath: 'WhL', color: outlineColor },
+          { keypath: 'Base', color: outlineColor },
+        ]}
+      />
+    </View>
+  );
+}
+
+// ─── Reis: spinning globe with animated longitude lines + flight path reveal ────
+function TravelGoalAnim({ styles, colors }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, { duration: 5200, easing: Easing.linear }),
+      -1, false
+    );
+  }, [progress]);
+
+  const ell1Props = useAnimatedProps(() => ({
+    rx: Math.abs(32 * Math.cos(progress.value * Math.PI * 2.5)),
+  }));
+  const ell2Props = useAnimatedProps(() => ({
+    rx: Math.abs(32 * Math.cos(progress.value * Math.PI * 2.5 + (2 * Math.PI / 3))),
+  }));
+  const ell3Props = useAnimatedProps(() => ({
+    rx: Math.abs(32 * Math.cos(progress.value * Math.PI * 2.5 + (4 * Math.PI / 3))),
+  }));
+
+  const pathProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.04, 0.54], [112, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.04, 0.10, 0.72, 0.84], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const dotProps = useAnimatedProps(() => {
+    const t = interpolate(progress.value, [0.04, 0.54], [0, 1], Extrapolation.CLAMP);
+    return {
+      cx: (1 - t) * (1 - t) * 50 + 2 * (1 - t) * t * 82 + t * t * 120,
+      cy: (1 - t) * (1 - t) * 28 + 2 * (1 - t) * t * 10 + t * t * 60,
+      opacity: interpolate(progress.value, [0.04, 0.10, 0.72, 0.84], [0, 1, 1, 0], Extrapolation.CLAMP),
+    };
+  });
+
+  const globeStroke = toRgba(colors.text.primary, 0.50);
+  const lonStroke   = toRgba(colors.text.primary, 0.20);
+  const latStroke   = toRgba(colors.text.primary, 0.14);
+  const pathStroke  = toRgba(colors.accent.primary, 0.88);
+  const dotFill     = toRgba(colors.accent.primary, 1);
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Svg width={160} height={88}>
+        {/* Globe circle */}
+        <Circle cx={80} cy={44} r={32} stroke={globeStroke} strokeWidth={1} fill="none" />
+
+        {/* Latitude lines (static) */}
+        <Ellipse cx={80} cy={44} rx={32} ry={7}
+          stroke={latStroke} strokeWidth={0.8} fill="none" />
+        <Ellipse cx={80} cy={34} rx={28} ry={5}
+          stroke={latStroke} strokeWidth={0.6} fill="none" />
+
+        {/* Animated longitude lines */}
+        <AnimatedEllipse cx={80} cy={44} ry={32}
+          stroke={lonStroke} strokeWidth={0.8} fill="none"
+          animatedProps={ell1Props} />
+        <AnimatedEllipse cx={80} cy={44} ry={32}
+          stroke={lonStroke} strokeWidth={0.8} fill="none"
+          animatedProps={ell2Props} />
+        <AnimatedEllipse cx={80} cy={44} ry={32}
+          stroke={lonStroke} strokeWidth={0.8} fill="none"
+          animatedProps={ell3Props} />
+
+        {/* Flight path */}
+        <AnimatedPath
+          d="M 50 28 Q 82 10 120 60"
+          stroke={pathStroke}
+          strokeWidth={1.5}
+          fill="none"
+          strokeDasharray={112}
+          animatedProps={pathProps}
+        />
+
+        {/* Moving dot along path */}
+        <AnimatedCircle r={4} fill={dotFill} animatedProps={dotProps} />
+
+        {/* Origin marker */}
+        <Circle cx={50} cy={28} r={3} fill={toRgba(colors.text.primary, 0.35)} />
+        {/* Destination marker */}
+        <Circle cx={120} cy={60} r={4} fill={toRgba(colors.accent.primary, 0.55)} />
+      </Svg>
+    </View>
+  );
+}
+
+// ─── Pensioen: compound growth curve drawn progressively, endpoint glows ────────
+const GROWTH_PATH_D = 'M 14 72 C 30 70, 50 58, 70 44 S 110 20, 146 10';
+const GROWTH_FILL_D = 'M 14 72 C 30 70, 50 58, 70 44 S 110 20, 146 10 L 146 72 Z';
+const GROWTH_LEN    = 165;
+
+function RetirementGoalAnim({ styles, colors }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 4200, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(900, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
+    );
+  }, [progress]);
+
+  const curveProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0, 0.82], [GROWTH_LEN, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0, 0.04, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const fillProps = useAnimatedProps(() => ({
+    opacity: interpolate(progress.value, [0.12, 0.36, 0.88, 1], [0, 0.18, 0.18, 0], Extrapolation.CLAMP),
+  }));
+
+  const dotProps = useAnimatedProps(() => {
+    const t = interpolate(progress.value, [0, 0.82], [0, 1], Extrapolation.CLAMP);
+    return {
+      cx: (1 - t) * (1 - t) * 14 + 2 * (1 - t) * t * 80 + t * t * 146,
+      cy: (1 - t) * (1 - t) * 72 + 2 * (1 - t) * t * 20 + t * t * 10,
+      opacity: interpolate(progress.value, [0.04, 0.10, 0.86, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+    };
+  });
+
+  const glowProps = useAnimatedProps(() => {
+    const t = interpolate(progress.value, [0, 0.82], [0, 1], Extrapolation.CLAMP);
+    return {
+      cx: (1 - t) * (1 - t) * 14 + 2 * (1 - t) * t * 80 + t * t * 146,
+      cy: (1 - t) * (1 - t) * 72 + 2 * (1 - t) * t * 20 + t * t * 10,
+      r: interpolate(progress.value, [0.76, 0.86, 0.92, 1], [0, 14, 14, 0], Extrapolation.CLAMP),
+      opacity: interpolate(progress.value, [0.76, 0.84, 0.92, 1], [0, 0.28, 0.28, 0], Extrapolation.CLAMP),
+    };
+  });
+
+  const grid    = toRgba(colors.ui.divider, 0.20);
+  const axis    = toRgba(colors.ui.divider, 0.28);
+  const curve   = toRgba(colors.accent.primary, 0.92);
+  const fill    = toRgba(colors.accent.primary, 1);
+  const dot     = toRgba(colors.accent.primary, 1);
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Svg width={160} height={84}>
+        {/* Grid */}
+        <Path d="M 14 18 L 146 18" stroke={grid} strokeWidth={0.7} />
+        <Path d="M 14 36 L 146 36" stroke={grid} strokeWidth={0.7} />
+        <Path d="M 14 54 L 146 54" stroke={grid} strokeWidth={0.7} />
+        <Path d="M 14 72 L 146 72" stroke={axis} strokeWidth={0.8} />
+        <Path d="M 14 12 L 14 72"  stroke={axis} strokeWidth={0.8} />
+
+        {/* Fill area under curve */}
+        <AnimatedPath d={GROWTH_FILL_D} fill={fill} animatedProps={fillProps} />
+
+        {/* Growth curve */}
+        <AnimatedPath
+          d={GROWTH_PATH_D}
+          stroke={curve}
+          strokeWidth={2}
+          fill="none"
+          strokeDasharray={GROWTH_LEN}
+          animatedProps={curveProps}
+        />
+
+        {/* Endpoint glow */}
+        <AnimatedCircle fill={dot} animatedProps={glowProps} />
+
+        {/* Endpoint dot */}
+        <AnimatedCircle r={4.5} fill={dot} animatedProps={dotProps} />
+      </Svg>
+    </View>
+  );
+}
 // ─ 1. GOAL: a dot spirals inward and shrinks until it locks on the goal ────────
 function GoalGridAnim({ styles, colors }) {
   const phase = useSharedValue(0);
@@ -5571,6 +5904,145 @@ const createStyles = (colors, components, mode = 'dark') =>
     justifyContent: 'center',
     overflow: 'hidden',
     minHeight: components.sizes.chart.md,
+  },
+  goalHouseHalo: {
+    position: 'absolute',
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: toRgba(colors.accent.primary, 0.12),
+  },
+  goalHouseRoof: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 38,
+    borderRightWidth: 38,
+    borderBottomWidth: 30,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: toRgba(colors.text.primary, 0.88),
+    marginBottom: -2,
+  },
+  goalHouseBody: {
+    width: 76,
+    height: 58,
+    borderRadius: 14,
+    backgroundColor: toRgba(colors.background.surfaceActive, 0.94),
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
+  },
+  goalHouseFill: {
+    width: '100%',
+    backgroundColor: toRgba(colors.accent.primary, 0.22),
+  },
+  goalHouseBase: {
+    width: 96,
+    height: 6,
+    borderRadius: 999,
+    marginTop: 12,
+    backgroundColor: toRgba(colors.ui.divider, 0.28),
+  },
+  goalCarInner: {
+    width: 160,
+    height: 60,
+    position: 'relative',
+  },
+  goalCarTrack: {
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    width: 152,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: toRgba(colors.ui.divider, 0.28),
+  },
+  goalCarTrackFill: {
+    position: 'absolute',
+    bottom: 8,
+    left: 0,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: toRgba(colors.accent.primary, 0.58),
+  },
+  goalCarDestMarker: {
+    position: 'absolute',
+    bottom: 3,
+    left: 146,
+    width: 2,
+    height: 12,
+    borderRadius: 1,
+    backgroundColor: toRgba(colors.text.primary, 0.38),
+  },
+  goalCarUnit: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    alignItems: 'center',
+  },
+  goalCarRoof: {
+    width: 22,
+    height: 11,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
+    backgroundColor: toRgba(colors.text.primary, 0.72),
+    marginBottom: -2,
+  },
+  goalCarBody: {
+    width: 54,
+    height: 18,
+    borderRadius: 8,
+    backgroundColor: toRgba(colors.accent.primary, 0.82),
+  },
+  goalTravelInner: {
+    width: 160,
+    height: 80,
+    position: 'relative',
+  },
+  goalTravelMarker: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.ui.divider, 0.45),
+  },
+  goalTravelDestMarker: {
+    backgroundColor: toRgba(colors.accent.primary, 0.72),
+  },
+  goalTravelDot: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: toRgba(colors.accent.primary, 0.92),
+  },
+  goalCarSvgWrap: {
+    position: 'absolute',
+    left: 8,
+    top: 0,
+  },
+  goalCarLottie: {
+    width: '156%',
+    height: '156%',
+  },
+  goalRetireBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+  },
+  goalRetireBar: {
+    width: 20,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  goalRetireBarMuted: {
+    backgroundColor: toRgba(colors.text.primary, 0.42),
+  },
+  goalRetireBarAccent: {
+    backgroundColor: toRgba(colors.accent.primary, 0.72),
   },
   l1CtaPill: {
     flexDirection: 'row',
