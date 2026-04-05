@@ -1238,107 +1238,92 @@ function HouseGoalAnim({ styles, colors }) {
   );
 }
 
-// ─── Auto: Porsche 911 profile glides in with spring easing ─────────────────────
+// ─── Auto: flat-design car drives across ──────────────────────────────────────
 function CarGoalAnim({ styles, colors }) {
-  const progress = useSharedValue(0);
+  const drive    = useSharedValue(0);
+  const wheelRot = useSharedValue(0);
 
   useEffect(() => {
-    progress.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 2800, easing: Easing.bezier(0.34, 1.24, 0.64, 1) }),
-        withDelay(1000, withTiming(0, { duration: 0 }))
-      ),
+    drive.value = withRepeat(
+      withTiming(1, { duration: 3000, easing: Easing.linear }),
       -1, false
     );
-  }, [progress]);
+    wheelRot.value = withRepeat(
+      withTiming(1, { duration: 500, easing: Easing.linear }),
+      -1, false
+    );
+  }, [drive, wheelRot]);
 
   const carStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: interpolate(progress.value, [0, 1], [-174, 0]) }],
-    opacity: interpolate(progress.value, [0, 0.06, 1], [0, 1, 1], Extrapolation.CLAMP),
+    transform: [{ translateX: interpolate(drive.value, [0, 1], [-160, 175], Extrapolation.CLAMP) }],
   }));
 
-  const road      = toRgba(colors.ui.divider, 0.30);
-  const roadDash  = toRgba(colors.ui.divider, 0.16);
-  const postColor = toRgba(colors.text.primary, 0.35);
-  const flagColor = toRgba(colors.accent.primary, 0.70);
-  // Car colors
-  const bodyColor = toRgba(colors.accent.primary, 0.90);
-  const bodyDark  = toRgba(colors.accent.primary, 0.60);
-  const glassCol  = toRgba(colors.background.surface, 0.28);
-  const darkMetal = toRgba(colors.text.primary, 0.80);
-  const trim      = toRgba(colors.text.primary, 0.55);
-  const tire      = toRgba(colors.text.primary, 0.86);
-  const rimOuter  = toRgba(colors.text.primary, 0.55);
-  const rimInner  = toRgba(colors.background.surface, 0.95);
-  const headlight = toRgba(colors.accent.primary, 0.95);
-  const taillight = toRgba(colors.accent.primary, 0.80);
+  const fWheelProps = useAnimatedProps(() => ({
+    transform: 'rotate(' + (wheelRot.value * 360) + ', 34, 62)',
+  }));
+  const rWheelProps = useAnimatedProps(() => ({
+    transform: 'rotate(' + (wheelRot.value * 360) + ', 106, 62)',
+  }));
 
-  // Porsche 911 side profile (fastback silhouette)
-  // Ground: y=68, front wheel cx=44 r=13, rear wheel cx=118 r=13
-  // Wheel arches: front x=31–57, rear x=105–131
-  const bodyPath =
-    'M 22 66 L 22 58 Q 26 48 38 44 Q 46 38 54 34 L 68 16 Q 74 12 82 11 Q 92 11 102 16 L 120 40 L 124 42 Q 130 44 132 50 L 133 62 L 133 66 L 131 66 A 13 13 0 0 0 105 66 L 57 66 A 13 13 0 0 0 31 66 Z';
+  const body   = toRgba(colors.text.primary, 0.86);
+  const cabin  = toRgba(colors.text.primary, 0.64);
+  const glass  = toRgba(colors.background.surface, 0.40);
+  const led    = toRgba(colors.accent.primary, 1.0);
+  const ledD   = toRgba(colors.accent.primary, 0.65);
+  const tire   = toRgba(colors.text.primary, 0.88);
+  const rim    = toRgba(colors.background.surface, 0.78);
+  const rimD   = toRgba(colors.text.primary, 0.62);
+  const road   = toRgba(colors.text.primary, 0.14);
+  const roadDash = toRgba(colors.text.primary, 0.07);
 
-  // Glass greenhouse (windshield + side + fastback rear window)
-  const glassPath =
-    'M 56 34 L 68 16 Q 82 12 102 16 L 120 40 L 98 32 L 58 36 Z';
+  // Rounded-rect paths (no Rect import needed)
+  // Body: x=10, y=28, w=120, h=34, rx=12
+  const bodyP   = 'M 22 28 L 118 28 Q 130 28 130 40 L 130 50 Q 130 62 118 62 L 22 62 Q 10 62 10 50 L 10 40 Q 10 28 22 28 Z';
+  // Cabin: x=30, y=10, w=70, h=24, rx=8
+  const cabinP  = 'M 38 10 L 92 10 Q 100 10 100 18 L 100 28 Q 100 34 92 34 L 38 34 Q 30 34 30 28 L 30 18 Q 30 10 38 10 Z';
+  // Window: x=34, y=14, w=62, h=16, rx=5
+  const windowP = 'M 39 14 L 91 14 Q 96 14 96 19 L 96 26 Q 96 30 91 30 L 39 30 Q 34 30 34 26 L 34 19 Q 34 14 39 14 Z';
 
   return (
     <View style={styles.l1AnimCanvas}>
-      {/* Static: road + destination flag */}
-      <Svg width={160} height={76} style={StyleSheet.absoluteFill}>
-        <Path d="M 0 68 L 160 68" stroke={road} strokeWidth={2} />
-        <Path d="M 0 64 L 160 64"
-          stroke={roadDash} strokeWidth={0.8} strokeDasharray="8,14" />
-        <Path d="M 150 52 L 150 68" stroke={postColor} strokeWidth={1.5} />
-        <Path d="M 150 52 L 159 55 L 150 58 Z" fill={flagColor} />
+      {/* Road */}
+      <Svg width={160} height={80} style={StyleSheet.absoluteFill}>
+        <Path d="M 0 74 L 160 74" stroke={road} strokeWidth={1.5} />
+        <Path d="M 0 70 L 160 70" stroke={roadDash} strokeWidth={0.6} strokeDasharray="10,14" />
       </Svg>
 
-      {/* Porsche 911 */}
-      <Animated.View style={[styles.goalCarSvgWrap, carStyle]}>
-        <Svg width={150} height={76}>
-          {/* Body silhouette */}
-          <Path d={bodyPath} fill={bodyColor} />
+      {/* Flat-design car */}
+      <Animated.View style={[{ position: 'absolute', left: 0, top: 0 }, carStyle]}>
+        <Svg width={140} height={76}>
+          {/* Tires first — body will cover upper half */}
+          <Circle cx={34}  cy={62} r={11} fill={tire} />
+          <Circle cx={34}  cy={62} r={8}  fill={rim} />
+          <Circle cx={106} cy={62} r={11} fill={tire} />
+          <Circle cx={106} cy={62} r={8}  fill={rim} />
 
-          {/* Subtle body shadow/depth on lower body */}
-          <Path
-            d="M 22 62 Q 46 58 80 56 Q 110 54 133 58 L 133 66 L 131 66 A 13 13 0 0 0 105 66 L 57 66 A 13 13 0 0 0 31 66 L 22 66 Z"
-            fill={bodyDark}
-          />
+          {/* Spinning cross — looks like spokes */}
+          <AnimatedG animatedProps={fWheelProps}>
+            <Path d="M 34 51 L 34 73 M 23 62 L 45 62" stroke={rimD} strokeWidth={2.2} fill="none" strokeLinecap="round" />
+            <Circle cx={34} cy={62} r={2} fill={rimD} />
+          </AnimatedG>
+          <AnimatedG animatedProps={rWheelProps}>
+            <Path d="M 106 51 L 106 73 M 95 62 L 117 62" stroke={rimD} strokeWidth={2.2} fill="none" strokeLinecap="round" />
+            <Circle cx={106} cy={62} r={2} fill={rimD} />
+          </AnimatedG>
 
-          {/* Glass: windshield + roof + fastback rear window */}
-          <Path d={glassPath} fill={glassCol} />
+          {/* Body */}
+          <Path d={bodyP} fill={body} />
+          {/* Cabin */}
+          <Path d={cabinP} fill={cabin} />
+          {/* Window */}
+          <Path d={windowP} fill={glass} />
+          {/* Centre post dividing windshield/rear window */}
+          <Path d="M 65 14 L 65 30" stroke={body} strokeWidth={1.5} fill="none" />
 
-          {/* Roof rail line */}
-          <Path d="M 74 13 L 96 15"
-            stroke={trim} strokeWidth={1.2} fill="none" strokeLinecap="round" />
-
-          {/* Door shut line */}
-          <Path d="M 64 30 Q 92 28 102 20"
-            stroke={trim} strokeWidth={0.7} fill="none" />
-
-          {/* FRONT headlight (round, iconic 911) */}
-          <Circle cx={26} cy={52} r={5.5} fill={darkMetal} />
-          <Circle cx={26} cy={52} r={4}   fill={headlight} />
-          <Circle cx={26} cy={52} r={1.5} fill={darkMetal} />
-
-          {/* REAR taillights (stacked round — 911 signature) */}
-          <Circle cx={130} cy={47} r={4.5} fill={darkMetal} />
-          <Circle cx={130} cy={47} r={3}   fill={taillight} />
-          <Circle cx={130} cy={56} r={3.5} fill={darkMetal} />
-          <Circle cx={130} cy={56} r={2}   fill={taillight} />
-
-          {/* FRONT WHEEL: tire + rim rings */}
-          <Circle cx={44} cy={66} r={13}  fill={tire} />
-          <Circle cx={44} cy={66} r={9.5} fill={rimOuter} />
-          <Circle cx={44} cy={66} r={7.5} fill={rimInner} />
-          <Circle cx={44} cy={66} r={3}   fill={rimOuter} />
-
-          {/* REAR WHEEL */}
-          <Circle cx={118} cy={66} r={13}  fill={tire} />
-          <Circle cx={118} cy={66} r={9.5} fill={rimOuter} />
-          <Circle cx={118} cy={66} r={7.5} fill={rimInner} />
-          <Circle cx={118} cy={66} r={3}   fill={rimOuter} />
+          {/* Headlight dot */}
+          <Circle cx={12} cy={43} r={3.5} fill={led} />
+          {/* Taillight dot */}
+          <Circle cx={128} cy={43} r={3.5} fill={ledD} />
         </Svg>
       </Animated.View>
     </View>
