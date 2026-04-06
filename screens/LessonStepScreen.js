@@ -43,6 +43,7 @@ import GlossaryText from '../components/GlossaryText';
 import LessonStepContainer from '../components/LessonStepContainer';
 import ScreenBackground from '../components/ScreenBackground';
 import SelectableOptionButton from '../components/SelectableOptionButton';
+import SplitInsightCard from '../components/SplitInsightCard';
 import SurfacePillButton from '../components/SurfacePillButton';
 import TOPSECTION from '../components/TOPSECTION';
 import { glossaryTerms } from '../data/glossary';
@@ -248,6 +249,9 @@ export default function LessonStepScreen() {
         return content?.steps?.reflection?.title || introTitle || 'Reflection';
       case 6:
         if (lessonId === 'lesson_0') return 'Het volledige investeringsproces';
+        if (lessonId === 'lesson_1') {
+          return content?.steps?.summary?.title || (locale === 'nl' ? 'Wat je geleerd hebt' : 'What you learned');
+        }
         return locale === 'nl' ? 'Wat je geleerd hebt' : 'What you learned';
       default:
         return `${copy.labels.part} ${step}`;
@@ -314,7 +318,7 @@ export default function LessonStepScreen() {
       return content?.steps?.exercise?.subtitle || null;
     }
     if (step === 6 && lessonId === 'lesson_1') {
-      return locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?';
+      return content?.steps?.summary?.subtitle || (locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?');
     }
     if (step === 6 && lessonId !== 'lesson_0') {
       return locale === 'nl'
@@ -3551,7 +3555,7 @@ function GoalInputExercise({ exercise, onNext, onPressTerm, copy }) {
   );
 }
 
-function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLabel }) {
+function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLabel, showProgressDots = true }) {
   const { styles } = useLessonStepStyles();
   const {
     sections = [],
@@ -3590,35 +3594,50 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLab
 
   // Build interpretation text from selected answers
   const buildInterpretation = () => {
-    if (!isComplete || !interpretations.why) return null;
-    const whyText = interpretations.why[answers.why] ?? answers.why;
-    const whenText = interpretations.when[answers.when] ?? answers.when;
-    const fitText = interpretations.fit[answers.fit] ?? answers.fit;
+    if (!isComplete) return null;
+    const whyText = interpretations?.why?.[answers.why] ?? answers.why;
+    const whenText = interpretations?.when?.[answers.when] ?? answers.when;
+    const fitText = interpretations?.fit?.[answers.fit] ?? answers.fit;
     const prefix = interpretations.prefix ?? '';
     return `${prefix}${whyText} ${whenText}.\n${fitText}`;
   };
 
   const interpretationText = isComplete ? buildInterpretation() : null;
+  const summarySections = [
+    interpretationText
+      ? {
+          label: copy.labels.goalInterpretationTitle,
+          text: interpretationText,
+        }
+      : null,
+    feedback.valid
+      ? {
+          label: copy.labels.insight,
+          text: feedback.valid,
+        }
+      : null,
+  ].filter(Boolean);
 
   return (
     <View style={styles.stepBody}>
-      {/* Step progress dots */}
-      <View style={styles.goalStepDots}>
-        {sections.map((s, index) => {
-          const isDone = answers[s.id] !== null;
-          const isCurrent = index === activeIndex && !isDone;
-          return (
-            <View
-              key={s.id}
-              style={[
-                styles.goalDot,
-                isDone && styles.goalDotDone,
-                isCurrent && styles.goalDotActive,
-              ]}
-            />
-          );
-        })}
-      </View>
+      {showProgressDots ? (
+        <View style={styles.goalStepDots}>
+          {sections.map((s, index) => {
+            const isDone = answers[s.id] !== null;
+            const isCurrent = index === activeIndex && !isDone;
+            return (
+              <View
+                key={s.id}
+                style={[
+                  styles.goalDot,
+                  isDone && styles.goalDotDone,
+                  isCurrent && styles.goalDotActive,
+                ]}
+              />
+            );
+          })}
+        </View>
+      ) : null}
 
       {/* Question sections — progressive reveal */}
       <View style={styles.guidedGoalSections}>
@@ -3677,29 +3696,15 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLab
         })}
       </View>
 
-      {/* Interpretation — appears once all questions are answered */}
-      {isComplete && interpretationText && (
-        <Animated.View entering={FadeInDown.duration(300)}>
-          <Card style={styles.goalInterpretationCard}>
-            <AppText style={styles.goalInterpretationTitle}>
-              {copy.labels.goalInterpretationTitle}
-            </AppText>
-            <AppText style={styles.goalInterpretationText}>{interpretationText}</AppText>
-          </Card>
-        </Animated.View>
-      )}
-
-      {/* Insight card — appears after Save */}
-      {hasSubmitted && isComplete && (
-        <Animated.View entering={FadeInDown.duration(250)}>
-          <Card style={styles.insightCard}>
-            <AppText style={styles.insightTitle}>{copy.labels.insight}</AppText>
-            <GlossaryText
-              text={feedback.valid}
-              style={styles.caption}
-              onPressTerm={onPressTerm}
-            />
-          </Card>
+      {summarySections.length > 0 && (
+        <Animated.View
+          key={`${answers.why || 'why'}-${answers.when || 'when'}-${answers.fit || 'fit'}-${hasSubmitted ? 'submitted' : 'draft'}`}
+          entering={FadeInDown.duration(300)}
+        >
+          <SplitInsightCard
+            sections={summarySections}
+            onPressTerm={onPressTerm}
+          />
         </Animated.View>
       )}
 
@@ -4182,7 +4187,7 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
 
 
 function Lesson1SummaryStep({ content, onComplete, copy }) {
-  const { colors, styles } = useLessonStepStyles();
+  const { styles } = useLessonStepStyles();
   const summary = content?.steps?.summary || {};
 
   // Build a synthetic exercise object from the summary data so GuidedGoalExercise can render it
@@ -4194,24 +4199,13 @@ function Lesson1SummaryStep({ content, onComplete, copy }) {
   };
 
   return (
-    <View style={styles.stepBody}>
-      {/* Journey strip — 5 steps completed */}
-      <View style={styles.summaryJourneyRow}>
-        {[1, 2, 3, 4, 5].map((n, i) => (
-          <React.Fragment key={n}>
-            <View style={styles.summaryJourneyNode}>
-              <Ionicons name="checkmark" size={10} color={colors.accent.primary} />
-            </View>
-            {i < 4 && <View style={styles.summaryJourneyConnector} />}
-          </React.Fragment>
-        ))}
-      </View>
-
+    <View style={[styles.stepBody, styles.summaryTopSpacing]}>
       <GuidedGoalExercise
         exercise={exercise}
         onNext={onComplete}
         copy={copy}
         postSubmitLabel={copy.buttons.completeLesson}
+        showProgressDots={false}
       />
     </View>
   );
@@ -4381,6 +4375,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     gap: components.layout.spacing.lg,
   },
   scenarioTopSpacing: {
+    marginTop: components.layout.spacing.xxl,
+  },
+  summaryTopSpacing: {
     marginTop: components.layout.spacing.xxl,
   },
   conceptCard: {
@@ -5810,19 +5807,6 @@ const createStyles = (colors, components, mode = 'dark') =>
     ...typography.styles.small,
     color: colors.text.onAccent,
     fontFamily: typography.fonts.interSemiBold,
-  },
-  // Goal interpretation card
-  goalInterpretationCard: {
-    gap: components.layout.spacing.sm,
-  },
-  goalInterpretationTitle: {
-    ...typography.styles.stepLabel,
-    color: colors.text.secondary,
-  },
-  goalInterpretationText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-    lineHeight: 26,
   },
   goalInputSection: {
     gap: components.layout.spacing.sm,
