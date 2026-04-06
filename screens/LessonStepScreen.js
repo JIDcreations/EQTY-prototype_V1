@@ -2870,7 +2870,7 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
 
 function ScenarioExercise({ exercise, onNext, copy }) {
   const { colors, components, styles, mode } = useLessonStepStyles();
-  const { story, question, options = [] } = exercise;
+  const { story, question, options = [], cardLabel, feedback = {} } = exercise;
   const [picked, setPicked] = useState(null);
 
   const handlePick = (id) => {
@@ -2880,11 +2880,17 @@ function ScenarioExercise({ exercise, onNext, copy }) {
 
   const pickedOption = options.find((o) => o.id === picked);
   const isAnswered = picked !== null;
+  const feedbackLabel = pickedOption?.isKey
+    ? feedback.correctLabel || copy.labels.aligned
+    : feedback.incorrectLabel || copy.labels.recheckFlow;
+  const feedbackText = pickedOption?.isKey
+    ? feedback.correctText || pickedOption?.reveal
+    : feedback.incorrectText || pickedOption?.reveal;
 
   return (
-    <View style={styles.stepBody}>
+    <View style={[styles.stepBody, styles.scenarioTopSpacing]}>
       <View style={styles.scenarioStoryCard}>
-        <AppText style={styles.scenarioStoryLabel}>Scenario</AppText>
+        <AppText style={styles.scenarioStoryLabel}>{cardLabel || 'Scenario'}</AppText>
         <AppText style={styles.scenarioStoryText}>{story}</AppText>
       </View>
 
@@ -2941,16 +2947,16 @@ function ScenarioExercise({ exercise, onNext, copy }) {
                 pickedOption.isKey && styles.scenarioRevealLabelKey,
               ]}
             >
-              {pickedOption.isKey ? (copy.labels.aligned) : (copy.labels.recheckFlow)}
+              {feedbackLabel}
             </AppText>
           </View>
-          <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
+          <AppText style={styles.scenarioRevealText}>{feedbackText}</AppText>
         </Animated.View>
       )}
 
       {isAnswered && (
         <Animated.View entering={FadeInDown.duration(200)}>
-          <PrimaryButton label={copy.buttons.completeExercise} onPress={onNext} />
+          <PrimaryButton label={copy.buttons.next} onPress={onNext} />
         </Animated.View>
       )}
     </View>
@@ -4206,7 +4212,7 @@ function Lesson1SummaryStep({ content, onComplete, copy }) {
 }
 
 function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language }) {
-  const { colors, components, styles, mode } = useLessonStepStyles();
+  const { colors, styles, mode } = useLessonStepStyles();
   const [picked, setPicked] = useState(null);
   const isDutch = getLocaleKey(language) === 'nl';
   const scenarioLabel = isDutch ? 'Scenario' : 'Scenario';
@@ -4258,7 +4264,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
   const isAnswered = picked !== null;
 
   return (
-    <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
+    <View style={[styles.stepBody, styles.scenarioTopSpacing]}>
 
       {/* Scenario */}
       <View style={styles.scenarioStoryCard}>
@@ -4367,6 +4373,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   stepBody: {
     gap: components.layout.spacing.lg,
+  },
+  scenarioTopSpacing: {
+    marginTop: components.layout.spacing.xxl,
   },
   conceptCard: {
     gap: components.layout.spacing.md,

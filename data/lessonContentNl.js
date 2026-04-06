@@ -286,30 +286,40 @@ export const lessonContentNl = {
           'Een doel maakt het verschil tussen willekeurig handelen en bewust investeren.',
       },
       exercise: {
-        title: 'Wat ontbreekt er?',
+        title: 'Wat deed Joris fout?',
+        subtitle: 'Ontdek wat ontbreekt voordat je begint met investeren.',
         type: 'scenario',
+        cardLabel: 'Scenario',
         story:
-          'Anna heeft €5.000 gespaard en besluit te beginnen met investeren. Ze kiest een ETF die ze las in een financieel artikel. Twee maanden later daalt de markt met 15%. Ze weet niet of ze moet verkopen, vasthouden of bijkopen.',
-        question: 'Wat ontbreekt er in Anna\'s aanpak?',
+          'Joris heeft €5.000 gespaard en begint met investeren. Hij kiest een ETF uit een artikel. Na 2 maanden staat hij op -15%. Nu weet hij niet of hij moet verkopen, vasthouden of bijkopen.',
+        question: 'Wat ontbreekt er in zijn aanpak?',
+        feedback: {
+          correctLabel: '✔ GOED',
+          incorrectLabel: 'NIET HELEMAAL',
+          correctText:
+            'Zonder doel weet Joris niet waarom hij investeert. Daardoor weet hij ook niet hoe hij moet reageren wanneer de markt daalt.',
+          incorrectText:
+            'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
+        },
         options: [
           {
             id: 'knowledge',
-            label: 'Meer kennis over ETFs',
+            label: 'Meer kennis over ETF\'s',
             reveal:
-              'Kennis helpt, maar ook goed geïnformeerde beleggers verliezen de richting zonder doel. Het probleem zit dieper dan informatie.',
+              'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
           },
           {
             id: 'goal',
             label: 'Een concreet beleggingsdoel',
             isKey: true,
             reveal:
-              'Zonder doel heeft Anna geen anker. Ze heeft nooit bepaald wat het geld voor haar moet doen — dus elke marktbeweging voelt als een crisis.',
+              'Zonder doel weet Joris niet waarom hij investeert. Daardoor weet hij ook niet hoe hij moet reageren wanneer de markt daalt.',
           },
           {
             id: 'capital',
             label: 'Een groter startbedrag',
             reveal:
-              'Meer kapitaal lost de ontbrekende richting niet op. Met €50.000 en geen doel staat Anna voor exact hetzelfde probleem, maar met hogere inzet.',
+              'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
           },
         ],
       },
