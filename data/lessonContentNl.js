@@ -267,8 +267,8 @@ export const lessonContentNl = {
             items: [
               'Onzeker',
               'Geen richting',
-              'Reactief',
-              'Geen referentiepunt',
+              'Impulsief',
+              'Geen houvast',
             ],
           },
           right: {
@@ -277,8 +277,8 @@ export const lessonContentNl = {
             items: [
               'Duidelijke richting',
               'Bewuste keuzes',
-              'Afgestemd op tijd & risico',
-              'Referentie bij twijfel',
+              'Past bij tijd & risico',
+              'Houvast bij twijfel',
             ],
           },
         },

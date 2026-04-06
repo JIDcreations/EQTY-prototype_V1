@@ -268,7 +268,7 @@ export const lessonContent = {
               'Uncertain',
               'No direction',
               'Reactive',
-              'No reference point',
+              'No anchor',
             ],
           },
           right: {
@@ -277,8 +277,8 @@ export const lessonContent = {
             items: [
               'Clear direction',
               'Intentional choices',
-              'Aligned with time & risk',
-              'Reference point in doubt',
+              'Fits time & risk',
+              'Anchor in doubt',
             ],
           },
         },
