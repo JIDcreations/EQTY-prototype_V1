@@ -286,32 +286,49 @@ export const lessonContentNl = {
           'Een doel maakt het verschil tussen willekeurig handelen en bewust investeren.',
       },
       exercise: {
-        title: 'Bouw het doel',
-        type: 'buildGoal',
+        title: 'Start met jouw doel',
+        subtitle: 'Pas wat je net leerde toe op jouw eigen situatie.',
+        type: 'guidedGoal',
         description:
-          'Maak van een vaag idee een concreet beleggingsdoel. Vul bedrag, termijn en doel in.',
-        fields: [
+          'Kies per stap wat vandaag het best bij jou past.',
+        sections: [
           {
-            id: 'amount',
-            label: 'Bedrag',
-            placeholder: 'Bijv. €25.000',
+            id: 'why',
+            question: 'Waarom wil je investeren?',
+            options: [
+              'Voor een woning',
+              'Meer vrijheid',
+              'Extra inkomen',
+              'Pensioen',
+              'Iets anders',
+            ],
           },
           {
-            id: 'horizon',
-            label: 'Termijn',
-            placeholder: 'Bijv. 7 jaar',
+            id: 'when',
+            question: 'Wanneer wil je dit ongeveer bereiken?',
+            options: [
+              'Binnen 2 jaar',
+              'Binnen 5 jaar',
+              'Binnen 10 jaar',
+              'Op lange termijn',
+              'Ik weet het nog niet',
+            ],
           },
           {
-            id: 'goal',
-            label: 'Doel',
-            placeholder: 'Bijv. een woning',
+            id: 'fit',
+            question: 'Wat past het best bij jou nu?',
+            options: [
+              'Ik wil vooral zekerheid',
+              'Ik kan wat schommelingen aan',
+              'Ik wil rustig starten',
+              'Ik weet het nog niet',
+            ],
           },
         ],
-        previewLabel: 'Jouw concrete doel',
-        previewTemplate: 'Ik wil over {horizon} {amount} opbouwen voor {goal}.',
+        submitLabel: 'Opslaan',
         feedback: {
-          complete:
-            'Nu is het doel concreet: bedrag, termijn en bestemming geven richting aan je keuzes.',
+          valid:
+            'Goed. Je hebt een eerste richting bepaald. In de volgende lessen maken we dit stap voor stap concreter.',
         },
       },
       reflection: {

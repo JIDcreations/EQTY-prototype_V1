@@ -310,6 +310,9 @@ export default function LessonStepScreen() {
     if (step === 3 && lessonId === 'lesson_1') {
       return content?.steps?.scenario?.intro || null;
     }
+    if (step === 4 && lessonId === 'lesson_1') {
+      return content?.steps?.exercise?.subtitle || null;
+    }
     if (step === 6 && lessonId === 'lesson_1') {
       return locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?';
     }
@@ -2808,6 +2811,24 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
           copy={copy}
         />
       );
+    case 'guidedGoal':
+      return (
+        <GuidedGoalExercise
+          exercise={exercise}
+          onNext={onNext}
+          onPressTerm={onPressTerm}
+          copy={copy}
+        />
+      );
+    case 'goalInput':
+      return (
+        <GoalInputExercise
+          exercise={exercise}
+          onNext={onNext}
+          onPressTerm={onPressTerm}
+          copy={copy}
+        />
+      );
     case 'buildGoal':
       return (
         <BuildGoalExercise
@@ -3342,6 +3363,173 @@ function BuildGoalExercise({ exercise, onNext, onPressTerm, copy }) {
         </View>
       </View>
     </TouchableWithoutFeedback>
+  );
+}
+
+function GoalInputExercise({ exercise, onNext, onPressTerm, copy }) {
+  const { colors, styles } = useLessonStepStyles();
+  const {
+    description,
+    inputLabel = '',
+    inputPlaceholder = '',
+    guidanceLabel = '',
+    guidanceItems = [],
+    submitLabel = copy.buttons.continue,
+    feedback = {},
+  } = exercise;
+  const [text, setText] = useState('');
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const trimmedText = text.trim();
+  const isValid = trimmedText.length > 0;
+
+  const handlePrimary = () => {
+    if (hasSubmitted && isValid) {
+      onNext();
+      return;
+    }
+    setHasSubmitted(true);
+  };
+
+  const primaryLabel = hasSubmitted && isValid ? copy.buttons.next : submitLabel;
+  const feedbackText = hasSubmitted && isValid ? feedback.valid : null;
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.stepBody}>
+        <Card style={styles.exerciseCard}>
+          <GlossaryText text={description} style={styles.bodyText} onPressTerm={onPressTerm} />
+
+          <View style={styles.goalInputSection}>
+            {inputLabel ? <AppText style={styles.buildGoalFieldLabel}>{inputLabel}</AppText> : null}
+            <View style={styles.buildGoalInputWrap}>
+              <AppTextInput
+                style={styles.buildGoalInput}
+                value={text}
+                onChangeText={setText}
+                placeholder={inputPlaceholder}
+                placeholderTextColor={colors.text.secondary}
+                autoCapitalize="sentences"
+                autoCorrect
+              />
+            </View>
+            {guidanceLabel ? (
+              <View style={styles.goalGuidanceBlock}>
+                <AppText style={styles.goalGuidanceLabel}>{guidanceLabel}</AppText>
+                {guidanceItems.map((item) => (
+                  <View key={item} style={styles.goalGuidanceRow}>
+                    <AppText style={styles.goalGuidanceBullet}>-</AppText>
+                    <GlossaryText text={item} style={styles.goalGuidanceText} onPressTerm={onPressTerm} />
+                  </View>
+                ))}
+              </View>
+            ) : null}
+          </View>
+        </Card>
+
+        {feedbackText ? (
+          <Animated.View entering={FadeInDown.duration(250)}>
+            <Card style={styles.insightCard}>
+              <AppText style={styles.insightTitle}>
+                {isValid ? copy.labels.insight : copy.labels.hint}
+              </AppText>
+              <GlossaryText text={feedbackText} style={styles.caption} onPressTerm={onPressTerm} />
+            </Card>
+          </Animated.View>
+        ) : null}
+
+        <PrimaryButton
+          label={primaryLabel}
+          onPress={handlePrimary}
+          disabled={!hasSubmitted && !trimmedText}
+        />
+      </View>
+    </TouchableWithoutFeedback>
+  );
+}
+
+function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
+  const { styles } = useLessonStepStyles();
+  const {
+    description,
+    sections = [],
+    submitLabel = copy.buttons.continue,
+    feedback = {},
+  } = exercise;
+  const [answers, setAnswers] = useState(() =>
+    sections.reduce((acc, section) => ({ ...acc, [section.id]: null }), {})
+  );
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const isComplete = sections.every((section) => answers[section.id]);
+  const primaryLabel = hasSubmitted && isComplete ? copy.buttons.next : submitLabel;
+
+  const handlePick = (sectionId, option) => {
+    setAnswers((prev) => ({ ...prev, [sectionId]: option }));
+  };
+
+  const handlePrimary = () => {
+    if (hasSubmitted && isComplete) {
+      onNext();
+      return;
+    }
+    setHasSubmitted(true);
+  };
+
+  const reset = () => {
+    setAnswers(sections.reduce((acc, section) => ({ ...acc, [section.id]: null }), {}));
+    setHasSubmitted(false);
+  };
+
+  return (
+    <View style={styles.stepBody}>
+      <Card style={styles.exerciseCard}>
+        <GlossaryText text={description} style={styles.bodyText} onPressTerm={onPressTerm} />
+        <View style={styles.guidedGoalSections}>
+          {sections.map((section) => (
+            <View key={section.id} style={styles.guidedGoalSection}>
+              <AppText style={styles.guidedGoalQuestion}>{section.question}</AppText>
+              <View style={styles.goalChipGrid}>
+                {section.options?.map((option) => {
+                  const isActive = answers[section.id] === option;
+                  return (
+                    <Pressable
+                      key={option}
+                      style={[styles.goalChip, isActive && styles.goalChipActive]}
+                      onPress={() => handlePick(section.id, option)}
+                    >
+                      <GlossaryText
+                        text={option}
+                        style={[styles.goalChipText, isActive && styles.goalChipTextActive]}
+                        onPressTerm={onPressTerm}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+          ))}
+        </View>
+      </Card>
+
+      {hasSubmitted && isComplete ? (
+        <Animated.View entering={FadeInDown.duration(250)}>
+          <Card style={styles.insightCard}>
+            <AppText style={styles.insightTitle}>{copy.labels.insight}</AppText>
+            <GlossaryText text={feedback.valid} style={styles.caption} onPressTerm={onPressTerm} />
+          </Card>
+        </Animated.View>
+      ) : null}
+
+      <View style={styles.exerciseActions}>
+        <SecondaryButton label={copy.buttons.reset} onPress={reset} />
+        <PrimaryButton
+          label={primaryLabel}
+          onPress={handlePrimary}
+          disabled={!isComplete}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -5352,6 +5540,71 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   exerciseSection: {
     gap: components.layout.spacing.md,
+  },
+  guidedGoalSections: {
+    gap: components.layout.spacing.md,
+  },
+  guidedGoalSection: {
+    gap: components.layout.spacing.sm,
+    padding: components.layout.spacing.md,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  guidedGoalQuestion: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  goalChipGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: components.layout.spacing.sm,
+  },
+  goalChip: {
+    paddingVertical: components.layout.spacing.sm,
+    paddingHorizontal: components.layout.spacing.md,
+    borderRadius: components.radius.pill,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  goalChipActive: {
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+  },
+  goalChipText: {
+    ...typography.styles.small,
+    color: colors.text.primary,
+  },
+  goalChipTextActive: {
+    ...typography.styles.small,
+    color: colors.text.primary,
+    fontFamily: typography.fonts.interSemiBold,
+  },
+  goalInputSection: {
+    gap: components.layout.spacing.sm,
+  },
+  goalGuidanceBlock: {
+    gap: components.layout.spacing.xs,
+  },
+  goalGuidanceLabel: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+  },
+  goalGuidanceRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: components.layout.spacing.xs,
+  },
+  goalGuidanceBullet: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+  },
+  goalGuidanceText: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+    flex: 1,
   },
   buildGoalFields: {
     gap: components.layout.spacing.md,

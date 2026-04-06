@@ -286,32 +286,49 @@ export const lessonContent = {
           'A goal is what turns random action into deliberate investing.',
       },
       exercise: {
-        title: 'Build the goal',
-        type: 'buildGoal',
+        title: 'Start with your goal',
+        subtitle: 'Apply what you just learned to your own situation.',
+        type: 'guidedGoal',
         description:
-          'Turn a vague idea into a concrete investment goal. Fill in amount, time horizon, and purpose.',
-        fields: [
+          'Choose what fits you best in each step.',
+        sections: [
           {
-            id: 'amount',
-            label: 'Amount',
-            placeholder: 'E.g. €25,000',
+            id: 'why',
+            question: 'Why do you want to invest?',
+            options: [
+              'For a home',
+              'More freedom',
+              'Extra income',
+              'Retirement',
+              'Something else',
+            ],
           },
           {
-            id: 'horizon',
-            label: 'Time horizon',
-            placeholder: 'E.g. 7 years',
+            id: 'when',
+            question: 'When would you roughly like to reach this?',
+            options: [
+              'Within 2 years',
+              'Within 5 years',
+              'Within 10 years',
+              'Long term',
+              "I don't know yet",
+            ],
           },
           {
-            id: 'goal',
-            label: 'Goal',
-            placeholder: 'E.g. a home down payment',
+            id: 'fit',
+            question: 'What fits you best right now?',
+            options: [
+              'I mainly want certainty',
+              'I can handle some ups and downs',
+              'I want to start calmly',
+              "I don't know yet",
+            ],
           },
         ],
-        previewLabel: 'Your concrete goal',
-        previewTemplate: 'I want to build {amount} over {horizon} for {goal}.',
+        submitLabel: 'Save',
         feedback: {
-          complete:
-            'Now the goal is concrete: amount, time horizon, and destination give your choices direction.',
+          valid:
+            'Good. You have set a first direction. In the next lessons, we will make it more concrete step by step.',
         },
       },
       reflection: {
