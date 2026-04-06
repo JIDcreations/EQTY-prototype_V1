@@ -232,25 +232,58 @@ export const lessonContentNl = {
         ],
       },
       scenario: {
-        title: 'Begin met het waarom',
-        variants: {
-          new: {
-            prompt: 'Een vriend zegt dat investeren altijd slim is. Wat doe je?',
-            options: ['Investeer meteen', 'Bepaal eerst je doel'],
-            insight:
-              'Zonder doel is elke investering een gok. Je doel vertelt je waarom je belegt en wat je ermee wilt bereiken.',
+        title: 'Eerst richting bepalen of meteen handelen?',
+        intro:
+          'Zie het verschil tussen investeren zonder doel en met een duidelijk doel.',
+        cardLabel: 'Jean-Pierre',
+        text:
+          'Ik heb €5.000 klaarstaan, maar ik weet nog niet waarvoor ik precies investeer.',
+        prompt: 'Wat doe je eerst?',
+        choices: [
+          {
+            id: 'invest_now',
+            label: 'Nu investeren',
+            sublabel: 'Zonder doel',
+            icon: 'flash-outline',
           },
-          growing: {
-            prompt: 'Je wilt serieus beginnen met investeren. Wat komt eerst?',
-            options: ['Kies een strategie', 'Bepaal eerst je doel'],
-            insight: 'Eerst komt het doel. Strategie volgt het doel, niet andersom.',
+          {
+            id: 'define_goal',
+            label: 'Doel bepalen',
+            sublabel: 'Waarom investeer je?',
+            icon: 'layers-outline',
+            isKey: true,
           },
-          seasoned: {
-            prompt: 'Je herbekijkt je plan. Wat houdt het coherent?',
-            options: ['Pas je aan aan het nieuws', 'Herbekijk het doel'],
-            insight: 'Terugkoppelen naar het doel houdt je plan consistent over cycli.',
+        ],
+        feedback: {
+          incorrect:
+            'Zonder doel voelt elke investering willekeurig. Je weet niet wat je probeert te bereiken.',
+          correct:
+            'Door eerst je doel te bepalen krijgen je keuzes richting en worden ze consistenter.',
+        },
+        comparison: {
+          left: {
+            title: 'ZONDER DOEL',
+            chartLabel: 'ONZEKER',
+            items: [
+              'Onzeker',
+              'Geen richting',
+              'Reactief',
+              'Geen referentiepunt',
+            ],
+          },
+          right: {
+            title: 'MET DOEL',
+            chartLabel: 'GERICHT',
+            items: [
+              'Duidelijke richting',
+              'Bewuste keuzes',
+              'Afgestemd op tijd & risico',
+              'Referentie bij twijfel',
+            ],
           },
         },
+        insightLine:
+          'Een doel maakt het verschil tussen willekeurig handelen en bewust investeren.',
       },
       exercise: {
         type: 'choice',

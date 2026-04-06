@@ -307,6 +307,9 @@ export default function LessonStepScreen() {
     if (step === 2 && lessonId === 'lesson_1') {
       return content?.steps?.visualization?.subtitle || null;
     }
+    if (step === 3 && lessonId === 'lesson_1') {
+      return content?.steps?.scenario?.intro || null;
+    }
     if (step === 6 && lessonId === 'lesson_1') {
       return locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?';
     }
@@ -365,6 +368,12 @@ export default function LessonStepScreen() {
           content={content}
           onboardingContext={onboardingContext}
           userContext={userContext}
+          onNext={handleNext}
+          copy={copy}
+        />
+      ) : lessonId === 'lesson_1' ? (
+        <Lesson1ContextualScenarioStep
+          content={content}
           onNext={handleNext}
           copy={copy}
         />
@@ -2248,6 +2257,422 @@ function IntroScenarioStep({ onNext, copy }) {
         <View style={styles.narrativeOutcomeSection}>
           <AppText style={styles.scenarioInsightLine}>{copy.introScenario.insightLine}</AppText>
           <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+        </View>
+      )}
+    </View>
+  );
+}
+
+function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
+  const { styles, colors, components } = useLessonStepStyles();
+  const scenario = content?.steps?.scenario || {};
+  const choices = scenario?.choices || [];
+  const leftChoice = choices[0];
+  const rightChoice = choices[1];
+  const leftItems = scenario?.comparison?.left?.items || [];
+  const rightItems = scenario?.comparison?.right?.items || [];
+  const [selected, setSelected] = useState(null);
+  const showComparison = selected !== null;
+  const isLeftSelected = selected === leftChoice?.id;
+  const isRightSelected = selected === rightChoice?.id;
+  const isCorrect = choices.find((choice) => choice.id === selected)?.isKey;
+
+  const leftScale = useSharedValue(1);
+  const rightScale = useSharedValue(1);
+  const leftOpacity = useSharedValue(1);
+  const rightOpacity = useSharedValue(1);
+  const leftVisualOpacity = useSharedValue(1);
+  const rightVisualOpacity = useSharedValue(1);
+
+  useEffect(() => {
+    if (isLeftSelected) {
+      leftScale.value = withSequence(
+        withTiming(1.03, { duration: 150, easing: Easing.out(Easing.quad) }),
+        withTiming(1.02, { duration: 120, easing: Easing.inOut(Easing.quad) })
+      );
+      leftOpacity.value = withTiming(1, { duration: 180 });
+      leftVisualOpacity.value = withSequence(
+        withTiming(0.35, { duration: 0 }),
+        withTiming(1, { duration: 300, easing: Easing.out(Easing.quad) })
+      );
+      rightScale.value = withTiming(1, { duration: 200 });
+      rightOpacity.value = withTiming(0.55, { duration: 180 });
+    } else if (isRightSelected) {
+      rightScale.value = withSequence(
+        withTiming(1.03, { duration: 150, easing: Easing.out(Easing.quad) }),
+        withTiming(1.02, { duration: 120, easing: Easing.inOut(Easing.quad) })
+      );
+      rightOpacity.value = withTiming(1, { duration: 180 });
+      rightVisualOpacity.value = withSequence(
+        withTiming(0.35, { duration: 0 }),
+        withTiming(1, { duration: 300, easing: Easing.out(Easing.quad) })
+      );
+      leftScale.value = withTiming(1, { duration: 200 });
+      leftOpacity.value = withTiming(0.55, { duration: 180 });
+    }
+  }, [
+    isLeftSelected,
+    isRightSelected,
+    leftVisualOpacity,
+    leftOpacity,
+    leftScale,
+    rightVisualOpacity,
+    rightOpacity,
+    rightScale,
+  ]);
+
+  const leftPanelAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: leftScale.value }],
+    opacity: leftOpacity.value,
+  }));
+  const rightPanelAnim = useAnimatedStyle(() => ({
+    transform: [{ scale: rightScale.value }],
+    opacity: rightOpacity.value,
+  }));
+  const leftVisualAnim = useAnimatedStyle(() => ({
+    opacity: leftVisualOpacity.value,
+  }));
+  const rightVisualAnim = useAnimatedStyle(() => ({
+    opacity: rightVisualOpacity.value,
+  }));
+
+  const leftDotColor = isLeftSelected
+    ? toRgba(colors.text.primary, 0.45)
+    : toRgba(colors.ui.divider, 0.28);
+  const rightDotColor = isRightSelected
+    ? toRgba(colors.accent.primary, 0.55)
+    : toRgba(colors.ui.divider, 0.28);
+
+  return (
+    <View style={styles.stepBody}>
+      <View style={styles.narrativeTopSection}>
+        <Card style={styles.narrativeCard}>
+          <View style={styles.narrativeCharacterRow}>
+            <View style={styles.narrativeAvatar}>
+              <Ionicons
+                name="person-outline"
+                size={components.sizes.icon.md}
+                color={colors.text.secondary}
+              />
+            </View>
+            <AppText style={styles.narrativeCharacterName}>
+              {scenario?.cardLabel || 'Scenario'}
+            </AppText>
+          </View>
+          <AppText style={styles.narrativeQuote}>{scenario?.text}</AppText>
+        </Card>
+
+        <AppText style={styles.narrativePrompt}>
+          {scenario?.prompt || 'Wat doe je eerst?'}
+        </AppText>
+      </View>
+
+      <View style={styles.narrativeFlowWrap}>
+        <View style={styles.narrativeChoiceRow}>
+          {leftChoice ? (
+            <Pressable
+              onPress={() => setSelected(leftChoice.id)}
+              style={({ pressed }) => [
+                styles.narrativeChoiceCard,
+                styles.narrativeChoiceCardReactive,
+                isLeftSelected && styles.narrativeChoiceCardActiveReactive,
+                pressed && styles.narrativeChoiceCardPressed,
+              ]}
+            >
+              <Ionicons
+                name={leftChoice.icon || 'flash-outline'}
+                size={components.sizes.icon.lg}
+                color={colors.text.secondary}
+              />
+              <AppText style={styles.narrativeChoiceLabel}>{leftChoice.label}</AppText>
+              <AppText style={styles.narrativeChoiceHint}>{leftChoice.sublabel}</AppText>
+            </Pressable>
+          ) : null}
+
+          {rightChoice ? (
+            <Pressable
+              onPress={() => setSelected(rightChoice.id)}
+              style={({ pressed }) => [
+                styles.narrativeChoiceCard,
+                styles.narrativeChoiceCardPlan,
+                isRightSelected && styles.narrativeChoiceCardActivePlan,
+                pressed && styles.narrativeChoiceCardPressed,
+              ]}
+            >
+              <Ionicons
+                name={rightChoice.icon || 'flag-outline'}
+                size={components.sizes.icon.lg}
+                color={colors.accent.primary}
+              />
+              <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
+                {rightChoice.label}
+              </AppText>
+              <AppText style={styles.narrativeChoiceHint}>{rightChoice.sublabel}</AppText>
+            </Pressable>
+          ) : null}
+        </View>
+
+        {showComparison ? (
+          <>
+            <Animated.View
+              entering={FadeInDown.duration(300)}
+              style={styles.scenarioRevealCard}
+            >
+              <View style={styles.scenarioRevealHeader}>
+                <Ionicons
+                  name={isCorrect ? 'checkmark-circle' : 'information-circle'}
+                  size={18}
+                  color={isCorrect ? colors.accent.primary : colors.text.secondary}
+                />
+                <AppText
+                  style={[
+                    styles.scenarioRevealLabel,
+                    isCorrect && styles.scenarioRevealLabelKey,
+                  ]}
+                >
+                  {isCorrect
+                    ? copy.introScenario.feedbackCorrectTitle
+                    : copy.introScenario.feedbackIncorrectTitle}
+                </AppText>
+              </View>
+              <AppText style={styles.scenarioRevealText}>
+                {isCorrect ? scenario?.feedback?.correct : scenario?.feedback?.incorrect}
+              </AppText>
+            </Animated.View>
+
+            <View style={styles.narrativeConnectorRow}>
+              <View style={styles.narrativeConnectorCol}>
+                {[0, 1, 2, 3, 4].map((dotIndex) => (
+                  <View
+                    key={`left-dot-${dotIndex}`}
+                    style={[styles.narrativeConnectorDot, { backgroundColor: leftDotColor }]}
+                  />
+                ))}
+              </View>
+              <View style={styles.narrativeConnectorCol}>
+                {[0, 1, 2, 3, 4].map((dotIndex) => (
+                  <View
+                    key={`right-dot-${dotIndex}`}
+                    style={[styles.narrativeConnectorDot, { backgroundColor: rightDotColor }]}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <View style={[styles.scenarioCompareGrid, styles.narrativeCompareGridOverride]}>
+              <Animated.View style={[styles.narrativeComparePanelWrap, leftPanelAnim]}>
+                <Card
+                  style={[
+                    styles.scenarioComparePanel,
+                    {
+                      flex: 1,
+                      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                      borderColor: isLeftSelected
+                        ? toRgba(colors.text.primary, 0.55)
+                        : toRgba(colors.ui.divider, colors.opacity.stroke),
+                    },
+                  ]}
+                >
+                  <View style={styles.scenarioCompareHeader}>
+                    <AppText style={styles.scenarioCompareLabel}>
+                      {scenario?.comparison?.left?.title}
+                    </AppText>
+                  </View>
+                  <Animated.View style={leftVisualAnim}>
+                    <ComparisonSymbolVisual variant="uncertain" />
+                  </Animated.View>
+                  <View style={styles.scenarioCompareSteps}>
+                    {leftItems.map((item, index) => (
+                      <View key={item} style={styles.scenarioCompareRow}>
+                        <View style={styles.scenarioCompareTrack}>
+                          <View
+                            style={[
+                              styles.scenarioCompareNode,
+                              styles.scenarioCompareNodeActiveReactive,
+                            ]}
+                          />
+                          {index < leftItems.length - 1 ? (
+                            <View
+                              style={[
+                                styles.scenarioCompareLine,
+                                styles.scenarioCompareLineDotted,
+                              ]}
+                            />
+                          ) : null}
+                        </View>
+                        <AppText
+                          style={[
+                            styles.scenarioCompareStepLabel,
+                            styles.scenarioCompareStepLabelMissing,
+                          ]}
+                        >
+                          {item}
+                        </AppText>
+                      </View>
+                    ))}
+                  </View>
+                </Card>
+              </Animated.View>
+
+              <Animated.View style={[styles.narrativeComparePanelWrap, rightPanelAnim]}>
+                <Card
+                  style={[
+                    styles.scenarioComparePanel,
+                    {
+                      flex: 1,
+                      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+                      borderColor: isRightSelected
+                        ? colors.accent.primary
+                        : toRgba(colors.ui.divider, colors.opacity.stroke),
+                    },
+                  ]}
+                >
+                  <View style={styles.scenarioCompareHeader}>
+                    <AppText style={styles.scenarioCompareLabel}>
+                      {scenario?.comparison?.right?.title}
+                    </AppText>
+                  </View>
+                  <Animated.View style={rightVisualAnim}>
+                    <ComparisonSymbolVisual variant="goal" />
+                  </Animated.View>
+                  <View style={styles.scenarioCompareSteps}>
+                    {rightItems.map((item, index) => (
+                      <View key={item} style={styles.scenarioCompareRow}>
+                        <View style={styles.scenarioCompareTrack}>
+                          <View
+                            style={[
+                              styles.scenarioCompareNode,
+                              styles.scenarioCompareNodeActive,
+                            ]}
+                          />
+                          {index < rightItems.length - 1 ? (
+                            <View
+                              style={[
+                                styles.scenarioCompareLine,
+                                styles.scenarioCompareLineActive,
+                              ]}
+                            />
+                          ) : null}
+                        </View>
+                        <AppText
+                          style={[
+                            styles.scenarioCompareStepLabel,
+                            styles.scenarioCompareStepLabelActive,
+                          ]}
+                        >
+                          {item}
+                        </AppText>
+                      </View>
+                    ))}
+                  </View>
+                </Card>
+              </Animated.View>
+            </View>
+          </>
+        ) : null}
+      </View>
+
+      {showComparison ? (
+        <View style={styles.narrativeOutcomeSection}>
+          <AppText style={styles.scenarioInsightLine}>{scenario?.insightLine}</AppText>
+          <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+function ComparisonSymbolVisual({ variant }) {
+  const { styles, colors } = useLessonStepStyles();
+  const drift = useSharedValue(0);
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    drift.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 1700, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 1700, easing: Easing.inOut(Easing.quad) })
+      ),
+      -1,
+      false
+    );
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.quad) }),
+        withTiming(0, { duration: 0 })
+      ),
+      -1,
+      false
+    );
+  }, [drift, progress]);
+
+  const symbolAnim = useAnimatedStyle(() => {
+    if (variant === 'uncertain') {
+      return {
+        transform: [
+          { translateY: interpolate(drift.value, [0, 1], [2, -3], Extrapolation.CLAMP) },
+          { translateX: interpolate(drift.value, [0, 0.5, 1], [-1, 2, -1], Extrapolation.CLAMP) },
+          { rotate: `${interpolate(drift.value, [0, 0.5, 1], [-2, 2, -2], Extrapolation.CLAMP)}deg` },
+        ],
+      };
+    }
+
+    return {
+      transform: [
+        { translateY: interpolate(drift.value, [0, 1], [1, -1], Extrapolation.CLAMP) },
+      ],
+    };
+  });
+
+  const particleOneAnim = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(progress.value, [0, 1], [-2, 5], Extrapolation.CLAMP) },
+      { translateY: interpolate(progress.value, [0, 1], [2, -4], Extrapolation.CLAMP) },
+    ],
+    opacity: interpolate(progress.value, [0, 0.5, 1], [0.25, 0.65, 0.25], Extrapolation.CLAMP),
+  }));
+  const particleTwoAnim = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(progress.value, [0, 1], [3, -4], Extrapolation.CLAMP) },
+      { translateY: interpolate(progress.value, [0, 1], [-3, 4], Extrapolation.CLAMP) },
+    ],
+    opacity: interpolate(progress.value, [0, 0.5, 1], [0.2, 0.45, 0.2], Extrapolation.CLAMP),
+  }));
+  const progressDotAnim = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: interpolate(progress.value, [0, 1], [0, 44], Extrapolation.CLAMP) },
+    ],
+    opacity: interpolate(progress.value, [0, 0.15, 1], [0, 1, 1], Extrapolation.CLAMP),
+  }));
+
+  return (
+    <View style={styles.compareVisualWrap}>
+      {variant === 'uncertain' ? (
+        <View style={styles.compareVisualStage}>
+          <Animated.View style={[styles.compareVisualParticle, styles.compareVisualParticleOne, particleOneAnim]} />
+          <Animated.View style={[styles.compareVisualParticle, styles.compareVisualParticleTwo, particleTwoAnim]} />
+          <Animated.View style={[styles.compareVisualCore, styles.compareVisualCoreMuted, symbolAnim]}>
+            <AppText style={styles.compareVisualQuestionMark}>?</AppText>
+          </Animated.View>
+          <View style={styles.compareVisualCaptionRow}>
+            <View style={[styles.compareVisualCaptionDash, styles.compareVisualCaptionDashMuted]} />
+            <View style={[styles.compareVisualCaptionDash, styles.compareVisualCaptionDashShort]} />
+          </View>
+        </View>
+      ) : (
+        <View style={styles.compareVisualStage}>
+          <View style={styles.compareProgressRail}>
+            <Animated.View
+              style={[
+                styles.compareProgressDot,
+                { backgroundColor: colors.accent.primary },
+                progressDotAnim,
+              ]}
+            />
+          </View>
+          <Animated.View style={[styles.compareGoalWrap, symbolAnim]}>
+            <Ionicons name="home-outline" size={22} color={colors.accent.primary} />
+          </Animated.View>
         </View>
       )}
     </View>
@@ -4255,6 +4680,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surface,
     gap: components.layout.spacing.lg,
+    overflow: 'hidden',
   },
   scenarioComparePanelReactive: {
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
@@ -4278,8 +4704,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioCompareRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: components.layout.spacing.sm,
+    minWidth: 0,
   },
   scenarioCompareTrack: {
     alignItems: 'center',
@@ -4292,6 +4719,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: colors.background.surface,
+    flexShrink: 0,
   },
   scenarioCompareNodeActive: {
     backgroundColor: colors.accent.primary,
@@ -4319,6 +4747,12 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioCompareLineActive: {
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.surface),
   },
+  scenarioCompareLineDotted: {
+    backgroundColor: 'transparent',
+    borderWidth: components.borderWidth.thin,
+    borderStyle: 'dashed',
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
   scenarioCompareLineActiveReactive: {
     backgroundColor: toRgba(colors.ui.divider, colors.opacity.surface),
   },
@@ -4331,6 +4765,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioCompareStepLabel: {
     ...typography.styles.body,
     color: colors.text.primary,
+    flex: 1,
+    flexShrink: 1,
+    minWidth: 0,
+    lineHeight: 22,
   },
   scenarioCompareStepLabelActive: {
     color: colors.text.primary,
@@ -4392,6 +4830,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   narrativeChoiceRow: {
     flexDirection: 'row',
     gap: components.layout.spacing.md,
+    alignItems: 'stretch',
   },
   narrativeChoiceCard: {
     flex: 1,
@@ -4455,12 +4894,106 @@ const createStyles = (colors, components, mode = 'dark') =>
   narrativeComparePanelWrap: {
     flex: 1,
     minWidth: 0,
+    overflow: 'hidden',
   },
   narrativeCompareGridOverride: {
     marginTop: components.layout.spacing.none,
   },
   narrativeOutcomeSection: {
     gap: components.layout.spacing.md,
+  },
+  compareVisualWrap: {
+    width: '100%',
+    minWidth: 0,
+    marginTop: components.layout.spacing.sm,
+  },
+  compareVisualStage: {
+    height: components.sizes.chart.md,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surfaceActive,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  compareVisualCore: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: components.borderWidth.thin,
+  },
+  compareVisualCoreMuted: {
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  compareVisualQuestionMark: {
+    ...typography.styles.h2,
+    color: colors.text.secondary,
+  },
+  compareVisualParticle: {
+    position: 'absolute',
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.surface),
+  },
+  compareVisualParticleOne: {
+    top: 18,
+    left: '32%',
+  },
+  compareVisualParticleTwo: {
+    right: '28%',
+    bottom: 20,
+  },
+  compareVisualCaptionRow: {
+    position: 'absolute',
+    bottom: components.layout.spacing.md,
+    flexDirection: 'row',
+    gap: components.layout.spacing.xs,
+    alignItems: 'center',
+  },
+  compareVisualCaptionDash: {
+    height: components.sizes.line.thin,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  compareVisualCaptionDashMuted: {
+    width: 30,
+  },
+  compareVisualCaptionDashShort: {
+    width: 14,
+    opacity: 0.6,
+  },
+  compareGoalWrap: {
+    position: 'absolute',
+    right: 22,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+  },
+  compareProgressRail: {
+    width: 74,
+    height: 2,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.accent.primary, 0.18),
+    position: 'absolute',
+    left: 20,
+  },
+  compareProgressDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    position: 'absolute',
+    top: -4,
+    left: 0,
   },
   // ─── Step-tap selector (replaces slider) ────────────────────────────────────
   scenarioSelectorWrap: {
@@ -4530,8 +5063,11 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioCurveWrap: {
     gap: components.layout.spacing.xs,
     marginTop: components.layout.spacing.sm,
+    width: '100%',
+    minWidth: 0,
   },
   scenarioCurveChart: {
+    width: '100%',
     height: components.sizes.chart.md,
     borderRadius: components.radius.input,
     backgroundColor: colors.background.surfaceActive,

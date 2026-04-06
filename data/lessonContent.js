@@ -232,25 +232,58 @@ export const lessonContent = {
         ],
       },
       scenario: {
-        title: 'Start with the why',
-        variants: {
-          new: {
-            prompt: 'A friend says investing is always smart. What do you do?',
-            options: ['Invest immediately', 'Define your goal first'],
-            insight:
-              'Without a goal, every investment is a guess. Your goal tells you why you are investing and what you want to achieve.',
+        title: 'Define direction first or act immediately?',
+        intro:
+          'See the difference between investing without a goal and investing with a clear goal.',
+        cardLabel: 'Jean-Pierre',
+        text:
+          'I have €5,000 ready, but I do not yet know what exactly I am investing for.',
+        prompt: 'What do you do first?',
+        choices: [
+          {
+            id: 'invest_now',
+            label: 'Invest now',
+            sublabel: 'Without a goal',
+            icon: 'flash-outline',
           },
-          growing: {
-            prompt: 'You want to get serious about investing. What comes first?',
-            options: ['Pick a strategy', 'Define your goal first'],
-            insight: 'Purpose comes first. Strategy follows the goal, not the other way around.',
+          {
+            id: 'define_goal',
+            label: 'Define the goal',
+            sublabel: 'Why are you investing?',
+            icon: 'layers-outline',
+            isKey: true,
           },
-          seasoned: {
-            prompt: 'You are reviewing your plan. What keeps it coherent?',
-            options: ['Adjust for headlines', 'Revisit the goal'],
-            insight: 'Reconnecting to the goal keeps your plan consistent across cycles.',
+        ],
+        feedback: {
+          incorrect:
+            'Without a goal, every investment feels arbitrary. You do not know what you are trying to achieve.',
+          correct:
+            'Defining your goal first gives your choices direction and makes them more consistent.',
+        },
+        comparison: {
+          left: {
+            title: 'WITHOUT A GOAL',
+            chartLabel: 'UNCERTAIN',
+            items: [
+              'Uncertain',
+              'No direction',
+              'Reactive',
+              'No reference point',
+            ],
+          },
+          right: {
+            title: 'WITH A GOAL',
+            chartLabel: 'STRUCTURED',
+            items: [
+              'Clear direction',
+              'Intentional choices',
+              'Aligned with time & risk',
+              'Reference point in doubt',
+            ],
           },
         },
+        insightLine:
+          'A goal is what turns random action into deliberate investing.',
       },
       exercise: {
         type: 'choice',
