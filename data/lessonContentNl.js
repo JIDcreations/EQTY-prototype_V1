@@ -286,11 +286,40 @@ export const lessonContentNl = {
           'Een doel maakt het verschil tussen willekeurig handelen en bewust investeren.',
       },
       exercise: {
-        title: 'Start met jouw doel',
-        subtitle: 'Pas wat je net leerde toe op jouw eigen situatie.',
-        type: 'guidedGoal',
-        description:
-          'Kies per stap wat vandaag het best bij jou past.',
+        title: 'Wat ontbreekt er?',
+        type: 'scenario',
+        story:
+          'Anna heeft €5.000 gespaard en besluit te beginnen met investeren. Ze kiest een ETF die ze las in een financieel artikel. Twee maanden later daalt de markt met 15%. Ze weet niet of ze moet verkopen, vasthouden of bijkopen.',
+        question: 'Wat ontbreekt er in Anna\'s aanpak?',
+        options: [
+          {
+            id: 'knowledge',
+            label: 'Meer kennis over ETFs',
+            reveal:
+              'Kennis helpt, maar ook goed geïnformeerde beleggers verliezen de richting zonder doel. Het probleem zit dieper dan informatie.',
+          },
+          {
+            id: 'goal',
+            label: 'Een concreet beleggingsdoel',
+            isKey: true,
+            reveal:
+              'Zonder doel heeft Anna geen anker. Ze heeft nooit bepaald wat het geld voor haar moet doen — dus elke marktbeweging voelt als een crisis.',
+          },
+          {
+            id: 'capital',
+            label: 'Een groter startbedrag',
+            reveal:
+              'Meer kapitaal lost de ontbrekende richting niet op. Met €50.000 en geen doel staat Anna voor exact hetzelfde probleem, maar met hogere inzet.',
+          },
+        ],
+      },
+      reflection: {
+        title: 'Reflectie',
+        question: 'Wat is jouw doel als je zou investeren?',
+        placeholder: 'Schrijf hier je antwoord...',
+      },
+      summary: {
+        type: 'goalSetting',
         sections: [
           {
             id: 'why',
@@ -348,49 +377,11 @@ export const lessonContentNl = {
             'Ik weet het nog niet': 'Je risicoprofiel is nog open — dat is een eerlijk en geldig startpunt.',
           },
         },
-        submitLabel: 'Opslaan',
+        submitLabel: 'Doel opslaan',
         feedback: {
           valid:
             'Goed. Je hebt een eerste richting bepaald. In de volgende lessen maken we dit stap voor stap concreter.',
         },
-      },
-      reflection: {
-        title: 'Reflectie',
-        question: 'Wat is jouw doel als je zou investeren?',
-        placeholder: 'Schrijf hier je antwoord...',
-      },
-      summary: {
-        scenario: {
-          text:
-            'Lena heeft €3.000 gespaard en besluit te investeren omdat een vriend goede resultaten boekte. Ze kiest willekeurig een aantal aandelen en ETFs. Na zes maanden staat ze op -12% en vraagt zich af: bijkopen of verkopen?',
-          question: 'Wat ontbreekt er in Lena\'s aanpak?',
-          options: [
-            {
-              id: 'knowledge',
-              label: 'Meer kennis over beleggingen',
-              reveal:
-                'Kennis helpt, maar ook ervaren beleggers maken slechte keuzes zonder een duidelijk doel. Het probleem zit dieper.',
-            },
-            {
-              id: 'goal',
-              label: 'Een concreet beleggingsdoel',
-              reveal:
-                'Zonder doel is elke beslissing willekeurig. Bijkopen of verkopen? Lena weet het niet, omdat ze nooit heeft bepaald wat het geld voor haar moet doen.',
-              isKey: true,
-            },
-            {
-              id: 'capital',
-              label: 'Een groter startkapitaal',
-              reveal:
-                'Meer geld lost het probleem niet op. Met €10.000 en geen doel staat Lena voor exact hetzelfde dilemma, maar dan met hogere inzet.',
-            },
-          ],
-        },
-        takeaways: [
-          'Investeren is een tool, niet het doel zelf.',
-          'Doelen geven richting aan elke beslissing.',
-          'Zonder doel voelen strategieën willekeurig.',
-        ],
       },
     },
   },

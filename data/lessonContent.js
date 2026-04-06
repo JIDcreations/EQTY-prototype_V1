@@ -286,11 +286,40 @@ export const lessonContent = {
           'A goal is what turns random action into deliberate investing.',
       },
       exercise: {
-        title: 'Start with your goal',
-        subtitle: 'Apply what you just learned to your own situation.',
-        type: 'guidedGoal',
-        description:
-          'Choose what fits you best in each step.',
+        title: 'What is missing?',
+        type: 'scenario',
+        story:
+          'Anna has €5,000 and decides to start investing. She picks an ETF she read about in a finance article. Two months later the market drops 15%. She does not know whether to sell, hold, or buy more.',
+        question: 'What is missing from Anna\'s approach?',
+        options: [
+          {
+            id: 'knowledge',
+            label: 'More knowledge about ETFs',
+            reveal:
+              'Knowledge helps, but even well-informed investors lose direction without a goal. The problem runs deeper than information.',
+          },
+          {
+            id: 'goal',
+            label: 'A concrete investment goal',
+            isKey: true,
+            reveal:
+              'Without a goal, Anna has no anchor. She never defined what the money is supposed to do for her — so every market move feels like a crisis.',
+          },
+          {
+            id: 'capital',
+            label: 'A larger starting amount',
+            reveal:
+              'More capital does not solve missing direction. With €50,000 and no goal, Anna faces the exact same paralysis — just with higher stakes.',
+          },
+        ],
+      },
+      reflection: {
+        title: 'Reflection',
+        question: 'What would your goal be if you were to invest?',
+        placeholder: 'Write your answer here...',
+      },
+      summary: {
+        type: 'goalSetting',
         sections: [
           {
             id: 'why',
@@ -348,49 +377,11 @@ export const lessonContent = {
             "I don't know yet": 'Your risk profile is still open — that is an honest and valid starting point.',
           },
         },
-        submitLabel: 'Save',
+        submitLabel: 'Save my goal',
         feedback: {
           valid:
             'Good. You have set a first direction. In the next lessons, we will make it more concrete step by step.',
         },
-      },
-      reflection: {
-        title: 'Reflection',
-        question: 'What would your goal be if you were to invest?',
-        placeholder: 'Write your answer here...',
-      },
-      summary: {
-        scenario: {
-          text:
-            'Lena has saved €3,000 and decides to invest because a friend had good results. She picks a random mix of stocks and ETFs. Six months later she is down 12% and does not know whether to buy more or sell.',
-          question: 'What is missing from Lena\'s approach?',
-          options: [
-            {
-              id: 'knowledge',
-              label: 'More knowledge about investments',
-              reveal:
-                'Knowledge helps, but even experienced investors make poor decisions without a clear goal. The problem runs deeper.',
-            },
-            {
-              id: 'goal',
-              label: 'A concrete investment goal',
-              reveal:
-                'Without a goal, every decision is arbitrary. Buy more or sell? Lena does not know, because she never defined what the money is supposed to do for her.',
-              isKey: true,
-            },
-            {
-              id: 'capital',
-              label: 'A larger starting amount',
-              reveal:
-                'More money does not solve the problem. With €10,000 and no goal, Lena faces the exact same dilemma, but with higher stakes.',
-            },
-          ],
-        },
-        takeaways: [
-          'Investing is a tool, not the goal itself.',
-          'Goals give direction to every decision.',
-          'Without a goal, strategies feel arbitrary.',
-        ],
       },
     },
   },

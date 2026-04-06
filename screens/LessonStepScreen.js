@@ -2847,6 +2847,14 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
           copy={copy}
         />
       );
+    case 'scenario':
+      return (
+        <ScenarioExercise
+          exercise={exercise}
+          onNext={onNext}
+          copy={copy}
+        />
+      );
     case 'tradeoff':
     default:
       return (
@@ -2858,6 +2866,95 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
         />
       );
   }
+}
+
+function ScenarioExercise({ exercise, onNext, copy }) {
+  const { colors, components, styles, mode } = useLessonStepStyles();
+  const { story, question, options = [] } = exercise;
+  const [picked, setPicked] = useState(null);
+
+  const handlePick = (id) => {
+    if (picked) return;
+    setPicked(id);
+  };
+
+  const pickedOption = options.find((o) => o.id === picked);
+  const isAnswered = picked !== null;
+
+  return (
+    <View style={styles.stepBody}>
+      <View style={styles.scenarioStoryCard}>
+        <AppText style={styles.scenarioStoryLabel}>Scenario</AppText>
+        <AppText style={styles.scenarioStoryText}>{story}</AppText>
+      </View>
+
+      <View style={styles.scenarioQuestionBlock}>
+        <AppText style={styles.scenarioQuestion}>{question}</AppText>
+        <View style={styles.scenarioOptionList}>
+          {options.map((opt) => {
+            const isPicked = picked === opt.id;
+            const isKey = isAnswered && opt.isKey;
+            const isWrongPick = isPicked && !opt.isKey;
+            const isDimmed = isAnswered && !isPicked && !opt.isKey;
+            return (
+              <SelectableOptionButton
+                key={opt.id}
+                onPress={() => handlePick(opt.id)}
+                disabled={isAnswered}
+                label={opt.label}
+                state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+                accessory={
+                  isKey ? (
+                    <View
+                      style={[
+                        styles.scenarioOptionCheckBadge,
+                        mode === 'light' && styles.scenarioOptionCheckBadgeLight,
+                      ]}
+                    >
+                      <Ionicons
+                        name="checkmark"
+                        size={components.sizes.icon.sm}
+                        color={mode === 'light' ? colors.text.primary : colors.accent.primary}
+                      />
+                    </View>
+                  ) : isWrongPick ? (
+                    <Ionicons name="close-circle" size={components.sizes.icon.lg} color={colors.text.secondary} />
+                  ) : null
+                }
+              />
+            );
+          })}
+        </View>
+      </View>
+
+      {isAnswered && pickedOption && (
+        <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
+          <View style={styles.scenarioRevealHeader}>
+            <Ionicons
+              name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
+              size={components.sizes.icon.lg}
+              color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
+            />
+            <AppText
+              style={[
+                styles.scenarioRevealLabel,
+                pickedOption.isKey && styles.scenarioRevealLabelKey,
+              ]}
+            >
+              {pickedOption.isKey ? (copy.labels.aligned) : (copy.labels.recheckFlow)}
+            </AppText>
+          </View>
+          <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
+        </Animated.View>
+      )}
+
+      {isAnswered && (
+        <Animated.View entering={FadeInDown.duration(200)}>
+          <PrimaryButton label={copy.buttons.completeExercise} onPress={onNext} />
+        </Animated.View>
+      )}
+    </View>
+  );
 }
 
 function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
@@ -3448,7 +3545,7 @@ function GoalInputExercise({ exercise, onNext, onPressTerm, copy }) {
   );
 }
 
-function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
+function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLabel }) {
   const { styles } = useLessonStepStyles();
   const {
     sections = [],
@@ -3604,7 +3701,7 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
       {isComplete && (
         <Animated.View entering={FadeInDown.duration(200)}>
           <PrimaryButton
-            label={hasSubmitted ? copy.buttons.next : (submitLabel || copy.buttons.continue)}
+            label={hasSubmitted ? (postSubmitLabel || copy.buttons.next) : (submitLabel || copy.buttons.continue)}
             onPress={handleSubmit}
           />
         </Animated.View>
@@ -4073,105 +4170,37 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
 
 
 function Lesson1SummaryStep({ content, onComplete, copy }) {
-  const { colors, components, styles, mode } = useLessonStepStyles();
-  const [picked, setPicked] = useState(null);
+  const { colors, styles } = useLessonStepStyles();
+  const summary = content?.steps?.summary || {};
 
-  const summaryScenario = content?.steps?.summary?.scenario;
-  const scenarioText = summaryScenario?.text || '';
-  const questionText = summaryScenario?.question || '';
-  const options = summaryScenario?.options || [];
-  const processResetText =
-    'Investeren zonder doel is handelen op instinct. Bepaal eerst het doel voordat je de volgende stap zet.';
-  const revealExactLabel = 'Precies';
-  const revealNudgeLabel = 'Niet helemaal — maar';
-
-  const handlePick = (id) => {
-    if (picked) return;
-    setPicked(id);
+  // Build a synthetic exercise object from the summary data so GuidedGoalExercise can render it
+  const exercise = {
+    sections: summary.sections || [],
+    interpretations: summary.interpretations || {},
+    submitLabel: summary.submitLabel,
+    feedback: summary.feedback || {},
   };
 
-  const pickedOption = options.find((o) => o.id === picked);
-  const isAnswered = picked !== null;
-
   return (
-    <View style={[styles.stepBody, { marginTop: components.layout.spacing.xxl }]}>
-
-      <View style={styles.scenarioStoryCard}>
-        <AppText style={styles.scenarioStoryLabel}>Scenario</AppText>
-        <AppText style={styles.scenarioStoryText}>{scenarioText}</AppText>
+    <View style={styles.stepBody}>
+      {/* Journey strip — 5 steps completed */}
+      <View style={styles.summaryJourneyRow}>
+        {[1, 2, 3, 4, 5].map((n, i) => (
+          <React.Fragment key={n}>
+            <View style={styles.summaryJourneyNode}>
+              <Ionicons name="checkmark" size={10} color={colors.accent.primary} />
+            </View>
+            {i < 4 && <View style={styles.summaryJourneyConnector} />}
+          </React.Fragment>
+        ))}
       </View>
 
-      <View style={styles.scenarioQuestionBlock}>
-        <AppText style={styles.scenarioQuestion}>{questionText}</AppText>
-
-        <View style={styles.scenarioOptionList}>
-          {options.map((opt) => {
-            const isPicked    = picked === opt.id;
-            const isKey       = isAnswered && opt.isKey;
-            const isWrongPick = isPicked && !opt.isKey;
-            const isDimmed    = isAnswered && !isPicked && !opt.isKey;
-            return (
-              <SelectableOptionButton
-                key={opt.id}
-                onPress={() => handlePick(opt.id)}
-                disabled={isAnswered}
-                label={opt.label}
-                state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
-                accessory={
-                  isKey ? (
-                    <View
-                      style={[
-                        styles.scenarioOptionCheckBadge,
-                        mode === 'light' && styles.scenarioOptionCheckBadgeLight,
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark"
-                        size={14}
-                        color={mode === 'light' ? colors.text.primary : colors.accent.primary}
-                      />
-                    </View>
-                  ) : isWrongPick ? (
-                    <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
-                  ) : null
-                }
-              />
-            );
-          })}
-        </View>
-      </View>
-
-      {isAnswered && pickedOption && (
-        <Animated.View
-          entering={FadeInDown.duration(300)}
-          style={styles.scenarioRevealCard}
-        >
-          <View style={styles.scenarioRevealHeader}>
-            <Ionicons
-              name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
-              size={18}
-              color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
-            />
-            <AppText
-              style={[
-                styles.scenarioRevealLabel,
-                pickedOption.isKey && styles.scenarioRevealLabelKey,
-              ]}
-            >
-              {pickedOption.isKey ? revealExactLabel : revealNudgeLabel}
-            </AppText>
-          </View>
-          <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
-          {!pickedOption.isKey && (
-            <>
-              <View style={styles.scenarioRevealDivider} />
-              <AppText style={styles.scenarioRevealText}>{processResetText}</AppText>
-            </>
-          )}
-        </Animated.View>
-      )}
-
-      {isAnswered && <PrimaryButton label={copy.buttons.next} onPress={onComplete} />}
+      <GuidedGoalExercise
+        exercise={exercise}
+        onNext={onComplete}
+        copy={copy}
+        postSubmitLabel={copy.buttons.completeLesson}
+      />
     </View>
   );
 }
