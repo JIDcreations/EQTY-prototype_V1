@@ -392,7 +392,7 @@ export const lessonContentNl = {
             'Ik weet het nog niet': 'Je profiel ligt nog open, en dat is oké.',
           },
         },
-        submitLabel: 'Doel opslaan',
+        submitLabel: 'Les afronden',
         feedback: {
           valid:
             'Goed. Je hebt een eerste richting bepaald. In de volgende lessen maken we dit stap voor stap concreter.',

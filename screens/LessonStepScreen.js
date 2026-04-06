@@ -3555,7 +3555,15 @@ function GoalInputExercise({ exercise, onNext, onPressTerm, copy }) {
   );
 }
 
-function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLabel, showProgressDots = true }) {
+function GuidedGoalExercise({
+  exercise,
+  onNext,
+  onPressTerm,
+  copy,
+  postSubmitLabel,
+  showProgressDots = true,
+  completeOnFirstSubmit = false,
+}) {
   const { styles } = useLessonStepStyles();
   const {
     sections = [],
@@ -3585,7 +3593,7 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy, postSubmitLab
   };
 
   const handleSubmit = () => {
-    if (hasSubmitted) {
+    if (hasSubmitted || completeOnFirstSubmit) {
       onNext();
     } else {
       setHasSubmitted(true);
@@ -4206,6 +4214,7 @@ function Lesson1SummaryStep({ content, onComplete, copy }) {
         copy={copy}
         postSubmitLabel={copy.buttons.completeLesson}
         showProgressDots={false}
+        completeOnFirstSubmit
       />
     </View>
   );
