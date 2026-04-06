@@ -325,7 +325,10 @@ export const lessonContentNl = {
       },
       reflection: {
         title: 'Reflectie',
-        question: 'Wat is jouw doel als je zou investeren?',
+        question: 'Wat zou er gebeuren als je investeert zonder doel?',
+        subtitle: 'Denk kort na over wat er mis kan lopen zonder duidelijke richting.',
+        insightText:
+          'Zonder doel worden je beslissingen willekeurig. Je weet niet wanneer je moet bijsturen, waardoor je sneller twijfelt of verkeerd reageert.',
         placeholder: 'Schrijf hier je antwoord...',
       },
       summary: {

@@ -3978,14 +3978,20 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
   const [text, setText] = useState('');
   const [submittedText, setSubmittedText] = useState('');
   const [response, setResponse] = useState(null);
+  const customInsightText = content?.steps?.reflection?.insightText;
   const question =
     content?.steps?.reflection?.question || copy.messages.reflectionQuestion;
+  const subtitle =
+    content?.steps?.reflection?.subtitle || copy.messages.reflectionSubtitle;
   const placeholder =
     content?.steps?.reflection?.placeholder || copy.messages.reflectionPlaceholder;
   const canSubmit = text.trim().length > 0;
   const isSubmitted = !!response;
 
   const buildResponse = (input) => {
+    if (customInsightText) {
+      return customInsightText;
+    }
     const normalized = (input || '').toLowerCase().trim();
     if (!normalized || normalized.length < 6) {
       return copy.messages.reflectionShort;
@@ -4029,7 +4035,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
         <View style={styles.reflectionHeader}>
           <AppText style={styles.reflectionQuestion}>{question}</AppText>
           <AppText style={styles.reflectionSubtitle}>
-            {copy.messages.reflectionSubtitle}
+            {subtitle}
           </AppText>
         </View>
         {isSubmitted ? (
