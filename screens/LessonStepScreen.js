@@ -2808,6 +2808,15 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
           copy={copy}
         />
       );
+    case 'buildGoal':
+      return (
+        <BuildGoalExercise
+          exercise={exercise}
+          onNext={onNext}
+          onPressTerm={onPressTerm}
+          copy={copy}
+        />
+      );
     case 'multi':
       return (
         <MultiExercise
@@ -3245,6 +3254,94 @@ function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
         />
       </View>
     </View>
+  );
+}
+
+function BuildGoalExercise({ exercise, onNext, onPressTerm, copy }) {
+  const { colors, styles } = useLessonStepStyles();
+  const {
+    description,
+    fields = [],
+    previewLabel = copy.labels.outcome,
+    previewTemplate = '',
+    feedback = {},
+  } = exercise;
+
+  const [values, setValues] = useState(() =>
+    fields.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {})
+  );
+
+  const trimmedValues = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(values).map(([key, value]) => [key, value.trim()])
+      ),
+    [values]
+  );
+
+  const isComplete = fields.every((field) => trimmedValues[field.id]);
+  const previewText = useMemo(() => {
+    if (!previewTemplate) return '';
+    return fields.reduce((text, field) => {
+      return text.replaceAll(`{${field.id}}`, trimmedValues[field.id] || '');
+    }, previewTemplate);
+  }, [fields, previewTemplate, trimmedValues]);
+
+  const handleChange = (id, nextValue) => {
+    setValues((prev) => ({ ...prev, [id]: nextValue }));
+  };
+
+  const reset = () => {
+    setValues(fields.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {}));
+  };
+
+  return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.stepBody}>
+        <Card style={styles.exerciseCard}>
+          <GlossaryText text={description} style={styles.bodyText} onPressTerm={onPressTerm} />
+          <View style={styles.buildGoalFields}>
+            {fields.map((field) => (
+              <View key={field.id} style={styles.buildGoalField}>
+                <AppText style={styles.buildGoalFieldLabel}>{field.label}</AppText>
+                <View style={styles.buildGoalInputWrap}>
+                  <AppTextInput
+                    style={styles.buildGoalInput}
+                    value={values[field.id]}
+                    onChangeText={(nextValue) => handleChange(field.id, nextValue)}
+                    placeholder={field.placeholder}
+                    placeholderTextColor={colors.text.secondary}
+                    autoCapitalize={field.id === 'goal' ? 'sentences' : 'none'}
+                    autoCorrect={field.id === 'goal'}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        </Card>
+
+        {isComplete ? (
+          <Card style={styles.insightCard}>
+            <AppText style={styles.insightTitle}>{previewLabel}</AppText>
+            <View style={styles.buildGoalPreview}>
+              <AppText style={styles.buildGoalPreviewText}>{previewText}</AppText>
+            </View>
+            {feedback.complete ? (
+              <GlossaryText text={feedback.complete} style={styles.caption} onPressTerm={onPressTerm} />
+            ) : null}
+          </Card>
+        ) : null}
+
+        <View style={styles.exerciseActions}>
+          <SecondaryButton label={copy.buttons.reset} onPress={reset} />
+          <PrimaryButton
+            label={copy.buttons.completeExercise}
+            onPress={onNext}
+            disabled={!isComplete}
+          />
+        </View>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -5255,6 +5352,40 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   exerciseSection: {
     gap: components.layout.spacing.md,
+  },
+  buildGoalFields: {
+    gap: components.layout.spacing.md,
+  },
+  buildGoalField: {
+    gap: components.layout.spacing.xs,
+  },
+  buildGoalFieldLabel: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+  },
+  buildGoalInputWrap: {
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surfaceActive,
+    paddingHorizontal: components.layout.spacing.sm,
+  },
+  buildGoalInput: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    minHeight: components.sizes.input.minHeight,
+    paddingVertical: components.layout.spacing.sm,
+  },
+  buildGoalPreview: {
+    padding: components.layout.spacing.md,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  buildGoalPreviewText: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
   },
   introExercisePrimarySection: {
     marginTop: components.layout.sectionGap,

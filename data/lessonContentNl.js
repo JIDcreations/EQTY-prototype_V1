@@ -286,29 +286,33 @@ export const lessonContentNl = {
           'Een doel maakt het verschil tussen willekeurig handelen en bewust investeren.',
       },
       exercise: {
-        type: 'choice',
+        title: 'Bouw het doel',
+        type: 'buildGoal',
         description:
-          'Kies het meest concrete beleggingsdoel. Een goed doel heeft een tijdshorizon, een bedrag en een duidelijk resultaat.',
-        options: [
+          'Maak van een vaag idee een concreet beleggingsdoel. Vul bedrag, termijn en doel in.',
+        fields: [
           {
-            id: 'vague',
-            label: 'Ik wil geld laten groeien',
-            reveal:
-              'Dit is een wens, geen doel. Het mist een tijdshorizon en een concreet resultaat. Zonder deze ankerpunten kun je geen plan opstellen.',
+            id: 'amount',
+            label: 'Bedrag',
+            placeholder: 'Bijv. €25.000',
           },
           {
-            id: 'partial',
-            label: 'Ik wil een financieel buffer opbouwen',
-            reveal:
-              'Beter dan niets, maar nog onvolledig. Hoeveel buffer? Tegen wanneer? Een doel heeft specificiteit nodig om beslissingen te sturen.',
+            id: 'horizon',
+            label: 'Termijn',
+            placeholder: 'Bijv. 7 jaar',
           },
           {
-            id: 'concrete',
-            label: 'Ik wil over 7 jaar €25.000 gespaard hebben voor een aanbetaling op een woning',
-            reveal:
-              'Dit is een concreet doel. Het bevat een tijdshorizon (7 jaar), een bedrag (€25.000) en een duidelijk resultaat. Dit stuurt al je beleggingsbeslissingen.',
+            id: 'goal',
+            label: 'Doel',
+            placeholder: 'Bijv. een woning',
           },
         ],
+        previewLabel: 'Jouw concrete doel',
+        previewTemplate: 'Ik wil over {horizon} {amount} opbouwen voor {goal}.',
+        feedback: {
+          complete:
+            'Nu is het doel concreet: bedrag, termijn en bestemming geven richting aan je keuzes.',
+        },
       },
       reflection: {
         title: 'Reflectie',

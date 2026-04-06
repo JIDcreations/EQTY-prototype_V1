@@ -286,29 +286,33 @@ export const lessonContent = {
           'A goal is what turns random action into deliberate investing.',
       },
       exercise: {
-        type: 'choice',
+        title: 'Build the goal',
+        type: 'buildGoal',
         description:
-          'Pick the most concrete investment goal. A good goal has a time horizon, an amount, and a clear outcome.',
-        options: [
+          'Turn a vague idea into a concrete investment goal. Fill in amount, time horizon, and purpose.',
+        fields: [
           {
-            id: 'vague',
-            label: 'I want to grow my money',
-            reveal:
-              'This is a wish, not a goal. It lacks a time horizon and a concrete outcome. Without these anchors, you cannot build a plan.',
+            id: 'amount',
+            label: 'Amount',
+            placeholder: 'E.g. €25,000',
           },
           {
-            id: 'partial',
-            label: 'I want to build a financial cushion',
-            reveal:
-              'Better than nothing, but still incomplete. How much? By when? A goal needs specificity to guide decisions.',
+            id: 'horizon',
+            label: 'Time horizon',
+            placeholder: 'E.g. 7 years',
           },
           {
-            id: 'concrete',
-            label: 'I want to have €25,000 saved in 7 years for a house down payment',
-            reveal:
-              'This is a concrete goal. It has a time horizon (7 years), an amount (€25,000), and a clear outcome. This drives every investment decision.',
+            id: 'goal',
+            label: 'Goal',
+            placeholder: 'E.g. a home down payment',
           },
         ],
+        previewLabel: 'Your concrete goal',
+        previewTemplate: 'I want to build {amount} over {horizon} for {goal}.',
+        feedback: {
+          complete:
+            'Now the goal is concrete: amount, time horizon, and destination give your choices direction.',
+        },
       },
       reflection: {
         title: 'Reflection',
