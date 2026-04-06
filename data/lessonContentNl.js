@@ -325,6 +325,29 @@ export const lessonContentNl = {
             ],
           },
         ],
+        interpretations: {
+          prefix: 'Je wil ',
+          why: {
+            'Voor een woning': 'investeren voor een eigen woning',
+            'Meer vrijheid': 'financiële vrijheid opbouwen',
+            'Extra inkomen': 'extra inkomen opbouwen naast je huidige inkomen',
+            'Pensioen': 'vooruitdenken en een aanvulling op je pensioen opbouwen',
+            'Iets anders': 'een persoonlijk doel nastreven',
+          },
+          when: {
+            'Binnen 2 jaar': 'op korte termijn',
+            'Binnen 5 jaar': 'op middellange termijn',
+            'Binnen 10 jaar': 'op langere termijn',
+            'Op lange termijn': 'op de lange termijn',
+            'Ik weet het nog niet': 'zonder vaste tijdshorizon',
+          },
+          fit: {
+            'Ik wil vooral zekerheid': 'Je stelt zekerheid boven rendement — stabiliteit is je eerste prioriteit.',
+            'Ik kan wat schommelingen aan': 'Je bent bereid om wat schommelingen te accepteren in ruil voor meer groeipotentieel.',
+            'Ik wil rustig starten': 'Je kiest voor een rustige start, wat betekent dat stabiliteit belangrijker is voor jou dan snelheid.',
+            'Ik weet het nog niet': 'Je risicoprofiel is nog open — dat is een eerlijk en geldig startpunt.',
+          },
+        },
         submitLabel: 'Opslaan',
         feedback: {
           valid:

@@ -3449,9 +3449,10 @@ function GoalInputExercise({ exercise, onNext, onPressTerm, copy }) {
 }
 
 function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
+  const { styles } = useLessonStepStyles();
   const {
     sections = [],
+    interpretations = {},
     submitLabel = copy.buttons.continue,
     feedback = {},
   } = exercise;
@@ -3484,7 +3485,17 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
     }
   };
 
-  const summaryAnswers = sections.map((s) => answers[s.id]).filter(Boolean);
+  // Build interpretation text from selected answers
+  const buildInterpretation = () => {
+    if (!isComplete || !interpretations.why) return null;
+    const whyText = interpretations.why[answers.why] ?? answers.why;
+    const whenText = interpretations.when[answers.when] ?? answers.when;
+    const fitText = interpretations.fit[answers.fit] ?? answers.fit;
+    const prefix = interpretations.prefix ?? '';
+    return `${prefix}${whyText} ${whenText}.\n${fitText}`;
+  };
+
+  const interpretationText = isComplete ? buildInterpretation() : null;
 
   return (
     <View style={styles.stepBody}>
@@ -3506,14 +3517,14 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
         })}
       </View>
 
-      {/* Question sections */}
+      {/* Question sections — progressive reveal */}
       <View style={styles.guidedGoalSections}>
         {sections.map((section, index) => {
           const isAnswered = answers[section.id] !== null;
           const isVisible = index <= activeIndex || isAnswered;
           if (!isVisible) return null;
 
-          // Collapsed answered section (not the currently active one)
+          // Collapsed answered row
           if (isAnswered && index < activeIndex) {
             return (
               <Animated.View key={section.id} entering={FadeInDown.duration(200)}>
@@ -3531,7 +3542,7 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
             );
           }
 
-          // Active section with full options list
+          // Active section
           return (
             <Animated.View
               key={section.id}
@@ -3563,36 +3574,33 @@ function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
         })}
       </View>
 
-      {/* Summary + insight after all answered */}
-      {isComplete && (
-        <Animated.View entering={FadeInDown.duration(300)} style={styles.guidedGoalSummaryBlock}>
-          <Card style={styles.goalSummaryCard}>
-            <AppText style={styles.goalSummaryLabel}>{copy.labels.yourDirection}</AppText>
-            <View style={styles.goalSummaryPills}>
-              {summaryAnswers.map((answer, i) => (
-                <View key={i} style={styles.goalSummaryPill}>
-                  <AppText style={styles.goalSummaryPillText}>{answer}</AppText>
-                </View>
-              ))}
-            </View>
+      {/* Interpretation — appears once all questions are answered */}
+      {isComplete && interpretationText && (
+        <Animated.View entering={FadeInDown.duration(300)}>
+          <Card style={styles.goalInterpretationCard}>
+            <AppText style={styles.goalInterpretationTitle}>
+              {copy.labels.goalInterpretationTitle}
+            </AppText>
+            <AppText style={styles.goalInterpretationText}>{interpretationText}</AppText>
           </Card>
-
-          {hasSubmitted && (
-            <Animated.View entering={FadeInDown.duration(250)}>
-              <Card style={styles.insightCard}>
-                <AppText style={styles.insightTitle}>{copy.labels.insight}</AppText>
-                <GlossaryText
-                  text={feedback.valid}
-                  style={styles.caption}
-                  onPressTerm={onPressTerm}
-                />
-              </Card>
-            </Animated.View>
-          )}
         </Animated.View>
       )}
 
-      {/* CTA — only appears once all questions are answered */}
+      {/* Insight card — appears after Save */}
+      {hasSubmitted && isComplete && (
+        <Animated.View entering={FadeInDown.duration(250)}>
+          <Card style={styles.insightCard}>
+            <AppText style={styles.insightTitle}>{copy.labels.insight}</AppText>
+            <GlossaryText
+              text={feedback.valid}
+              style={styles.caption}
+              onPressTerm={onPressTerm}
+            />
+          </Card>
+        </Animated.View>
+      )}
+
+      {/* CTA */}
       {isComplete && (
         <Animated.View entering={FadeInDown.duration(200)}>
           <PrimaryButton
@@ -5758,6 +5766,19 @@ const createStyles = (colors, components, mode = 'dark') =>
     ...typography.styles.small,
     color: colors.text.onAccent,
     fontFamily: typography.fonts.interSemiBold,
+  },
+  // Goal interpretation card
+  goalInterpretationCard: {
+    gap: components.layout.spacing.sm,
+  },
+  goalInterpretationTitle: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  goalInterpretationText: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    lineHeight: 26,
   },
   goalInputSection: {
     gap: components.layout.spacing.sm,

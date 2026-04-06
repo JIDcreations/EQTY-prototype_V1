@@ -172,6 +172,7 @@ const LESSON_STEP_COPY = {
       allInsightsConfirmed: "You've got it. Ready to complete the lesson.",
       change: 'Change',
       yourDirection: 'Your direction',
+      goalInterpretationTitle: 'What this says about your goal',
     },
     messages: {
       noExercise: 'No exercise is available for this lesson.',
@@ -397,6 +398,7 @@ const LESSON_STEP_COPY = {
       allInsightsConfirmed: 'Je begrijpt het. Klaar om de les af te ronden.',
       change: 'Wijzig',
       yourDirection: 'Jouw richting',
+      goalInterpretationTitle: 'Wat dit over jouw doel zegt',
     },
     messages: {
       noExercise: 'Er is geen oefening beschikbaar voor deze les.',

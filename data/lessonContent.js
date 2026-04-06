@@ -325,6 +325,29 @@ export const lessonContent = {
             ],
           },
         ],
+        interpretations: {
+          prefix: 'You want to ',
+          why: {
+            'For a home': 'invest towards owning a home',
+            'More freedom': 'build financial freedom',
+            'Extra income': 'generate extra income alongside your current earnings',
+            'Retirement': 'think ahead and build a supplement to your retirement',
+            'Something else': 'pursue a personal goal',
+          },
+          when: {
+            'Within 2 years': 'in the short term',
+            'Within 5 years': 'in the medium term',
+            'Within 10 years': 'over a longer horizon',
+            'Long term': 'over the long term',
+            "I don't know yet": 'without a fixed timeline yet',
+          },
+          fit: {
+            'I mainly want certainty': 'You put stability before returns — certainty is your first priority.',
+            'I can handle some ups and downs': 'You are willing to accept some volatility in exchange for more growth potential.',
+            'I want to start calmly': 'You prefer a calm start, which tells you that stability matters more to you than speed.',
+            "I don't know yet": 'Your risk profile is still open — that is an honest and valid starting point.',
+          },
+        },
         submitLabel: 'Save',
         feedback: {
           valid:
