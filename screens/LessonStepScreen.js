@@ -3449,86 +3449,158 @@ function GoalInputExercise({ exercise, onNext, onPressTerm, copy }) {
 }
 
 function GuidedGoalExercise({ exercise, onNext, onPressTerm, copy }) {
-  const { styles } = useLessonStepStyles();
+  const { styles, colors, components } = useLessonStepStyles();
   const {
-    description,
     sections = [],
     submitLabel = copy.buttons.continue,
     feedback = {},
   } = exercise;
+
   const [answers, setAnswers] = useState(() =>
-    sections.reduce((acc, section) => ({ ...acc, [section.id]: null }), {})
+    sections.reduce((acc, s) => ({ ...acc, [s.id]: null }), {})
   );
+  const [activeIndex, setActiveIndex] = useState(0);
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const isComplete = sections.every((section) => answers[section.id]);
-  const primaryLabel = hasSubmitted && isComplete ? copy.buttons.next : submitLabel;
+  const isComplete = sections.every((s) => answers[s.id] !== null);
 
-  const handlePick = (sectionId, option) => {
+  const handlePick = (sectionId, option, sectionIndex) => {
     setAnswers((prev) => ({ ...prev, [sectionId]: option }));
-  };
-
-  const handlePrimary = () => {
-    if (hasSubmitted && isComplete) {
-      onNext();
-      return;
+    if (sectionIndex === activeIndex && sectionIndex < sections.length - 1) {
+      setActiveIndex(sectionIndex + 1);
     }
-    setHasSubmitted(true);
   };
 
-  const reset = () => {
-    setAnswers(sections.reduce((acc, section) => ({ ...acc, [section.id]: null }), {}));
-    setHasSubmitted(false);
+  const handleChangeAnswer = (sectionIndex) => {
+    setActiveIndex(sectionIndex);
+    if (hasSubmitted) setHasSubmitted(false);
   };
+
+  const handleSubmit = () => {
+    if (hasSubmitted) {
+      onNext();
+    } else {
+      setHasSubmitted(true);
+    }
+  };
+
+  const summaryAnswers = sections.map((s) => answers[s.id]).filter(Boolean);
 
   return (
     <View style={styles.stepBody}>
-      <Card style={styles.exerciseCard}>
-        <GlossaryText text={description} style={styles.bodyText} onPressTerm={onPressTerm} />
-        <View style={styles.guidedGoalSections}>
-          {sections.map((section) => (
-            <View key={section.id} style={styles.guidedGoalSection}>
-              <AppText style={styles.guidedGoalQuestion}>{section.question}</AppText>
-              <View style={styles.goalChipGrid}>
-                {section.options?.map((option) => {
-                  const isActive = answers[section.id] === option;
-                  return (
-                    <Pressable
-                      key={option}
-                      style={[styles.goalChip, isActive && styles.goalChipActive]}
-                      onPress={() => handlePick(section.id, option)}
-                    >
-                      <GlossaryText
-                        text={option}
-                        style={[styles.goalChipText, isActive && styles.goalChipTextActive]}
-                        onPressTerm={onPressTerm}
-                      />
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          ))}
-        </View>
-      </Card>
-
-      {hasSubmitted && isComplete ? (
-        <Animated.View entering={FadeInDown.duration(250)}>
-          <Card style={styles.insightCard}>
-            <AppText style={styles.insightTitle}>{copy.labels.insight}</AppText>
-            <GlossaryText text={feedback.valid} style={styles.caption} onPressTerm={onPressTerm} />
-          </Card>
-        </Animated.View>
-      ) : null}
-
-      <View style={styles.exerciseActions}>
-        <SecondaryButton label={copy.buttons.reset} onPress={reset} />
-        <PrimaryButton
-          label={primaryLabel}
-          onPress={handlePrimary}
-          disabled={!isComplete}
-        />
+      {/* Step progress dots */}
+      <View style={styles.goalStepDots}>
+        {sections.map((s, index) => {
+          const isDone = answers[s.id] !== null;
+          const isCurrent = index === activeIndex && !isDone;
+          return (
+            <View
+              key={s.id}
+              style={[
+                styles.goalDot,
+                isDone && styles.goalDotDone,
+                isCurrent && styles.goalDotActive,
+              ]}
+            />
+          );
+        })}
       </View>
+
+      {/* Question sections */}
+      <View style={styles.guidedGoalSections}>
+        {sections.map((section, index) => {
+          const isAnswered = answers[section.id] !== null;
+          const isVisible = index <= activeIndex || isAnswered;
+          if (!isVisible) return null;
+
+          // Collapsed answered section (not the currently active one)
+          if (isAnswered && index < activeIndex) {
+            return (
+              <Animated.View key={section.id} entering={FadeInDown.duration(200)}>
+                <Pressable
+                  style={styles.goalAnsweredRow}
+                  onPress={() => handleChangeAnswer(index)}
+                >
+                  <View style={styles.goalAnsweredContent}>
+                    <AppText style={styles.goalAnsweredQuestion}>{section.question}</AppText>
+                    <AppText style={styles.goalAnsweredValue}>{answers[section.id]}</AppText>
+                  </View>
+                  <AppText style={styles.goalChangeLink}>{copy.labels.change}</AppText>
+                </Pressable>
+              </Animated.View>
+            );
+          }
+
+          // Active section with full options list
+          return (
+            <Animated.View
+              key={section.id}
+              entering={index > 0 ? FadeInDown.duration(300) : undefined}
+            >
+              <Card style={styles.guidedGoalActiveCard}>
+                <AppText style={styles.guidedGoalQuestion}>{section.question}</AppText>
+                <View style={styles.goalOptionList}>
+                  {section.options?.map((option) => {
+                    const isActive = answers[section.id] === option;
+                    return (
+                      <Pressable
+                        key={option}
+                        style={[styles.goalOption, isActive && styles.goalOptionActive]}
+                        onPress={() => handlePick(section.id, option, index)}
+                      >
+                        <GlossaryText
+                          text={option}
+                          style={[styles.goalOptionText, isActive && styles.goalOptionTextActive]}
+                          onPressTerm={onPressTerm}
+                        />
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </Card>
+            </Animated.View>
+          );
+        })}
+      </View>
+
+      {/* Summary + insight after all answered */}
+      {isComplete && (
+        <Animated.View entering={FadeInDown.duration(300)} style={styles.guidedGoalSummaryBlock}>
+          <Card style={styles.goalSummaryCard}>
+            <AppText style={styles.goalSummaryLabel}>{copy.labels.yourDirection}</AppText>
+            <View style={styles.goalSummaryPills}>
+              {summaryAnswers.map((answer, i) => (
+                <View key={i} style={styles.goalSummaryPill}>
+                  <AppText style={styles.goalSummaryPillText}>{answer}</AppText>
+                </View>
+              ))}
+            </View>
+          </Card>
+
+          {hasSubmitted && (
+            <Animated.View entering={FadeInDown.duration(250)}>
+              <Card style={styles.insightCard}>
+                <AppText style={styles.insightTitle}>{copy.labels.insight}</AppText>
+                <GlossaryText
+                  text={feedback.valid}
+                  style={styles.caption}
+                  onPressTerm={onPressTerm}
+                />
+              </Card>
+            </Animated.View>
+          )}
+        </Animated.View>
+      )}
+
+      {/* CTA — only appears once all questions are answered */}
+      {isComplete && (
+        <Animated.View entering={FadeInDown.duration(200)}>
+          <PrimaryButton
+            label={hasSubmitted ? copy.buttons.next : (submitLabel || copy.buttons.continue)}
+            onPress={handleSubmit}
+          />
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -5580,6 +5652,111 @@ const createStyles = (colors, components, mode = 'dark') =>
   goalChipTextActive: {
     ...typography.styles.small,
     color: colors.text.primary,
+    fontFamily: typography.fonts.interSemiBold,
+  },
+  // GuidedGoalExercise — progressive reveal styles
+  goalStepDots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.xs,
+    paddingBottom: components.layout.spacing.sm,
+  },
+  goalDot: {
+    width: components.sizes.dot.sm,
+    height: components.sizes.dot.sm,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  goalDotActive: {
+    width: components.sizes.dot.md,
+    height: components.sizes.dot.md,
+    borderRadius: components.radius.pill,
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderWidth: components.borderWidth.thin,
+    borderColor: colors.accent.primary,
+  },
+  goalDotDone: {
+    backgroundColor: colors.accent.primary,
+  },
+  goalAnsweredRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: components.layout.spacing.sm,
+    paddingHorizontal: components.layout.spacing.md,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, 0.06),
+  },
+  goalAnsweredContent: {
+    gap: 2,
+    flex: 1,
+  },
+  goalAnsweredQuestion: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+  },
+  goalAnsweredValue: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  goalChangeLink: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+    marginLeft: components.layout.spacing.md,
+  },
+  guidedGoalActiveCard: {
+    gap: components.layout.spacing.md,
+  },
+  goalOptionList: {
+    gap: components.layout.spacing.xs,
+  },
+  goalOption: {
+    paddingVertical: components.layout.spacing.md,
+    paddingHorizontal: components.layout.spacing.md,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  goalOptionActive: {
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor: colors.accent.primary,
+  },
+  goalOptionText: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+  },
+  goalOptionTextActive: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+    fontFamily: typography.fonts.interSemiBold,
+  },
+  guidedGoalSummaryBlock: {
+    gap: components.layout.spacing.md,
+  },
+  goalSummaryCard: {
+    gap: components.layout.spacing.sm,
+  },
+  goalSummaryLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.secondary,
+  },
+  goalSummaryPills: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: components.layout.spacing.xs,
+  },
+  goalSummaryPill: {
+    paddingVertical: components.layout.spacing.xs,
+    paddingHorizontal: components.layout.spacing.sm,
+    borderRadius: components.radius.pill,
+    backgroundColor: colors.accent.primary,
+  },
+  goalSummaryPillText: {
+    ...typography.styles.small,
+    color: colors.text.onAccent,
     fontFamily: typography.fonts.interSemiBold,
   },
   goalInputSection: {
