@@ -2134,120 +2134,62 @@ function IntroScenarioStep({ onNext, copy }) {
 
             {/* Comparison panels — animated active/inactive states */}
             <View style={[styles.scenarioCompareGrid, styles.narrativeCompareGridOverride]}>
-              {/* ZONDER PLAN */}
-              <Animated.View style={[styles.narrativeComparePanelWrap, reactiveCardAnim]}>
-                <Card
-                  style={[
-                    styles.scenarioComparePanel,
-                    {
-                      flex: 1,
-                      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-                      borderColor: selected === 'reactive'
-                        ? toRgba(colors.text.primary, 0.55)
-                        : toRgba(colors.ui.divider, colors.opacity.stroke),
-                    },
-                  ]}
-                >
-                  <View style={styles.scenarioCompareHeader}>
-                    <AppText style={styles.scenarioCompareLabel}>ZONDER PLAN</AppText>
-                  </View>
+              <ScenarioCompareCard
+                title="ZONDER PLAN"
+                animatedStyle={reactiveCardAnim}
+                cardStyle={{
+                  flex: 1,
+                  backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                  borderColor: selected === 'reactive'
+                    ? toRgba(colors.text.primary, 0.55)
+                    : toRgba(colors.ui.divider, colors.opacity.stroke),
+                }}
+                visual={(
                   <Animated.View style={reactiveChartAnim}>
                     <ScenarioCurve variant="volatile" progress={1} label="ONZEKER" />
                   </Animated.View>
-                  <View style={styles.scenarioCompareSteps}>
-                    {reactiveSteps.map((step, index) => {
-                      const isLast = index === reactiveSteps.length - 1;
-                      return (
-                        <View key={step.id} style={styles.scenarioCompareRow}>
-                          <View style={styles.scenarioCompareTrack}>
-                            <View
-                              style={[
-                                styles.scenarioCompareNode,
-                                step.isMissing && styles.scenarioCompareNodeMissing,
-                                step.isActive && styles.scenarioCompareNodeActiveReactive,
-                              ]}
-                            />
-                            {!isLast ? (
-                              <View
-                                style={[
-                                  styles.scenarioCompareLine,
-                                  step.isMissing && styles.scenarioCompareLineMissing,
-                                  step.isActive && styles.scenarioCompareLineActiveReactive,
-                                ]}
-                              />
-                            ) : null}
-                          </View>
-                          <AppText
-                            style={[
-                              styles.scenarioCompareStepLabel,
-                              step.isMissing && styles.scenarioCompareStepLabelMissing,
-                              step.isActive && styles.scenarioCompareStepLabelActive,
-                            ]}
-                          >
-                            {step.label}
-                          </AppText>
-                        </View>
-                      );
-                    })}
-                  </View>
-                </Card>
-              </Animated.View>
+                )}
+                rows={reactiveSteps.map((step) => ({
+                  id: step.id,
+                  label: step.label,
+                  nodeStyles: [
+                    step.isMissing && styles.scenarioCompareNodeMissing,
+                    step.isActive && styles.scenarioCompareNodeActiveReactive,
+                  ],
+                  lineStyles: [
+                    step.isMissing && styles.scenarioCompareLineMissing,
+                    step.isActive && styles.scenarioCompareLineActiveReactive,
+                  ],
+                  labelStyles: [
+                    step.isMissing && styles.scenarioCompareStepLabelMissing,
+                    step.isActive && styles.scenarioCompareStepLabelActive,
+                  ],
+                }))}
+              />
 
-              {/* MET PLAN */}
-              <Animated.View style={[styles.narrativeComparePanelWrap, planCardAnim]}>
-                <Card
-                  style={[
-                    styles.scenarioComparePanel,
-                    {
-                      flex: 1,
-                      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-                      borderColor: selected === 'plan'
-                        ? colors.accent.primary
-                        : toRgba(colors.ui.divider, colors.opacity.stroke),
-                    },
-                  ]}
-                >
-                  <View style={styles.scenarioCompareHeader}>
-                    <AppText style={styles.scenarioCompareLabel}>MET PLAN</AppText>
-                  </View>
+              <ScenarioCompareCard
+                title="MET PLAN"
+                animatedStyle={planCardAnim}
+                cardStyle={{
+                  flex: 1,
+                  backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+                  borderColor: selected === 'plan'
+                    ? colors.accent.primary
+                    : toRgba(colors.ui.divider, colors.opacity.stroke),
+                }}
+                visual={(
                   <Animated.View style={planChartAnim}>
                     <ScenarioCurve variant="stable" progress={1} label="STABIEL" />
                   </Animated.View>
-                  <View style={styles.scenarioCompareSteps}>
-                    {planSteps.map((step, index) => {
-                      const isLast = index === planSteps.length - 1;
-                      return (
-                        <View key={step.id} style={styles.scenarioCompareRow}>
-                          <View style={styles.scenarioCompareTrack}>
-                            <View
-                              style={[
-                                styles.scenarioCompareNode,
-                                styles.scenarioCompareNodeActive,
-                              ]}
-                            />
-                            {!isLast ? (
-                              <View
-                                style={[
-                                  styles.scenarioCompareLine,
-                                  styles.scenarioCompareLineActive,
-                                ]}
-                              />
-                            ) : null}
-                          </View>
-                          <AppText
-                            style={[
-                              styles.scenarioCompareStepLabel,
-                              styles.scenarioCompareStepLabelActive,
-                            ]}
-                          >
-                            {step.label}
-                          </AppText>
-                        </View>
-                      );
-                    })}
-                  </View>
-                </Card>
-              </Animated.View>
+                )}
+                rows={planSteps.map((step) => ({
+                  id: step.id,
+                  label: step.label,
+                  nodeStyles: [styles.scenarioCompareNodeActive],
+                  lineStyles: [styles.scenarioCompareLineActive],
+                  labelStyles: [styles.scenarioCompareStepLabelActive],
+                }))}
+              />
             </View>
           </>
         )}
@@ -2260,6 +2202,39 @@ function IntroScenarioStep({ onNext, copy }) {
         </View>
       )}
     </View>
+  );
+}
+
+function ScenarioCompareCard({ title, animatedStyle, cardStyle, visual, rows }) {
+  const { styles } = useLessonStepStyles();
+
+  return (
+    <Animated.View style={[styles.narrativeComparePanelWrap, animatedStyle]}>
+      <Card style={[styles.scenarioComparePanel, cardStyle]}>
+        <View style={styles.scenarioCompareHeader}>
+          <AppText style={styles.scenarioCompareLabel}>{title}</AppText>
+        </View>
+        {visual}
+        <View style={styles.scenarioCompareSteps}>
+          {rows.map((row, index) => {
+            const isLast = index === rows.length - 1;
+            return (
+              <View key={row.id} style={styles.scenarioCompareRow}>
+                <View style={styles.scenarioCompareTrack}>
+                  <View style={[styles.scenarioCompareNode, ...(row.nodeStyles || [])]} />
+                  {!isLast ? (
+                    <View style={[styles.scenarioCompareLine, ...(row.lineStyles || [])]} />
+                  ) : null}
+                </View>
+                <AppText style={[styles.scenarioCompareStepLabel, ...(row.labelStyles || [])]}>
+                  {row.label}
+                </AppText>
+              </View>
+            );
+          })}
+        </View>
+      </Card>
+    </Animated.View>
   );
 }
 
@@ -2460,113 +2435,53 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
             </View>
 
             <View style={[styles.scenarioCompareGrid, styles.narrativeCompareGridOverride]}>
-              <Animated.View style={[styles.narrativeComparePanelWrap, leftPanelAnim]}>
-                <Card
-                  style={[
-                    styles.scenarioComparePanel,
-                    {
-                      flex: 1,
-                      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
-                      borderColor: isLeftSelected
-                        ? toRgba(colors.text.primary, 0.55)
-                        : toRgba(colors.ui.divider, colors.opacity.stroke),
-                    },
-                  ]}
-                >
-                  <View style={styles.scenarioCompareHeader}>
-                    <AppText style={styles.scenarioCompareLabel}>
-                      {scenario?.comparison?.left?.title}
-                    </AppText>
-                  </View>
+              <ScenarioCompareCard
+                title={scenario?.comparison?.left?.title}
+                animatedStyle={leftPanelAnim}
+                cardStyle={{
+                  flex: 1,
+                  backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                  borderColor: isLeftSelected
+                    ? toRgba(colors.text.primary, 0.55)
+                    : toRgba(colors.ui.divider, colors.opacity.stroke),
+                }}
+                visual={(
                   <Animated.View style={leftVisualAnim}>
                     <ComparisonSymbolVisual variant="uncertain" />
                   </Animated.View>
-                  <View style={styles.scenarioCompareSteps}>
-                    {leftItems.map((item, index) => (
-                      <View key={item} style={styles.scenarioCompareRow}>
-                        <View style={styles.scenarioCompareTrack}>
-                          <View
-                            style={[
-                              styles.scenarioCompareNode,
-                              styles.scenarioCompareNodeActiveReactive,
-                            ]}
-                          />
-                          {index < leftItems.length - 1 ? (
-                            <View
-                              style={[
-                                styles.scenarioCompareLine,
-                                styles.scenarioCompareLineDotted,
-                              ]}
-                            />
-                          ) : null}
-                        </View>
-                        <AppText
-                          style={[
-                            styles.scenarioCompareStepLabel,
-                            styles.scenarioCompareStepLabelMissing,
-                          ]}
-                        >
-                          {item}
-                        </AppText>
-                      </View>
-                    ))}
-                  </View>
-                </Card>
-              </Animated.View>
+                )}
+                rows={leftItems.map((item, index) => ({
+                  id: `${scenario?.comparison?.left?.title}-${index}`,
+                  label: item,
+                  nodeStyles: [styles.scenarioCompareNodeActiveReactive],
+                  lineStyles: [styles.scenarioCompareLineDotted],
+                  labelStyles: [styles.scenarioCompareStepLabelMissing],
+                }))}
+              />
 
-              <Animated.View style={[styles.narrativeComparePanelWrap, rightPanelAnim]}>
-                <Card
-                  style={[
-                    styles.scenarioComparePanel,
-                    {
-                      flex: 1,
-                      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-                      borderColor: isRightSelected
-                        ? colors.accent.primary
-                        : toRgba(colors.ui.divider, colors.opacity.stroke),
-                    },
-                  ]}
-                >
-                  <View style={styles.scenarioCompareHeader}>
-                    <AppText style={styles.scenarioCompareLabel}>
-                      {scenario?.comparison?.right?.title}
-                    </AppText>
-                  </View>
+              <ScenarioCompareCard
+                title={scenario?.comparison?.right?.title}
+                animatedStyle={rightPanelAnim}
+                cardStyle={{
+                  flex: 1,
+                  backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+                  borderColor: isRightSelected
+                    ? colors.accent.primary
+                    : toRgba(colors.ui.divider, colors.opacity.stroke),
+                }}
+                visual={(
                   <Animated.View style={rightVisualAnim}>
                     <ComparisonSymbolVisual variant="goal" />
                   </Animated.View>
-                  <View style={styles.scenarioCompareSteps}>
-                    {rightItems.map((item, index) => (
-                      <View key={item} style={styles.scenarioCompareRow}>
-                        <View style={styles.scenarioCompareTrack}>
-                          <View
-                            style={[
-                              styles.scenarioCompareNode,
-                              styles.scenarioCompareNodeActive,
-                            ]}
-                          />
-                          {index < rightItems.length - 1 ? (
-                            <View
-                              style={[
-                                styles.scenarioCompareLine,
-                                styles.scenarioCompareLineActive,
-                              ]}
-                            />
-                          ) : null}
-                        </View>
-                        <AppText
-                          style={[
-                            styles.scenarioCompareStepLabel,
-                            styles.scenarioCompareStepLabelActive,
-                          ]}
-                        >
-                          {item}
-                        </AppText>
-                      </View>
-                    ))}
-                  </View>
-                </Card>
-              </Animated.View>
+                )}
+                rows={rightItems.map((item, index) => ({
+                  id: `${scenario?.comparison?.right?.title}-${index}`,
+                  label: item,
+                  nodeStyles: [styles.scenarioCompareNodeActive],
+                  lineStyles: [styles.scenarioCompareLineActive],
+                  labelStyles: [styles.scenarioCompareStepLabelActive],
+                }))}
+              />
             </View>
           </>
         ) : null}
@@ -4709,7 +4624,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     minWidth: 0,
   },
   scenarioCompareTrack: {
+    position: 'relative',
     alignItems: 'center',
+    alignSelf: 'stretch',
     width: components.sizes.track.sm,
   },
   scenarioCompareNode: {
@@ -4739,9 +4656,11 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareLine: {
+    position: 'absolute',
+    left: (components.sizes.track.sm - components.sizes.line.thin) / 2,
+    top: components.sizes.dot.md + 4,
     width: components.sizes.line.thin,
-    height: components.sizes.track.sm,
-    marginTop: components.layout.spacing.xs,
+    bottom: -(components.layout.spacing.sm - 4),
     backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareLineActive: {
