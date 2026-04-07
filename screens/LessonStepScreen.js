@@ -240,7 +240,7 @@ export default function LessonStepScreen() {
       case 2:
         return lessonId === 'lesson_0'
           ? INTRO_VISUALIZATION_TITLE
-          : introTitle || content.steps.visualization.title;
+          : content.steps.visualization.title || introTitle;
       case 3:
         return content.steps.scenario.title;
       case 4:
@@ -1086,6 +1086,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
               key={step.id}
               step={step}
               index={index}
+              stepCodePrefix={isGoalSequence ? 'VOORBEELD' : 'STEP'}
               styles={styles}
               colors={colors}
               isActive={isActive}

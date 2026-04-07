@@ -157,8 +157,8 @@ export const lessonContentNl = {
     shortDescription: 'Doelen geven richting aan elke beslissing.',
     steps: {
       concept: {
-        title: 'Investeren is een middel, geen doel',
-        intro: 'Een duidelijk doel geeft richting aan elke volgende keuze.',
+        title: 'Wat is een beleggingsdoel?',
+        intro: 'Een doel geeft richting aan hoe je investeert',
         sectionLabel: 'Je doel bepaalt:',
         sectionHint: 'Tik op een factor om te begrijpen waarom.',
         drivers: [
@@ -181,9 +181,8 @@ export const lessonContentNl = {
         visualHint: 'Doelen maken van ruis richting.',
       },
       visualization: {
-        title: 'Wat kan je doel zijn?',
-        subtitle:
-          'Ontdek voorbeelden van doelen waarvoor mensen investeren.',
+        title: 'Voorbeelden van beleggingsdoelen',
+        subtitle: 'Ontdek concrete doelen en hoe ze werken',
         cards: [
           {
             id: 'house',
@@ -232,13 +231,12 @@ export const lessonContentNl = {
         ],
       },
       scenario: {
-        title: 'Eerst richting bepalen of meteen handelen?',
-        intro:
-          'Zie het verschil tussen investeren zonder doel en met een duidelijk doel.',
+        title: 'Eerst doel of meteen investeren?',
+        intro: 'Ontdek wat het verschil maakt',
         cardLabel: 'Jean-Pierre',
         text:
           'Ik heb €5.000 klaarstaan, maar ik weet nog niet waarvoor ik precies investeer.',
-        prompt: 'Wat doe je eerst?',
+        prompt: 'Wat zou jij doen in deze situatie?',
         choices: [
           {
             id: 'invest_now',

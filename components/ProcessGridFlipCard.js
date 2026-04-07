@@ -24,6 +24,7 @@ const toRgba = (hex, alpha) => {
 export default function ProcessGridFlipCard({
   step,
   index,
+  stepCodePrefix = 'STEP',
   styles,
   colors,
   isActive,
@@ -122,7 +123,7 @@ export default function ProcessGridFlipCard({
     if (nextFlipped && !isCompleted) onStepCompleted?.();
   };
 
-  const stepCode = `STEP ${`${index + 1}`.padStart(2, '0')}`;
+  const stepCode = `${stepCodePrefix} ${`${index + 1}`.padStart(2, '0')}`;
   const frontCtaLabel = 'Ontdek stap';
   const lockedCtaLabel = 'Bekijk eerst de volgende stappen hierboven';
   const backCtaLabel = 'Terug';
