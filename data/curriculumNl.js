@@ -40,7 +40,7 @@ export const curriculumNl = {
         'Investeren is een proces: eerst beslissen, dan handelen.',
     },
     lesson_1: {
-      title: 'Waarom wil ik investeren?',
+      title: 'Waarom wil ik beleggen?',
       shortDescription: 'Doelen geven richting aan elke beslissing.',
     },
     lesson_2: {

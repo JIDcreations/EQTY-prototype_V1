@@ -117,7 +117,14 @@ export default function LessonOverviewScreen() {
                   {moduleLabel}
                 </AppText>
                 <View style={styles.titleBlock}>
-                  <AppText style={styles.title}>{lesson.title}</AppText>
+                  <AppText
+                    style={styles.title}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.9}
+                  >
+                    {lesson.title}
+                  </AppText>
                   <AppText style={styles.hook}>{hook}</AppText>
                 </View>
               </View>

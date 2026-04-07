@@ -58,7 +58,7 @@ const LESSON_OVERVIEW_COPY = {
     defaultHook: 'Eerst helderheid. Dan actie.',
     lessonHooks: {
       lesson_0: 'Leer het ‘Beleggen als proces’-plan kennen.',
-      lesson_1: 'Een duidelijk waarom maakt elke keuze makkelijker.',
+      lesson_1: 'Een duidelijk doel maakt elke keuze eenvoudiger.',
     },
     defaultOutcomes: [
       'Begrijp het kernidee',
@@ -72,9 +72,9 @@ const LESSON_OVERVIEW_COPY = {
         'Leer je beleggen volgens een plan',
       ],
       lesson_1: [
-        'Bepaal je echte waarom',
-        'Kies richting, geen ruis',
-        'Start met heldere intentie',
+        'Leer je wat een doel is',
+        'Krijg je richting',
+        'start je met heldere intentie',
       ],
     },
     startLesson: 'Start les',

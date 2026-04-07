@@ -153,7 +153,7 @@ export const lessonContentNl = {
     },
   },
   lesson_1: {
-    title: 'Waarom wil ik investeren?',
+    title: 'Waarom wil ik beleggen?',
     shortDescription: 'Doelen geven richting aan elke beslissing.',
     steps: {
       concept: {
