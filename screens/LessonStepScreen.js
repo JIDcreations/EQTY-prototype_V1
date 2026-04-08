@@ -2915,20 +2915,7 @@ function ScenarioExercise({ exercise, onNext, copy }) {
                 label={opt.label}
                 state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
                 accessory={
-                  isKey ? (
-                    <View
-                      style={[
-                        styles.scenarioOptionCheckBadge,
-                        mode === 'light' && styles.scenarioOptionCheckBadgeLight,
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark"
-                        size={components.sizes.icon.sm}
-                        color={mode === 'light' ? colors.text.primary : colors.accent.primary}
-                      />
-                    </View>
-                  ) : isWrongPick ? (
+                  isWrongPick ? (
                     <Ionicons name="close-circle" size={components.sizes.icon.lg} color={colors.text.secondary} />
                   ) : null
                 }

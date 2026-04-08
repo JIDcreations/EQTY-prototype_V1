@@ -292,7 +292,7 @@ export const lessonContentNl = {
           'Joris heeft €5.000 gespaard en begint met investeren. Hij kiest een ETF uit een artikel. Na 2 maanden staat hij op -15%. Nu weet hij niet of hij moet verkopen, vasthouden of bijkopen.',
         question: 'Wat ontbreekt er in zijn aanpak?',
         feedback: {
-          correctLabel: '✔ GOED',
+          correctLabel: 'GOED',
           incorrectLabel: 'NIET HELEMAAL',
           correctText:
             'Zonder doel weet Joris niet waarom hij investeert. Daardoor weet hij ook niet hoe hij moet reageren wanneer de markt daalt.',
