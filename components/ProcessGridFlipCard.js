@@ -124,8 +124,11 @@ export default function ProcessGridFlipCard({
   };
 
   const stepCode = `${stepCodePrefix} ${`${index + 1}`.padStart(2, '0')}`;
-  const frontCtaLabel = 'Ontdek stap';
-  const lockedCtaLabel = 'Bekijk eerst de volgende stappen hierboven';
+  const frontCtaLabel = stepCodePrefix === 'VOORBEELD' ? 'Ontdek voorbeeld' : 'Ontdek stap';
+  const lockedCtaLabel =
+    stepCodePrefix === 'VOORBEELD'
+      ? 'Ontdek eerst de voorbeelden hierboven'
+      : 'Bekijk eerst de volgende stappen hierboven';
   const backCtaLabel = 'Terug';
 
   const renderStatusIndicator = () => {

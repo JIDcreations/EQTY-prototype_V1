@@ -6753,7 +6753,6 @@ const createStyles = (colors, components, mode = 'dark') =>
     width: '100%',
     flexDirection: 'column',
     gap: components.layout.spacing.md,
-    marginTop: components.layout.spacing.sm,
   },
   l1CardShell: {
     width: '100%',
