@@ -3595,7 +3595,7 @@ function GuidedGoalExercise({
     const whenText = interpretations?.when?.[answers.when] ?? answers.when;
     const fitText = interpretations?.fit?.[answers.fit] ?? answers.fit;
     const prefix = interpretations.prefix ?? '';
-    return `${prefix}${whyText} ${whenText}.\n${fitText}`;
+    return `${prefix}${whyText} ${whenText}. ${fitText}`;
   };
 
   const interpretationText = isComplete ? buildInterpretation() : null;
@@ -3606,7 +3606,7 @@ function GuidedGoalExercise({
           text: interpretationText,
         }
       : null,
-    feedback.valid
+    isComplete && feedback.valid
       ? {
           label: copy.labels.insight,
           text: feedback.valid,
@@ -4040,18 +4040,20 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
           </AppText>
         </View>
         {isSubmitted ? (
-          <Animated.View
-            entering={FadeInDown.duration(350)}
-            style={styles.reflectionResultCard}
-          >
-            <AppText style={styles.reflectionAnswerText}>{submittedText}</AppText>
-            <View style={styles.reflectionResultDivider} />
-            <View style={styles.reflectionInsightBlock}>
-              <AppText style={styles.reflectionInsightLabel}>
-                {copy.labels.eqtyInsight}
-              </AppText>
-              <AppText style={styles.reflectionInsightText}>{response}</AppText>
+          <Animated.View entering={FadeInDown.duration(350)}>
+            <View style={styles.reflectionResultCard}>
+              <AppText style={styles.reflectionAnswerText}>{submittedText}</AppText>
+              <View style={styles.reflectionResultDivider} />
+              <View style={styles.reflectionInsightBlock}>
+                <AppText style={styles.reflectionInsightLabel}>
+                  {copy.labels.eqtyInsight}
+                </AppText>
+                <AppText style={styles.reflectionInsightText}>{response}</AppText>
+              </View>
             </View>
+            <AppText style={styles.reflectionPersonalizationHint}>
+              {copy.messages.reflectionPersonalizationHint}
+            </AppText>
           </Animated.View>
         ) : (
           <View>
@@ -5757,6 +5759,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   goalOptionList: {
     gap: components.layout.spacing.xs,
+    padding: components.layout.spacing.xs,
+    borderRadius: components.radius.input,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   goalOption: {
     paddingVertical: components.layout.spacing.md,
