@@ -170,7 +170,7 @@ export const lessonContentNl = {
           {
             id: 'risk',
             label: 'Risico',
-            detail: 'hoeveel verlies je aankan',
+            detail: 'Hoeveel risico kan en wil je nemen?',
           },
           {
             id: 'personal',
@@ -182,7 +182,7 @@ export const lessonContentNl = {
       },
       visualization: {
         title: 'Voorbeelden van beleggingsdoelen',
-        subtitle: 'Ontdek concrete doelen en hoe ze werken',
+        subtitle: 'Ontdek concrete doelen en hoe ze werken.',
         cards: [
           {
             id: 'house',
@@ -231,7 +231,7 @@ export const lessonContentNl = {
         ],
       },
       scenario: {
-        title: 'Eerst doel of meteen investeren?',
+        title: 'Meteen investeren of eerst doel?',
         intro: 'Ontdek wat het verschil maakt',
         cardLabel: 'Jean-Pierre',
         text:

@@ -2448,9 +2448,11 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                 animatedStyle={leftPanelAnim}
                 cardStyle={{
                   flex: 1,
-                  backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                  backgroundColor: isLeftSelected
+                    ? toRgba(colors.background.surfaceActive, 0.6)
+                    : toRgba(colors.background.surface, colors.opacity.surface),
                   borderColor: isLeftSelected
-                    ? toRgba(colors.text.primary, 0.55)
+                    ? colors.text.primary
                     : toRgba(colors.ui.divider, colors.opacity.stroke),
                 }}
                 visual={(
@@ -2463,7 +2465,11 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                   label: item,
                   nodeStyles: [styles.scenarioCompareNodeActiveReactive],
                   lineStyles: [styles.scenarioCompareLineDotted],
-                  labelStyles: [styles.scenarioCompareStepLabelMissing],
+                  labelStyles: [
+                    isLeftSelected
+                      ? styles.scenarioCompareStepLabelActive
+                      : styles.scenarioCompareStepLabelMissing,
+                  ],
                 }))}
               />
 
@@ -5224,6 +5230,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     marginTop: components.layout.spacing.none,
   },
   narrativeOutcomeSection: {
+    marginTop: 4,
     gap: components.layout.spacing.md,
   },
   compareVisualWrap: {
