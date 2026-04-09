@@ -5785,10 +5785,6 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   goalOptionList: {
     gap: components.layout.spacing.xs,
-    padding: components.layout.spacing.xs,
-    borderRadius: components.radius.input,
-    borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   goalOption: {
     paddingVertical: components.layout.spacing.md,
@@ -5796,7 +5792,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: components.radius.input,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
   },
   goalOptionActive: {
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
