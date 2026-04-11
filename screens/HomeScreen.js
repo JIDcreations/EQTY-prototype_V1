@@ -199,13 +199,17 @@ export default function HomeScreen() {
       <View style={styles.heroGroup}>
         <Animated.View style={[styles.section, heroAnimStyle]}>
           <Card style={[styles.heroStack, styles.heroCard]}>
-            <AppText style={styles.heroStepLabel} numberOfLines={1}>
-              {currentContextLabel}
-            </AppText>
-            <AppText style={styles.heroTitle}>{lessonTitle}</AppText>
-            {heroDescription ? (
-              <AppText style={styles.heroSubtitle}>{heroDescription}</AppText>
-            ) : null}
+            <View style={styles.heroTextBlock}>
+              <AppText style={styles.heroStepLabel} numberOfLines={1}>
+                {currentContextLabel}
+              </AppText>
+              <View style={styles.heroTitleBlock}>
+                <AppText style={styles.heroTitle}>{lessonTitle}</AppText>
+                {heroDescription ? (
+                  <AppText style={styles.heroSubtitle}>{heroDescription}</AppText>
+                ) : null}
+              </View>
+            </View>
             <CtaInsideButton
               label={primaryCtaLabel}
               onPress={() =>
@@ -295,12 +299,18 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     heroCard: {
       padding: components.layout.spacing.xxl,
-      gap: components.layout.spacing.lg,
+      gap: components.layout.spacing.xl,
       backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
       borderWidth: components.borderWidth.thin,
       borderColor: isLight
         ? colors.ui.divider
         : toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+    heroTextBlock: {
+      gap: components.layout.spacing.xl,
+    },
+    heroTitleBlock: {
+      gap: components.layout.spacing.sm,
     },
     heroStepLabel: {
       ...typography.styles.stepLabel,

@@ -2078,14 +2078,14 @@ function IntroScenarioStep({ onNext, copy }) {
             style={({ pressed }) => [
               styles.narrativeChoiceCard,
               styles.narrativeChoiceCardPlan,
-              selected === 'plan' && styles.narrativeChoiceCardActivePlan,
+              selected !== null && styles.narrativeChoiceCardActivePlan,
               pressed && styles.narrativeChoiceCardPressed,
             ]}
           >
             <Ionicons
               name="layers-outline"
               size={components.sizes.icon.lg}
-              color={colors.accent.primary}
+              color={selected !== null ? colors.accent.primary : colors.text.primary}
             />
             <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
               Volg het proces
@@ -2322,7 +2322,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
   const leftDotColor = isLeftSelected
     ? toRgba(colors.text.primary, 0.45)
     : toRgba(colors.ui.divider, 0.28);
-  const rightDotColor = isRightSelected
+  const rightDotColor = showComparison && rightChoice?.isKey
     ? toRgba(colors.accent.primary, 0.55)
     : toRgba(colors.ui.divider, 0.28);
 
@@ -2378,14 +2378,14 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
               style={({ pressed }) => [
                 styles.narrativeChoiceCard,
                 styles.narrativeChoiceCardPlan,
-                isRightSelected && styles.narrativeChoiceCardActivePlan,
+                showComparison && rightChoice?.isKey && styles.narrativeChoiceCardActivePlan,
                 pressed && styles.narrativeChoiceCardPressed,
               ]}
             >
               <Ionicons
                 name={rightChoice.icon || 'flag-outline'}
                 size={components.sizes.icon.lg}
-                color={colors.accent.primary}
+                color={showComparison && rightChoice?.isKey ? colors.accent.primary : colors.text.primary}
               />
               <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
                 {rightChoice.label}
@@ -2920,7 +2920,8 @@ function ScenarioExercise({ exercise, onNext, copy }) {
                 disabled={isAnswered}
                 label={opt.label}
                 state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
-                labelStyle={isKey ? { color: colors.accent.primary } : null}
+                style={isKey ? styles.scenarioOptionButtonActive : null}
+                labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
                 accessory={
                   isKey ? (
                     <View
@@ -4316,6 +4317,8 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                 disabled={isAnswered}
                 label={opt.label}
                 state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+                style={isKey ? styles.scenarioOptionButtonActive : null}
+                labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
                 accessory={
                   isKey ? (
                     <View
@@ -5195,14 +5198,15 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   narrativeChoiceCardPlan: {
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   narrativeChoiceCardActiveReactive: {
     borderColor: colors.text.primary,
   },
   narrativeChoiceCardActivePlan: {
-    borderColor: colors.accent.primary,
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
   },
   narrativeChoiceCardPressed: {
     opacity: colors.opacity.emphasis,
@@ -5213,7 +5217,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.primary,
   },
   narrativeChoiceLabelPlan: {
-    color: colors.accent.primary,
+    color: colors.text.primary,
   },
   narrativeChoiceHint: {
     ...typography.styles.meta,
@@ -6701,6 +6705,13 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioOptionList: {
     gap: components.layout.spacing.sm,
+  },
+  scenarioOptionButtonActive: {
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+  },
+  scenarioOptionLabelActive: {
+    color: colors.text.primary,
   },
   scenarioRevealCard: {
     marginTop: components.layout.spacing.xs / 2,
