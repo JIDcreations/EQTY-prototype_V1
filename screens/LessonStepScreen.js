@@ -10,6 +10,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Text,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -2880,9 +2881,25 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
 }
 
 function ScenarioExercise({ exercise, onNext, copy }) {
+  const { onboardingContext } = useApp();
   const { colors, components, styles, mode } = useLessonStepStyles();
-  const { story, question, options = [], cardLabel, feedback = {} } = exercise;
+  const {
+    story,
+    storyLead,
+    storyQuoteField,
+    storyQuoteFallback,
+    storyTail,
+    question,
+    options = [],
+    cardLabel,
+    feedback = {},
+  } = exercise;
   const [picked, setPicked] = useState(null);
+  const storyQuote = resolveScenarioStoryQuote(
+    onboardingContext,
+    storyQuoteField,
+    storyQuoteFallback
+  );
 
   const handlePick = (id) => {
     if (picked) return;
@@ -2902,7 +2919,16 @@ function ScenarioExercise({ exercise, onNext, copy }) {
     <View style={[styles.stepBody, styles.scenarioTopSpacing]}>
       <View style={styles.scenarioStoryCard}>
         <AppText style={styles.scenarioStoryLabel}>{cardLabel || 'Scenario'}</AppText>
-        <AppText style={styles.scenarioStoryText}>{story}</AppText>
+        {storyLead && storyTail ? (
+          <AppText style={styles.scenarioStoryText}>
+            {`${storyLead} `}
+            <Text style={styles.scenarioStoryTextUser}>{storyQuote}</Text>
+            {'.\n'}
+            {storyTail}
+          </AppText>
+        ) : (
+          <AppText style={styles.scenarioStoryText}>{story}</AppText>
+        )}
       </View>
 
       <View style={styles.scenarioQuestionBlock}>
@@ -2979,6 +3005,17 @@ function ScenarioExercise({ exercise, onNext, copy }) {
       )}
     </View>
   );
+}
+
+function resolveScenarioStoryQuote(onboardingContext, quoteField, fallback = '') {
+  if (!quoteField) return fallback;
+  const onboardingAnswers = onboardingContext?.onboardingAnswers || {};
+  const value =
+    onboardingContext?.[quoteField] ||
+    onboardingAnswers.q3 ||
+    fallback;
+
+  return String(value || fallback).trim() || fallback;
 }
 
 function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
@@ -6695,6 +6732,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioStoryText: {
     ...typography.styles.body,
     color: colors.text.primary,
+  },
+  scenarioStoryTextUser: {
+    ...typography.styles.bodyStrong,
+    color: mode === 'light' ? colors.text.primary : colors.accent.primary,
   },
   scenarioQuestion: {
     ...typography.styles.h3,

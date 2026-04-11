@@ -288,8 +288,11 @@ export const lessonContentNl = {
         subtitle: 'Ontdek wat ontbreekt voordat je begint met investeren.',
         type: 'scenario',
         cardLabel: 'Scenario',
-        story:
-          'Joris heeft €5.000 gespaard en begint met investeren. Hij kiest een ETF uit een artikel. Na 2 maanden staat hij op -15%. Nu weet hij niet of hij moet verkopen, vasthouden of bijkopen.',
+        storyLead: 'Joris wil beginnen met investeren omdat hij',
+        storyQuoteField: 'motivationAnswer',
+        storyQuoteFallback: 'een huis wil kopen',
+        storyTail:
+          'Na een paar weken weet hij niet goed of hij moet bijhouden, verkopen of veranderen.',
         question: 'Wat ontbreekt er in zijn aanpak?',
         feedback: {
           correctLabel: 'GOED',
@@ -302,20 +305,20 @@ export const lessonContentNl = {
         options: [
           {
             id: 'knowledge',
-            label: 'Meer kennis over ETF\'s',
+            label: 'Hij maakte te snel keuzes',
             reveal:
               'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
           },
           {
             id: 'goal',
-            label: 'Een concreet beleggingsdoel',
+            label: 'Hij had geen duidelijk doel voor ogen',
             isKey: true,
             reveal:
               'Zonder doel weet Joris niet waarom hij investeert. Daardoor weet hij ook niet hoe hij moet reageren wanneer de markt daalt.',
           },
           {
             id: 'capital',
-            label: 'Een groter startbedrag',
+            label: 'Hij wist niet goed waarin hij investeerde',
             reveal:
               'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
           },
