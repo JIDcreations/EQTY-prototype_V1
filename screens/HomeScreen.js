@@ -113,7 +113,12 @@ export default function HomeScreen() {
         currentLesson?.id,
         preferences?.language,
         currentThemeIndex,
-        currentLessonIndexInTheme
+        currentLessonIndexInTheme,
+        formatHomeThemeLessonContext(
+          preferences?.language,
+          currentThemeIndex,
+          currentLessonIndexInTheme
+        )
       ),
     [currentLesson?.id, currentLessonIndexInTheme, currentThemeIndex, preferences?.language]
   );
@@ -357,7 +362,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     insightBodyAccent: {
       ...typography.styles.body,
-      color: colors.accent.primary,
+      color: colors.text.primary,
     },
     actionRow: {
       flexDirection: 'row',
@@ -399,6 +404,16 @@ const getGreeting = (homeCopy) => homeCopy.greetingHi || 'Hi';
 
 const formatThemeLessonContext = (language, themeIndex, lessonIndexInTheme) => {
   return formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'dot');
+};
+
+const formatHomeThemeLessonContext = (language, themeIndex, lessonIndexInTheme) => {
+  return formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'dot')
+    .split(' · ')
+    .map((segment) => {
+      if (!segment) return segment;
+      return segment.charAt(0) + segment.slice(1).toLowerCase();
+    })
+    .join(' · ');
 };
 
 const getDisplayName = (authUser, homeCopy) => {

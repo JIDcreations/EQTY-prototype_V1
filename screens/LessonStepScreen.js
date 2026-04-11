@@ -6715,7 +6715,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.primary,
   },
   scenarioStoryTextUser: {
-    ...typography.styles.bodyStrong,
+    ...typography.styles.body,
     color: mode === 'light' ? colors.text.primary : colors.accent.primary,
   },
   scenarioQuestion: {

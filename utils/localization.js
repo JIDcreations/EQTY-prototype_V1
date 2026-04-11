@@ -1848,16 +1848,19 @@ export function getHomeCopy(language) {
   return HOME_COPY[locale] || HOME_COPY.en;
 }
 
-export function getHomeLessonCardCopy(lessonId, language, themeIndex, lessonIndexInTheme) {
+export function getHomeLessonCardCopy(
+  lessonId,
+  language,
+  themeIndex,
+  lessonIndexInTheme,
+  contextLabelOverride = null
+) {
   const locale = getLocaleKey(language);
   const localized = HOME_LESSON_CARD_COPY[locale] || HOME_LESSON_CARD_COPY.en;
   const entry = localized?.[lessonId] || localized.default || HOME_LESSON_CARD_COPY.en.default;
-  const contextLabel = formatThemeLessonContextLabel(
-    language,
-    themeIndex,
-    lessonIndexInTheme,
-    'dot'
-  );
+  const contextLabel =
+    contextLabelOverride ||
+    formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'dot');
 
   return {
     label: entry.label,
