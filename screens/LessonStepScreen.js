@@ -2044,7 +2044,12 @@ function IntroScenarioStep({ onNext, copy }) {
                 color={colors.text.secondary}
               />
             </View>
-            <AppText style={styles.narrativeCharacterName}>Lars</AppText>
+            <View style={styles.narrativeCharacterText}>
+              <AppText style={styles.narrativeCharacterName}>Lars</AppText>
+              <AppText style={styles.narrativeCharacterSubtitle}>
+                {copy.labels.scenarioPersonalisedSub}
+              </AppText>
+            </View>
           </View>
           <AppText style={styles.narrativeQuote}>
             "Ik heb €5.000 klaarstaan. Ik heb een goed gevoel over dit aandeel."
@@ -2340,9 +2345,14 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                 color={colors.text.secondary}
               />
             </View>
-            <AppText style={styles.narrativeCharacterName}>
-              {scenario?.cardLabel || 'Scenario'}
-            </AppText>
+            <View style={styles.narrativeCharacterText}>
+              <AppText style={styles.narrativeCharacterName}>
+                {scenario?.cardLabel || 'Scenario'}
+              </AppText>
+              <AppText style={styles.narrativeCharacterSubtitle}>
+                {copy.labels.scenarioPersonalisedSub}
+              </AppText>
+            </View>
           </View>
           <AppText style={styles.narrativeQuote}>{scenario?.text}</AppText>
         </Card>
@@ -5207,6 +5217,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     alignItems: 'center',
     gap: components.layout.spacing.sm,
   },
+  narrativeCharacterText: {
+    flexShrink: 1,
+    gap: 2,
+  },
   narrativeAvatar: {
     width: components.sizes.square.md,
     height: components.sizes.square.md,
@@ -5220,6 +5234,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   narrativeCharacterName: {
     ...typography.styles.bodyStrong,
     color: colors.text.primary,
+  },
+  narrativeCharacterSubtitle: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
   },
   narrativeQuote: {
     ...typography.styles.body,
