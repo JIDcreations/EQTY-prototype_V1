@@ -39,6 +39,7 @@ import Card from '../components/Card';
 import ConceptDropdownMenu from '../components/ConceptDropdownMenu';
 import ProcessGridFlipCard from '../components/ProcessGridFlipCard';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
+import ReflectionResultCard from '../components/ReflectionResultCard';
 import { useGlossary } from '../components/GlossaryProvider';
 import GlossaryText from '../components/GlossaryText';
 import LessonStepContainer from '../components/LessonStepContainer';
@@ -4109,16 +4110,11 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
         </View>
         {isSubmitted ? (
           <Animated.View entering={FadeInDown.duration(350)}>
-            <View style={styles.reflectionResultCard}>
-              <AppText style={styles.reflectionAnswerText}>{submittedText}</AppText>
-              <View style={styles.reflectionResultDivider} />
-              <View style={styles.reflectionInsightBlock}>
-                <AppText style={styles.reflectionInsightLabel}>
-                  {copy.labels.eqtyInsight}
-                </AppText>
-                <AppText style={styles.reflectionInsightText}>{response}</AppText>
-              </View>
-            </View>
+            <ReflectionResultCard
+              answer={submittedText}
+              insightLabel={copy.labels.eqtyInsight}
+              insightText={response}
+            />
             <AppText style={styles.reflectionPersonalizationHint}>
               {copy.messages.reflectionPersonalizationHint}
             </AppText>
@@ -6364,31 +6360,6 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.secondary,
     marginTop: components.layout.spacing.xs,
     paddingHorizontal: components.layout.spacing.xs,
-  },
-  reflectionResultCard: {
-    borderRadius: components.radius.card,
-    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-    padding: components.layout.spacing.lg,
-    gap: components.layout.spacing.md,
-  },
-  reflectionAnswerText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
-  },
-  reflectionResultDivider: {
-    height: components.borderWidth.thin,
-    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-  },
-  reflectionInsightBlock: {
-    gap: components.layout.spacing.xs,
-  },
-  reflectionInsightLabel: {
-    ...typography.styles.stepLabel,
-    color: colors.text.secondary,
-  },
-  reflectionInsightText: {
-    ...typography.styles.body,
-    color: colors.text.primary,
   },
   summaryCard: {
     gap: components.layout.spacing.md,
