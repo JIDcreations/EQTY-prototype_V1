@@ -2918,7 +2918,12 @@ function ScenarioExercise({ exercise, onNext, copy }) {
   return (
     <View style={[styles.stepBody, styles.scenarioTopSpacing]}>
       <View style={styles.scenarioStoryCard}>
-        <AppText style={styles.scenarioStoryLabel}>{cardLabel || 'Scenario'}</AppText>
+        <View>
+          <AppText style={styles.scenarioStoryLabel}>{cardLabel || 'Scenario'}</AppText>
+          {storyQuoteField && (
+            <AppText style={styles.scenarioStorySubtitle}>{copy.labels.scenarioPersonalisedSub}</AppText>
+          )}
+        </View>
         {storyLead && storyTail ? (
           <AppText style={styles.scenarioStoryText}>
             {`${storyLead} `}
@@ -6728,6 +6733,11 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioStoryLabel: {
     ...typography.styles.stepLabel,
     color: colors.text.secondary,
+  },
+  scenarioStorySubtitle: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
+    marginTop: 0,
   },
   scenarioStoryText: {
     ...typography.styles.body,
