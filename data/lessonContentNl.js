@@ -170,7 +170,7 @@ export const lessonContentNl = {
           {
             id: 'risk',
             label: 'Risico',
-            detail: 'Hoeveel risico kan en wil je nemen?',
+            detail: 'Hoe zou je reageren als je belegging 10% daalt?',
           },
           {
             id: 'personal',
