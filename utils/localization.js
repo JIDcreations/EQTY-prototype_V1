@@ -977,7 +977,8 @@ const HOME_LESSON_CARD_COPY = {
       bodyParts: (contextLabel) => ({
         before: 'In ',
         highlight: contextLabel,
-        after: ' leer je hoe elke beslissing op de vorige voortbouwt.',
+        after:
+          ' leer je waarom beleggen een stappenproces is en hoe dit je helpt betere keuzes te maken.',
       }),
     },
   },
