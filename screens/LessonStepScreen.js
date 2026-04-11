@@ -3620,6 +3620,7 @@ function GuidedGoalExercise({
   postSubmitLabel,
   showProgressDots = true,
   completeOnFirstSubmit = false,
+  personalizationHint,
 }) {
   const { styles } = useLessonStepStyles();
   const {
@@ -4444,6 +4445,18 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   summaryTopSpacing: {
     marginTop: components.layout.spacing.xxl,
+  },
+  summaryPersonalizationPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    borderRadius: components.radius.pill,
+    paddingVertical: 5,
+    paddingHorizontal: components.layout.spacing.sm,
+    marginBottom: components.layout.spacing.md,
+  },
+  summaryPersonalizationHint: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
   },
   conceptCard: {
     gap: components.layout.spacing.md,

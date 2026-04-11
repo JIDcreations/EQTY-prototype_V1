@@ -187,6 +187,7 @@ const LESSON_STEP_COPY = {
       reflectionSaved: 'Saved to personalize upcoming lessons.',
       reflectionSubtitle: 'Write down what you take away from this lesson.',
       reflectionPersonalizationHint: 'Your answer personalises future lessons.',
+      summaryPersonalizationHint: 'Your answers shape the lessons ahead.',
       reflectionLockedTitle: 'Response locked',
       reflectionLockedBody:
         'Saved to personalize upcoming lessons. You can’t add another response.',
@@ -414,6 +415,7 @@ const LESSON_STEP_COPY = {
       reflectionSaved: 'Opgeslagen om komende lessen te personaliseren.',
       reflectionSubtitle: 'Schrijf op wat jij meeneemt uit deze les.',
       reflectionPersonalizationHint: 'Je antwoord personaliseert je volgende lessen.',
+      summaryPersonalizationHint: 'Je antwoorden stemmen de volgende lessen op jou af.',
       reflectionLockedTitle: 'Reactie vergrendeld',
       reflectionLockedBody:
         'Opgeslagen om komende lessen te personaliseren. Je kunt geen extra antwoord sturen.',

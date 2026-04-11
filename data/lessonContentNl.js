@@ -335,7 +335,7 @@ export const lessonContentNl = {
       summary: {
         type: 'goalSetting',
         title: 'Pas dit toe op jouw situatie',
-        subtitle: 'Gebruik wat je net leerde om jouw doel concreter te maken.',
+        subtitle: 'Maak je doel concreter. Je antwoorden komen terug in de volgende lessen.',
         sections: [
           {
             id: 'why',
