@@ -356,8 +356,8 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       color: colors.text.secondary,
     },
     insightBodyAccent: {
-      ...typography.styles.stepLabel,
-      color: colors.text.primary,
+      ...typography.styles.body,
+      color: colors.accent.primary,
     },
     actionRow: {
       flexDirection: 'row',
