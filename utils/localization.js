@@ -819,7 +819,8 @@ const ONBOARDING_COPY = {
     questionsIntro: {
       badge: 'Persoonlijke context',
       title: 'Personaliseer je ervaring',
-      subtitle: 'Beantwoord 3 korte vragen zodat we lessen op jou afstemmen.',
+      subtitle:
+        'Beantwoord 3 korte vragen.\n\nWe gebruiken je antwoorden om voorbeelden en scenario’s in de lessen op jou af te stemmen.\n\nDe opbouw van de lessen blijft hetzelfde.',
       primaryButton: 'Beantwoord 3 vragen',
       secondaryButton: 'Doe dit later',
       cardTitle: 'Je verhaal in drie stappen',
