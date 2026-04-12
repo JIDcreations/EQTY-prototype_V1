@@ -123,13 +123,9 @@ export default function ProcessGridFlipCard({
     if (nextFlipped && !isCompleted) onStepCompleted?.();
   };
 
-  const stepCode = `${stepCodePrefix} ${`${index + 1}`.padStart(2, '0')}`;
-  const frontCtaLabel = stepCodePrefix === 'VOORBEELD' ? 'Ontdek voorbeeld' : 'Ontdek stap';
-  const lockedCtaLabel =
-    stepCodePrefix === 'VOORBEELD'
-      ? 'Ontdek eerst de voorbeelden hierboven'
-      : 'Bekijk eerst de volgende stappen hierboven';
-  const backCtaLabel = 'Terug';
+  const frontCtaLabel = 'Tik voor uitleg';
+  const lockedCtaLabel = 'Werk eerst de vorige kaart af';
+  const backCtaLabel = 'Sluit uitleg';
 
   const renderStatusIndicator = () => {
     if (isCompleted) {
@@ -184,9 +180,6 @@ export default function ProcessGridFlipCard({
         >
           <View style={styles.l1CardHeaderRow}>
             <View style={styles.l1StepMeta}>
-              <AppText style={[styles.l1StepKicker, isSubtleCompleted && styles.l1StepKickerSubtle]}>
-                {stepCode}
-              </AppText>
               <AppText
                 style={[styles.l1CardLabel, isSubtleCompleted && styles.l1CardLabelSubtle]}
                 numberOfLines={2}
@@ -218,12 +211,10 @@ export default function ProcessGridFlipCard({
           ) : isSubtleCompleted ? (
             <View style={styles.l1CtaPill}>
               <AppText style={styles.l1CtaPillLabel}>{frontCtaLabel}</AppText>
-              <AppText style={styles.l1CtaPillArrow}>{'→'}</AppText>
             </View>
           ) : (
             <View style={styles.l1CtaPill}>
               <AppText style={styles.l1CtaPillLabel}>{frontCtaLabel}</AppText>
-              <AppText style={styles.l1CtaPillArrow}>{'→'}</AppText>
             </View>
           )}
         </Animated.View>
@@ -240,14 +231,12 @@ export default function ProcessGridFlipCard({
         >
           <View style={styles.l1CardHeaderRow}>
             <View style={styles.l1StepMeta}>
-              <AppText style={styles.l1StepKicker}>{stepCode}</AppText>
               <AppText style={styles.l1BackLabel}>{step.question}</AppText>
             </View>
             {renderStatusIndicator()}
           </View>
           <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
           <View style={styles.l1CtaPill}>
-            <AppText style={styles.l1CtaPillArrow}>{'←'}</AppText>
             <AppText style={styles.l1CtaPillLabel}>{backCtaLabel}</AppText>
           </View>
         </Animated.View>
