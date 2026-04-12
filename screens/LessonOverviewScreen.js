@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -27,6 +27,7 @@ export default function LessonOverviewScreen() {
   const { lessonId, entrySource } = route.params || {};
   const { preferences, onboardingContext, progress } = useApp();
   const { colors, components } = useTheme();
+  const lockedTapStateRef = useRef({ count: 0, timestamp: 0 });
 
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
@@ -90,6 +91,47 @@ export default function LessonOverviewScreen() {
   const isLessonGateRequired =
     lesson.id === 'lesson_1' && !onboardingContext?.onboardingComplete;
   const isLessonLocked = lessonStatus === 'locked';
+
+  const startLesson = useCallback(() => {
+    if (isLessonGateRequired) {
+      navigation.navigate('OnboardingRequired', { entrySource });
+      return;
+    }
+
+    navigation.navigate('LessonStep', {
+      lessonId: lesson.id,
+      step: 1,
+      entrySource,
+    });
+  }, [entrySource, isLessonGateRequired, lesson.id, navigation]);
+
+  const handleStartPress = useCallback(() => {
+    if (!isLessonLocked) {
+      startLesson();
+      return;
+    }
+
+    if (!__DEV__) {
+      return;
+    }
+
+    const now = Date.now();
+    const nextCount =
+      now - lockedTapStateRef.current.timestamp < 700
+        ? lockedTapStateRef.current.count + 1
+        : 1;
+
+    if (nextCount >= 3) {
+      lockedTapStateRef.current = { count: 0, timestamp: 0 };
+      startLesson();
+      return;
+    }
+
+    lockedTapStateRef.current = {
+      count: nextCount,
+      timestamp: now,
+    };
+  }, [isLessonLocked, startLesson]);
 
   return (
     <ScreenBackground variant="bg3">
@@ -158,23 +200,8 @@ export default function LessonOverviewScreen() {
         <View style={styles.ctaDock}>
           <CtaButton
             label={isLessonLocked ? overviewCopy.lockedLesson : overviewCopy.startLesson}
-            disabled={isLessonLocked}
-            onPress={() => {
-              if (isLessonLocked) {
-                return;
-              }
-
-              if (isLessonGateRequired) {
-                navigation.navigate('OnboardingRequired', { entrySource });
-                return;
-              }
-
-              navigation.navigate('LessonStep', {
-                lessonId: lesson.id,
-                step: 1,
-                entrySource,
-              });
-            }}
+            disabled={isLessonLocked && !__DEV__}
+            onPress={handleStartPress}
           />
         </View>
       </View>

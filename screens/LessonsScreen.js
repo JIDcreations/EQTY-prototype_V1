@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -24,6 +24,7 @@ export default function LessonsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { progress, preferences } = useApp();
   const { colors, components } = useTheme();
+  const lockedTapStateRef = useRef(new Map());
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
@@ -45,6 +46,46 @@ export default function LessonsScreen() {
       .filter((module) => module.lessons.length > 0)
       .map((module) => module);
   }, [localizedLessons, localizedModules]);
+
+  const openLessonOverview = useCallback(
+    (lessonId) => {
+      navigation.navigate('LessonOverview', {
+        lessonId,
+        entrySource: 'Lessons',
+      });
+    },
+    [navigation]
+  );
+
+  const handleLessonPress = useCallback(
+    (lessonId, isLocked) => {
+      if (!isLocked) {
+        openLessonOverview(lessonId);
+        return;
+      }
+
+      if (!__DEV__) {
+        return;
+      }
+
+      const now = Date.now();
+      const previous = lockedTapStateRef.current.get(lessonId);
+      const nextCount =
+        previous && now - previous.timestamp < 700 ? previous.count + 1 : 1;
+
+      if (nextCount >= 3) {
+        lockedTapStateRef.current.delete(lessonId);
+        openLessonOverview(lessonId);
+        return;
+      }
+
+      lockedTapStateRef.current.set(lessonId, {
+        count: nextCount,
+        timestamp: now,
+      });
+    },
+    [openLessonOverview]
+  );
 
   return (
     <OnboardingScreen
@@ -75,16 +116,7 @@ export default function LessonsScreen() {
                 return (
                   <Pressable
                     key={lesson.id}
-                    disabled={isLocked}
-                    onPress={
-                      isLocked
-                        ? undefined
-                        : () =>
-                            navigation.navigate('LessonOverview', {
-                              lessonId: lesson.id,
-                              entrySource: 'Lessons',
-                            })
-                    }
+                    onPress={() => handleLessonPress(lesson.id, isLocked)}
                   >
                     {({ pressed }) => (
                       <View
@@ -93,7 +125,7 @@ export default function LessonsScreen() {
                           status === 'current' && styles.lessonRowCurrent,
                           status === 'completed' && styles.lessonRowCompleted,
                           isLocked && styles.lessonRowLocked,
-                          pressed && !isLocked && styles.lessonRowPressed,
+                          pressed && (!isLocked || __DEV__) && styles.lessonRowPressed,
                         ]}
                       >
                         <View style={styles.lessonRowLeft}>
