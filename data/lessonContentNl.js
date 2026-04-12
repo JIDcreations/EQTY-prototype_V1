@@ -160,7 +160,6 @@ export const lessonContentNl = {
         title: 'Wat is een beleggingsdoel?',
         intro: 'Een doel geeft richting aan hoe je investeert',
         sectionLabel: 'Je doel bepaalt:',
-        sectionHint: 'Tik op een factor om te begrijpen waarom.',
         drivers: [
           {
             id: 'time',

@@ -162,7 +162,6 @@ export const lessonContent = {
         title: 'Investing is a means, not a goal',
         intro: 'A clear goal gives direction to every choice that follows.',
         sectionLabel: 'Your goal determines:',
-        sectionHint: 'Tap a factor to understand why.',
         drivers: [
           {
             id: 'time',
@@ -483,7 +482,6 @@ export const lessonContent = {
         body:
           'Risk is not only financial. Emotional responses, uncertainty, and recovery time matter. Understanding your perception of risk comes before chasing returns.',
         sectionLabel: 'Risk can show up as:',
-        sectionHint: 'Tap a layer to understand it.',
         drivers: [
           {
             id: 'financial',

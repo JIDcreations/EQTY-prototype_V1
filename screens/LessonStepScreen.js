@@ -562,7 +562,7 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
 
   if (content?.steps?.concept?.drivers?.length) {
     return (
-      <DropdownConceptStep
+      <AnchorConceptStep
         content={content}
         lessonId={lessonId}
         onNext={onNext}
@@ -638,6 +638,110 @@ function DropdownConceptStep({ content, lessonId, onNext, copy }) {
         components={components}
         wrapStyle={lessonId === 'lesson_1' ? { marginTop: 0 } : null}
       />
+
+      <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+    </View>
+  );
+}
+
+function AnchorConceptStep({ content, lessonId, onNext, copy }) {
+  const { colors, components, styles } = useLessonStepStyles();
+  const concept = content?.steps?.concept;
+  const drivers = concept?.drivers || [];
+  const [forkWidth, setForkWidth] = useState(0);
+
+  const anchorAnim = useSharedValue(0);
+  const contentAnim = useSharedValue(0);
+
+  useEffect(() => {
+    anchorAnim.value = withTiming(1, { duration: 480, easing: Easing.out(Easing.quad) });
+    contentAnim.value = withDelay(260, withTiming(1, { duration: 420, easing: Easing.out(Easing.quad) }));
+  }, []);
+
+  const anchorStyle = useAnimatedStyle(() => ({
+    opacity: anchorAnim.value,
+    transform: [{ scale: interpolate(anchorAnim.value, [0, 1], [0.95, 1], Extrapolation.CLAMP) }],
+  }));
+
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: contentAnim.value,
+    transform: [{ translateY: interpolate(contentAnim.value, [0, 1], [12, 0], Extrapolation.CLAMP) }],
+  }));
+
+  const forkPositions =
+    drivers.length === 3 ? [0.165, 0.5, 0.835] :
+    drivers.length === 2 ? [0.25, 0.75] :
+    [0.5];
+
+  return (
+    <View style={styles.anchorStepBody}>
+      {/* Anchor card — the concept hero */}
+      <Animated.View style={[styles.anchorCard, anchorStyle]}>
+        <View style={styles.anchorCardIcon}>
+          <Ionicons name="flag" size={16} color={colors.text.onAccent} />
+        </View>
+        <AppText style={styles.anchorCardPunchline}>{concept?.visualHint}</AppText>
+      </Animated.View>
+
+      {/* Fork connector + tiles */}
+      <Animated.View style={[styles.anchorContent, contentStyle]}>
+        <View
+          style={styles.anchorForkContainer}
+          onLayout={(e) => setForkWidth(e.nativeEvent.layout.width)}
+        >
+          {forkWidth > 0 && drivers.length <= 3 && (
+            <Svg width={forkWidth} height={36}>
+              {/* Vertical stem */}
+              <Path
+                d={`M ${forkWidth * 0.5} 0 L ${forkWidth * 0.5} 16`}
+                stroke={colors.accent.primary}
+                strokeWidth={1.5}
+                strokeOpacity={0.3}
+              />
+              {/* Horizontal crossbar */}
+              <Path
+                d={`M ${forkWidth * forkPositions[0]} 16 L ${forkWidth * forkPositions[forkPositions.length - 1]} 16`}
+                stroke={colors.accent.primary}
+                strokeWidth={1.5}
+                strokeOpacity={0.3}
+              />
+              {/* Drops to each tile */}
+              {forkPositions.map((pos, i) => (
+                <Path
+                  key={i}
+                  d={`M ${forkWidth * pos} 16 L ${forkWidth * pos} 36`}
+                  stroke={colors.accent.primary}
+                  strokeWidth={1.5}
+                  strokeOpacity={0.3}
+                />
+              ))}
+            </Svg>
+          )}
+          {forkWidth > 0 && drivers.length === 4 && (
+            <Svg width={forkWidth} height={24}>
+              <Path
+                d={`M ${forkWidth * 0.5} 0 L ${forkWidth * 0.5} 24`}
+                stroke={colors.accent.primary}
+                strokeWidth={1.5}
+                strokeOpacity={0.3}
+              />
+            </Svg>
+          )}
+        </View>
+
+        {/* Attribute tiles */}
+        <View style={[styles.anchorTiles, drivers.length === 4 && styles.anchorTilesGrid]}>
+          {drivers.map((driver) => (
+            <View
+              key={driver.id}
+              style={[styles.anchorTile, drivers.length === 4 && styles.anchorTileWide]}
+            >
+              <AppText style={styles.anchorTileLabel}>{driver.label}</AppText>
+              <AppText style={styles.anchorTileDetail}>{driver.detail}</AppText>
+            </View>
+          ))}
+        </View>
+      </Animated.View>
 
       <PrimaryButton label={copy.buttons.next} onPress={onNext} />
     </View>
@@ -7365,6 +7469,67 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: 7,
     borderWidth: 2,
     borderColor: toRgba(colors.accent.primary, 0.7),
+  },
+  // ─── Anchor concept step ──────────────────────────────────────────────────
+  anchorStepBody: {
+    gap: components.layout.spacing.xl,
+  },
+  anchorCard: {
+    borderRadius: components.radius.card,
+    backgroundColor: colors.accent.primary,
+    padding: components.layout.spacing.xl,
+    gap: components.layout.spacing.sm,
+    shadowColor: colors.accent.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 24,
+    elevation: 10,
+  },
+  anchorCardIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: components.radius.pill,
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  anchorCardPunchline: {
+    ...typography.styles.h2,
+    color: colors.text.onAccent,
+  },
+  anchorContent: {
+    gap: components.layout.spacing.xs,
+  },
+  anchorForkContainer: {
+    width: '100%',
+  },
+  anchorTiles: {
+    flexDirection: 'row',
+    gap: components.layout.spacing.sm,
+  },
+  anchorTilesGrid: {
+    flexWrap: 'wrap',
+  },
+  anchorTile: {
+    flex: 1,
+    padding: components.layout.spacing.md,
+    borderRadius: components.radius.card,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    gap: components.layout.spacing.xs,
+  },
+  anchorTileWide: {
+    flexBasis: '47%',
+    flexGrow: 1,
+  },
+  anchorTileLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.accent.primary,
+  },
+  anchorTileDetail: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
   },
   });
 
