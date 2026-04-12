@@ -34,7 +34,7 @@ const LESSON_OVERVIEW_COPY = {
     lessonOutcomes: {
       lesson_0: [
         'Learn to think in steps',
-        'See why taking action comes last',
+        'See why investing is the final step',
         'Learn to invest according to a plan',
       ],
       lesson_1: [
@@ -68,7 +68,7 @@ const LESSON_OVERVIEW_COPY = {
     lessonOutcomes: {
       lesson_0: [
         'Leer je denken in stappen',
-        'Zie je waarom handelen als laatste komt',
+        'Zie je waarom investeren pas de laatste stap is',
         'Leer je beleggen volgens een plan',
       ],
       lesson_1: [
