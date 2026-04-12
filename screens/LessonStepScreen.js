@@ -1056,7 +1056,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
     setCurrentCardIndex(0);
   }, [steps.length, isGuidedSequence]);
 
-  const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
+const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
   const activeIndex = firstIncompleteIndex === -1 ? steps.length - 1 : firstIncompleteIndex;
   const allCompleted = !isGuidedSequence || (steps.length > 0 && completedSteps.every(Boolean));
 
@@ -1079,12 +1079,14 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
     }
   };
 
+  const pageWidth = Dimensions.get('window').width;
+  const CARD_GAP = 8;
+  const snapInterval = pageWidth - (2 * components.layout.pagePaddingHorizontal) + CARD_GAP;
+
   const handlePageChange = useCallback((event) => {
-    const width = event.nativeEvent.layoutMeasurement.width;
-    if (!width) return;
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / snapInterval);
     setCurrentCardIndex(Math.max(0, Math.min(nextIndex, steps.length - 1)));
-  }, [steps.length]);
+  }, [steps.length, snapInterval]);
 
   const handleScrollFailed = useCallback((info) => {
     requestAnimationFrame(() => {
@@ -1097,7 +1099,6 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
 
   const stepCodePrefix = isGoalSequence ? 'VOORBEELD' : 'STEP';
   const progressLabel = `${stepCodePrefix} ${`${currentCardIndex + 1}`.padStart(2, '0')}`;
-  const pageWidth = Dimensions.get('window').width;
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
@@ -1123,9 +1124,10 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
           data={steps}
           keyExtractor={(item) => item.id}
           style={styles.l1VisPagerList}
-          contentContainerStyle={styles.l1VisPagerTrack}
+          contentContainerStyle={[styles.l1VisPagerTrack, { paddingLeft: components.layout.pagePaddingHorizontal }]}
           horizontal
-          pagingEnabled
+          snapToInterval={snapInterval}
+          snapToAlignment="start"
           decelerationRate="fast"
           showsHorizontalScrollIndicator={false}
           bounces={false}
@@ -1138,7 +1140,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
             const isActive = isGuidedSequence ? !isCompleted && index === activeIndex : true;
 
             return (
-              <View style={[styles.l1VisPage, { width: pageWidth }]}>
+              <View style={[styles.l1VisPage, { width: snapInterval }]}>
                 <ProcessGridFlipCard
                   step={step}
                   index={index}
@@ -6904,7 +6906,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     paddingVertical: components.layout.spacing.xs,
   },
   l1VisPage: {
-    paddingHorizontal: components.layout.pagePaddingHorizontal,
+    paddingRight: components.layout.spacing.sm,
     paddingVertical: 2,
   },
   l1CardShell: {
