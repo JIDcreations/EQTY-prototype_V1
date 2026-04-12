@@ -123,7 +123,7 @@ export default function ProcessGridFlipCard({
     if (nextFlipped && !isCompleted) onStepCompleted?.();
   };
 
-  const frontCtaLabel = 'Tik voor uitleg';
+  const frontCtaLabel = 'Ontdek stap';
   const lockedCtaLabel = 'Werk eerst de vorige kaart af';
   const backCtaLabel = 'Sluit uitleg';
 
@@ -180,6 +180,9 @@ export default function ProcessGridFlipCard({
         >
           <View style={styles.l1CardHeaderRow}>
             <View style={styles.l1StepMeta}>
+              <AppText style={[styles.l1StepKicker, isSubtleCompleted && styles.l1StepKickerSubtle]}>
+                {stepCodePrefix} {String(index + 1).padStart(2, '0')}
+              </AppText>
               <AppText
                 style={[styles.l1CardLabel, isSubtleCompleted && styles.l1CardLabelSubtle]}
                 numberOfLines={2}

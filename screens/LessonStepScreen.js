@@ -1039,53 +1039,28 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
   const { styles, colors, components } = useLessonStepStyles();
   const isProcessSequence = lessonId === 'lesson_0';
   const isGoalSequence = lessonId === 'lesson_1';
-  const isGuidedSequence = isProcessSequence || isGoalSequence;
   const pagerRef = useRef(null);
   const steps = isProcessSequence
     ? INTRO_VISUALIZATION_STEPS
     : isGoalSequence
       ? content?.steps?.visualization?.cards || []
       : copy.introVisualization.steps;
-  const [completedSteps, setCompletedSteps] = useState(() => steps.map(() => false));
-  const [focusedStepIndex, setFocusedStepIndex] = useState(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [maxReachedIndex, setMaxReachedIndex] = useState(0);
 
   useEffect(() => {
-    setCompletedSteps(steps.map(() => false));
-    setFocusedStepIndex(null);
     setCurrentCardIndex(0);
-  }, [steps.length, isGuidedSequence]);
-
-const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
-  const activeIndex = firstIncompleteIndex === -1 ? steps.length - 1 : firstIncompleteIndex;
-  const allCompleted = !isGuidedSequence || (steps.length > 0 && completedSteps.every(Boolean));
-
-  const handleStepCompleted = (index) => {
-    if (!isGuidedSequence) return;
-    setCompletedSteps((previous) => {
-      if (previous[index]) return previous;
-      const next = [...previous];
-      next[index] = true;
-      return next;
-    });
-  };
-
-  const handleCardFocus = (index) => {
-    if (!isGuidedSequence) return;
-    const nextFocusedIndex = focusedStepIndex === index ? null : index;
-    setFocusedStepIndex(nextFocusedIndex);
-    if (nextFocusedIndex !== null && !completedSteps[index]) {
-      handleStepCompleted(index);
-    }
-  };
+    setMaxReachedIndex(0);
+  }, [steps.length]);
 
   const pageWidth = Dimensions.get('window').width;
   const CARD_GAP = 8;
   const snapInterval = pageWidth - (2 * components.layout.pagePaddingHorizontal) + CARD_GAP;
 
   const handlePageChange = useCallback((event) => {
-    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / snapInterval);
-    setCurrentCardIndex(Math.max(0, Math.min(nextIndex, steps.length - 1)));
+    const nextIndex = Math.max(0, Math.min(Math.round(event.nativeEvent.contentOffset.x / snapInterval), steps.length - 1));
+    setCurrentCardIndex(nextIndex);
+    setMaxReachedIndex((prev) => Math.max(prev, nextIndex));
   }, [steps.length, snapInterval]);
 
   const handleScrollFailed = useCallback((info) => {
@@ -1102,14 +1077,6 @@ const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
-      <View style={styles.l1VisProgressWrap}>
-        <OnboardingProgress
-          current={currentCardIndex + 1}
-          total={steps.length}
-          label={progressLabel}
-          style={styles.l1VisProgress}
-        />
-      </View>
       <View
         style={[
           styles.l1VisPagerWrap,
@@ -1134,41 +1101,37 @@ const firstIncompleteIndex = completedSteps.findIndex((isDone) => !isDone);
           onMomentumScrollEnd={handlePageChange}
           onScrollEndDrag={handlePageChange}
           onScrollToIndexFailed={handleScrollFailed}
-          renderItem={({ item: step, index }) => {
-            const isCompleted = isGuidedSequence ? completedSteps[index] : false;
-            const isLocked = isGuidedSequence ? !isCompleted && index > activeIndex : false;
-            const isActive = isGuidedSequence ? !isCompleted && index === activeIndex : true;
-
-            return (
-              <View style={[styles.l1VisPage, { width: snapInterval }]}>
-                <ProcessGridFlipCard
-                  step={step}
-                  index={index}
-                  stepCodePrefix={stepCodePrefix}
-                  styles={styles}
-                  colors={colors}
-                  isActive={isActive}
-                  isCompleted={isCompleted}
-                  isLocked={isLocked}
-                  controlledFlipped={isGuidedSequence ? focusedStepIndex === index : undefined}
-                  onToggleFlipped={isGuidedSequence ? () => handleCardFocus(index) : undefined}
-                  onStepCompleted={() => handleStepCompleted(index)}
-                  renderAnimation={() => (
-                    isProcessSequence ? (
-                      <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
-                    ) : (
-                      <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
-                    )
-                  )}
-                />
-              </View>
-            );
-          }}
+          renderItem={({ item: step, index }) => (
+            <View style={[styles.l1VisPage, { width: snapInterval }]}>
+              <ProcessGridFlipCard
+                step={step}
+                index={index}
+                stepCodePrefix={stepCodePrefix}
+                styles={styles}
+                colors={colors}
+                isActive={index === currentCardIndex}
+                isCompleted={false}
+                isLocked={false}
+                renderAnimation={() => (
+                  isProcessSequence ? (
+                    <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                  ) : (
+                    <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                  )
+                )}
+              />
+            </View>
+          )}
         />
       </View>
-      {allCompleted ? (
-        <PrimaryButton label={copy.buttons.next} onPress={onNext} />
-      ) : null}
+      <View style={styles.l1VisDotsWrap}>
+        <OnboardingProgress
+          current={currentCardIndex + 1}
+          total={steps.length}
+          style={styles.l1VisDots}
+        />
+      </View>
+      <PrimaryButton label={copy.buttons.next} onPress={onNext} disabled={maxReachedIndex < steps.length - 1} />
     </View>
   );
 }
@@ -6894,6 +6857,12 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   l1VisProgress: {
     width: '100%',
+  },
+  l1VisDotsWrap: {
+    alignItems: 'center',
+  },
+  l1VisDots: {
+    justifyContent: 'center',
   },
   l1VisPagerWrap: {
     alignSelf: 'center',
