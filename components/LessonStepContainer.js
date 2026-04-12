@@ -9,6 +9,7 @@ export default function LessonStepContainer({
   scrollEnabled = true,
   contentStyle,
   containerStyle,
+  fillViewport = false,
 }) {
   const { colors, components } = useTheme();
   const tabBarHeight = useContext(BottomTabBarHeightContext) || 0;
@@ -17,7 +18,7 @@ export default function LessonStepContainer({
     [colors, components, tabBarHeight]
   );
   const contentContainerStyle = scrollEnabled
-    ? [styles.content, styles.contentScroll, contentStyle]
+    ? [styles.content, styles.contentScroll, fillViewport && styles.contentFill, contentStyle]
     : [styles.content, styles.contentFixed, contentStyle];
   const wrapperStyle = scrollEnabled
     ? [styles.containerScroll, containerStyle]
@@ -30,7 +31,12 @@ export default function LessonStepContainer({
           contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.View entering={FadeInDown.duration(280)}>{children}</Animated.View>
+          <Animated.View
+            style={fillViewport ? styles.contentInner : null}
+            entering={FadeInDown.duration(280)}
+          >
+            {children}
+          </Animated.View>
         </ScrollView>
       ) : (
         <View style={contentContainerStyle}>
@@ -65,6 +71,9 @@ const createStyles = (colors, components, tabBarHeight) =>
     contentFixed: {
       flex: 1,
       paddingBottom: tabBarHeight + components.layout.spacing.md,
+    },
+    contentFill: {
+      flexGrow: 1,
     },
     contentInner: {
       flex: 1,

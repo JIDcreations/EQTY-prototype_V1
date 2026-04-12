@@ -341,6 +341,7 @@ export default function LessonStepScreen() {
       <LessonStepContainer
         scrollEnabled={!disableOuterScroll && !isLessonGlossaryOpen}
         containerStyle={styles.transparentScreen}
+        fillViewport={step === 2}
       >
       <TOPSECTION
         step={step}
@@ -1077,61 +1078,65 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
-      <View
-        style={[
-          styles.l1VisPagerWrap,
-          {
-            width: pageWidth,
-            marginHorizontal: -components.layout.pagePaddingHorizontal,
-          },
-        ]}
-      >
-        <FlatList
-          ref={pagerRef}
-          data={steps}
-          keyExtractor={(item) => item.id}
-          style={styles.l1VisPagerList}
-          contentContainerStyle={[styles.l1VisPagerTrack, { paddingLeft: components.layout.pagePaddingHorizontal }]}
-          horizontal
-          snapToInterval={snapInterval}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          showsHorizontalScrollIndicator={false}
-          bounces={false}
-          onMomentumScrollEnd={handlePageChange}
-          onScrollEndDrag={handlePageChange}
-          onScrollToIndexFailed={handleScrollFailed}
-          renderItem={({ item: step, index }) => (
-            <View style={[styles.l1VisPage, { width: snapInterval }]}>
-              <ProcessGridFlipCard
-                step={step}
-                index={index}
-                stepCodePrefix={stepCodePrefix}
-                styles={styles}
-                colors={colors}
-                isActive={index === currentCardIndex}
-                isCompleted={false}
-                isLocked={false}
-                renderAnimation={() => (
-                  isProcessSequence ? (
-                    <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
-                  ) : (
-                    <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
-                  )
-                )}
-              />
-            </View>
-          )}
-        />
+      <View style={styles.l1VisContent}>
+        <View
+          style={[
+            styles.l1VisPagerWrap,
+            {
+              width: pageWidth,
+              marginHorizontal: -components.layout.pagePaddingHorizontal,
+            },
+          ]}
+        >
+          <FlatList
+            ref={pagerRef}
+            data={steps}
+            keyExtractor={(item) => item.id}
+            style={styles.l1VisPagerList}
+            contentContainerStyle={[styles.l1VisPagerTrack, { paddingLeft: components.layout.pagePaddingHorizontal }]}
+            horizontal
+            snapToInterval={snapInterval}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            showsHorizontalScrollIndicator={false}
+            bounces={false}
+            onMomentumScrollEnd={handlePageChange}
+            onScrollEndDrag={handlePageChange}
+            onScrollToIndexFailed={handleScrollFailed}
+            renderItem={({ item: step, index }) => (
+              <View style={[styles.l1VisPage, { width: snapInterval }]}>
+                <ProcessGridFlipCard
+                  step={step}
+                  index={index}
+                  stepCodePrefix={stepCodePrefix}
+                  styles={styles}
+                  colors={colors}
+                  isActive={index === currentCardIndex}
+                  isCompleted={false}
+                  isLocked={false}
+                  renderAnimation={() => (
+                    isProcessSequence ? (
+                      <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                    ) : (
+                      <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                    )
+                  )}
+                />
+              </View>
+            )}
+          />
+        </View>
+        <View style={styles.l1VisDotsWrap}>
+          <OnboardingProgress
+            current={currentCardIndex + 1}
+            total={steps.length}
+            style={styles.l1VisDots}
+          />
+        </View>
       </View>
-      <View style={styles.l1VisDotsWrap}>
-        <OnboardingProgress
-          current={currentCardIndex + 1}
-          total={steps.length}
-          style={styles.l1VisDots}
-        />
+      <View style={styles.l1VisActionWrap}>
+        <PrimaryButton label={copy.buttons.next} onPress={onNext} disabled={maxReachedIndex < steps.length - 1} />
       </View>
-      <PrimaryButton label={copy.buttons.next} onPress={onNext} disabled={maxReachedIndex < steps.length - 1} />
     </View>
   );
 }
@@ -6848,8 +6853,14 @@ const createStyles = (colors, components, mode = 'dark') =>
 
   // ─── Lesson 1 visualization: grid layout ────────────────────────────────────
   l1VisBody: {
-    gap: components.layout.spacing.lg,
+    flex: 1,
     paddingTop: components.layout.spacing.xxl,
+  },
+  l1VisContent: {
+    gap: components.layout.spacing.lg,
+  },
+  l1VisActionWrap: {
+    marginTop: 'auto',
   },
   l1VisProgressWrap: {
     width: '100%',
@@ -6872,11 +6883,13 @@ const createStyles = (colors, components, mode = 'dark') =>
     overflow: 'visible',
   },
   l1VisPagerTrack: {
-    paddingVertical: components.layout.spacing.xs,
+    paddingTop: components.layout.spacing.none,
+    paddingBottom: components.layout.spacing.xs,
   },
   l1VisPage: {
     paddingRight: components.layout.spacing.sm,
-    paddingVertical: 2,
+    paddingTop: components.layout.spacing.none,
+    paddingBottom: components.layout.spacing.none,
   },
   l1CardShell: {
     width: '100%',
