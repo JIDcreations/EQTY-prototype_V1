@@ -16,7 +16,7 @@ import {
   formatLessonModuleLabel,
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
-import { annotateLessonsWithThemeContext } from '../utils/helpers';
+import { annotateLessonsWithThemeContext, getLessonStatus } from '../utils/helpers';
 
 const FALLBACK_STEP_COUNT = 6;
 
@@ -25,7 +25,7 @@ export default function LessonOverviewScreen() {
   const route = useRoute();
   const tabBarHeight = useBottomTabBarHeight();
   const { lessonId, entrySource } = route.params || {};
-  const { preferences, onboardingContext } = useApp();
+  const { preferences, onboardingContext, progress } = useApp();
   const { colors, components } = useTheme();
 
   const styles = useMemo(
@@ -75,6 +75,7 @@ export default function LessonOverviewScreen() {
   }
 
   const content = getLessonContent(lesson.id, preferences?.language);
+  const lessonStatus = getLessonStatus(lesson.id, progress);
   const moduleLabel = formatLessonModuleLabel(
     preferences?.language,
     lesson.themeIndex,
@@ -88,6 +89,7 @@ export default function LessonOverviewScreen() {
 
   const isLessonGateRequired =
     lesson.id === 'lesson_1' && !onboardingContext?.onboardingComplete;
+  const isLessonLocked = lessonStatus === 'locked';
 
   return (
     <ScreenBackground variant="bg3">
@@ -155,8 +157,13 @@ export default function LessonOverviewScreen() {
 
         <View style={styles.ctaDock}>
           <CtaButton
-            label={overviewCopy.startLesson}
+            label={isLessonLocked ? overviewCopy.lockedLesson : overviewCopy.startLesson}
+            disabled={isLessonLocked}
             onPress={() => {
+              if (isLessonLocked) {
+                return;
+              }
+
               if (isLessonGateRequired) {
                 navigation.navigate('OnboardingRequired', { entrySource });
                 return;

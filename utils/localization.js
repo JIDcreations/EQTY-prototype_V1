@@ -44,6 +44,7 @@ const LESSON_OVERVIEW_COPY = {
       ],
     },
     startLesson: 'Begin lesson',
+    lockedLesson: 'Finish the previous lessons first',
     back: 'Back',
   },
   nl: {
@@ -78,6 +79,7 @@ const LESSON_OVERVIEW_COPY = {
       ],
     },
     startLesson: 'Start les',
+    lockedLesson: 'Werk eerst de vorige lessen af',
     back: 'Terug',
   },
 };

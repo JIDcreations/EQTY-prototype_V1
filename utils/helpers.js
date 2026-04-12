@@ -5,18 +5,40 @@ export function getLessonById(lessonId) {
   return lessons.find((lesson) => lesson.id === lessonId);
 }
 
+function getSortedLessons() {
+  return [...lessons].sort((a, b) => a.order - b.order);
+}
+
+export function isLessonUnlocked(lessonId, progress) {
+  const sortedLessons = getSortedLessons();
+  const lessonIndex = sortedLessons.findIndex((lesson) => lesson.id === lessonId);
+  if (lessonIndex <= 0) {
+    return true;
+  }
+
+  const completedLessonIds = progress?.completedLessonIds || [];
+  return sortedLessons
+    .slice(0, lessonIndex)
+    .every((lesson) => completedLessonIds.includes(lesson.id));
+}
+
 export function getLessonStatus(lessonId, progress) {
-  if (progress.completedLessonIds.includes(lessonId)) {
+  const completedLessonIds = progress?.completedLessonIds || [];
+
+  if (completedLessonIds.includes(lessonId)) {
     return 'completed';
   }
-  if (progress.currentLessonId === lessonId) {
+  if (!isLessonUnlocked(lessonId, progress)) {
+    return 'locked';
+  }
+  if (progress?.currentLessonId === lessonId) {
     return 'current';
   }
   return 'upcoming';
 }
 
 export function getNextLessonId(currentLessonId) {
-  const sorted = [...lessons].sort((a, b) => a.order - b.order);
+  const sorted = getSortedLessons();
   const index = sorted.findIndex((lesson) => lesson.id === currentLessonId);
   if (index === -1 || index === sorted.length - 1) {
     return currentLessonId;

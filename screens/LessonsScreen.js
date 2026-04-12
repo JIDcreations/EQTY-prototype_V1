@@ -70,15 +70,20 @@ export default function LessonsScreen() {
             <View style={styles.lessonList}>
               {module.lessons.map((lesson) => {
                 const status = getLessonStatus(lesson.id, progress);
+                const isLocked = status === 'locked';
 
                 return (
                   <Pressable
                     key={lesson.id}
-                    onPress={() =>
-                      navigation.navigate('LessonOverview', {
-                        lessonId: lesson.id,
-                        entrySource: 'Lessons',
-                      })
+                    disabled={isLocked}
+                    onPress={
+                      isLocked
+                        ? undefined
+                        : () =>
+                            navigation.navigate('LessonOverview', {
+                              lessonId: lesson.id,
+                              entrySource: 'Lessons',
+                            })
                     }
                   >
                     {({ pressed }) => (
@@ -87,7 +92,8 @@ export default function LessonsScreen() {
                           styles.lessonRow,
                           status === 'current' && styles.lessonRowCurrent,
                           status === 'completed' && styles.lessonRowCompleted,
-                          pressed && styles.lessonRowPressed,
+                          isLocked && styles.lessonRowLocked,
+                          pressed && !isLocked && styles.lessonRowPressed,
                         ]}
                       >
                         <View style={styles.lessonRowLeft}>
@@ -100,7 +106,7 @@ export default function LessonsScreen() {
                           <AppText
                             style={[
                               styles.lessonTitle,
-                              status === 'upcoming' && styles.lessonTitleUpcoming,
+                              (status === 'upcoming' || isLocked) && styles.lessonTitleUpcoming,
                             ]}
                             numberOfLines={1}
                           >
@@ -114,6 +120,12 @@ export default function LessonsScreen() {
                               name="checkmark-circle"
                               size={components.sizes.icon.lg}
                               color={colors.accent.primary}
+                            />
+                          ) : isLocked ? (
+                            <Ionicons
+                              name="lock-closed"
+                              size={components.sizes.icon.sm}
+                              color={colors.text.secondary}
                             />
                           ) : (
                             <Ionicons
@@ -190,6 +202,9 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     lessonRowCompleted: {
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    },
+    lessonRowLocked: {
+      opacity: 0.62,
     },
     lessonRowPressed: {
       opacity: colors.opacity.emphasis,
