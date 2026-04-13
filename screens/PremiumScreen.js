@@ -66,9 +66,21 @@ export default function PremiumScreen() {
 
         {/* Hero */}
         <View style={styles.hero}>
-          <AppText style={[styles.title, { color: colors.text.primary }]}>
-            {copy.title}
-          </AppText>
+          <View
+            style={[
+              styles.titleTag,
+              { backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint) },
+            ]}
+          >
+            <AppText
+              style={[
+                styles.titleTagLabel,
+                { color: mode === 'light' ? colors.text.secondary : colors.accent.primary },
+              ]}
+            >
+              {copy.title}
+            </AppText>
+          </View>
           <AppText style={[styles.subtitle, { color: colors.text.secondary }]}>
             {copy.subtitle}
           </AppText>
@@ -79,7 +91,7 @@ export default function PremiumScreen() {
           style={[
             styles.benefitsCard,
             {
-              backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+              backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
               borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
             },
           ]}
@@ -116,14 +128,19 @@ const createStyles = (colors, components, tabBarHeight) =>
   StyleSheet.create({
     content: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
-      paddingTop: components.layout.safeArea.top + components.layout.spacing.xl,
+      paddingTop: 0,
       paddingBottom:
         components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.xl,
       flex: 1,
       justifyContent: 'space-between',
+      position: 'relative',
     },
 
     backButton: {
+      position: 'absolute',
+      top: 62,
+      left: components.layout.pagePaddingHorizontal,
+      zIndex: 1,
       width: components.sizes.square.lg,
       height: components.sizes.square.lg,
       borderRadius: components.radius.pill,
@@ -137,11 +154,13 @@ const createStyles = (colors, components, tabBarHeight) =>
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
-      gap: components.layout.spacing.xl,
+      gap: 0,
     },
 
     // Badge
     badgeWrapper: {
+      width: 108,
+      height: 108,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -167,11 +186,17 @@ const createStyles = (colors, components, tabBarHeight) =>
     hero: {
       alignItems: 'center',
       gap: components.layout.spacing.sm,
+      marginTop: 32,
       paddingHorizontal: components.layout.spacing.md,
     },
-    title: {
-      ...typography.styles.display,
-      textAlign: 'center',
+    titleTag: {
+      alignSelf: 'center',
+      paddingHorizontal: 15,
+      paddingVertical: 8,
+      borderRadius: components.radius.pill,
+    },
+    titleTagLabel: {
+      ...typography.styles.stepLabel,
     },
     subtitle: {
       ...typography.styles.body,
@@ -181,6 +206,7 @@ const createStyles = (colors, components, tabBarHeight) =>
     // Benefits card
     benefitsCard: {
       width: '100%',
+      marginTop: 24,
       borderRadius: components.radius.card,
       borderWidth: components.borderWidth.thin,
       paddingVertical: components.layout.spacing.md,

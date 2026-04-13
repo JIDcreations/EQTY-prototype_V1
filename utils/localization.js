@@ -1981,12 +1981,12 @@ const PREMIUM_COPY = {
     dismiss: 'Maybe later',
   },
   nl: {
-    title: 'Ga verder.',
+    title: 'Ga verder',
     subtitle: 'Je hebt de basis afgerond. Verdiep je verder in specifieke onderwerpen, op jouw tempo.',
     benefits: [
       'Toegang tot alle verdiepingsmodules',
       'ETF’s, risico en strategie in detail',
-      'Nieuwe onderwerpen worden toegevoegd',
+      'Nieuwe onderwerpen volgen',
     ],
     priceNote: '€4,99 / maand',
     cta: 'Premium ontgrendelen',
