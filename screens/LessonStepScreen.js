@@ -37,6 +37,7 @@ import AppTextInput from '../components/AppTextInput';
 import BottomSheet from '../components/BottomSheet';
 import Card from '../components/Card';
 import ConceptDropdownMenu from '../components/ConceptDropdownMenu';
+import ConceptInfoCard from '../components/ConceptInfoCard';
 import OnboardingProgress from '../components/OnboardingProgress';
 import ProcessGridFlipCard from '../components/ProcessGridFlipCard';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
@@ -611,7 +612,7 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
 }
 
 function IntroConceptStep({ content, onNext, copy }) {
-  const { colors, styles } = useLessonStepStyles();
+  const { styles } = useLessonStepStyles();
   const steps = copy.introConcept.steps;
   const processLeadTitle = 'Dit zijn de stappen';
   const processLeadBody = 'Verspreid over 26 lessen';
@@ -633,19 +634,12 @@ function IntroConceptStep({ content, onNext, copy }) {
 
       <View style={styles.goalConceptImpactList}>
         {steps.map((step) => (
-          <Card key={step.id} style={styles.goalConceptImpactCard}>
-            <View style={styles.goalConceptImpactHeader}>
-              <View style={styles.goalConceptImpactIcon}>
-                <Ionicons
-                  name={iconById[step.id] || 'ellipse-outline'}
-                  size={16}
-                  color={colors.accent.primary}
-                />
-              </View>
-              <AppText style={styles.goalConceptImpactLabel}>{step.label}</AppText>
-            </View>
-            <AppText style={styles.goalConceptImpactDetail}>{step.detail}</AppText>
-          </Card>
+          <ConceptInfoCard
+            key={step.id}
+            iconName={iconById[step.id] || 'ellipse-outline'}
+            label={step.label}
+            detail={step.detail}
+          />
         ))}
       </View>
 
@@ -655,7 +649,7 @@ function IntroConceptStep({ content, onNext, copy }) {
 }
 
 function GoalConceptStep({ content, onNext, copy }) {
-  const { colors, styles } = useLessonStepStyles();
+  const { styles } = useLessonStepStyles();
   const concept = content?.steps?.concept;
   const drivers = concept?.drivers || [];
   const iconById = {
@@ -673,19 +667,12 @@ function GoalConceptStep({ content, onNext, copy }) {
 
       <View style={styles.goalConceptImpactList}>
         {drivers.map((driver) => (
-          <Card key={driver.id} style={styles.goalConceptImpactCard}>
-            <View style={styles.goalConceptImpactHeader}>
-              <View style={styles.goalConceptImpactIcon}>
-                <Ionicons
-                  name={iconById[driver.id] || 'ellipse-outline'}
-                  size={16}
-                  color={colors.accent.primary}
-                />
-              </View>
-              <AppText style={styles.goalConceptImpactLabel}>{driver.label}</AppText>
-            </View>
-            <AppText style={styles.goalConceptImpactDetail}>{driver.detail}</AppText>
-          </Card>
+          <ConceptInfoCard
+            key={driver.id}
+            iconName={iconById[driver.id] || 'ellipse-outline'}
+            label={driver.label}
+            detail={driver.detail}
+          />
         ))}
       </View>
 
@@ -5203,31 +5190,6 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   goalConceptImpactList: {
     gap: components.layout.spacing.sm,
-  },
-  goalConceptImpactCard: {
-    gap: components.layout.spacing.xs,
-    padding: components.layout.spacing.lg,
-  },
-  goalConceptImpactHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: components.layout.spacing.sm,
-  },
-  goalConceptImpactIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: components.radius.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: toRgba(colors.accent.primary, 0.12),
-  },
-  goalConceptImpactLabel: {
-    ...typography.styles.bodyStrong,
-    color: colors.text.primary,
-  },
-  goalConceptImpactDetail: {
-    ...typography.styles.meta,
-    color: colors.text.secondary,
   },
   segmentRow: {
     flexDirection: 'row',
