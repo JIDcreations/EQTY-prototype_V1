@@ -239,6 +239,11 @@ export default function LessonStepScreen() {
     const introTitle = getIntroStepTitle(preferences?.language, step);
     switch (step) {
       case 1:
+        if (lessonId === 'lesson_0') {
+          return locale === 'nl'
+            ? 'Wat is beleggen als een proces?'
+            : 'What is investing as a process?';
+        }
         return content.steps.concept.title;
       case 2:
         return lessonId === 'lesson_0'
@@ -308,6 +313,11 @@ export default function LessonStepScreen() {
   }
   const flowMetaLabel = `${flowPhaseLabel} · ${step}/${TOTAL_STEPS}`.toUpperCase();
   const topSectionSubtitle = useMemo(() => {
+    if (step === 1 && lessonId === 'lesson_0') {
+      return locale === 'nl'
+        ? 'Een stappenplan dat je volgt ter voorbereiding op investeren.'
+        : 'A step-by-step plan you follow in preparation for investing.';
+    }
     if (step === 1 && lessonId === 'lesson_1') {
       return content?.steps?.concept?.intro || null;
     }
@@ -353,7 +363,7 @@ export default function LessonStepScreen() {
         onPressTerm={handleTermPress}
         stepLabel={flowMetaLabel}
         subtitle={topSectionSubtitle}
-        showTitle={!(lessonId === 'lesson_0' && step === 1) && step !== 5}
+        showTitle={step !== 5}
       />
 
       {step === 1 && (
@@ -603,7 +613,8 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
 function IntroConceptStep({ content, onNext, copy }) {
   const { colors, styles } = useLessonStepStyles();
   const steps = copy.introConcept.steps;
-  const paragraph = copy.introConcept.paragraph;
+  const processLeadTitle = 'Dit zijn de stappen';
+  const processLeadBody = 'Verspreid over 26 lessen';
   const iconById = {
     goal: 'flag-outline',
     risk: 'pulse-outline',
@@ -615,9 +626,9 @@ function IntroConceptStep({ content, onNext, copy }) {
 
   return (
     <View style={styles.stepBody}>
-      <View style={styles.goalConceptSection}>
-        <AppText style={styles.goalConceptSectionIntro}>{paragraph}</AppText>
-        <AppText style={styles.goalConceptSectionTitle}>{copy.introConcept.processTitle}</AppText>
+      <View style={styles.introConceptLead}>
+        <AppText style={styles.introConceptLeadLabel}>{processLeadTitle}</AppText>
+        <AppText style={styles.introConceptLeadBody}>{processLeadBody}</AppText>
       </View>
 
       <View style={styles.goalConceptImpactList}>
@@ -5178,6 +5189,17 @@ const createStyles = (colors, components, mode = 'dark') =>
   goalConceptSectionTitle: {
     ...typography.styles.bodyStrong,
     color: colors.text.primary,
+  },
+  introConceptLead: {
+    marginTop: 32,
+  },
+  introConceptLeadLabel: {
+    ...typography.styles.stepLabel,
+    color: colors.text.primary,
+  },
+  introConceptLeadBody: {
+    ...typography.styles.body,
+    color: colors.text.secondary,
   },
   goalConceptImpactList: {
     gap: components.layout.spacing.sm,
