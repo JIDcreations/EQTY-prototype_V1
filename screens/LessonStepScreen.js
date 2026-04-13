@@ -560,6 +560,10 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
     return <IntroConceptStep content={content} onNext={onNext} copy={copy} />;
   }
 
+  if (lessonId === 'lesson_1') {
+    return <GoalConceptStep content={content} onNext={onNext} copy={copy} />;
+  }
+
   if (content?.steps?.concept?.drivers?.length) {
     return (
       <AnchorConceptStep
@@ -597,25 +601,82 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
 }
 
 function IntroConceptStep({ content, onNext, copy }) {
-  const { colors, components, styles } = useLessonStepStyles();
+  const { colors, styles } = useLessonStepStyles();
   const steps = copy.introConcept.steps;
   const paragraph = copy.introConcept.paragraph;
+  const iconById = {
+    goal: 'flag-outline',
+    risk: 'pulse-outline',
+    strategy: 'git-branch-outline',
+    allocation: 'pie-chart-outline',
+    vehicle: 'layers-outline',
+    execution: 'flash-outline',
+  };
 
   return (
     <View style={styles.stepBody}>
-      <View style={styles.conceptDef}>
-        <AppText style={styles.conceptDefTitle}>{copy.introConcept.title}</AppText>
-        <AppText style={styles.conceptDefBody}>{paragraph}</AppText>
+      <View style={styles.goalConceptSection}>
+        <AppText style={styles.goalConceptSectionIntro}>{paragraph}</AppText>
+        <AppText style={styles.goalConceptSectionTitle}>{copy.introConcept.processTitle}</AppText>
       </View>
 
-      <ConceptDropdownMenu
-        headerLabel={copy.introConcept.processTitle}
-        headerHint={copy.introConcept.processHint}
-        items={steps}
-        styles={styles}
-        colors={colors}
-        components={components}
-      />
+      <View style={styles.goalConceptImpactList}>
+        {steps.map((step) => (
+          <Card key={step.id} style={styles.goalConceptImpactCard}>
+            <View style={styles.goalConceptImpactHeader}>
+              <View style={styles.goalConceptImpactIcon}>
+                <Ionicons
+                  name={iconById[step.id] || 'ellipse-outline'}
+                  size={16}
+                  color={colors.accent.primary}
+                />
+              </View>
+              <AppText style={styles.goalConceptImpactLabel}>{step.label}</AppText>
+            </View>
+            <AppText style={styles.goalConceptImpactDetail}>{step.detail}</AppText>
+          </Card>
+        ))}
+      </View>
+
+      <PrimaryButton label={copy.buttons.next} onPress={onNext} />
+    </View>
+  );
+}
+
+function GoalConceptStep({ content, onNext, copy }) {
+  const { colors, styles } = useLessonStepStyles();
+  const concept = content?.steps?.concept;
+  const drivers = concept?.drivers || [];
+  const iconById = {
+    time: 'time-outline',
+    risk: 'pulse-outline',
+    personal: 'person-outline',
+  };
+
+  return (
+    <View style={styles.stepBody}>
+      <View style={styles.goalConceptSection}>
+        <AppText style={styles.goalConceptSectionIntro}>{concept?.intro}</AppText>
+        <AppText style={styles.goalConceptSectionTitle}>{concept?.sectionLabel}</AppText>
+      </View>
+
+      <View style={styles.goalConceptImpactList}>
+        {drivers.map((driver) => (
+          <Card key={driver.id} style={styles.goalConceptImpactCard}>
+            <View style={styles.goalConceptImpactHeader}>
+              <View style={styles.goalConceptImpactIcon}>
+                <Ionicons
+                  name={iconById[driver.id] || 'ellipse-outline'}
+                  size={16}
+                  color={colors.accent.primary}
+                />
+              </View>
+              <AppText style={styles.goalConceptImpactLabel}>{driver.label}</AppText>
+            </View>
+            <AppText style={styles.goalConceptImpactDetail}>{driver.detail}</AppText>
+          </Card>
+        ))}
+      </View>
 
       <PrimaryButton label={copy.buttons.next} onPress={onNext} />
     </View>
@@ -5106,6 +5167,45 @@ const createStyles = (colors, components, mode = 'dark') =>
     height: components.borderWidth.thin,
     marginHorizontal: components.layout.spacing.lg,
     backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  goalConceptSection: {
+    gap: components.layout.spacing.xs,
+  },
+  goalConceptSectionIntro: {
+    ...typography.styles.body,
+    color: colors.text.primary,
+  },
+  goalConceptSectionTitle: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  goalConceptImpactList: {
+    gap: components.layout.spacing.sm,
+  },
+  goalConceptImpactCard: {
+    gap: components.layout.spacing.xs,
+    padding: components.layout.spacing.lg,
+  },
+  goalConceptImpactHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: components.layout.spacing.sm,
+  },
+  goalConceptImpactIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: toRgba(colors.accent.primary, 0.12),
+  },
+  goalConceptImpactLabel: {
+    ...typography.styles.bodyStrong,
+    color: colors.text.primary,
+  },
+  goalConceptImpactDetail: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
   },
   segmentRow: {
     flexDirection: 'row',
