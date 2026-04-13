@@ -46,6 +46,7 @@ const createStyles = (colors, components) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderWidth: components.borderWidth.thin,
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      borderRadius: 16,
       gap: components.layout.spacing.xs,
       padding: components.layout.spacing.lg,
     },
