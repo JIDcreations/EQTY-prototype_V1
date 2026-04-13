@@ -652,6 +652,8 @@ function GoalConceptStep({ content, onNext, copy }) {
   const { styles } = useLessonStepStyles();
   const concept = content?.steps?.concept;
   const drivers = concept?.drivers || [];
+  const conceptLeadLabel = 'Je doel heeft invloed op';
+  const conceptLeadBody = 'Drie onderdelen van je plan';
   const iconById = {
     time: 'time-outline',
     risk: 'pulse-outline',
@@ -660,9 +662,9 @@ function GoalConceptStep({ content, onNext, copy }) {
 
   return (
     <View style={styles.stepBody}>
-      <View style={styles.goalConceptSection}>
-        <AppText style={styles.goalConceptSectionIntro}>{concept?.intro}</AppText>
-        <AppText style={styles.goalConceptSectionTitle}>{concept?.sectionLabel}</AppText>
+      <View style={styles.introConceptLead}>
+        <AppText style={styles.introConceptLeadLabel}>{conceptLeadLabel}</AppText>
+        <AppText style={styles.introConceptLeadBody}>{conceptLeadBody}</AppText>
       </View>
 
       <View style={styles.goalConceptImpactList}>
