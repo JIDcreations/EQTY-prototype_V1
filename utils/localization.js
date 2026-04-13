@@ -1952,9 +1952,9 @@ const DEEP_DIVE_COPY = {
     lessonIndex: (n) => `${String(n).padStart(2, '0')}`,
     // LessonsScreen inline section
     sectionChip: 'GA DIEPER',
-    sectionTitle: 'Jouw richting.',
+    sectionTitle: 'Jouw volgende stap.',
     sectionSubtitle:
-      'Het kernleertraject eindigt hier. Wat je vervolgens verkent, kies je zelf.',
+      'Je hebt de basis afgerond. Kies zelf waarin je verder wil verdiepen.',
     sectionLockedNote: 'Beschikbaar na het afronden van de kernlessen.',
     premiumBadge: 'PREMIUM',
     // LessonSuccessScreen — after final core lesson
@@ -1982,11 +1982,11 @@ const PREMIUM_COPY = {
   },
   nl: {
     title: 'Ga verder.',
-    subtitle: 'Deep dives zijn zelfgestuurde leertrajecten die verder gaan dan het kernleertraject — gerichte onderwerpen, in jouw tempo.',
+    subtitle: 'Je hebt de basis afgerond. Verdiep je verder in specifieke onderwerpen, op jouw tempo.',
     benefits: [
-      'Toegang tot alle beschikbare onderwerpen',
-      'ETFs, risicobeheer en beleggingsstrategie',
-      'Regelmatig nieuwe tracks toegevoegd',
+      'Toegang tot alle verdiepingsmodules',
+      'ETF’s, risico en strategie in detail',
+      'Nieuwe onderwerpen worden toegevoegd',
     ],
     priceNote: '€4,99 / maand',
     cta: 'Premium ontgrendelen',
