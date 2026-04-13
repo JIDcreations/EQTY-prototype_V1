@@ -1,5 +1,6 @@
 import { lessonContent } from '../data/lessonContent';
 import { lessonContentNl } from '../data/lessonContentNl';
+import { deepDiveContent } from '../data/deepDiveContent';
 import { lessons, modules } from '../data/curriculum';
 import { curriculumNl } from '../data/curriculumNl';
 
@@ -1806,7 +1807,12 @@ export function getLocaleKey(language) {
 export function getLessonContent(lessonId, language) {
   const locale = getLocaleKey(language);
   const localized = locale === 'nl' ? lessonContentNl : null;
-  return localized?.[lessonId] || lessonContent[lessonId] || lessonContent.lesson_0;
+  return (
+    localized?.[lessonId] ||
+    lessonContent[lessonId] ||
+    deepDiveContent[lessonId] ||
+    lessonContent.lesson_0
+  );
 }
 
 export function getLocalizedLessons(language) {
@@ -1906,6 +1912,96 @@ export function getTextSizeOptions(language) {
 export function getGlossaryCopy(language) {
   const locale = getLocaleKey(language);
   return GLOSSARY_COPY[locale] || GLOSSARY_COPY.en;
+}
+
+// ─── Deep Dive copy ────────────────────────────────────────────────────────────
+
+const DEEP_DIVE_COPY = {
+  en: {
+    // DeepDiveScreen (track detail)
+    headerTitle: 'Go Deeper',
+    headerSubtitle: 'Explore focused topics from the investing process.',
+    trackLabel: 'DEEP DIVE',
+    trackNotFound: 'Topic not found.',
+    comingSoon: 'COMING SOON',
+    lessonsCount: (n) => `${n} lessons`,
+    trackProgress: (done, total) => `${done} / ${total} complete`,
+    lessonIndex: (n) => `${String(n).padStart(2, '0')}`,
+    // LessonsScreen inline section
+    sectionChip: 'GO DEEPER',
+    sectionTitle: 'Your own direction.',
+    sectionSubtitle:
+      'The core curriculum ends here. What you explore next is yours to choose.',
+    sectionLockedNote: 'Available after completing the core lessons.',
+    premiumBadge: 'PREMIUM',
+    // LessonSuccessScreen — after final core lesson
+    finalLessonSubtitle: 'The deep dives are waiting — explore the topics that matter most to you.',
+    finalLessonCta: 'See what\'s next',
+    // LessonSuccessScreen — after a deep dive lesson
+    deepDiveCta: 'Back to track',
+  },
+  nl: {
+    // DeepDiveScreen (track detail)
+    headerTitle: 'Ga dieper',
+    headerSubtitle: 'Verken gerichte onderwerpen uit het beleggingsproces.',
+    trackLabel: 'DEEP DIVE',
+    trackNotFound: 'Onderwerp niet gevonden.',
+    comingSoon: 'BINNENKORT',
+    lessonsCount: (n) => `${n} lessen`,
+    trackProgress: (done, total) => `${done} / ${total} afgerond`,
+    lessonIndex: (n) => `${String(n).padStart(2, '0')}`,
+    // LessonsScreen inline section
+    sectionChip: 'GA DIEPER',
+    sectionTitle: 'Jouw richting.',
+    sectionSubtitle:
+      'Het kernleertraject eindigt hier. Wat je vervolgens verkent, kies je zelf.',
+    sectionLockedNote: 'Beschikbaar na het afronden van de kernlessen.',
+    premiumBadge: 'PREMIUM',
+    // LessonSuccessScreen — after final core lesson
+    finalLessonSubtitle: 'De deep dives staan klaar — verken de onderwerpen die voor jou het meest relevant zijn.',
+    finalLessonCta: 'Bekijk wat er volgt',
+    // LessonSuccessScreen — after a deep dive lesson
+    deepDiveCta: 'Terug naar track',
+  },
+};
+
+// ─── Premium paywall copy ───────────────────────────────────────────────────────
+
+const PREMIUM_COPY = {
+  en: {
+    title: 'Go further.',
+    subtitle: 'Deep dives are self-directed learning tracks that go beyond the core curriculum — focused topics, at your own pace.',
+    benefits: [
+      'Access all available topic tracks',
+      'ETFs, risk management & investment strategy',
+      'New tracks added over time',
+    ],
+    priceNote: '€4.99 / month',
+    cta: 'Unlock Premium',
+    dismiss: 'Maybe later',
+  },
+  nl: {
+    title: 'Ga verder.',
+    subtitle: 'Deep dives zijn zelfgestuurde leertrajecten die verder gaan dan het kernleertraject — gerichte onderwerpen, in jouw tempo.',
+    benefits: [
+      'Toegang tot alle beschikbare onderwerpen',
+      'ETFs, risicobeheer en beleggingsstrategie',
+      'Regelmatig nieuwe tracks toegevoegd',
+    ],
+    priceNote: '€4,99 / maand',
+    cta: 'Premium ontgrendelen',
+    dismiss: 'Misschien later',
+  },
+};
+
+export function getPremiumCopy(language) {
+  const locale = getLocaleKey(language);
+  return PREMIUM_COPY[locale] || PREMIUM_COPY.en;
+}
+
+export function getDeepDiveCopy(language) {
+  const locale = getLocaleKey(language);
+  return DEEP_DIVE_COPY[locale] || DEEP_DIVE_COPY.en;
 }
 
 export function getLocalizedGlossaryCategories(language, categories = []) {

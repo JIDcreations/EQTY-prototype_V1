@@ -1,4 +1,5 @@
 import { lessons } from '../data/curriculum';
+import { deepDiveLessons } from '../data/deepDives';
 import { defaultUserContext } from '../data/defaults';
 
 export function getLessonById(lessonId) {
@@ -44,6 +45,22 @@ export function getNextLessonId(currentLessonId) {
     return currentLessonId;
   }
   return sorted[index + 1].id;
+}
+
+export function areAllCoreLessonsComplete(progress) {
+  const completedIds = progress?.completedLessonIds || [];
+  return lessons.every((lesson) => completedIds.includes(lesson.id));
+}
+
+export function getDeepDiveLessonStatus(lessonId, progress) {
+  const completedIds = progress?.completedLessonIds || [];
+  if (completedIds.includes(lessonId)) return 'completed';
+  return 'upcoming';
+}
+
+export function getLastCoreLessonId() {
+  const sorted = getSortedLessons();
+  return sorted[sorted.length - 1]?.id || null;
 }
 
 function parseModuleNumberFromId(moduleId) {

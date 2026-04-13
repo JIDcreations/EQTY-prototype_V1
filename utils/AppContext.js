@@ -33,6 +33,7 @@ export function AppProvider({ children }) {
   const [userContext, setUserContext] = useState(defaultUserContext);
   const [progress, setProgress] = useState(defaultProgress);
   const [reflections, setReflections] = useState([]);
+  const [isPremium, setIsPremium] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
@@ -149,11 +150,17 @@ export function AppProvider({ children }) {
     await saveReflections(next);
   };
 
+  const unlockPremium = () => {
+    setIsPremium(true);
+  };
+
   const completeLesson = async (lessonId) => {
     const completed = progress.completedLessonIds.includes(lessonId)
       ? progress.completedLessonIds
       : [...progress.completedLessonIds, lessonId];
-    const nextLessonId = getNextLessonId(lessonId);
+    // Deep dive lessons do not advance the core lesson pointer
+    const isDeepDive = typeof lessonId === 'string' && lessonId.startsWith('deep_');
+    const nextLessonId = isDeepDive ? progress.currentLessonId : getNextLessonId(lessonId);
     const nextProgress = {
       completedLessonIds: completed,
       currentLessonId: nextLessonId,
@@ -170,6 +177,7 @@ export function AppProvider({ children }) {
       userContext,
       progress,
       reflections,
+      isPremium,
       isReady,
       textScale: getTextScale(preferences?.textSize),
       updateAuthUser,
@@ -180,8 +188,9 @@ export function AppProvider({ children }) {
       updateProgress,
       addReflection,
       completeLesson,
+      unlockPremium,
     }),
-    [authUser, onboardingContext, preferences, userContext, progress, reflections, isReady]
+    [authUser, onboardingContext, preferences, userContext, progress, reflections, isPremium, isReady]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

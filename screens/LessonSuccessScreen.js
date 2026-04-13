@@ -14,7 +14,9 @@ import AppText from '../components/AppText';
 import { PrimaryButton } from '../components/Button';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getLessonContent, getLessonStepCopy } from '../utils/localization';
+import { getLessonContent, getLessonStepCopy, getDeepDiveCopy } from '../utils/localization';
+import { getLastCoreLessonId } from '../utils/helpers';
+import { getDeepDiveLesson } from '../data/deepDives';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -37,17 +39,30 @@ export default function LessonSuccessScreen() {
     [colors, components, tabBarHeight]
   );
   const copy = useMemo(() => getLessonStepCopy(preferences?.language), [preferences?.language]);
+  const deepDiveCopy = useMemo(
+    () => getDeepDiveCopy(preferences?.language),
+    [preferences?.language]
+  );
   const content = getLessonContent(lessonId, preferences?.language);
   const lessonTitle = content?.title || copy.lessonSuccess.fallbackTitle;
   const isIntroLesson = lessonId === 'lesson_0';
-  const subtitle =
-    isIntroLesson
+  const isDeepDiveLesson = typeof lessonId === 'string' && lessonId.startsWith('deep_');
+  const isLastCoreLesson = lessonId === getLastCoreLessonId();
+  const deepLesson = isDeepDiveLesson ? getDeepDiveLesson(lessonId) : null;
+  const subtitle = isDeepDiveLesson
+    ? (deepLesson?.shortDescription || lessonTitle)
+    : isIntroLesson
       ? copy.lessonSuccess.introSubtitle
       : copy.lessonSuccess.subtitle
         ? copy.lessonSuccess.subtitle(lessonTitle)
         : '';
-  const detail =
-    isIntroLesson ? copy.lessonSuccess.introDetail : copy.lessonSuccess.detail;
+  const detail = isDeepDiveLesson
+    ? deepDiveCopy.headerSubtitle
+    : isLastCoreLesson
+      ? deepDiveCopy.finalLessonSubtitle
+      : isIntroLesson
+        ? copy.lessonSuccess.introDetail
+        : copy.lessonSuccess.detail;
 
   // Entrance animations — staggered, spring badge, eased text
   const badgeScale = useSharedValue(0.4);
@@ -123,6 +138,19 @@ export default function LessonSuccessScreen() {
       parent.navigate('Home');
     } else {
       navigation.navigate('Home');
+    }
+  };
+
+  const handleGoToLessonsOverview = () => {
+    // Pop to the top of the lessons stack — the deep dive section is right there
+    navigation.popToTop();
+  };
+
+  const handleBackToTrack = () => {
+    if (deepLesson) {
+      navigation.navigate('DeepDive', { trackId: deepLesson.trackId });
+    } else {
+      navigation.popToTop();
     }
   };
 
@@ -205,7 +233,28 @@ export default function LessonSuccessScreen() {
           <Pressable style={styles.replayButton} onPress={runAnimation}>
             <AppText style={[styles.replayLabel, { color: colors.text.secondary }]}>↺ Replay</AppText>
           </Pressable>
-          <PrimaryButton label={copy.lessonSuccess.cta} onPress={handleReturnHome} />
+
+          {isDeepDiveLesson ? (
+            <>
+              <PrimaryButton label={deepDiveCopy.deepDiveCta} onPress={handleBackToTrack} />
+              <Pressable style={styles.secondaryAction} onPress={handleReturnHome}>
+                <AppText style={[styles.secondaryActionLabel, { color: colors.text.secondary }]}>
+                  {copy.lessonSuccess.cta}
+                </AppText>
+              </Pressable>
+            </>
+          ) : isLastCoreLesson ? (
+            <>
+              <PrimaryButton label={deepDiveCopy.finalLessonCta} onPress={handleGoToLessonsOverview} />
+              <Pressable style={styles.secondaryAction} onPress={handleReturnHome}>
+                <AppText style={[styles.secondaryActionLabel, { color: colors.text.secondary }]}>
+                  {copy.lessonSuccess.cta}
+                </AppText>
+              </Pressable>
+            </>
+          ) : (
+            <PrimaryButton label={copy.lessonSuccess.cta} onPress={handleReturnHome} />
+          )}
         </Animated.View>
       </View>
     </OnboardingScreen>
@@ -304,6 +353,14 @@ const createStyles = (colors, components, tabBarHeight) =>
       paddingHorizontal: components.layout.spacing.md,
     },
     replayLabel: {
+      ...typography.styles.small,
+    },
+    secondaryAction: {
+      alignSelf: 'center',
+      paddingVertical: components.layout.spacing.xs,
+      paddingHorizontal: components.layout.spacing.md,
+    },
+    secondaryActionLabel: {
       ...typography.styles.small,
     },
   });

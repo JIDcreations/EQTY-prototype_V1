@@ -6,6 +6,8 @@ import LessonStepScreen from '../screens/LessonStepScreen';
 import LessonSuccessScreen from '../screens/LessonSuccessScreen';
 import LessonResourcesScreen from '../screens/LessonResourcesScreen';
 import LessonVideosScreen from '../screens/LessonVideosScreen';
+import DeepDiveScreen from '../screens/DeepDiveScreen';
+import PremiumScreen from '../screens/PremiumScreen';
 
 const Stack = createStackNavigator();
 
@@ -39,6 +41,12 @@ export default function LessonsStack() {
       <Stack.Screen
         name="LessonSuccess"
         component={LessonSuccessScreen}
+        options={{ cardStyleInterpolator: forFade, transitionSpec: successTransition }}
+      />
+      <Stack.Screen name="DeepDive" component={DeepDiveScreen} />
+      <Stack.Screen
+        name="Premium"
+        component={PremiumScreen}
         options={{ cardStyleInterpolator: forFade, transitionSpec: successTransition }}
       />
     </Stack.Navigator>

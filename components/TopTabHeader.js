@@ -19,6 +19,7 @@ export default function TopTabHeader({
   subtitleStyle,
   onBack,
   onPressProfile,
+  onPressTitle,
 }) {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
@@ -39,11 +40,19 @@ export default function TopTabHeader({
             />
           </Pressable>
         ) : null}
-        <View style={styles.titleWrap}>
-          <AppText style={styles.title} numberOfLines={1}>
-            {title}
-          </AppText>
-        </View>
+        {onPressTitle ? (
+          <Pressable style={styles.titleWrap} onPress={onPressTitle} hitSlop={8}>
+            <AppText style={styles.title} numberOfLines={1}>
+              {title}
+            </AppText>
+          </Pressable>
+        ) : (
+          <View style={styles.titleWrap}>
+            <AppText style={styles.title} numberOfLines={1}>
+              {title}
+            </AppText>
+          </View>
+        )}
         {onPressProfile ? (
           <Pressable
             onPress={onPressProfile}

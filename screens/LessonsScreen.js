@@ -11,23 +11,37 @@ import {
   formatThemeUnitLabel,
   getLocalizedLessons,
   getLocalizedModules,
+  getDeepDiveCopy,
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import {
   buildModulesWithIndexedLessons,
   getLessonStatus,
+  areAllCoreLessonsComplete,
+  getLastCoreLessonId,
 } from '../utils/helpers';
+import { lessons } from '../data/curriculum';
+import { deepDiveTracks, getDeepDiveLessonsForTrack } from '../data/deepDives';
 
 export default function LessonsScreen() {
   const navigation = useNavigation();
   const tabBarHeight = useBottomTabBarHeight();
-  const { progress, preferences } = useApp();
+  const { progress, preferences, isPremium, updateProgress } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef(new Map());
+  const devTitleTapRef = useRef({ count: 0, timestamp: 0 });
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
+  );
+  const deepDiveCopy = useMemo(
+    () => getDeepDiveCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const allCoreComplete = useMemo(
+    () => areAllCoreLessonsComplete(progress),
+    [progress]
   );
 
   const localizedLessons = useMemo(
@@ -46,6 +60,22 @@ export default function LessonsScreen() {
       .filter((module) => module.lessons.length > 0)
       .map((module) => module);
   }, [localizedLessons, localizedModules]);
+
+  const handleDevTripleTap = useCallback(() => {
+    if (!__DEV__) return;
+    const now = Date.now();
+    const ref = devTitleTapRef.current;
+    const nextCount = now - ref.timestamp < 600 ? ref.count + 1 : 1;
+    devTitleTapRef.current = { count: nextCount, timestamp: now };
+    if (nextCount >= 3) {
+      devTitleTapRef.current = { count: 0, timestamp: 0 };
+      const allIds = lessons.map((l) => l.id);
+      updateProgress({
+        completedLessonIds: allIds,
+        currentLessonId: getLastCoreLessonId(),
+      });
+    }
+  }, [updateProgress]);
 
   const openLessonOverview = useCallback(
     (lessonId) => {
@@ -97,6 +127,7 @@ export default function LessonsScreen() {
         title="Lesoverzicht"
         subtitle="Bekijk alle lessen per thema"
         onPressProfile={() => navigation.navigate('Profile')}
+        onPressTitle={__DEV__ ? handleDevTripleTap : undefined}
       />
 
       <View style={styles.themeList}>
@@ -175,6 +206,192 @@ export default function LessonsScreen() {
             </View>
           </View>
         ))}
+      </View>
+
+      {/* Deep Dive section — always visible, signals a new phase */}
+      <View style={styles.deepDiveSection}>
+
+        {/* Divider */}
+        <View style={[styles.deepDiveDivider, { backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke) }]} />
+
+        {/* Section intro */}
+        <View style={styles.deepDiveIntro}>
+          <View style={styles.deepDiveTitleRow}>
+            <AppText style={[styles.deepDiveIntroTitle, { color: colors.text.primary }]}>
+              {deepDiveCopy.sectionTitle}
+            </AppText>
+            {!isPremium && (
+              <View
+                style={[
+                  styles.deepDivePremiumBadge,
+                  { borderColor: toRgba(colors.ui.divider, colors.opacity.stroke) },
+                ]}
+              >
+                <AppText style={[styles.deepDivePremiumLabel, { color: colors.text.secondary }]}>
+                  {deepDiveCopy.premiumBadge}
+                </AppText>
+              </View>
+            )}
+          </View>
+          <AppText style={[styles.deepDiveIntroSubtitle, { color: colors.text.secondary }]}>
+            {deepDiveCopy.sectionSubtitle}
+          </AppText>
+          {!allCoreComplete && (
+            <View style={styles.deepDiveLockedRow}>
+              <Ionicons
+                name="lock-closed"
+                size={components.sizes.icon.xs}
+                color={colors.text.secondary}
+              />
+              <AppText style={[styles.deepDiveLockedNote, { color: colors.text.secondary }]}>
+                {deepDiveCopy.sectionLockedNote}
+              </AppText>
+            </View>
+          )}
+        </View>
+
+        {/* Track cards */}
+        <View style={styles.deepDiveTrackList}>
+          {deepDiveTracks.map((track) => {
+            const trackLessons = getDeepDiveLessonsForTrack(track.id);
+            const completedCount = trackLessons.filter((l) =>
+              (progress?.completedLessonIds || []).includes(l.id)
+            ).length;
+            const isAccessible = allCoreComplete && track.available;
+            const allDone = completedCount === trackLessons.length && completedCount > 0;
+
+            return (
+              <Pressable
+                key={track.id}
+                disabled={!isAccessible}
+                onPress={() => {
+                  if (isPremium) {
+                    navigation.navigate('DeepDive', { trackId: track.id });
+                  } else {
+                    navigation.navigate('Premium');
+                  }
+                }}
+              >
+                {({ pressed }) => (
+                  <View
+                    style={[
+                      styles.deepDiveTrackCard,
+                      {
+                        backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                        borderColor: isAccessible
+                          ? toRgba(colors.ui.divider, colors.opacity.stroke)
+                          : toRgba(colors.ui.divider, colors.opacity.stroke * 0.5),
+                      },
+                      !isAccessible && styles.deepDiveTrackCardLocked,
+                      pressed && isAccessible && styles.deepDiveTrackCardPressed,
+                    ]}
+                  >
+                    {/* Left accent bar — only when accessible */}
+                    {isAccessible && (
+                      <View
+                        style={[
+                          styles.deepDiveTrackAccentBar,
+                          {
+                            backgroundColor: allDone
+                              ? colors.accent.primary
+                              : toRgba(colors.accent.primary, 0.35),
+                          },
+                        ]}
+                      />
+                    )}
+
+                    <View style={styles.deepDiveTrackCardInner}>
+                      <View style={styles.deepDiveTrackCardText}>
+                        <View style={styles.deepDiveTrackTitleRow}>
+                          <AppText
+                            style={[
+                              styles.deepDiveTrackTitle,
+                              {
+                                color: isAccessible
+                                  ? colors.text.primary
+                                  : colors.text.secondary,
+                              },
+                            ]}
+                            numberOfLines={1}
+                          >
+                            {track.title}
+                          </AppText>
+                          {!track.available && (
+                            <View
+                              style={[
+                                styles.deepDiveComingSoonChip,
+                                {
+                                  borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+                                },
+                              ]}
+                            >
+                              <AppText
+                                style={[
+                                  styles.deepDiveComingSoonLabel,
+                                  { color: colors.text.secondary },
+                                ]}
+                              >
+                                {deepDiveCopy.comingSoon}
+                              </AppText>
+                            </View>
+                          )}
+                        </View>
+                        <AppText
+                          style={[
+                            styles.deepDiveTrackDescription,
+                            { color: colors.text.secondary },
+                          ]}
+                          numberOfLines={2}
+                        >
+                          {track.description}
+                        </AppText>
+                      </View>
+
+                      <View style={styles.deepDiveTrackCardRight}>
+                        {allDone ? (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={components.sizes.icon.lg}
+                            color={colors.accent.primary}
+                          />
+                        ) : isAccessible ? (
+                          <View style={styles.deepDiveTrackMeta}>
+                            {completedCount > 0 && (
+                              <AppText
+                                style={[
+                                  styles.deepDiveTrackProgress,
+                                  { color: colors.accent.primary },
+                                ]}
+                              >
+                                {deepDiveCopy.trackProgress(completedCount, trackLessons.length)}
+                              </AppText>
+                            )}
+                            <AppText
+                              style={[
+                                styles.deepDiveTrackCount,
+                                { color: colors.text.secondary },
+                              ]}
+                            >
+                              {deepDiveCopy.lessonsCount(trackLessons.length)}
+                            </AppText>
+                          </View>
+                        ) : null}
+
+                        {isAccessible && (
+                          <Ionicons
+                            name="chevron-forward"
+                            size={components.sizes.icon.sm}
+                            color={colors.text.secondary}
+                          />
+                        )}
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
       </View>
     </OnboardingScreen>
   );
@@ -266,5 +483,124 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     lessonTitleUpcoming: {
       color: colors.text.secondary,
+    },
+
+    // ── Deep Dive section ────────────────────────────────────────────────────
+    deepDiveSection: {
+      gap: components.layout.spacing.xl,
+      paddingBottom: components.layout.spacing.xl,
+    },
+
+    // Section intro block
+    deepDiveDivider: {
+      height: 1,
+    },
+    deepDiveIntro: {
+      gap: components.layout.spacing.sm,
+    },
+    deepDiveTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.sm,
+      flexWrap: 'wrap',
+    },
+    deepDiveIntroTitle: {
+      ...typography.styles.h2,
+    },
+    deepDivePremiumBadge: {
+      paddingHorizontal: components.layout.spacing.sm,
+      paddingVertical: 4,
+      borderRadius: components.radius.pill,
+      borderWidth: components.borderWidth.thin,
+    },
+    deepDivePremiumLabel: {
+      ...typography.styles.stepLabel,
+    },
+    deepDiveIntroSubtitle: {
+      ...typography.styles.body,
+    },
+    deepDiveLockedRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.xs,
+      marginTop: components.layout.spacing.xs,
+    },
+    deepDiveLockedNote: {
+      ...typography.styles.small,
+    },
+
+    // Track list
+    deepDiveTrackList: {
+      gap: components.layout.spacing.sm,
+    },
+
+    // Track card
+    deepDiveTrackCard: {
+      ...components.input.container,
+      flexDirection: 'row',
+      overflow: 'hidden',
+      paddingLeft: 0,
+    },
+    deepDiveTrackCardLocked: {
+      opacity: 0.45,
+    },
+    deepDiveTrackCardPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    deepDiveTrackAccentBar: {
+      width: 3,
+      alignSelf: 'stretch',
+      borderRadius: 0,
+    },
+    deepDiveTrackCardInner: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.md,
+      paddingVertical: components.layout.spacing.md,
+      paddingHorizontal: components.layout.spacing.md,
+    },
+    deepDiveTrackCardText: {
+      flex: 1,
+      gap: 4,
+      minWidth: 0,
+    },
+    deepDiveTrackTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.sm,
+      flexWrap: 'wrap',
+    },
+    deepDiveTrackTitle: {
+      ...typography.styles.bodyStrong,
+    },
+    deepDiveTrackDescription: {
+      ...typography.styles.small,
+    },
+    deepDiveTrackCardRight: {
+      flexShrink: 0,
+      alignItems: 'flex-end',
+      gap: 4,
+    },
+    deepDiveTrackMeta: {
+      alignItems: 'flex-end',
+      gap: 2,
+    },
+    deepDiveTrackProgress: {
+      ...typography.styles.small,
+    },
+    deepDiveTrackCount: {
+      ...typography.styles.small,
+    },
+    deepDiveComingSoonChip: {
+      paddingHorizontal: components.layout.spacing.sm,
+      paddingVertical: 2,
+      borderRadius: components.radius.pill,
+      borderWidth: components.borderWidth.thin,
+    },
+    deepDiveComingSoonLabel: {
+      ...typography.styles.stepLabel,
+      fontSize: 10,
     },
   });
