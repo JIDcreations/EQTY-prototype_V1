@@ -258,6 +258,7 @@ export default function LessonsScreen() {
               (progress?.completedLessonIds || []).includes(l.id)
             ).length;
             const isAccessible = allCoreComplete && track.available;
+            const showLockedState = !allCoreComplete && track.available;
             const allDone = completedCount === trackLessons.length && completedCount > 0;
 
             return (
@@ -277,29 +278,18 @@ export default function LessonsScreen() {
                     style={[
                       styles.deepDiveTrackCard,
                       {
-                        backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+                        backgroundColor: toRgba(
+                          colors.background.surface,
+                          colors.opacity.surface * 0.72
+                        ),
                         borderColor: isAccessible
                           ? toRgba(colors.ui.divider, colors.opacity.stroke)
-                          : toRgba(colors.ui.divider, colors.opacity.stroke * 0.5),
+                          : toRgba(colors.ui.divider, colors.opacity.stroke * 0.7),
                       },
                       !isAccessible && styles.deepDiveTrackCardLocked,
                       pressed && isAccessible && styles.deepDiveTrackCardPressed,
                     ]}
                   >
-                    {/* Left accent bar — only when accessible */}
-                    {isAccessible && (
-                      <View
-                        style={[
-                          styles.deepDiveTrackAccentBar,
-                          {
-                            backgroundColor: allDone
-                              ? colors.accent.primary
-                              : toRgba(colors.accent.primary, 0.35),
-                          },
-                        ]}
-                      />
-                    )}
-
                     <View style={styles.deepDiveTrackCardInner}>
                       <View style={styles.deepDiveTrackCardText}>
                         <View style={styles.deepDiveTrackTitleRow}>
@@ -341,7 +331,7 @@ export default function LessonsScreen() {
                             styles.deepDiveTrackDescription,
                             { color: colors.text.secondary },
                           ]}
-                          numberOfLines={2}
+                          numberOfLines={1}
                         >
                           {track.description}
                         </AppText>
@@ -351,7 +341,7 @@ export default function LessonsScreen() {
                         {allDone ? (
                           <Ionicons
                             name="checkmark-circle"
-                            size={components.sizes.icon.lg}
+                            size={components.sizes.icon.sm}
                             color={colors.accent.primary}
                           />
                         ) : isAccessible ? (
@@ -366,24 +356,29 @@ export default function LessonsScreen() {
                                 {deepDiveCopy.trackProgress(completedCount, trackLessons.length)}
                               </AppText>
                             )}
-                            <AppText
-                              style={[
-                                styles.deepDiveTrackCount,
-                                { color: colors.text.secondary },
-                              ]}
-                            >
-                              {deepDiveCopy.lessonsCount(trackLessons.length)}
-                            </AppText>
+                            <View style={styles.deepDiveTrackMetaRow}>
+                              <AppText
+                                style={[
+                                  styles.deepDiveTrackCount,
+                                  { color: colors.text.secondary },
+                                ]}
+                              >
+                                {deepDiveCopy.lessonsCount(trackLessons.length)}
+                              </AppText>
+                              <Ionicons
+                                name="chevron-forward"
+                                size={components.sizes.icon.sm}
+                                color={colors.text.secondary}
+                              />
+                            </View>
                           </View>
-                        ) : null}
-
-                        {isAccessible && (
+                        ) : showLockedState ? (
                           <Ionicons
-                            name="chevron-forward"
+                            name="lock-closed"
                             size={components.sizes.icon.sm}
                             color={colors.text.secondary}
                           />
-                        )}
+                        ) : null}
                       </View>
                     </View>
                   </View>
@@ -539,31 +534,28 @@ const createStyles = (colors, components, tabBarHeight) =>
       ...components.input.container,
       flexDirection: 'row',
       overflow: 'hidden',
-      paddingLeft: 0,
+      width: '100%',
+      paddingVertical: 0,
+      paddingHorizontal: 0,
     },
     deepDiveTrackCardLocked: {
-      opacity: 0.45,
+      opacity: 0.8,
     },
     deepDiveTrackCardPressed: {
       opacity: colors.opacity.emphasis,
       transform: [{ scale: components.transforms.scalePressed }],
-    },
-    deepDiveTrackAccentBar: {
-      width: 3,
-      alignSelf: 'stretch',
-      borderRadius: 0,
     },
     deepDiveTrackCardInner: {
       flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: components.layout.spacing.md,
-      paddingVertical: components.layout.spacing.md,
-      paddingHorizontal: components.layout.spacing.md,
+      paddingVertical: 20,
+      paddingHorizontal: 16,
     },
     deepDiveTrackCardText: {
       flex: 1,
-      gap: 4,
+      gap: 2,
       minWidth: 0,
     },
     deepDiveTrackTitleRow: {
@@ -581,11 +573,17 @@ const createStyles = (colors, components, tabBarHeight) =>
     deepDiveTrackCardRight: {
       flexShrink: 0,
       alignItems: 'flex-end',
-      gap: 4,
+      justifyContent: 'center',
+      gap: 2,
     },
     deepDiveTrackMeta: {
       alignItems: 'flex-end',
       gap: 2,
+    },
+    deepDiveTrackMetaRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.xs,
     },
     deepDiveTrackProgress: {
       ...typography.styles.small,

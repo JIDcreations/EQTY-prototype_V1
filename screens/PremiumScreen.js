@@ -101,10 +101,20 @@ export default function PremiumScreen() {
 
       {/* Footer */}
       <View style={styles.footer}>
-        <AppText style={[styles.priceNote, { color: colors.text.secondary }]}>
-          {copy.priceNote}
-        </AppText>
-        <PrimaryButton label={copy.cta} onPress={handleUnlock} />
+        <View
+          style={[
+            styles.priceCard,
+            {
+              backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+              borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+            },
+          ]}
+        >
+          <AppText style={[styles.priceNote, { color: colors.text.secondary }]}>
+            {copy.priceNote}
+          </AppText>
+        </View>
+        <PrimaryButton label={copy.cta} onPress={handleUnlock} style={styles.ctaButton} />
         <Pressable style={styles.dismissAction} onPress={() => navigation.goBack()}>
           <AppText style={[styles.dismissLabel, { color: colors.text.secondary }]}>
             {copy.dismiss}
@@ -203,14 +213,31 @@ const createStyles = (colors, components, tabBarHeight) =>
     // Footer
     footer: {
       gap: components.layout.spacing.md,
-      alignItems: 'center',
+      width: '100%',
+      alignItems: 'stretch',
+    },
+    priceCard: {
+      width: '100%',
+      maxWidth: components.sizes.button.ctaPageWidth,
+      alignSelf: 'center',
+      borderRadius: components.radius.card,
+      borderWidth: components.borderWidth.thin,
+      paddingVertical: components.layout.spacing.sm,
+      paddingHorizontal: components.layout.spacing.lg,
     },
     priceNote: {
       ...typography.styles.small,
+      textAlign: 'center',
+    },
+    ctaButton: {
+      width: '100%',
+      maxWidth: components.sizes.button.ctaPageWidth,
+      alignSelf: 'center',
     },
     dismissAction: {
       paddingVertical: components.layout.spacing.xs,
       paddingHorizontal: components.layout.spacing.md,
+      alignSelf: 'center',
     },
     dismissLabel: {
       ...typography.styles.small,

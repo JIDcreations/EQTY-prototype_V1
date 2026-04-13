@@ -2,36 +2,31 @@ export const deepDiveTracks = [
   {
     id: 'track_etfs',
     title: 'ETFs in Depth',
-    description:
-      'How ETFs are built, what costs to look for, and how to use them in a real portfolio.',
+    description: 'Costs, structure, and portfolio use.',
     available: true,
   },
   {
     id: 'track_risk',
     title: 'Understanding Risk',
-    description:
-      'Beyond risk tolerance — behavioral biases, volatility, and managing risk over time.',
+    description: 'Biases, volatility, and discipline.',
     available: true,
   },
   {
     id: 'track_strategy',
     title: 'Building a Strategy',
-    description:
-      'Rebalancing, passive vs active, and putting the strategy pieces together.',
+    description: 'Rebalancing, style, and fit.',
     available: true,
   },
   {
     id: 'track_stocks',
     title: 'Stocks in Depth',
-    description:
-      'Individual equity analysis, valuation basics, and when stocks fit your plan.',
+    description: 'Valuation, selection, and fit.',
     available: false,
   },
   {
     id: 'track_bonds',
     title: 'Bonds in Depth',
-    description:
-      'Bond pricing, duration, yield curves, and where bonds fit in an allocation.',
+    description: 'Duration, yield, and allocation.',
     available: false,
   },
 ];
