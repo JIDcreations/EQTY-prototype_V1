@@ -43,6 +43,9 @@ export default function ConceptInfoCard({
 const createStyles = (colors, components) =>
   StyleSheet.create({
     card: {
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+      borderWidth: components.borderWidth.thin,
+      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
       gap: components.layout.spacing.xs,
       padding: components.layout.spacing.lg,
     },
