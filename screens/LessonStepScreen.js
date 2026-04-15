@@ -1208,6 +1208,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
   const { styles, colors, components } = useLessonStepStyles();
   const isProcessSequence = lessonId === 'lesson_0';
   const isGoalSequence = lessonId === 'lesson_1';
+  const isGoalTypeSequence = lessonId === 'lesson_2';
   const contentCards = content?.steps?.visualization?.cards || [];
   const hasContentCards = contentCards.length > 0;
   const pagerRef = useRef(null);
@@ -1290,6 +1291,8 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
                       <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
                     ) : isGoalSequence ? (
                       <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                    ) : isGoalTypeSequence ? (
+                      <GoalTypeStepAnimation stepId={step.id} styles={styles} colors={colors} />
                     ) : (
                       null
                     )
@@ -1343,6 +1346,19 @@ function GoalExampleStepAnimation({ stepId, styles, colors }) {
       return <TravelGoalAnim styles={styles} colors={colors} />;
     case 'retirement':
       return <RetirementGoalAnim styles={styles} colors={colors} />;
+    default:
+      return null;
+  }
+}
+
+function GoalTypeStepAnimation({ stepId, styles, colors }) {
+  switch (stepId) {
+    case 'short':
+      return <ShortTermAnim styles={styles} colors={colors} />;
+    case 'medium':
+      return <MediumTermAnim styles={styles} colors={colors} />;
+    case 'long':
+      return <LongTermAnim styles={styles} colors={colors} />;
     default:
       return null;
   }
@@ -1661,6 +1677,236 @@ function RetirementGoalAnim({ styles, colors }) {
 
         {/* Endpoint dot */}
         <AnimatedCircle r={4.5} fill={dot} animatedProps={dotProps} />
+      </Svg>
+    </View>
+  );
+}
+
+// ─── Korte termijn: calendar with a specific nearby date circled ─────────────
+// Calendar body x=44–116, y=22–78. Header y=22–34. Grid: 3 rows × 5 cols.
+// Target date at row 1, col 1 (cx=66, cy=54) — early in the calendar = soon.
+const CAL_RING_LEN = 44; // circumference of r=7 ≈ 2π*7 ≈ 44
+
+function ShortTermAnim({ styles, colors }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 3200, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(900, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
+    );
+  }, [progress]);
+
+  const calProps = useAnimatedProps(() => ({
+    opacity: interpolate(progress.value, [0, 0.12, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const ringProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.38, 0.68], [CAL_RING_LEN, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.38, 0.44, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const glowProps = useAnimatedProps(() => ({
+    r: interpolate(progress.value, [0.68, 0.80, 0.88, 1], [0, 13, 13, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.68, 0.74, 0.86, 1], [0, 0.26, 0.26, 0], Extrapolation.CLAMP),
+  }));
+
+  const calStroke  = toRgba(colors.ui.divider, 0.32);
+  const headerFill = toRgba(colors.ui.divider, 0.14);
+  const dayCol     = toRgba(colors.text.primary, 0.22);
+  const targetCol  = toRgba(colors.accent.primary, 1);
+  const bindCol    = toRgba(colors.text.primary, 0.38);
+  const bgCol      = toRgba(colors.background.surface, 1);
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Svg width={160} height={88}>
+        <AnimatedG animatedProps={calProps}>
+          {/* Calendar body */}
+          <Path d="M 44 22 L 44 78 L 116 78 L 116 22 Z"
+            stroke={calStroke} strokeWidth={1.5} fill="none" />
+          {/* Header fill */}
+          <Path d="M 44.75 22 L 44.75 34 L 115.25 34 L 115.25 22 Z"
+            fill={headerFill} />
+          {/* Header divider */}
+          <Path d="M 44 34 L 116 34" stroke={calStroke} strokeWidth={0.8} />
+          {/* Binding clips */}
+          <Circle cx={66} cy={22} r={4} fill={bgCol} stroke={bindCol} strokeWidth={1.2} />
+          <Circle cx={94} cy={22} r={4} fill={bgCol} stroke={bindCol} strokeWidth={1.2} />
+
+          {/* Day grid — 3 rows × 5 cols */}
+          {/* Row 0 (y=44) */}
+          <Circle cx={56} cy={44} r={2.5} fill={dayCol} />
+          <Circle cx={68} cy={44} r={2.5} fill={dayCol} />
+          <Circle cx={80} cy={44} r={2.5} fill={dayCol} />
+          <Circle cx={92} cy={44} r={2.5} fill={dayCol} />
+          <Circle cx={104} cy={44} r={2.5} fill={dayCol} />
+          {/* Row 1 (y=56) — target is col 1 (cx=68) */}
+          <Circle cx={56} cy={56} r={2.5} fill={dayCol} />
+          <Circle cx={68} cy={56} r={2.5} fill={targetCol} />
+          <Circle cx={80} cy={56} r={2.5} fill={dayCol} />
+          <Circle cx={92} cy={56} r={2.5} fill={dayCol} />
+          <Circle cx={104} cy={56} r={2.5} fill={dayCol} />
+          {/* Row 2 (y=68) */}
+          <Circle cx={56} cy={68} r={2.5} fill={dayCol} />
+          <Circle cx={68} cy={68} r={2.5} fill={dayCol} />
+          <Circle cx={80} cy={68} r={2.5} fill={dayCol} />
+          <Circle cx={92} cy={68} r={2.5} fill={dayCol} />
+          <Circle cx={104} cy={68} r={2.5} fill={dayCol} />
+        </AnimatedG>
+
+        {/* Circle drawing around the target date */}
+        <AnimatedCircle
+          cx={68} cy={56} r={7}
+          stroke={targetCol} strokeWidth={2} fill="none"
+          strokeDasharray={CAL_RING_LEN}
+          animatedProps={ringProps}
+        />
+
+        {/* Glow pulse when circle completes */}
+        <AnimatedCircle cx={68} cy={56} fill={targetCol} animatedProps={glowProps} />
+      </Svg>
+    </View>
+  );
+}
+
+// ─── Middellange termijn: zigzag growth line — upward trend with dips ────────
+function MediumTermAnim({ styles, colors }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 3600, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(700, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
+    );
+  }, [progress]);
+
+  const LINE_LEN = 144;
+
+  const lineProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0, 0.86], [LINE_LEN, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0, 0.03, 0.90, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const dotProps = useAnimatedProps(() => ({
+    opacity: interpolate(progress.value, [0.82, 0.88, 0.94, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const axis = toRgba(colors.ui.divider, 0.28);
+  const grid = toRgba(colors.ui.divider, 0.14);
+  const line = toRgba(colors.accent.primary, 0.88);
+  const endDot = toRgba(colors.accent.primary, 1);
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Svg width={160} height={88}>
+        {/* Grid */}
+        <Path d="M 14 28 L 146 28" stroke={grid} strokeWidth={0.6} />
+        <Path d="M 14 48 L 146 48" stroke={grid} strokeWidth={0.6} />
+        {/* Axes */}
+        <Path d="M 14 68 L 146 68" stroke={axis} strokeWidth={0.8} />
+        <Path d="M 14 12 L 14 68" stroke={axis} strokeWidth={0.8} />
+
+        {/* Zigzag growth line — goes up, slight dip, up, slight dip, strong finish */}
+        <AnimatedPath
+          d="M 14 64 L 38 52 L 62 58 L 86 40 L 110 48 L 140 26"
+          stroke={line} strokeWidth={2}
+          strokeLinecap="round" strokeLinejoin="round" fill="none"
+          strokeDasharray={LINE_LEN}
+          animatedProps={lineProps}
+        />
+
+        {/* End dot */}
+        <AnimatedCircle cx={140} cy={26} r={4} fill={endDot} animatedProps={dotProps} />
+      </Svg>
+    </View>
+  );
+}
+
+// ─── Lange termijn: compound growth bars grow in sequence, final bar glows ────
+function LongTermAnim({ styles, colors }) {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withSequence(
+        withTiming(1, { duration: 4200, easing: Easing.bezier(0.25, 0.46, 0.45, 0.94) }),
+        withDelay(700, withTiming(0, { duration: 0 }))
+      ),
+      -1, false
+    );
+  }, [progress]);
+
+  const bar1Props = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.00, 0.18], [8, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.00, 0.04, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const bar2Props = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.10, 0.30], [16, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.10, 0.14, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const bar3Props = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.20, 0.44], [28, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.20, 0.24, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const bar4Props = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.32, 0.60], [46, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.32, 0.36, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const bar5Props = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.44, 0.80], [68, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.44, 0.48, 0.88, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+
+  const glowProps = useAnimatedProps(() => ({
+    r: interpolate(progress.value, [0.80, 0.88, 0.94, 1], [0, 12, 12, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.80, 0.86, 0.92, 1], [0, 0.28, 0.28, 0], Extrapolation.CLAMP),
+  }));
+
+  const axis    = toRgba(colors.ui.divider, 0.28);
+  const barMute = toRgba(colors.text.primary, 0.22);
+  const barAcce = toRgba(colors.accent.primary, 0.92);
+  const glow    = toRgba(colors.accent.primary, 1);
+
+  return (
+    <View style={styles.l1AnimCanvas}>
+      <Svg width={160} height={88}>
+        {/* X-axis */}
+        <Path d="M 14 72 L 150 72" stroke={axis} strokeWidth={0.8} />
+
+        {/* Bar 1 — height 8 */}
+        <AnimatedPath d="M 29 72 L 29 64" stroke={barMute} strokeWidth={16}
+          strokeLinecap="butt" fill="none"
+          strokeDasharray={8} animatedProps={bar1Props} />
+
+        {/* Bar 2 — height 16 */}
+        <AnimatedPath d="M 53 72 L 53 56" stroke={barMute} strokeWidth={16}
+          strokeLinecap="butt" fill="none"
+          strokeDasharray={16} animatedProps={bar2Props} />
+
+        {/* Bar 3 — height 28 */}
+        <AnimatedPath d="M 77 72 L 77 44" stroke={barMute} strokeWidth={16}
+          strokeLinecap="butt" fill="none"
+          strokeDasharray={28} animatedProps={bar3Props} />
+
+        {/* Bar 4 — height 46 */}
+        <AnimatedPath d="M 101 72 L 101 26" stroke={barMute} strokeWidth={16}
+          strokeLinecap="butt" fill="none"
+          strokeDasharray={46} animatedProps={bar4Props} />
+
+        {/* Bar 5 — height 68, accent */}
+        <AnimatedPath d="M 125 72 L 125 4" stroke={barAcce} strokeWidth={16}
+          strokeLinecap="butt" fill="none"
+          strokeDasharray={68} animatedProps={bar5Props} />
+
+        {/* Glow at top of bar 5 */}
+        <AnimatedCircle cx={125} cy={4} fill={glow} animatedProps={glowProps} />
       </Svg>
     </View>
   );
