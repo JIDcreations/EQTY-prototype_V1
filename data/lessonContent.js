@@ -386,89 +386,148 @@ export const lessonContent = {
   },
   lesson_2: {
     title: 'Types of Investment Goals',
-    shortDescription: 'Goal type shapes risk, time, and strategy.',
+    shortDescription: 'Goal type guides future investing choices.',
     steps: {
       concept: {
-        title: 'Goal types change the rules',
-        body:
-          'Short-term goals need stability. Medium-term goals balance risk and growth. Long-term goals can accept volatility because time absorbs swings.',
-        visualHint: 'Time horizon reshapes risk tolerance.',
+        title: 'Types of Investment Goals',
+        intro:
+          'Investing goals are not all the same. The time you have strongly affects how you should approach investing.',
+        leadLabel: 'Three goal types',
+        leadBody: 'Short, medium, and long term',
+        drivers: [
+          {
+            id: 'short',
+            label: 'Short term',
+            detail: 'Focus on stability and predictability.',
+          },
+          {
+            id: 'medium',
+            label: 'Medium term',
+            detail: 'Balance growth with careful risk.',
+          },
+          {
+            id: 'long',
+            label: 'Long term',
+            detail: 'Focus on growth and accept ups and downs.',
+          },
+        ],
+        visualHint: 'The goal type shapes the choices that come later.',
       },
       visualization: {
         title: 'Short, medium, long',
-        segments: [
+        subtitle: 'Swipe through the goal types and examples.',
+        cardCodePrefix: 'TYPE',
+        cards: [
           {
-            id: 'segment_1',
-            label: 'Short-term',
-            value: 0.33,
-            description: 'Stability and access matter most.',
+            id: 'short',
+            label: 'Short term',
+            question: 'Buying something within 1-2 years',
+            detail:
+              'Because the goal is close, stability and predictability matter most. Example: saving for a trip, laptop, or deposit soon.',
           },
           {
-            id: 'segment_2',
-            label: 'Medium-term',
-            value: 0.33,
-            description: 'Balance growth with control.',
+            id: 'medium',
+            label: 'Medium term',
+            question: 'Saving for something in a few years',
+            detail:
+              'There is more time, but not unlimited time. The approach usually balances growth with careful risk. Example: saving for a home deposit.',
           },
           {
-            id: 'segment_3',
-            label: 'Long-term',
-            value: 0.34,
-            description: 'Time allows more volatility.',
+            id: 'long',
+            label: 'Long term',
+            question: 'Building wealth over many years',
+            detail:
+              'With many years ahead, the focus can move more toward growth. Example: building wealth for retirement or future freedom.',
           },
         ],
       },
       scenario: {
-        title: 'Match the goal type',
+        title: 'Goal type guides the next choice',
         variants: {
           new: {
-            prompt: 'You want money for a trip in 18 months. What matters most?',
-            options: ['Stability and access', 'Maximum growth', 'Ignore the time limit'],
-            insight: 'Short-term goals prioritize stability and access.',
+            prompt: 'You want to use the money in about 18 months. What should your first focus be?',
+            options: ['Stability and predictability', 'The highest possible growth', 'Ignoring when you need the money'],
+            insight:
+              'Because the goal is close, the approach should stay stable and predictable.',
           },
           growing: {
-            prompt: 'You are saving for a home in 5 years. What fits?',
-            options: ['Balanced risk and growth', 'All-in volatility', 'No plan yet'],
-            insight: 'Medium-term goals balance growth with risk control.',
+            prompt: 'You are saving for something important in a few years. What fits best?',
+            options: ['A balanced approach', 'Only chasing fast growth', 'No clear plan'],
+            insight:
+              'A medium-term goal usually needs a balance between growth and careful risk.',
           },
           seasoned: {
-            prompt: 'You are investing for retirement in 25 years. What is true?',
-            options: ['Volatility is acceptable', 'Only cash is safe', 'Time does not matter'],
-            insight: 'Long-term goals can accept volatility because time works for you.',
+            prompt: 'You are investing for a goal many years away. What becomes more acceptable?',
+            options: ['Market ups and downs', 'Needing the money next month', 'Changing direction every week'],
+            insight:
+              'Long-term goals can focus more on growth because there is more time to handle ups and downs.',
           },
         },
       },
       exercise: {
-        type: 'choice',
-        description: 'Select a goal type and see the constraints it creates.',
-        options: [
+        title: 'Match each situation',
+        subtitle: 'Choose which goal type fits each situation.',
+        type: 'guidedGoal',
+        sections: [
           {
-            id: 'short',
-            label: 'Short-term goal',
-            reveal:
-              'Constraints: high stability, high liquidity, low tolerance for drawdowns.',
+            id: 'why',
+            question: 'You want to buy something within 1-2 years.',
+            correctOption: 'Short term',
+            options: ['Short term', 'Medium term', 'Long term'],
           },
           {
-            id: 'medium',
-            label: 'Medium-term goal',
-            reveal:
-              'Constraints: balance growth with stability, moderate liquidity, controlled risk.',
+            id: 'when',
+            question: 'You are saving for something in a few years.',
+            correctOption: 'Medium term',
+            options: ['Short term', 'Medium term', 'Long term'],
           },
           {
-            id: 'long',
-            label: 'Long-term goal',
-            reveal:
-              'Constraints: accept volatility, focus on growth, less need for quick access.',
+            id: 'fit',
+            question: 'You are building wealth over many years.',
+            correctOption: 'Long term',
+            options: ['Short term', 'Medium term', 'Long term'],
           },
         ],
+        interpretations: {
+          prefix: '',
+          why: {
+            'Short term': 'Buying something within 1-2 years is a short-term goal.',
+            'Medium term': 'This goal is close, so it fits short term better than medium term.',
+            'Long term': 'This goal is too close to treat as long term.',
+          },
+          when: {
+            'Short term': 'A few years is usually longer than a short-term goal.',
+            'Medium term': 'Saving for something in a few years is a medium-term goal.',
+            'Long term': 'A few years is usually not long enough to treat as long term.',
+          },
+          fit: {
+            'Short term': 'Many years ahead is longer than a short-term goal.',
+            'Medium term': 'Many years ahead usually goes beyond a medium-term goal.',
+            'Long term': 'Building wealth over many years is a long-term goal.',
+          },
+        },
+        submitLabel: 'Check my matches',
+        feedback: {
+          valid:
+            'Good. Matching the goal type helps you choose a fitting approach later.',
+          invalid:
+            'Not quite yet. Check each situation again and match it to how soon the goal is.',
+        },
       },
       reflection: {
-        question: 'Which goal type best matches your current priority?'
+        title: 'Reflection',
+        question: 'Which type of goal fits you best right now?',
+        subtitle:
+          'Think about what feels closest today. Your answer will be used in future lessons.',
+        placeholder: 'Short term, medium term, or long term...',
+        insightText:
+          'Good. Knowing your current goal type will help future lessons connect decisions to your situation.',
       },
       summary: {
         takeaways: [
-          'Short-term goals need stability and access.',
-          'Medium-term goals balance risk and growth.',
-          'Long-term goals can accept volatility.',
+          'Different goals require different approaches.',
+          'Time plays a key role in what makes sense.',
+          'Your goal will influence how you invest later, so this step prepares future decisions.',
         ],
       },
     },

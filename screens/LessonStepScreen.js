@@ -319,16 +319,16 @@ export default function LessonStepScreen() {
         ? 'Een stappenplan dat je volgt ter voorbereiding op investeren.'
         : 'A step-by-step plan you follow in preparation for investing.';
     }
-    if (step === 1 && lessonId === 'lesson_1') {
+    if (step === 1 && lessonId !== 'lesson_0') {
       return content?.steps?.concept?.intro || null;
     }
-    if (step === 2 && lessonId === 'lesson_1') {
+    if (step === 2 && lessonId !== 'lesson_0') {
       return content?.steps?.visualization?.subtitle || null;
     }
     if (step === 3 && lessonId === 'lesson_1') {
       return content?.steps?.scenario?.intro || null;
     }
-    if (step === 4 && lessonId === 'lesson_1') {
+    if (step === 4 && lessonId !== 'lesson_0') {
       return content?.steps?.exercise?.subtitle || null;
     }
     if (step === 6 && lessonId === 'lesson_1') {
@@ -571,7 +571,7 @@ function ConceptStep({ content, lessonId, onNext, onPressTerm, copy }) {
     return <IntroConceptStep content={content} onNext={onNext} copy={copy} />;
   }
 
-  if (lessonId === 'lesson_1') {
+  if (lessonId === 'lesson_1' || lessonId === 'lesson_2') {
     return <GoalConceptStep content={content} onNext={onNext} copy={copy} />;
   }
 
@@ -652,12 +652,15 @@ function GoalConceptStep({ content, onNext, copy }) {
   const { styles } = useLessonStepStyles();
   const concept = content?.steps?.concept;
   const drivers = concept?.drivers || [];
-  const conceptLeadLabel = 'Je doel heeft invloed op';
-  const conceptLeadBody = 'Drie onderdelen van je plan';
+  const conceptLeadLabel = concept?.leadLabel || 'Je doel heeft invloed op';
+  const conceptLeadBody = concept?.leadBody || 'Drie onderdelen van je plan';
   const iconById = {
     time: 'time-outline',
     risk: 'pulse-outline',
     personal: 'person-outline',
+    short: 'hourglass-outline',
+    medium: 'swap-horizontal-outline',
+    long: 'trending-up-outline',
   };
 
   return (
@@ -1205,11 +1208,13 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
   const { styles, colors, components } = useLessonStepStyles();
   const isProcessSequence = lessonId === 'lesson_0';
   const isGoalSequence = lessonId === 'lesson_1';
+  const contentCards = content?.steps?.visualization?.cards || [];
+  const hasContentCards = contentCards.length > 0;
   const pagerRef = useRef(null);
   const steps = isProcessSequence
     ? INTRO_VISUALIZATION_STEPS
-    : isGoalSequence
-      ? content?.steps?.visualization?.cards || []
+    : hasContentCards
+      ? contentCards
       : copy.introVisualization.steps;
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [maxReachedIndex, setMaxReachedIndex] = useState(0);
@@ -1238,7 +1243,8 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
     });
   }, []);
 
-  const stepCodePrefix = isGoalSequence ? 'VOORBEELD' : 'STEP';
+  const stepCodePrefix =
+    content?.steps?.visualization?.cardCodePrefix || (isGoalSequence ? 'VOORBEELD' : 'STEP');
   const progressLabel = `${stepCodePrefix} ${`${currentCardIndex + 1}`.padStart(2, '0')}`;
 
   return (
@@ -1282,8 +1288,10 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
                   renderAnimation={() => (
                     isProcessSequence ? (
                       <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
-                    ) : (
+                    ) : isGoalSequence ? (
                       <GoalExampleStepAnimation stepId={step.id} styles={styles} colors={colors} />
+                    ) : (
+                      null
                     )
                   )}
                 />
@@ -2887,8 +2895,9 @@ function ScenarioCurve({ variant, progress, label }) {
 function VisualizationStep({ content, lessonId, onNext, onPressTerm, copy }) {
   const { styles } = useLessonStepStyles();
   const [selected, setSelected] = useState(null);
+  const hasSwipeCards = (content?.steps?.visualization?.cards || []).length > 0;
 
-  if (lessonId === 'lesson_0' || lessonId === 'lesson_1') {
+  if (lessonId === 'lesson_0' || lessonId === 'lesson_1' || hasSwipeCards) {
     return (
       <IntroVisualizationStep
         content={content}
@@ -3840,9 +3849,14 @@ function GuidedGoalExercise({
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const isComplete = sections.every((s) => answers[s.id] !== null);
+  const hasCorrectOptions = sections.some((s) => s.correctOption);
+  const allCorrect =
+    isComplete && sections.every((s) => !s.correctOption || answers[s.id] === s.correctOption);
+  const canContinue = isComplete && (!hasCorrectOptions || allCorrect);
 
   const handlePick = (sectionId, option, sectionIndex) => {
     setAnswers((prev) => ({ ...prev, [sectionId]: option }));
+    if (hasSubmitted) setHasSubmitted(false);
     if (sectionIndex === activeIndex && sectionIndex < sections.length - 1) {
       setActiveIndex(sectionIndex + 1);
     }
@@ -3854,7 +3868,7 @@ function GuidedGoalExercise({
   };
 
   const handleSubmit = () => {
-    if (hasSubmitted || completeOnFirstSubmit) {
+    if ((hasSubmitted || completeOnFirstSubmit) && canContinue) {
       onNext();
     } else {
       setHasSubmitted(true);
@@ -3872,6 +3886,7 @@ function GuidedGoalExercise({
   };
 
   const interpretationText = isComplete ? buildInterpretation() : null;
+  const feedbackText = hasCorrectOptions && !allCorrect ? feedback.invalid : feedback.valid;
   const summarySections = [
     interpretationText
       ? {
@@ -3879,10 +3894,10 @@ function GuidedGoalExercise({
           text: interpretationText,
         }
       : null,
-    isComplete && feedback.valid
+    isComplete && feedbackText && (!hasCorrectOptions || hasSubmitted)
       ? {
           label: copy.labels.insight,
-          text: feedback.valid,
+          text: feedbackText,
         }
       : null,
   ].filter(Boolean);
@@ -3981,7 +3996,7 @@ function GuidedGoalExercise({
       {isComplete && (
         <Animated.View entering={FadeInDown.duration(200)}>
           <PrimaryButton
-            label={hasSubmitted ? (postSubmitLabel || copy.buttons.next) : (submitLabel || copy.buttons.continue)}
+            label={hasSubmitted && canContinue ? (postSubmitLabel || copy.buttons.next) : (submitLabel || copy.buttons.continue)}
             onPress={handleSubmit}
           />
         </Animated.View>
@@ -7132,6 +7147,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   l1BackPage: {
     backgroundColor: toRgba(colors.background.surfaceActive, 0.96),
   },
+  l1BackContent: {
+    flex: 1,
+    gap: components.layout.spacing.sm,
+  },
   l1CardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -7383,7 +7402,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   l1BackDetail: {
     ...typography.styles.body,
     color: colors.text.primary,
-    flex: 1,
+  },
+  l1BackExample: {
+    ...typography.styles.small,
+    color: colors.text.secondary,
   },
   // ─── Goal animation ───────────────────────────────────────────────────────────
   l1GoalOptDot: {

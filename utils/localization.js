@@ -56,11 +56,14 @@ const LESSON_OVERVIEW_COPY = {
     minutesLabel: (minutes) => `~${minutes} min`,
     lessonMetaChips: {
       lesson_0: ['~8 min', 'Introductie'],
+      lesson_2: ['~8 min', 'Doeltypes'],
     },
     defaultHook: 'Eerst helderheid. Dan actie.',
     lessonHooks: {
       lesson_0: 'Leer het ‘Beleggen als proces’-plan kennen.',
       lesson_1: 'Een duidelijk doel maakt elke keuze eenvoudiger.',
+      lesson_2:
+        'Niet elk beleggingsdoel is hetzelfde. In deze les ontdek je de verschillende types.',
     },
     defaultOutcomes: [
       'Begrijp het kernidee',
@@ -77,6 +80,11 @@ const LESSON_OVERVIEW_COPY = {
         'Leer je wat een doel is',
         'Krijg je richting',
         'start je met heldere intentie',
+      ],
+      lesson_2: [
+        'Leer je de verschillende soorten beleggingsdoelen',
+        'Zie je het verschil tussen korte, middellange en lange termijn',
+        'Zie je hoe je doel je keuzes beïnvloedt',
       ],
     },
     startLesson: 'Start les',

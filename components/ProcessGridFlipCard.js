@@ -78,7 +78,7 @@ export default function ProcessGridFlipCard({
   }, [activePulse, isActive]);
 
   const frontStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(flipProgress.value, [0, 1], [0, 180]);
+    const rotate = interpolate(flipProgress.value, [0, 1], [0, -180]);
     const opacity = interpolate(
       flipProgress.value,
       [0, 0.48, 0.55, 1],
@@ -87,13 +87,14 @@ export default function ProcessGridFlipCard({
     );
     return {
       transform: [{ perspective: 1200 }, { rotateY: `${rotate}deg` }],
+      backfaceVisibility: 'hidden',
       opacity,
       zIndex: flipProgress.value < 0.5 ? 2 : 0,
     };
   });
 
   const backStyle = useAnimatedStyle(() => {
-    const rotate = interpolate(flipProgress.value, [0, 1], [180, 360]);
+    const rotate = interpolate(flipProgress.value, [0, 1], [180, 0]);
     const opacity = interpolate(
       flipProgress.value,
       [0, 0.45, 0.52, 1],
@@ -102,10 +103,20 @@ export default function ProcessGridFlipCard({
     );
     return {
       transform: [{ perspective: 1200 }, { rotateY: `${rotate}deg` }],
+      backfaceVisibility: 'hidden',
       opacity,
       zIndex: flipProgress.value >= 0.5 ? 2 : 0,
     };
   });
+
+  const backContentStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(flipProgress.value, [0.55, 0.75], [0, 1], Extrapolation.CLAMP),
+    transform: [
+      {
+        translateY: interpolate(flipProgress.value, [0.55, 0.75], [6, 0], Extrapolation.CLAMP),
+      },
+    ],
+  }));
 
   const activePulseStyle = useAnimatedStyle(() => ({
     transform: [{ scale: interpolate(activePulse.value, [0, 1], [0.82, 1.45]) }],
@@ -156,7 +167,7 @@ export default function ProcessGridFlipCard({
       disabled={isLocked}
       style={[
         styles.l1CardShell,
-        isActive && styles.l1CardShellActive,
+        isActive && !isFlipped && styles.l1CardShellActive,
         isCompleted && styles.l1CardShellCompleted,
         isLocked && styles.l1CardShellLocked,
       ]}
@@ -232,13 +243,18 @@ export default function ProcessGridFlipCard({
             backStyle,
           ]}
         >
-          <View style={styles.l1CardHeaderRow}>
-            <View style={styles.l1StepMeta}>
-              <AppText style={styles.l1BackLabel}>{step.question}</AppText>
+          <Animated.View style={[styles.l1BackContent, backContentStyle]}>
+            <View style={styles.l1CardHeaderRow}>
+              <View style={styles.l1StepMeta}>
+                <AppText style={styles.l1BackLabel}>{step.question}</AppText>
+              </View>
+              {renderStatusIndicator()}
             </View>
-            {renderStatusIndicator()}
-          </View>
-          <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
+            <AppText style={styles.l1BackDetail}>{step.detail}</AppText>
+            {step.example ? (
+              <AppText style={styles.l1BackExample}>{step.example}</AppText>
+            ) : null}
+          </Animated.View>
           <View style={styles.l1CtaPill}>
             <AppText style={styles.l1CtaPillLabel}>{backCtaLabel}</AppText>
           </View>

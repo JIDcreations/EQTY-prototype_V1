@@ -45,7 +45,7 @@ export const curriculumNl = {
     },
     lesson_2: {
       title: 'Soorten beleggingsdoelen',
-      shortDescription: 'Het type doel bepaalt risico, tijd en strategie.',
+      shortDescription: 'Het type doel stuurt latere beleggingskeuzes.',
     },
     lesson_3: {
       title: 'Wat betekent risico echt?',

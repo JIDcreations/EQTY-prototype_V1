@@ -61,7 +61,7 @@ const baseLessons = [
     moduleId: 'module_1',
     order: 2,
     title: 'Types of Investment Goals',
-    shortDescription: 'Goal type shapes risk, time, and strategy.',
+    shortDescription: 'Goal type guides future investing choices.',
   },
   {
     id: 'lesson_3',

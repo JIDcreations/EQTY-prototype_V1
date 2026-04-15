@@ -400,4 +400,155 @@ export const lessonContentNl = {
       },
     },
   },
+  lesson_2: {
+    title: 'Soorten beleggingsdoelen',
+    shortDescription: 'Het type doel stuurt latere beleggingskeuzes.',
+    steps: {
+      concept: {
+        title: 'Soorten beleggingsdoelen',
+        intro:
+          'Beleggingsdoelen verschillen. De tijd die je hebt bepaalt hoe je investeert.',
+        leadLabel: 'Drie soorten doelen',
+        leadBody: 'Korte, middellange en lange termijn doelen',
+        drivers: [
+          {
+            id: 'short',
+            label: 'Korte termijn',
+            detail: 'Focus op stabiliteit en voorspelbare resultaten.',
+          },
+          {
+            id: 'medium',
+            label: 'Middellange termijn',
+            detail: 'Zoek balans tussen groei en risico.',
+          },
+          {
+            id: 'long',
+            label: 'Lange termijn',
+            detail: 'Focus op groei en accepteer schommelingen.',
+          },
+        ],
+        visualHint: 'Het type doel stuurt de keuzes die later volgen.',
+      },
+      visualization: {
+        title: 'Korte, middellange en lange termijn',
+        subtitle: 'Swipe door de verschillende soorten doelen en voorbeelden.',
+        cardCodePrefix: 'TYPE',
+        cards: [
+          {
+            id: 'short',
+            label: 'Korte termijn',
+            question: 'Iets kopen binnen 1–2 jaar',
+            detail:
+              'Je doel ligt dichtbij. Daarom kies je voor stabiliteit en voorspelbare resultaten.',
+            example: 'Sparen voor een reis, laptop of voorschot',
+          },
+          {
+            id: 'medium',
+            label: 'Middellange termijn',
+            question: 'Sparen voor iets binnen enkele jaren',
+            detail:
+              'Je hebt wat tijd, maar niet onbeperkt. Je zoekt balans tussen groei en risico.',
+            example: 'Sparen voor een woning of grote uitgave',
+          },
+          {
+            id: 'long',
+            label: 'Lange termijn',
+            question: 'Vermogen opbouwen op lange termijn',
+            detail:
+              'Je hebt veel tijd. Daardoor kan je schommelingen accepteren en focussen op groei.',
+            example: 'Pensioen of financiële vrijheid',
+          },
+        ],
+      },
+      scenario: {
+        title: 'Je doeltype stuurt de volgende keuze',
+        variants: {
+          new: {
+            prompt: 'Je wil het geld over ongeveer 18 maanden gebruiken. Waar moet je eerst op letten?',
+            options: ['Stabiliteit en voorspelbaarheid', 'Zo snel mogelijk groeien', 'Niet kijken wanneer je het geld nodig hebt'],
+            insight:
+              'Omdat het doel dichtbij is, moet de aanpak stabiel en voorspelbaar blijven.',
+          },
+          growing: {
+            prompt: 'Je spaart voor iets belangrijks over enkele jaren. Wat past het best?',
+            options: ['Een evenwichtige aanpak', 'Alleen snelle groei najagen', 'Nog geen duidelijk plan'],
+            insight:
+              'Een middellang doel vraagt meestal balans tussen groei en voorzichtig risico.',
+          },
+          seasoned: {
+            prompt: 'Je belegt voor een doel dat nog vele jaren weg is. Wat wordt dan aanvaardbaarder?',
+            options: ['Schommelingen onderweg', 'Het geld volgende maand nodig hebben', 'Elke week van richting veranderen'],
+            insight:
+              'Lange termijn doelen kunnen meer op groei focussen omdat er meer tijd is om schommelingen op te vangen.',
+          },
+        },
+      },
+      exercise: {
+        title: 'Koppel elke situatie',
+        subtitle: 'Kies welk doeltype bij elke situatie past.',
+        type: 'guidedGoal',
+        sections: [
+          {
+            id: 'why',
+            question: 'Je wil iets kopen binnen 1-2 jaar.',
+            correctOption: 'Korte termijn',
+            options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+          },
+          {
+            id: 'when',
+            question: 'Je spaart voor iets over enkele jaren.',
+            correctOption: 'Middellange termijn',
+            options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+          },
+          {
+            id: 'fit',
+            question: 'Je wil vermogen opbouwen over vele jaren.',
+            correctOption: 'Lange termijn',
+            options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+          },
+        ],
+        interpretations: {
+          prefix: '',
+          why: {
+            'Korte termijn': 'Iets kopen binnen 1-2 jaar is een doel op korte termijn.',
+            'Middellange termijn': 'Dit doel is dichtbij, dus korte termijn past beter dan middellange termijn.',
+            'Lange termijn': 'Dit doel is te dichtbij om als lange termijn te behandelen.',
+          },
+          when: {
+            'Korte termijn': 'Enkele jaren is meestal langer dan een kortetermijndoel.',
+            'Middellange termijn': 'Sparen voor iets over enkele jaren is een doel op middellange termijn.',
+            'Lange termijn': 'Enkele jaren is meestal niet lang genoeg om als lange termijn te behandelen.',
+          },
+          fit: {
+            'Korte termijn': 'Vele jaren vooruit is langer dan een kortetermijndoel.',
+            'Middellange termijn': 'Vele jaren vooruit gaat meestal verder dan middellange termijn.',
+            'Lange termijn': 'Vermogen opbouwen over vele jaren is een doel op lange termijn.',
+          },
+        },
+        submitLabel: 'Controleer mijn antwoorden',
+        feedback: {
+          valid:
+            'Goed. Het doeltype herkennen helpt je later een passende aanpak te kiezen.',
+          invalid:
+            'Nog niet helemaal. Kijk opnieuw naar hoe snel elk doel bereikt moet worden.',
+        },
+      },
+      reflection: {
+        title: 'Reflectie',
+        question: 'Welk type doel past nu het best bij jou?',
+        subtitle:
+          'Denk aan wat vandaag het dichtst bij jouw situatie ligt. Je antwoord komt terug in toekomstige lessen.',
+        placeholder: 'Korte termijn, middellange termijn of lange termijn...',
+        insightText:
+          'Goed. Je huidige doeltype kennen helpt om toekomstige lessen aan jouw situatie te koppelen.',
+      },
+      summary: {
+        takeaways: [
+          'Verschillende doelen vragen verschillende aanpakken.',
+          'Tijd speelt een grote rol in wat logisch is.',
+          'Je doel bepaalt mee hoe je later investeert, dus deze stap bereidt toekomstige keuzes voor.',
+        ],
+      },
+    },
+  },
 };
