@@ -134,7 +134,7 @@ export default function ProcessGridFlipCard({
     if (nextFlipped && !isCompleted) onStepCompleted?.();
   };
 
-  const frontCtaLabel = 'Ontdek stap';
+  const frontCtaLabel = 'Bekijk uitleg';
   const lockedCtaLabel = 'Werk eerst de vorige kaart af';
   const backCtaLabel = 'Sluit uitleg';
 

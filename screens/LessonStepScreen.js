@@ -1219,11 +1219,13 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
       : copy.introVisualization.steps;
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [maxReachedIndex, setMaxReachedIndex] = useState(0);
+  const [viewedStepIds, setViewedStepIds] = useState(() => new Set());
 
   useEffect(() => {
     setCurrentCardIndex(0);
     setMaxReachedIndex(0);
-  }, [steps.length]);
+    setViewedStepIds(new Set());
+  }, [lessonId, steps.length]);
 
   const pageWidth = Dimensions.get('window').width;
   const CARD_GAP = 8;
@@ -1241,6 +1243,15 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
         index: info.index,
         animated: false,
       });
+    });
+  }, []);
+
+  const handleStepCompleted = useCallback((stepId) => {
+    setViewedStepIds((prev) => {
+      if (prev.has(stepId)) return prev;
+      const next = new Set(prev);
+      next.add(stepId);
+      return next;
     });
   }, []);
 
@@ -1284,8 +1295,9 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
                   styles={styles}
                   colors={colors}
                   isActive={index === currentCardIndex}
-                  isCompleted={false}
+                  isCompleted={viewedStepIds.has(step.id)}
                   isLocked={false}
+                  onStepCompleted={() => handleStepCompleted(step.id)}
                   renderAnimation={() => (
                     isProcessSequence ? (
                       <ProcessGridStepAnimation stepId={step.id} styles={styles} colors={colors} />
