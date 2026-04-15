@@ -325,7 +325,7 @@ export default function LessonStepScreen() {
     if (step === 2 && lessonId !== 'lesson_0') {
       return content?.steps?.visualization?.subtitle || null;
     }
-    if (step === 3 && lessonId === 'lesson_1') {
+    if (step === 3 && (lessonId === 'lesson_1' || lessonId === 'lesson_2')) {
       return content?.steps?.scenario?.intro || null;
     }
     if (step === 4 && lessonId !== 'lesson_0') {
@@ -393,7 +393,7 @@ export default function LessonStepScreen() {
           onNext={handleNext}
           copy={copy}
         />
-      ) : lessonId === 'lesson_1' ? (
+      ) : (lessonId === 'lesson_1' || lessonId === 'lesson_2') ? (
         <Lesson1ContextualScenarioStep
           content={content}
           onNext={handleNext}
@@ -2713,6 +2713,7 @@ function ScenarioCompareCard({ title, animatedStyle, cardStyle, visual, rows }) 
 }
 
 function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
+  const { authUser } = useApp();
   const { styles, colors, components } = useLessonStepStyles();
   const scenario = content?.steps?.scenario || {};
   const choices = scenario?.choices || [];
@@ -2725,6 +2726,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
   const isLeftSelected = selected === leftChoice?.id;
   const isRightSelected = selected === rightChoice?.id;
   const isCorrect = choices.find((choice) => choice.id === selected)?.isKey;
+  const scenarioName = scenario?.cardLabel || authUser?.name || authUser?.username || 'Scenario';
 
   const leftScale = useSharedValue(1);
   const rightScale = useSharedValue(1);
@@ -2806,7 +2808,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
             </View>
             <View style={styles.narrativeCharacterText}>
               <AppText style={styles.narrativeCharacterName}>
-                {scenario?.cardLabel || 'Scenario'}
+                {scenarioName}
               </AppText>
               <AppText style={styles.narrativeCharacterSubtitle}>
                 {copy.labels.scenarioPersonalisedSub}
@@ -2885,8 +2887,8 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                   ]}
                 >
                   {isCorrect
-                    ? copy.introScenario.feedbackCorrectTitle
-                    : copy.introScenario.feedbackIncorrectTitle}
+                    ? scenario?.feedback?.correctLabel || copy.introScenario.feedbackCorrectTitle
+                    : scenario?.feedback?.incorrectLabel || copy.introScenario.feedbackIncorrectTitle}
                 </AppText>
               </View>
               <AppText style={styles.scenarioRevealText}>
@@ -2928,7 +2930,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                 }}
                 visual={(
                   <Animated.View style={leftVisualAnim}>
-                    <ComparisonSymbolVisual variant="uncertain" />
+                    <ComparisonSymbolVisual variant={scenario?.comparison?.left?.visualVariant || 'uncertain'} />
                   </Animated.View>
                 )}
                 rows={leftItems.map((item, index) => ({
@@ -2956,7 +2958,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                 }}
                 visual={(
                   <Animated.View style={rightVisualAnim}>
-                    <ComparisonSymbolVisual variant="goal" />
+                    <ComparisonSymbolVisual variant={scenario?.comparison?.right?.visualVariant || 'goal'} />
                   </Animated.View>
                 )}
                 rows={rightItems.map((item, index) => ({
@@ -3044,10 +3046,130 @@ function ComparisonSymbolVisual({ variant }) {
     ],
     opacity: interpolate(progress.value, [0, 0.15, 1], [0, 1, 1], Extrapolation.CLAMP),
   }));
+  const riskLineProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0, 0.78], [132, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0, 0.08, 0.9, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const riskPulseProps = useAnimatedProps(() => ({
+    r: interpolate(progress.value, [0.58, 0.72, 0.9, 1], [0, 14, 14, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.58, 0.7, 0.88, 1], [0, 0.22, 0.22, 0], Extrapolation.CLAMP),
+  }));
+  const stableLineProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0, 0.62], [74, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0, 0.08, 0.92, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const stableRingProps = useAnimatedProps(() => ({
+    strokeDashoffset: interpolate(progress.value, [0.36, 0.68], [38, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.36, 0.44, 0.9, 1], [0, 1, 1, 0], Extrapolation.CLAMP),
+  }));
+  const stablePulseProps = useAnimatedProps(() => ({
+    r: interpolate(progress.value, [0.68, 0.82, 0.92, 1], [0, 13, 13, 0], Extrapolation.CLAMP),
+    opacity: interpolate(progress.value, [0.68, 0.78, 0.9, 1], [0, 0.22, 0.22, 0], Extrapolation.CLAMP),
+  }));
 
   return (
     <View style={styles.compareVisualWrap}>
-      {variant === 'uncertain' ? (
+      {variant === 'shortRisk' ? (
+        <View style={styles.compareVisualStage}>
+          <Svg width={116} height={82}>
+            <Path
+              d="M 12 64 L 104 64"
+              stroke={toRgba(colors.ui.divider, 0.22)}
+              strokeWidth={1}
+            />
+            <Path
+              d="M 12 18 L 12 64"
+              stroke={toRgba(colors.ui.divider, 0.22)}
+              strokeWidth={1}
+            />
+            <AnimatedPath
+              d="M 14 56 L 28 28 L 42 62 L 58 34 L 74 66 L 96 40"
+              stroke={toRgba(colors.text.secondary, 0.82)}
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray={132}
+              animatedProps={riskLineProps}
+              fill="none"
+            />
+            <AnimatedCircle cx={96} cy={40} fill={toRgba(colors.text.secondary, 0.9)} animatedProps={riskPulseProps} />
+            <Path
+              d="M 96 24 L 110 50 L 82 50 Z"
+              fill={toRgba(colors.background.surface, 0.92)}
+              stroke={toRgba(colors.text.secondary, 0.7)}
+              strokeWidth={1.4}
+            />
+            <Path
+              d="M 96 32 L 96 42"
+              stroke={toRgba(colors.text.secondary, 0.85)}
+              strokeWidth={2}
+              strokeLinecap="round"
+            />
+            <Circle cx={96} cy={46} r={1.8} fill={toRgba(colors.text.secondary, 0.85)} />
+          </Svg>
+        </View>
+      ) : variant === 'shortStable' ? (
+        <View style={styles.compareVisualStage}>
+          <Svg width={116} height={82}>
+            <Path
+              d="M 18 24 L 18 64 L 78 64 L 78 24 Z"
+              stroke={toRgba(colors.ui.divider, 0.32)}
+              strokeWidth={1.3}
+              fill="none"
+            />
+            <Path
+              d="M 18.7 24 L 18.7 34 L 77.3 34 L 77.3 24 Z"
+              fill={toRgba(colors.ui.divider, 0.13)}
+            />
+            <Path
+              d="M 18 34 L 78 34"
+              stroke={toRgba(colors.ui.divider, 0.25)}
+              strokeWidth={0.8}
+            />
+            <Circle cx={36} cy={24} r={3.4} fill={colors.background.surface} stroke={toRgba(colors.text.primary, 0.34)} strokeWidth={1.1} />
+            <Circle cx={60} cy={24} r={3.4} fill={colors.background.surface} stroke={toRgba(colors.text.primary, 0.34)} strokeWidth={1.1} />
+            {[30, 42, 54, 66].map((x) => (
+              <Circle key={`stable-day-top-${x}`} cx={x} cy={44} r={2.1} fill={toRgba(colors.text.primary, 0.18)} />
+            ))}
+            {[30, 42, 54, 66].map((x) => (
+              <Circle key={`stable-day-bottom-${x}`} cx={x} cy={56} r={2.1} fill={toRgba(colors.text.primary, 0.18)} />
+            ))}
+            <AnimatedPath
+              d="M 20 70 L 92 70"
+              stroke={toRgba(colors.accent.primary, 0.8)}
+              strokeWidth={2.2}
+              strokeLinecap="round"
+              strokeDasharray={74}
+              animatedProps={stableLineProps}
+            />
+            <AnimatedCircle cx={66} cy={56} fill={toRgba(colors.accent.primary, 0.85)} animatedProps={stablePulseProps} />
+            <AnimatedCircle
+              cx={66}
+              cy={56}
+              r={6}
+              stroke={toRgba(colors.accent.primary, 0.95)}
+              strokeWidth={1.8}
+              strokeDasharray={38}
+              animatedProps={stableRingProps}
+              fill="none"
+            />
+            <Path
+              d="M 88 38 L 100 34 L 100 50 C 100 58 94 64 88 67 C 82 64 76 58 76 50 L 76 34 Z"
+              fill={toRgba(colors.background.surface, 0.9)}
+              stroke={toRgba(colors.accent.primary, 0.72)}
+              strokeWidth={1.5}
+            />
+            <Path
+              d="M 82 50 L 86 54 L 94 44"
+              stroke={toRgba(colors.accent.primary, 0.9)}
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </Svg>
+        </View>
+      ) : variant === 'uncertain' ? (
         <View style={styles.compareVisualStage}>
           <Animated.View style={[styles.compareVisualParticle, styles.compareVisualParticleOne, particleOneAnim]} />
           <Animated.View style={[styles.compareVisualParticle, styles.compareVisualParticleTwo, particleTwoAnim]} />

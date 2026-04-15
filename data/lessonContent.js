@@ -442,27 +442,58 @@ export const lessonContent = {
         ],
       },
       scenario: {
-        title: 'Goal type guides the next choice',
-        variants: {
-          new: {
-            prompt: 'You want to use the money in about 18 months. What should your first focus be?',
-            options: ['Stability and predictability', 'The highest possible growth', 'Ignoring when you need the money'],
-            insight:
-              'Because the goal is close, the approach should stay stable and predictable.',
+        title: 'Short or long thinking?',
+        intro: 'Discover how time shapes your approach',
+        text:
+          'I want to buy something within 2 years and want my money to grow.',
+        prompt: 'What would you do in this situation?',
+        choices: [
+          {
+            id: 'max_growth',
+            label: 'Seek maximum growth',
+            sublabel: 'Even if my money moves up and down',
+            icon: 'flash-outline',
           },
-          growing: {
-            prompt: 'You are saving for something important in a few years. What fits best?',
-            options: ['A balanced approach', 'Only chasing fast growth', 'No clear plan'],
-            insight:
-              'A medium-term goal usually needs a balance between growth and careful risk.',
+          {
+            id: 'choose_stability',
+            label: 'Choose stability',
+            sublabel: 'Because my goal is close',
+            icon: 'layers-outline',
+            isKey: true,
           },
-          seasoned: {
-            prompt: 'You are investing for a goal many years away. What becomes more acceptable?',
-            options: ['Market ups and downs', 'Needing the money next month', 'Changing direction every week'],
-            insight:
-              'Long-term goals can focus more on growth because there is more time to handle ups and downs.',
+        ],
+        feedback: {
+          incorrectLabel: 'NOT THE BEST CHOICE',
+          incorrect:
+            'Your goal is close. Taking too much risk can mean your money is worth less when you need it.',
+          correctLabel: 'GOOD CHOICE',
+          correct:
+            'Because you need your money soon, stability and predictability are a better fit.',
+        },
+        comparison: {
+          left: {
+            title: 'TOO MUCH RISK',
+            visualVariant: 'shortRisk',
+            items: [
+              'Ups and downs',
+              'Uncertain result',
+              'Chance of loss',
+              'Less control',
+            ],
+          },
+          right: {
+            title: 'STABLE',
+            visualVariant: 'shortStable',
+            items: [
+              'More predictable',
+              'Fewer ups and downs',
+              'More certainty',
+              'Fits short term',
+            ],
           },
         },
+        insightLine:
+          'A short-term goal needs a different approach than a long-term goal.',
       },
       exercise: {
         title: 'Match each situation',

@@ -461,27 +461,59 @@ export const lessonContentNl = {
         ],
       },
       scenario: {
-        title: 'Je doeltype stuurt de volgende keuze',
-        variants: {
-          new: {
-            prompt: 'Je wil het geld over ongeveer 18 maanden gebruiken. Waar moet je eerst op letten?',
-            options: ['Stabiliteit en voorspelbaarheid', 'Zo snel mogelijk groeien', 'Niet kijken wanneer je het geld nodig hebt'],
-            insight:
-              'Omdat het doel dichtbij is, moet de aanpak stabiel en voorspelbaar blijven.',
+        title: 'Kort of lang denken?',
+        intro: 'Ontdek hoe tijd je aanpak bepaalt',
+        cardLabel: 'Pieter-Jan',
+        text:
+          'Ik wil binnen 2 jaar een auto kopen en wil hiervoor mijn geld laten groeien.',
+        prompt: 'Wat zou jij doen in deze situatie?',
+        choices: [
+          {
+            id: 'max_growth',
+            label: 'Maximale groei zoeken',
+            sublabel: 'Ook als mijn geld schommelt',
+            icon: 'flash-outline',
           },
-          growing: {
-            prompt: 'Je spaart voor iets belangrijks over enkele jaren. Wat past het best?',
-            options: ['Een evenwichtige aanpak', 'Alleen snelle groei najagen', 'Nog geen duidelijk plan'],
-            insight:
-              'Een middellang doel vraagt meestal balans tussen groei en voorzichtig risico.',
+          {
+            id: 'choose_stability',
+            label: 'Kiezen voor stabiliteit',
+            sublabel: 'Omdat mijn doel dichtbij is',
+            icon: 'layers-outline',
+            isKey: true,
           },
-          seasoned: {
-            prompt: 'Je belegt voor een doel dat nog vele jaren weg is. Wat wordt dan aanvaardbaarder?',
-            options: ['Schommelingen onderweg', 'Het geld volgende maand nodig hebben', 'Elke week van richting veranderen'],
-            insight:
-              'Lange termijn doelen kunnen meer op groei focussen omdat er meer tijd is om schommelingen op te vangen.',
+        ],
+        feedback: {
+          incorrectLabel: 'NIET DE BESTE KEUZE',
+          incorrect:
+            'Je doel ligt dichtbij. Te veel risico nemen kan ervoor zorgen dat je geld minder waard is wanneer je het nodig hebt.',
+          correctLabel: 'GOEDE KEUZE',
+          correct:
+            'Omdat je je geld snel nodig hebt, kies je beter voor stabiliteit en voorspelbaarheid.',
+        },
+        comparison: {
+          left: {
+            title: 'TE VEEL RISICO',
+            visualVariant: 'shortRisk',
+            items: [
+              'Schommelt',
+              'Kans op verlies',
+              'Geen richting',
+              'Minder controle',
+            ],
+          },
+          right: {
+            title: 'STABIEL',
+            visualVariant: 'shortStable',
+            items: [
+              'Voorspelbaar',
+              'Rustiger',
+              'Meer zekerheid',
+              'Korte termijn',
+            ],
           },
         },
+        insightLine:
+          'Hoeveel tijd je hebt, bepaalt je aanpak.',
       },
       exercise: {
         title: 'Koppel elke situatie',
