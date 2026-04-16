@@ -499,51 +499,56 @@ export const lessonContent = {
         title: 'Match each situation',
         subtitle: 'Choose which goal type fits each situation.',
         type: 'guidedGoal',
+        interactionMode: 'singleQuestionImmediate',
+        scenarioLabel: 'Scenario',
+        prompt: 'Which goal type fits this?',
         sections: [
           {
             id: 'why',
-            question: 'You want to buy something within 1-2 years.',
+            scenario: 'I want to buy something within 1–2 years.',
             correctOption: 'Short term',
             options: ['Short term', 'Medium term', 'Long term'],
+            feedback: {
+              correctTitle: 'Correct',
+              incorrectTitle: 'Not quite',
+              correct:
+                'Correct. This is a short-term goal because it is within 1–2 years.',
+              incorrect:
+                'Not quite. This is a short-term goal because it is within 1–2 years.',
+            },
           },
           {
             id: 'when',
-            question: 'You are saving for something in a few years.',
+            scenario: 'I am saving for something in a few years.',
             correctOption: 'Medium term',
             options: ['Short term', 'Medium term', 'Long term'],
+            feedback: {
+              correctTitle: 'Correct',
+              incorrectTitle: 'Not quite',
+              correct:
+                'Correct. This is a medium-term goal because it is in a few years.',
+              incorrect:
+                'Not quite. This is a medium-term goal because it is in a few years.',
+            },
           },
           {
             id: 'fit',
-            question: 'You are building wealth over many years.',
+            scenario: 'I want to build wealth over a long time.',
             correctOption: 'Long term',
             options: ['Short term', 'Medium term', 'Long term'],
+            feedback: {
+              correctTitle: 'Correct',
+              incorrectTitle: 'Not quite',
+              correct:
+                'Correct. This is a long-term goal because it plays out over a long time.',
+              incorrect:
+                'Not quite. This is a long-term goal because it plays out over a long time.',
+            },
           },
         ],
-        interpretations: {
-          prefix: '',
-          why: {
-            'Short term': 'Buying something within 1-2 years is a short-term goal.',
-            'Medium term': 'This goal is close, so it fits short term better than medium term.',
-            'Long term': 'This goal is too close to treat as long term.',
-          },
-          when: {
-            'Short term': 'A few years is usually longer than a short-term goal.',
-            'Medium term': 'Saving for something in a few years is a medium-term goal.',
-            'Long term': 'A few years is usually not long enough to treat as long term.',
-          },
-          fit: {
-            'Short term': 'Many years ahead is longer than a short-term goal.',
-            'Medium term': 'Many years ahead usually goes beyond a medium-term goal.',
-            'Long term': 'Building wealth over many years is a long-term goal.',
-          },
-        },
-        submitLabel: 'Check my matches',
-        feedback: {
-          valid:
-            'Good. Matching the goal type helps you choose a fitting approach later.',
-          invalid:
-            'Not quite yet. Check each situation again and match it to how soon the goal is.',
-        },
+        nextLabel: 'Next',
+        completionLabel: 'Next',
+        lockAnswerAfterSelection: true,
       },
       reflection: {
         title: 'Reflection',

@@ -4214,12 +4214,18 @@ function GuidedGoalExercise({
   completeOnFirstSubmit = false,
   personalizationHint,
 }) {
-  const { styles } = useLessonStepStyles();
+  const { colors, components, styles } = useLessonStepStyles();
   const {
     sections = [],
     interpretations = {},
     submitLabel = copy.buttons.continue,
     feedback = {},
+    interactionMode,
+    scenarioLabel,
+    prompt,
+    nextLabel,
+    completionLabel,
+    lockAnswerAfterSelection = false,
   } = exercise;
 
   const [answers, setAnswers] = useState(() =>
@@ -4227,6 +4233,130 @@ function GuidedGoalExercise({
   );
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const isSingleQuestionImmediate = interactionMode === 'singleQuestionImmediate';
+
+  if (isSingleQuestionImmediate) {
+    const activeSection = sections[activeIndex];
+    const selectedOption = activeSection ? answers[activeSection.id] : null;
+    const isAnswered = selectedOption !== null;
+    const isCorrect = isAnswered && selectedOption === activeSection?.correctOption;
+    const feedbackConfig = isAnswered
+      ? {
+          title:
+            (isCorrect
+              ? activeSection?.feedback?.correctTitle
+              : activeSection?.feedback?.incorrectTitle) || (isCorrect ? 'Correct' : 'Not quite'),
+          text:
+            (isCorrect
+              ? activeSection?.feedback?.correct
+              : activeSection?.feedback?.incorrect) || '',
+        }
+      : null;
+
+    const handleSinglePick = (option) => {
+      if (!activeSection) return;
+      if (lockAnswerAfterSelection && answers[activeSection.id] !== null) return;
+      setAnswers((prev) => ({ ...prev, [activeSection.id]: option }));
+    };
+
+    const handleSingleNext = () => {
+      if (!isAnswered) return;
+      if (activeIndex < sections.length - 1) {
+        setActiveIndex((prev) => prev + 1);
+        return;
+      }
+      onNext();
+    };
+
+    return (
+      <View style={styles.stepBody}>
+        {showProgressDots ? (
+          <View style={styles.goalStepDots}>
+            {sections.map((section, index) => {
+              const hasAnswer = answers[section.id] !== null;
+              const isCurrent = index === activeIndex && !hasAnswer;
+              return (
+                <View
+                  key={section.id}
+                  style={[
+                    styles.goalDot,
+                    hasAnswer && styles.goalDotDone,
+                    isCurrent && styles.goalDotActive,
+                  ]}
+                />
+              );
+            })}
+          </View>
+        ) : null}
+
+        {activeSection ? (
+          <Animated.View entering={FadeInDown.duration(200)}>
+            <Card style={styles.guidedGoalActiveCard}>
+              {scenarioLabel ? <AppText style={styles.exerciseLabel}>{scenarioLabel}</AppText> : null}
+              <AppText style={styles.guidedGoalQuestion}>
+                {activeSection.scenario || activeSection.question}
+              </AppText>
+              {prompt ? (
+                <GlossaryText text={prompt} style={styles.bodyText} onPressTerm={onPressTerm} />
+              ) : null}
+              <View style={styles.goalOptionList}>
+                {activeSection.options?.map((option) => {
+                  const isActive = selectedOption === option;
+                  return (
+                    <Pressable
+                      key={option}
+                      style={[styles.goalOption, isActive && styles.goalOptionActive]}
+                      onPress={() => handleSinglePick(option)}
+                    >
+                      <GlossaryText
+                        text={option}
+                        style={[styles.goalOptionText, isActive && styles.goalOptionTextActive]}
+                        onPressTerm={onPressTerm}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </Card>
+          </Animated.View>
+        ) : null}
+
+        {feedbackConfig?.text ? (
+          <Animated.View entering={FadeInDown.duration(250)} style={styles.scenarioRevealCard}>
+            <View style={styles.scenarioRevealHeader}>
+              <Ionicons
+                name={isCorrect ? 'checkmark-circle' : 'information-circle'}
+                size={components.sizes.icon.lg}
+                color={isCorrect ? colors.accent.primary : colors.text.secondary}
+              />
+              <AppText
+                style={[
+                  styles.scenarioRevealLabel,
+                  isCorrect && styles.scenarioRevealLabelKey,
+                ]}
+              >
+                {feedbackConfig.title}
+              </AppText>
+            </View>
+            <AppText style={styles.scenarioRevealText}>{feedbackConfig.text}</AppText>
+          </Animated.View>
+        ) : null}
+
+        {isAnswered ? (
+          <Animated.View entering={FadeInDown.duration(200)}>
+            <PrimaryButton
+              label={
+                activeIndex === sections.length - 1
+                  ? completionLabel || nextLabel || copy.buttons.next
+                  : nextLabel || copy.buttons.next
+              }
+              onPress={handleSingleNext}
+            />
+          </Animated.View>
+        ) : null}
+      </View>
+    );
+  }
 
   const isComplete = sections.every((s) => answers[s.id] !== null);
   const hasCorrectOptions = sections.some((s) => s.correctOption);

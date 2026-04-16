@@ -519,51 +519,56 @@ export const lessonContentNl = {
         title: 'Koppel elke situatie',
         subtitle: 'Kies welk doeltype bij elke situatie past.',
         type: 'guidedGoal',
+        interactionMode: 'singleQuestionImmediate',
+        scenarioLabel: 'Scenario',
+        prompt: 'Welk doeltype past hierbij?',
         sections: [
           {
             id: 'why',
-            question: 'Je wil iets kopen binnen 1-2 jaar.',
+            scenario: 'Ik wil binnen 1–2 jaar iets kopen.',
             correctOption: 'Korte termijn',
             options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+            feedback: {
+              correctTitle: 'Correct',
+              incorrectTitle: 'Niet helemaal',
+              correct:
+                'Correct. Dit is een kortetermijndoel omdat het binnen 1–2 jaar ligt.',
+              incorrect:
+                'Niet helemaal. Dit is een kortetermijndoel omdat het binnen 1–2 jaar ligt.',
+            },
           },
           {
             id: 'when',
-            question: 'Je spaart voor iets over enkele jaren.',
+            scenario: 'Ik spaar voor iets over enkele jaren.',
             correctOption: 'Middellange termijn',
             options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+            feedback: {
+              correctTitle: 'Correct',
+              incorrectTitle: 'Niet helemaal',
+              correct:
+                'Correct. Dit is een middellangetermijndoel omdat het binnen enkele jaren ligt.',
+              incorrect:
+                'Niet helemaal. Dit is een middellangetermijndoel omdat het binnen enkele jaren ligt.',
+            },
           },
           {
             id: 'fit',
-            question: 'Je wil vermogen opbouwen over vele jaren.',
+            scenario: 'Ik wil vermogen opbouwen over lange tijd.',
             correctOption: 'Lange termijn',
             options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+            feedback: {
+              correctTitle: 'Correct',
+              incorrectTitle: 'Niet helemaal',
+              correct:
+                'Correct. Dit is een langetermijndoel omdat het over lange tijd loopt.',
+              incorrect:
+                'Niet helemaal. Dit is een langetermijndoel omdat het over lange tijd loopt.',
+            },
           },
         ],
-        interpretations: {
-          prefix: '',
-          why: {
-            'Korte termijn': 'Iets kopen binnen 1-2 jaar is een doel op korte termijn.',
-            'Middellange termijn': 'Dit doel is dichtbij, dus korte termijn past beter dan middellange termijn.',
-            'Lange termijn': 'Dit doel is te dichtbij om als lange termijn te behandelen.',
-          },
-          when: {
-            'Korte termijn': 'Enkele jaren is meestal langer dan een kortetermijndoel.',
-            'Middellange termijn': 'Sparen voor iets over enkele jaren is een doel op middellange termijn.',
-            'Lange termijn': 'Enkele jaren is meestal niet lang genoeg om als lange termijn te behandelen.',
-          },
-          fit: {
-            'Korte termijn': 'Vele jaren vooruit is langer dan een kortetermijndoel.',
-            'Middellange termijn': 'Vele jaren vooruit gaat meestal verder dan middellange termijn.',
-            'Lange termijn': 'Vermogen opbouwen over vele jaren is een doel op lange termijn.',
-          },
-        },
-        submitLabel: 'Controleer mijn antwoorden',
-        feedback: {
-          valid:
-            'Goed. Het doeltype herkennen helpt je later een passende aanpak te kiezen.',
-          invalid:
-            'Nog niet helemaal. Kijk opnieuw naar hoe snel elk doel bereikt moet worden.',
-        },
+        nextLabel: 'Volgende',
+        completionLabel: 'Volgende',
+        lockAnswerAfterSelection: true,
       },
       reflection: {
         title: 'Reflectie',
