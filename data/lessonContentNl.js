@@ -569,6 +569,8 @@ export const lessonContentNl = {
         nextLabel: 'Volgende',
         completionLabel: 'Volgende',
         lockAnswerAfterSelection: true,
+        autoAdvance: true,
+        autoAdvanceDelayMs: 1400,
       },
       reflection: {
         title: 'Reflectie',

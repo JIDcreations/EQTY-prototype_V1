@@ -4226,6 +4226,8 @@ function GuidedGoalExercise({
     nextLabel,
     completionLabel,
     lockAnswerAfterSelection = false,
+    autoAdvance = false,
+    autoAdvanceDelayMs = 1400,
   } = exercise;
 
   const [answers, setAnswers] = useState(() =>
@@ -4234,11 +4236,35 @@ function GuidedGoalExercise({
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const isSingleQuestionImmediate = interactionMode === 'singleQuestionImmediate';
+  const activeSingleSection = isSingleQuestionImmediate ? sections[activeIndex] : null;
+  const selectedSingleOption = activeSingleSection ? answers[activeSingleSection.id] : null;
+  const isSingleAnswered = selectedSingleOption !== null;
+  const isLastSingleSection = activeIndex === sections.length - 1;
+
+  useEffect(() => {
+    if (!isSingleQuestionImmediate || !autoAdvance || !isSingleAnswered || isLastSingleSection) {
+      return undefined;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setActiveIndex((prev) => (prev === activeIndex ? Math.min(prev + 1, sections.length - 1) : prev));
+    }, autoAdvanceDelayMs);
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    activeIndex,
+    autoAdvance,
+    autoAdvanceDelayMs,
+    isLastSingleSection,
+    isSingleAnswered,
+    isSingleQuestionImmediate,
+    sections.length,
+  ]);
 
   if (isSingleQuestionImmediate) {
-    const activeSection = sections[activeIndex];
-    const selectedOption = activeSection ? answers[activeSection.id] : null;
-    const isAnswered = selectedOption !== null;
+    const activeSection = activeSingleSection;
+    const selectedOption = selectedSingleOption;
+    const isAnswered = isSingleAnswered;
     const isCorrect = isAnswered && selectedOption === activeSection?.correctOption;
     const feedbackConfig = isAnswered
       ? {
@@ -4271,26 +4297,17 @@ function GuidedGoalExercise({
     return (
       <View style={styles.stepBody}>
         {showProgressDots ? (
-          <View style={styles.goalStepDots}>
-            {sections.map((section, index) => {
-              const hasAnswer = answers[section.id] !== null;
-              const isCurrent = index === activeIndex && !hasAnswer;
-              return (
-                <View
-                  key={section.id}
-                  style={[
-                    styles.goalDot,
-                    hasAnswer && styles.goalDotDone,
-                    isCurrent && styles.goalDotActive,
-                  ]}
-                />
-              );
-            })}
+          <View style={styles.l1VisDotsWrap}>
+            <OnboardingProgress
+              current={Math.min(activeIndex + 1, sections.length)}
+              total={sections.length}
+              style={styles.l1VisDots}
+            />
           </View>
         ) : null}
 
         {activeSection ? (
-          <Animated.View entering={FadeInDown.duration(200)}>
+          <Animated.View key={activeSection.id} entering={FadeInDown.duration(220)}>
             <Card style={styles.guidedGoalActiveCard}>
               {scenarioLabel ? <AppText style={styles.exerciseLabel}>{scenarioLabel}</AppText> : null}
               <AppText style={styles.guidedGoalQuestion}>
@@ -4301,19 +4318,47 @@ function GuidedGoalExercise({
               ) : null}
               <View style={styles.goalOptionList}>
                 {activeSection.options?.map((option) => {
-                  const isActive = selectedOption === option;
+                  const isPicked = selectedOption === option;
+                  const isKey = isAnswered && option === activeSection.correctOption;
+                  const isWrongPick = isPicked && option !== activeSection.correctOption;
+                  const isDimmed = isAnswered && !isPicked && !isKey;
                   return (
-                    <Pressable
+                    <SelectableOptionButton
                       key={option}
-                      style={[styles.goalOption, isActive && styles.goalOptionActive]}
                       onPress={() => handleSinglePick(option)}
-                    >
-                      <GlossaryText
-                        text={option}
-                        style={[styles.goalOptionText, isActive && styles.goalOptionTextActive]}
-                        onPressTerm={onPressTerm}
-                      />
-                    </Pressable>
+                      disabled={isAnswered}
+                      label={option}
+                      state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+                      style={isKey ? styles.scenarioOptionButtonActive : null}
+                      labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
+                      accessory={
+                        isKey ? (
+                          <View
+                            style={[
+                              styles.scenarioOptionCheckBadge,
+                              {
+                                width: components.sizes.icon.lg,
+                                height: components.sizes.icon.lg,
+                                borderRadius: components.sizes.icon.lg / 2,
+                                backgroundColor: colors.accent.primary,
+                              },
+                            ]}
+                          >
+                            <Ionicons
+                              name="checkmark"
+                              size={components.sizes.icon.sm}
+                              color={colors.background.surface}
+                            />
+                          </View>
+                        ) : isWrongPick ? (
+                          <Ionicons
+                            name="close-circle"
+                            size={components.sizes.icon.lg}
+                            color={colors.text.secondary}
+                          />
+                        ) : null
+                      }
+                    />
                   );
                 })}
               </View>
@@ -4342,11 +4387,11 @@ function GuidedGoalExercise({
           </Animated.View>
         ) : null}
 
-        {isAnswered ? (
+        {isAnswered && (!autoAdvance || isLastSingleSection) ? (
           <Animated.View entering={FadeInDown.duration(200)}>
             <PrimaryButton
               label={
-                activeIndex === sections.length - 1
+                isLastSingleSection
                   ? completionLabel || nextLabel || copy.buttons.next
                   : nextLabel || copy.buttons.next
               }
