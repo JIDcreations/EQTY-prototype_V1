@@ -7637,7 +7637,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     gap: components.layout.spacing.sm,
   },
   scenarioOptionButtonActive: {
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderColor: colors.accent.primary,
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
   },
   scenarioOptionLabelActive: {

@@ -533,7 +533,7 @@ export const lessonContentNl = {
               'Lange termijn',
             ],
             feedback: {
-              correctLabel: 'Correct',
+              correctLabel: 'GOED',
               incorrectLabel: 'Niet helemaal',
               correctText:
                 'Correct. Dit is een kortetermijndoel omdat het binnen 1–2 jaar ligt.',
@@ -543,9 +543,9 @@ export const lessonContentNl = {
           },
           {
             id: 'when',
-            name: 'Emma',
+            name: 'Frank',
             cardSubtitle: 'Voorbeeldscenario',
-            story: 'Emma spaart voor iets over enkele jaren.',
+            story: 'Frank spaart voor iets over enkele jaren.',
             question: 'Welk doeltype past hierbij?',
             correctOption: 'Middellange termijn',
             options: [
@@ -554,7 +554,7 @@ export const lessonContentNl = {
               'Lange termijn',
             ],
             feedback: {
-              correctLabel: 'Correct',
+              correctLabel: 'GOED',
               incorrectLabel: 'Niet helemaal',
               correctText:
                 'Correct. Dit is een middellangetermijndoel omdat het binnen enkele jaren ligt.',
@@ -564,9 +564,9 @@ export const lessonContentNl = {
           },
           {
             id: 'fit',
-            name: 'Lucas',
+            name: 'Bert',
             cardSubtitle: 'Voorbeeldscenario',
-            story: 'Lucas wil vermogen opbouwen voor later.',
+            story: 'Bert wil vermogen opbouwen voor later.',
             question: 'Welk doeltype past hierbij?',
             correctOption: 'Lange termijn',
             options: [
@@ -575,7 +575,7 @@ export const lessonContentNl = {
               'Lange termijn',
             ],
             feedback: {
-              correctLabel: 'Correct',
+              correctLabel: 'GOED',
               incorrectLabel: 'Niet helemaal',
               correctText:
                 'Correct. Dit is een langetermijndoel omdat het voor later is.',
