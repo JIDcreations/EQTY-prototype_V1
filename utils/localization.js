@@ -112,6 +112,7 @@ const LESSON_STEP_COPY = {
   en: {
     buttons: {
       next: 'Next',
+      nextQuestion: 'Next question',
       continue: 'Continue',
       reset: 'Reset',
       completeExercise: 'Complete exercise',
@@ -340,6 +341,7 @@ const LESSON_STEP_COPY = {
   nl: {
     buttons: {
       next: 'Volgende',
+      nextQuestion: 'Volgende vraag',
       continue: 'Doorgaan',
       reset: 'Reset',
       completeExercise: 'Oefening afronden',

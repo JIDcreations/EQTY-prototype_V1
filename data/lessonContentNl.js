@@ -286,9 +286,9 @@ export const lessonContentNl = {
         title: 'Wat deed Joris fout?',
         subtitle: 'Ontdek wat ontbreekt voordat je begint met investeren.',
         type: 'scenario',
-        cardLabel: 'Scenario',
+        name: 'Joris',
+        personalized: true,
         storyLead: 'Joris wil beginnen met investeren omdat hij',
-        storyQuoteField: 'motivationAnswer',
         storyQuoteFallback: 'een huis wil kopen',
         storyTail:
           'Na een paar weken weet hij niet goed of hij moet bijhouden, verkopen of veranderen.',
@@ -516,61 +516,78 @@ export const lessonContentNl = {
           'Hoeveel tijd je hebt, bepaalt je aanpak.',
       },
       exercise: {
-        title: 'Koppel elke situatie',
-        subtitle: 'Kies welk doeltype bij elke situatie past.',
-        type: 'guidedGoal',
-        interactionMode: 'singleQuestionImmediate',
-        scenarioLabel: 'Scenario',
-        prompt: 'Welk doeltype past hierbij?',
+        title: 'Wat voor doel is dit?',
+        subtitle: 'Kies welk doeltype bij elk scenario past.',
+        type: 'scenario',
         sections: [
           {
             id: 'why',
-            scenario: 'Ik wil binnen 1–2 jaar iets kopen.',
+            name: 'Joris',
+            cardSubtitle: 'Voorbeeldscenario',
+            story: 'Joris wil binnen 1–2 jaar een auto kopen.',
+            question: 'Welk doeltype past hierbij?',
             correctOption: 'Korte termijn',
-            options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+            options: [
+              'Korte termijn',
+              'Middellange termijn',
+              'Lange termijn',
+            ],
             feedback: {
-              correctTitle: 'Correct',
-              incorrectTitle: 'Niet helemaal',
-              correct:
+              correctLabel: 'Correct',
+              incorrectLabel: 'Niet helemaal',
+              correctText:
                 'Correct. Dit is een kortetermijndoel omdat het binnen 1–2 jaar ligt.',
-              incorrect:
+              incorrectText:
                 'Niet helemaal. Dit is een kortetermijndoel omdat het binnen 1–2 jaar ligt.',
             },
           },
           {
             id: 'when',
-            scenario: 'Ik spaar voor iets over enkele jaren.',
+            name: 'Emma',
+            cardSubtitle: 'Voorbeeldscenario',
+            story: 'Emma spaart voor iets over enkele jaren.',
+            question: 'Welk doeltype past hierbij?',
             correctOption: 'Middellange termijn',
-            options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+            options: [
+              'Korte termijn',
+              'Middellange termijn',
+              'Lange termijn',
+            ],
             feedback: {
-              correctTitle: 'Correct',
-              incorrectTitle: 'Niet helemaal',
-              correct:
+              correctLabel: 'Correct',
+              incorrectLabel: 'Niet helemaal',
+              correctText:
                 'Correct. Dit is een middellangetermijndoel omdat het binnen enkele jaren ligt.',
-              incorrect:
+              incorrectText:
                 'Niet helemaal. Dit is een middellangetermijndoel omdat het binnen enkele jaren ligt.',
             },
           },
           {
             id: 'fit',
-            scenario: 'Ik wil vermogen opbouwen over lange tijd.',
+            name: 'Lucas',
+            cardSubtitle: 'Voorbeeldscenario',
+            story: 'Lucas wil vermogen opbouwen voor later.',
+            question: 'Welk doeltype past hierbij?',
             correctOption: 'Lange termijn',
-            options: ['Korte termijn', 'Middellange termijn', 'Lange termijn'],
+            options: [
+              'Korte termijn',
+              'Middellange termijn',
+              'Lange termijn',
+            ],
             feedback: {
-              correctTitle: 'Correct',
-              incorrectTitle: 'Niet helemaal',
-              correct:
-                'Correct. Dit is een langetermijndoel omdat het over lange tijd loopt.',
-              incorrect:
-                'Niet helemaal. Dit is een langetermijndoel omdat het over lange tijd loopt.',
+              correctLabel: 'Correct',
+              incorrectLabel: 'Niet helemaal',
+              correctText:
+                'Correct. Dit is een langetermijndoel omdat het voor later is.',
+              incorrectText:
+                'Niet helemaal. Dit is een langetermijndoel omdat het voor later is.',
             },
           },
         ],
+        nextQuestionLabel: 'Volgende vraag',
         nextLabel: 'Volgende',
         completionLabel: 'Volgende',
         lockAnswerAfterSelection: true,
-        autoAdvance: true,
-        autoAdvanceDelayMs: 1400,
       },
       reflection: {
         title: 'Reflectie',

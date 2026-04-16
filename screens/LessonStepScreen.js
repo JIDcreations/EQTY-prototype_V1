@@ -3477,7 +3477,10 @@ function ScenarioExercise({ exercise, onNext, copy }) {
   const { onboardingContext } = useApp();
   const { colors, components, styles, mode } = useLessonStepStyles();
   const {
+    sections = [],
     story,
+    name,
+    personalized,
     storyLead,
     storyQuoteField,
     storyQuoteFallback,
@@ -3485,97 +3488,189 @@ function ScenarioExercise({ exercise, onNext, copy }) {
     question,
     options = [],
     cardLabel,
+    cardSubtitle,
     feedback = {},
+    nextQuestionLabel,
+    nextLabel,
+    completionLabel,
   } = exercise;
-  const [picked, setPicked] = useState(null);
-  const storyQuote = resolveScenarioStoryQuote(
-    onboardingContext,
-    storyQuoteField,
-    storyQuoteFallback
+  const hasSections = sections.length > 0;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [answers, setAnswers] = useState(() =>
+    hasSections
+      ? sections.reduce((acc, section) => ({ ...acc, [section.id]: null }), {})
+      : { single: null }
   );
 
+  const activeSection = hasSections ? sections[activeIndex] : exercise;
+  const answerKey = hasSections ? activeSection?.id : 'single';
+  const picked = answerKey ? answers[answerKey] : null;
+  const isAnswered = picked !== null;
+  const storyQuote = resolveScenarioStoryQuote(
+    onboardingContext,
+    activeSection?.storyQuoteField ?? storyQuoteField,
+    activeSection?.storyQuoteFallback ?? storyQuoteFallback
+  );
+  const scenarioName = activeSection?.name || name;
+  const headerLabel = scenarioName || activeSection?.cardLabel || cardLabel || 'Scenario';
+  const showPersonalizationHint = Boolean(
+    activeSection?.personalized ||
+    personalized ||
+    activeSection?.storyQuoteField ||
+    storyQuoteField
+  );
+  const headerSubtitle =
+    activeSection?.cardSubtitle ??
+    cardSubtitle ??
+    (showPersonalizationHint ? copy.labels.scenarioPersonalisedSub : null);
+  const activeOptions = (activeSection?.options || options).map((option, index) => {
+    if (typeof option === 'string') {
+      return {
+        id: `${activeSection?.id || 'option'}-${index}`,
+        label: option,
+        isKey: option === activeSection?.correctOption,
+      };
+    }
+    return {
+      ...option,
+      isKey:
+        option.isKey ||
+        option.label === activeSection?.correctOption ||
+        option.id === activeSection?.correctOption,
+    };
+  });
+
   const handlePick = (id) => {
-    if (picked) return;
-    setPicked(id);
+    if (!answerKey || picked) return;
+    setAnswers((prev) => ({ ...prev, [answerKey]: id }));
   };
 
-  const pickedOption = options.find((o) => o.id === picked);
-  const isAnswered = picked !== null;
+  const handleNext = () => {
+    if (!isAnswered) return;
+    if (hasSections && activeIndex < sections.length - 1) {
+      setActiveIndex((prev) => prev + 1);
+      return;
+    }
+    onNext();
+  };
+
+  const pickedOption = activeOptions.find((option) => option.id === picked);
+  const activeFeedback = activeSection?.feedback || feedback;
   const feedbackLabel = pickedOption?.isKey
-    ? feedback.correctLabel || copy.labels.aligned
-    : feedback.incorrectLabel || copy.labels.recheckFlow;
+    ? activeFeedback.correctLabel || copy.labels.aligned
+    : activeFeedback.incorrectLabel || copy.labels.recheckFlow;
   const feedbackText = pickedOption?.isKey
-    ? feedback.correctText || pickedOption?.reveal
-    : feedback.incorrectText || pickedOption?.reveal;
+    ? activeFeedback.correctText || pickedOption?.reveal
+    : activeFeedback.incorrectText || pickedOption?.reveal;
+  const actionLabel = hasSections && activeIndex < sections.length - 1
+    ? nextQuestionLabel || copy.buttons.nextQuestion || copy.buttons.next
+    : completionLabel || nextLabel || copy.buttons.next;
 
   return (
-    <View style={[styles.stepBody, styles.scenarioTopSpacing]}>
-      <View style={styles.scenarioStoryCard}>
-        <View>
-          <AppText style={styles.scenarioStoryLabel}>{cardLabel || 'Scenario'}</AppText>
-          {storyQuoteField && (
-            <AppText style={styles.scenarioStorySubtitle}>{copy.labels.scenarioPersonalisedSub}</AppText>
+    <View style={[styles.stepBody, styles.scenarioTopSpacing, styles.scenarioExerciseBody]}>
+      <Animated.View
+        key={activeSection?.id || 'single'}
+        entering={FadeInDown.duration(220)}
+        style={styles.scenarioExercisePanel}
+      >
+        <Card style={styles.narrativeCard}>
+          {scenarioName ? (
+            <View style={styles.narrativeCharacterRow}>
+              <View style={styles.narrativeAvatar}>
+                <Ionicons
+                  name="person-outline"
+                  size={components.sizes.icon.md}
+                  color={colors.text.secondary}
+                />
+              </View>
+              <View style={styles.narrativeCharacterText}>
+                <AppText style={styles.narrativeCharacterName}>
+                  {headerLabel}
+                </AppText>
+                {headerSubtitle ? (
+                  <AppText style={styles.narrativeCharacterSubtitle}>
+                    {headerSubtitle}
+                  </AppText>
+                ) : null}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.scenarioStoryHeader}>
+              <AppText style={styles.scenarioStoryLabel}>{headerLabel}</AppText>
+              {headerSubtitle ? (
+                <AppText style={styles.scenarioStorySubtitle}>
+                  {headerSubtitle}
+                </AppText>
+              ) : null}
+            </View>
           )}
-        </View>
-        {storyLead && storyTail ? (
-          <AppText style={styles.scenarioStoryText}>
-            {`${storyLead} `}
-            <Text style={styles.scenarioStoryTextUser}>{storyQuote}</Text>
-            {'.\n'}
-            {storyTail}
-          </AppText>
-        ) : (
-          <AppText style={styles.scenarioStoryText}>{story}</AppText>
-        )}
-      </View>
+          {activeSection?.storyLead && activeSection?.storyTail ? (
+            <AppText style={styles.narrativeQuote}>
+              {`${activeSection.storyLead} `}
+              <Text style={styles.scenarioStoryTextUser}>{storyQuote}</Text>
+              {'.\n'}
+              {activeSection.storyTail}
+            </AppText>
+          ) : storyLead && storyTail ? (
+            <AppText style={styles.narrativeQuote}>
+              {`${storyLead} `}
+              <Text style={styles.scenarioStoryTextUser}>{storyQuote}</Text>
+              {'.\n'}
+              {storyTail}
+            </AppText>
+          ) : (
+            <AppText style={styles.narrativeQuote}>{activeSection?.story || story}</AppText>
+          )}
+        </Card>
 
-      <View style={styles.scenarioQuestionBlock}>
-        <AppText style={styles.scenarioQuestion}>{question}</AppText>
-        <View style={styles.scenarioOptionList}>
-          {options.map((opt) => {
-            const isPicked = picked === opt.id;
-            const isKey = isAnswered && opt.isKey;
-            const isWrongPick = isPicked && !opt.isKey;
-            const isDimmed = isAnswered && !isPicked && !opt.isKey;
-            return (
-              <SelectableOptionButton
-                key={opt.id}
-                onPress={() => handlePick(opt.id)}
-                disabled={isAnswered}
-                label={opt.label}
-                state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
-                style={isKey ? styles.scenarioOptionButtonActive : null}
-                labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
-                accessory={
-                  isKey ? (
-                    <View
-                      style={[
-                        styles.scenarioOptionCheckBadge,
-                        {
-                          width: components.sizes.icon.lg,
-                          height: components.sizes.icon.lg,
-                          borderRadius: components.sizes.icon.lg / 2,
-                          backgroundColor: colors.accent.primary,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark"
-                        size={components.sizes.icon.sm}
-                        color={colors.background.surface}
-                      />
-                    </View>
-                  ) : isWrongPick ? (
-                    <Ionicons name="close-circle" size={components.sizes.icon.lg} color={colors.text.secondary} />
-                  ) : null
-                }
-              />
-            );
-          })}
+        <View style={styles.scenarioQuestionBlock}>
+          <AppText style={styles.scenarioQuestion}>{activeSection?.question || question}</AppText>
+          <View style={styles.scenarioOptionList}>
+            {activeOptions.map((opt) => {
+              const isPicked = picked === opt.id;
+              const isKey = isAnswered && opt.isKey;
+              const isWrongPick = isPicked && !opt.isKey;
+              const isDimmed = isAnswered && !isPicked && !opt.isKey;
+              return (
+                <SelectableOptionButton
+                  key={opt.id}
+                  onPress={() => handlePick(opt.id)}
+                  disabled={isAnswered}
+                  label={opt.label}
+                  state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
+                  style={isKey ? styles.scenarioOptionButtonActive : null}
+                  labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
+                  accessory={
+                    isKey ? (
+                      <View
+                        style={[
+                          styles.scenarioOptionCheckBadge,
+                          {
+                            width: components.sizes.icon.lg,
+                            height: components.sizes.icon.lg,
+                            borderRadius: components.sizes.icon.lg / 2,
+                            backgroundColor: colors.accent.primary,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name="checkmark"
+                          size={components.sizes.icon.sm}
+                          color={colors.background.surface}
+                        />
+                      </View>
+                    ) : isWrongPick ? (
+                      <Ionicons name="close-circle" size={components.sizes.icon.lg} color={colors.text.secondary} />
+                    ) : null
+                  }
+                />
+              );
+            })}
+          </View>
         </View>
-      </View>
+      </Animated.View>
 
-      {isAnswered && pickedOption && (
+      {isAnswered && pickedOption ? (
         <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
           <View style={styles.scenarioRevealHeader}>
             <Ionicons
@@ -3594,13 +3689,9 @@ function ScenarioExercise({ exercise, onNext, copy }) {
           </View>
           <AppText style={styles.scenarioRevealText}>{feedbackText}</AppText>
         </Animated.View>
-      )}
+      ) : null}
 
-      {isAnswered && (
-        <Animated.View entering={FadeInDown.duration(200)}>
-          <PrimaryButton label={copy.buttons.next} onPress={onNext} />
-        </Animated.View>
-      )}
+      <PrimaryButton label={actionLabel} onPress={handleNext} disabled={!isAnswered} />
     </View>
   );
 }
@@ -4221,13 +4312,11 @@ function GuidedGoalExercise({
     submitLabel = copy.buttons.continue,
     feedback = {},
     interactionMode,
-    scenarioLabel,
     prompt,
+    nextQuestionLabel,
     nextLabel,
     completionLabel,
     lockAnswerAfterSelection = false,
-    autoAdvance = false,
-    autoAdvanceDelayMs = 1400,
   } = exercise;
 
   const [answers, setAnswers] = useState(() =>
@@ -4240,26 +4329,6 @@ function GuidedGoalExercise({
   const selectedSingleOption = activeSingleSection ? answers[activeSingleSection.id] : null;
   const isSingleAnswered = selectedSingleOption !== null;
   const isLastSingleSection = activeIndex === sections.length - 1;
-
-  useEffect(() => {
-    if (!isSingleQuestionImmediate || !autoAdvance || !isSingleAnswered || isLastSingleSection) {
-      return undefined;
-    }
-
-    const timeoutId = setTimeout(() => {
-      setActiveIndex((prev) => (prev === activeIndex ? Math.min(prev + 1, sections.length - 1) : prev));
-    }, autoAdvanceDelayMs);
-
-    return () => clearTimeout(timeoutId);
-  }, [
-    activeIndex,
-    autoAdvance,
-    autoAdvanceDelayMs,
-    isLastSingleSection,
-    isSingleAnswered,
-    isSingleQuestionImmediate,
-    sections.length,
-  ]);
 
   if (isSingleQuestionImmediate) {
     const activeSection = activeSingleSection;
@@ -4295,21 +4364,10 @@ function GuidedGoalExercise({
     };
 
     return (
-      <View style={styles.stepBody}>
-        {showProgressDots ? (
-          <View style={styles.l1VisDotsWrap}>
-            <OnboardingProgress
-              current={Math.min(activeIndex + 1, sections.length)}
-              total={sections.length}
-              style={styles.l1VisDots}
-            />
-          </View>
-        ) : null}
-
+      <View style={[styles.stepBody, styles.guidedGoalSingleBody]}>
         {activeSection ? (
           <Animated.View key={activeSection.id} entering={FadeInDown.duration(220)}>
             <Card style={styles.guidedGoalActiveCard}>
-              {scenarioLabel ? <AppText style={styles.exerciseLabel}>{scenarioLabel}</AppText> : null}
               <AppText style={styles.guidedGoalQuestion}>
                 {activeSection.scenario || activeSection.question}
               </AppText>
@@ -4387,18 +4445,26 @@ function GuidedGoalExercise({
           </Animated.View>
         ) : null}
 
-        {isAnswered && (!autoAdvance || isLastSingleSection) ? (
-          <Animated.View entering={FadeInDown.duration(200)}>
-            <PrimaryButton
-              label={
-                isLastSingleSection
-                  ? completionLabel || nextLabel || copy.buttons.next
-                  : nextLabel || copy.buttons.next
-              }
-              onPress={handleSingleNext}
-            />
-          </Animated.View>
-        ) : null}
+        <View style={styles.guidedGoalFooter}>
+          {showProgressDots ? (
+            <View style={styles.guidedGoalFooterProgressWrap}>
+              <OnboardingProgress
+                current={Math.min(activeIndex + 1, sections.length)}
+                total={sections.length}
+                style={styles.guidedGoalFooterProgress}
+              />
+            </View>
+          ) : null}
+          <PrimaryButton
+            label={
+              isLastSingleSection
+                ? completionLabel || nextLabel || copy.buttons.next
+                : nextQuestionLabel || copy.buttons.nextQuestion || nextLabel || copy.buttons.next
+            }
+            onPress={handleSingleNext}
+            disabled={!isAnswered}
+          />
+        </View>
       </View>
     );
   }
@@ -5215,6 +5281,12 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioTopSpacing: {
     marginTop: components.layout.spacing.xxl,
+  },
+  scenarioExerciseBody: {
+    gap: components.layout.spacing.xl,
+  },
+  scenarioExercisePanel: {
+    gap: components.layout.spacing.xl,
   },
   summaryTopSpacing: {
     marginTop: components.layout.spacing.xxl,
@@ -6643,6 +6715,20 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   guidedGoalActiveCard: {
     gap: components.layout.spacing.md,
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  guidedGoalSingleBody: {
+    marginTop: components.layout.spacing.xxl,
+  },
+  guidedGoalFooter: {
+    gap: components.layout.spacing.md,
+  },
+  guidedGoalFooterProgressWrap: {
+    alignItems: 'center',
+  },
+  guidedGoalFooterProgress: {
+    justifyContent: 'center',
   },
   goalOptionList: {
     gap: components.layout.spacing.xs,
@@ -7520,6 +7606,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     padding: components.layout.spacing.lg,
     gap: components.layout.spacing.xs,
   },
+  scenarioStoryHeader: {
+    gap: 2,
+  },
   scenarioStoryLabel: {
     ...typography.styles.stepLabel,
     color: colors.text.secondary,
@@ -7535,7 +7624,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioStoryTextUser: {
     ...typography.styles.body,
-    color: mode === 'light' ? colors.text.primary : colors.accent.primary,
+    color: colors.text.primary,
   },
   scenarioQuestion: {
     ...typography.styles.h3,

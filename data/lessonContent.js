@@ -287,6 +287,8 @@ export const lessonContent = {
       exercise: {
         title: 'What is missing?',
         type: 'scenario',
+        name: 'Anna',
+        personalized: true,
         story:
           'Anna has €5,000 and decides to start investing. She picks an ETF she read about in a finance article. Two months later the market drops 15%. She does not know whether to sell, hold, or buy more.',
         question: 'What is missing from Anna\'s approach?',
@@ -496,61 +498,66 @@ export const lessonContent = {
           'A short-term goal needs a different approach than a long-term goal.',
       },
       exercise: {
-        title: 'Match each situation',
-        subtitle: 'Choose which goal type fits each situation.',
-        type: 'guidedGoal',
-        interactionMode: 'singleQuestionImmediate',
-        scenarioLabel: 'Scenario',
-        prompt: 'Which goal type fits this?',
+        title: 'What kind of goal is this?',
+        subtitle: 'Choose which goal type fits each scenario.',
+        type: 'scenario',
         sections: [
           {
             id: 'why',
-            scenario: 'I want to buy something within 1–2 years.',
+            name: 'Joris',
+            cardSubtitle: 'Example scenario',
+            story: 'Joris wants to buy a car within 1–2 years.',
+            question: 'Which goal type fits this?',
             correctOption: 'Short term',
             options: ['Short term', 'Medium term', 'Long term'],
             feedback: {
-              correctTitle: 'Correct',
-              incorrectTitle: 'Not quite',
-              correct:
+              correctLabel: 'Correct',
+              incorrectLabel: 'Not quite',
+              correctText:
                 'Correct. This is a short-term goal because it is within 1–2 years.',
-              incorrect:
+              incorrectText:
                 'Not quite. This is a short-term goal because it is within 1–2 years.',
             },
           },
           {
             id: 'when',
-            scenario: 'I am saving for something in a few years.',
+            name: 'Emma',
+            cardSubtitle: 'Example scenario',
+            story: 'Emma is saving for something in a few years.',
+            question: 'Which goal type fits this?',
             correctOption: 'Medium term',
             options: ['Short term', 'Medium term', 'Long term'],
             feedback: {
-              correctTitle: 'Correct',
-              incorrectTitle: 'Not quite',
-              correct:
+              correctLabel: 'Correct',
+              incorrectLabel: 'Not quite',
+              correctText:
                 'Correct. This is a medium-term goal because it is in a few years.',
-              incorrect:
+              incorrectText:
                 'Not quite. This is a medium-term goal because it is in a few years.',
             },
           },
           {
             id: 'fit',
-            scenario: 'I want to build wealth over a long time.',
+            name: 'Lucas',
+            cardSubtitle: 'Example scenario',
+            story: 'Lucas wants to build wealth for later.',
+            question: 'Which goal type fits this?',
             correctOption: 'Long term',
             options: ['Short term', 'Medium term', 'Long term'],
             feedback: {
-              correctTitle: 'Correct',
-              incorrectTitle: 'Not quite',
-              correct:
-                'Correct. This is a long-term goal because it plays out over a long time.',
-              incorrect:
-                'Not quite. This is a long-term goal because it plays out over a long time.',
+              correctLabel: 'Correct',
+              incorrectLabel: 'Not quite',
+              correctText:
+                'Correct. This is a long-term goal because it is for later.',
+              incorrectText:
+                'Not quite. This is a long-term goal because it is for later.',
             },
           },
         ],
+        nextQuestionLabel: 'Next question',
         nextLabel: 'Next',
         completionLabel: 'Next',
         lockAnswerAfterSelection: true,
-        autoAdvance: true,
-        autoAdvanceDelayMs: 1400,
       },
       reflection: {
         title: 'Reflection',
