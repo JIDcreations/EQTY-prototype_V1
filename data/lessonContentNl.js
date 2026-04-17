@@ -591,12 +591,12 @@ export const lessonContentNl = {
       },
       reflection: {
         title: 'Reflectie',
-        question: 'Welk type doel past nu het best bij jou?',
+        question: 'Waarom zijn er verschillende soorten doelen?',
         subtitle:
-          'Denk aan wat vandaag het dichtst bij jouw situatie ligt. Je antwoord komt terug in toekomstige lessen.',
-        placeholder: 'Korte termijn, middellange termijn of lange termijn...',
+          'Leg in je eigen woorden uit waarom tijd een rol speelt bij investeren.',
+        placeholder: 'Beschrijf kort waarom tijd een rol speelt...',
         insightText:
-          'Goed. Je huidige doeltype kennen helpt om toekomstige lessen aan jouw situatie te koppelen.',
+          'Goed gezien. Tijd bepaalt hoeveel risico je kan nemen en welke aanpak past bij je doel.',
       },
       summary: {
         takeaways: [
