@@ -14,7 +14,7 @@ import AppText from '../components/AppText';
 import { PrimaryButton } from '../components/Button';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getLessonContent, getLessonStepCopy, getDeepDiveCopy } from '../utils/localization';
+import { getLessonContent, getLessonStepCopy, getDeepDiveCopy, getLocaleKey } from '../utils/localization';
 import { getLastCoreLessonId } from '../utils/helpers';
 import { getDeepDiveLesson } from '../data/deepDives';
 
@@ -44,6 +44,7 @@ export default function LessonSuccessScreen() {
     [preferences?.language]
   );
   const content = getLessonContent(lessonId, preferences?.language);
+  const locale = getLocaleKey(preferences?.language);
   const lessonTitle = content?.title || copy.lessonSuccess.fallbackTitle;
   const isIntroLesson = lessonId === 'lesson_0';
   const isDeepDiveLesson = typeof lessonId === 'string' && lessonId.startsWith('deep_');
@@ -53,6 +54,8 @@ export default function LessonSuccessScreen() {
     ? (deepLesson?.shortDescription || lessonTitle)
     : isIntroLesson
       ? copy.lessonSuccess.introSubtitle
+      : lessonId === 'lesson_2' && locale === 'nl'
+        ? 'Je hebt de les ‘Soorten beleggingsdoelen’ afgerond.'
       : copy.lessonSuccess.subtitle
         ? copy.lessonSuccess.subtitle(lessonTitle)
         : '';
@@ -62,6 +65,8 @@ export default function LessonSuccessScreen() {
       ? deepDiveCopy.finalLessonSubtitle
       : isIntroLesson
         ? copy.lessonSuccess.introDetail
+        : lessonId === 'lesson_2' && locale === 'nl'
+          ? 'Ga verder en ontdek hoe je dit toepast in de volgende lessen.'
         : copy.lessonSuccess.detail;
 
   // Entrance animations — staggered, spring badge, eased text
