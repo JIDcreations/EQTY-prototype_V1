@@ -599,11 +599,46 @@ export const lessonContentNl = {
           'Goed gezien. Tijd bepaalt hoeveel risico je kan nemen en welke aanpak past bij je doel.',
       },
       summary: {
-        takeaways: [
-          'Verschillende doelen vragen verschillende aanpakken.',
-          'Tijd speelt een grote rol in wat logisch is.',
-          'Je doel bepaalt mee hoe je later investeert, dus deze stap bereidt toekomstige keuzes voor.',
+        title: 'Welke aanpak past het best deze situatie?',
+        subtitle: 'Kies de aanpak die past bij hoe snel het doel bereikt moet worden.',
+        scenarioLabel: 'Scenario',
+        scenarioText:
+          'Frank wil binnen enkele jaren een woning kopen. Hij wil zijn geld laten groeien, maar wil geen grote risico’s nemen omdat hij het geld binnenkort nodig heeft.',
+        question: 'Welke aanpak past het best bij zijn situatie?',
+        correctLabel: 'Goed',
+        almostLabel: 'Bijna juist - maar',
+        incorrectLabel: 'Niet de beste keuze',
+        nonKeyFollowupText:
+          'Zijn tijdshorizon vraagt om een aanpak die rekening houdt met beide: nog wat groeikans, maar ook bescherming omdat het geld binnen enkele jaren nodig is.',
+        options: [
+          {
+            id: 'max_growth',
+            label: 'Focus op maximale groei',
+            feedbackTone: 'incorrect',
+            reveal:
+              'Kies eerder een aanpak die balans houdt tussen groei en bescherming.',
+            followupText:
+              'Kies eerder een aanpak die balans houdt tussen groei en bescherming.',
+          },
+          {
+            id: 'stability',
+            label: 'Focus op stabiliteit',
+            feedbackTone: 'almost',
+            reveal:
+              'Stabiliteit is logisch, maar mist groeikansen op middellange termijn.',
+            followupText:
+              'Een aanpak met balans tussen groei en bescherming past hier beter.',
+          },
+          {
+            id: 'balance',
+            label: 'Zoek balans tussen groei en risico',
+            isKey: true,
+            feedbackTone: 'correct',
+            reveal:
+              'Juist. Omdat Frank nog enkele jaren heeft, maar het geld wel binnen afzienbare tijd nodig heeft, past een balans tussen groei en risico het best bij zijn tijdshorizon.',
+          },
         ],
+        completionLabel: 'Les afronden',
       },
     },
   },

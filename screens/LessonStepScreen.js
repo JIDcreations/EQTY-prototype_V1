@@ -258,10 +258,7 @@ export default function LessonStepScreen() {
         return content?.steps?.reflection?.title || introTitle || 'Reflection';
       case 6:
         if (lessonId === 'lesson_0') return 'Het volledige investeringsproces';
-        if (lessonId === 'lesson_1') {
-          return content?.steps?.summary?.title || (locale === 'nl' ? 'Wat je geleerd hebt' : 'What you learned');
-        }
-        return locale === 'nl' ? 'Wat je geleerd hebt' : 'What you learned';
+        return content?.steps?.summary?.title || (locale === 'nl' ? 'Wat je geleerd hebt' : 'What you learned');
       default:
         return `${copy.labels.part} ${step}`;
     }
@@ -331,13 +328,12 @@ export default function LessonStepScreen() {
     if (step === 4 && lessonId !== 'lesson_0') {
       return content?.steps?.exercise?.subtitle || null;
     }
-    if (step === 6 && lessonId === 'lesson_1') {
-      return content?.steps?.summary?.subtitle || (locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?');
-    }
     if (step === 6 && lessonId !== 'lesson_0') {
-      return locale === 'nl'
-        ? 'Tik op elk inzicht om te bevestigen dat het is blijven hangen.'
-        : 'Tap each insight to confirm what stuck with you.';
+      return content?.steps?.summary?.subtitle || (lessonId === 'lesson_1'
+        ? (locale === 'nl' ? 'Herken je het ontbrekende element?' : 'Can you spot what is missing?')
+        : (locale === 'nl'
+          ? 'Tik op elk inzicht om te bevestigen dat het is blijven hangen.'
+          : 'Tap each insight to confirm what stuck with you.'));
     }
     if (lessonId !== 'lesson_0') return null;
     if (step === 2) return INTRO_VISUALIZATION_SUBTITLE;
@@ -430,7 +426,7 @@ export default function LessonStepScreen() {
         />
       )}
       {step === 6 && (
-        lessonId === 'lesson_0' ? (
+        lessonId === 'lesson_0' || lessonId === 'lesson_2' ? (
           <IntroSummaryStep
             content={content}
             onComplete={handleComplete}
@@ -5115,29 +5111,33 @@ function Lesson1SummaryStep({ content, onComplete, copy }) {
 }
 
 function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language }) {
-  const { colors, styles, mode } = useLessonStepStyles();
+  const { colors, components, styles } = useLessonStepStyles();
   const [picked, setPicked] = useState(null);
   const isDutch = getLocaleKey(language) === 'nl';
-  const scenarioLabel = isDutch ? 'Scenario' : 'Scenario';
-  const scenarioText = isDutch
+  const summary = content?.steps?.summary || {};
+  const scenarioLabel = summary.scenarioLabel || (isDutch ? 'Scenario' : 'Scenario');
+  const scenarioSubtitle = summary.scenarioSubtitle || copy.labels.scenarioPersonalisedSub;
+  const scenarioText = summary.scenarioText || (isDutch
     ? 'Bert koopt impulsief aandelen in de groene energiesector voor €3.000. Drie maanden later staat hij op -18%. Een vriend zegt: hold. Een collega zegt: verkoop. Bert weet niet wat te doen.'
-    : 'Bert impulsively buys 3,000 EUR worth of green energy stocks. Three months later, he is down 18%. A friend says: hold. A colleague says: sell. Bert does not know what to do.';
-  const questionText = isDutch
+    : 'Bert impulsively buys 3,000 EUR worth of green energy stocks. Three months later, he is down 18%. A friend says: hold. A colleague says: sell. Bert does not know what to do.');
+  const questionText = summary.question || (isDutch
     ? 'Wat zegt het beleggingsproces?'
-    : 'What does the investment process say?';
-  const revealExactLabel = isDutch ? 'Goed' : 'Exactly';
-  const revealNudgeLabel = isDutch ? 'Bijna juist - maar' : 'Almost right, but';
-  const processResetText = isDutch
+    : 'What does the investment process say?');
+  const revealExactLabel = summary.correctLabel || (isDutch ? 'Goed' : 'Exactly');
+  const revealAlmostLabel = summary.almostLabel || (isDutch ? 'Bijna juist - maar' : 'Almost right, but');
+  const revealIncorrectLabel = summary.incorrectLabel || (isDutch ? 'Niet de beste keuze' : 'Not the best choice');
+  const nonKeyFollowupText = summary.nonKeyFollowupText || (isDutch
     ? 'Het proces zegt, ga terug naar stap 1. Zonder een doel is elke vervolgbeslissing willekeurig.'
-    : 'The process says: go back to step one. Without a goal, every next decision is arbitrary.';
+    : 'The process says: go back to step one. Without a goal, every next decision is arbitrary.');
 
-  const options = [
+  const options = summary.options || [
     {
       id: 'sell',
       label: isDutch ? 'Verkopen en verlies nemen' : 'Sell and take the loss',
       reveal: isDutch
         ? 'Verkopen is niet per se fout.\nMaar zonder doel weet Bert niet of dit de juiste keuze is.'
         : 'Not necessarily wrong, but without a goal Bert does not know if this is the right choice. Selling on instinct is just as arbitrary as buying on instinct.',
+      feedbackTone: 'incorrect',
     },
     {
       id: 'hold',
@@ -5145,6 +5145,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
       reveal: isDutch
         ? 'Misschien herstelt het aandeel.\nMaar zonder doel is de keuze willekeurig.'
         : 'Patience can be smart, but only if there is a reason to hold. Without a goal, waiting is not a strategy, it is procrastination.',
+      feedbackTone: 'almost',
     },
     {
       id: 'process',
@@ -5155,6 +5156,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
         ? 'Dat is wat het proces zegt. Zonder doel is elke vervolgbeslissing willekeurig.'
         : 'This is what the process says. Without a goal, every next decision is arbitrary. Reconsider the goal first, then decide.',
       isKey: true,
+      feedbackTone: 'correct',
     },
   ];
 
@@ -5165,17 +5167,43 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
 
   const pickedOption = options.find((o) => o.id === picked);
   const isAnswered = picked !== null;
+  const pickedTone = pickedOption?.isKey ? 'correct' : pickedOption?.feedbackTone || 'incorrect';
+  const pickedLabel = pickedOption?.feedbackLabel || (
+    pickedTone === 'correct'
+      ? revealExactLabel
+      : pickedTone === 'almost'
+        ? revealAlmostLabel
+        : revealIncorrectLabel
+  );
+  const completionLabel = summary.completionLabel || copy.buttons.next;
+  const followupText = pickedOption?.followupText || nonKeyFollowupText;
 
   return (
     <View style={[styles.stepBody, styles.scenarioTopSpacing]}>
 
       {/* Scenario */}
-      <View style={styles.scenarioStoryCard}>
-        <AppText style={styles.scenarioStoryLabel}>{scenarioLabel}</AppText>
-        <AppText style={styles.scenarioStoryText}>
+      <Card style={styles.narrativeCard}>
+        <View style={styles.narrativeCharacterRow}>
+          <View style={styles.narrativeAvatar}>
+            <Ionicons
+              name="person-outline"
+              size={components.sizes.icon.md}
+              color={colors.text.secondary}
+            />
+          </View>
+          <View style={styles.narrativeCharacterText}>
+            <AppText style={styles.narrativeCharacterName}>{scenarioLabel}</AppText>
+            {scenarioSubtitle ? (
+              <AppText style={styles.narrativeCharacterSubtitle}>
+                {scenarioSubtitle}
+              </AppText>
+            ) : null}
+          </View>
+        </View>
+        <AppText style={styles.narrativeQuote}>
           {scenarioText}
         </AppText>
-      </View>
+      </Card>
 
       <View style={styles.scenarioQuestionBlock}>
         {/* Question */}
@@ -5202,17 +5230,26 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                     <View
                       style={[
                         styles.scenarioOptionCheckBadge,
-                        mode === 'light' && styles.scenarioOptionCheckBadgeLight,
+                        {
+                          width: components.sizes.icon.lg,
+                          height: components.sizes.icon.lg,
+                          borderRadius: components.sizes.icon.lg / 2,
+                          backgroundColor: colors.accent.primary,
+                        },
                       ]}
                     >
                       <Ionicons
                         name="checkmark"
-                        size={14}
-                        color={mode === 'light' ? colors.text.primary : colors.accent.primary}
+                        size={components.sizes.icon.sm}
+                        color={colors.background.surface}
                       />
                     </View>
                   ) : isWrongPick ? (
-                    <Ionicons name="close-circle" size={20} color={colors.text.secondary} />
+                    <Ionicons
+                      name="close-circle"
+                      size={components.sizes.icon.lg}
+                      color={colors.text.secondary}
+                    />
                   ) : null
                 }
               />
@@ -5234,24 +5271,20 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
               color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
             />
             <AppText style={[styles.scenarioRevealLabel, pickedOption.isKey && styles.scenarioRevealLabelKey]}>
-              {pickedOption.isKey
-                ? revealExactLabel
-                : isDutch && pickedOption.id === 'hold'
-                  ? 'Logisch idee - maar'
-                  : revealNudgeLabel}
+              {pickedLabel}
             </AppText>
           </View>
           <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
-          {!pickedOption.isKey && (
+          {!pickedOption.isKey && followupText ? (
             <>
               <View style={styles.scenarioRevealDivider} />
-              <AppText style={styles.scenarioRevealText}>{processResetText}</AppText>
+              <AppText style={styles.scenarioRevealText}>{followupText}</AppText>
             </>
-          )}
+          ) : null}
         </Animated.View>
       )}
 
-      {isAnswered && <PrimaryButton label={copy.buttons.next} onPress={onComplete} />}
+      {isAnswered && <PrimaryButton label={completionLabel} onPress={onComplete} />}
     </View>
   );
 }
