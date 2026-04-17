@@ -408,7 +408,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       paddingTop: components.layout.safeArea.top + components.layout.spacing.xl,
       gap: components.layout.contentGap,
       paddingBottom:
-        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.md,
+        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.xxl,
     },
     themeList: {
       gap: components.layout.spacing.xxl,

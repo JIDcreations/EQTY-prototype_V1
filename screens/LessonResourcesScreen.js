@@ -374,7 +374,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
   return StyleSheet.create({
     content: {
       paddingTop: components.layout.safeArea.top + sp.xl,
-      paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.md,
+      paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.xxl,
       gap: sp.lg,
     },
 

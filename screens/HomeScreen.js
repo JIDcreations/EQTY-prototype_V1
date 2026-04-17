@@ -283,7 +283,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     content: {
       paddingTop: components.layout.safeArea.top + components.layout.spacing.xl,
       paddingBottom:
-        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.md,
+        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.xxl,
     },
     topBlock: {
       gap: components.layout.spacing.md,
