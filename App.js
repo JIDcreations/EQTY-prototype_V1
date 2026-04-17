@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native';
-import { DefaultTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import { CommonActions, DefaultTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -74,10 +74,34 @@ function Tabs() {
       <Tab.Screen
         name="Lessons"
         component={LessonsStack}
-        listeners={({ navigation }) => ({
+        listeners={({ navigation, route }) => ({
           tabPress: (event) => {
+            const tabState = navigation.getState();
+            const activeRouteKey = tabState.routes[tabState.index]?.key;
+            const isFocusedTab = activeRouteKey === route.key;
+            const nestedStackKey = route.state?.key;
+
+            const resetLessonsStack = () => {
+              if (!nestedStackKey) return false;
+              navigation.dispatch({
+                ...CommonActions.reset({
+                  index: 0,
+                  routes: [{ name: 'LessonsHome' }],
+                }),
+                target: nestedStackKey,
+              });
+              return true;
+            };
+
             event.preventDefault();
-            navigation.navigate('Lessons', { screen: 'LessonsHome' });
+            if (isFocusedTab) {
+              if (resetLessonsStack()) return;
+              navigation.navigate('Lessons', { screen: 'LessonsHome' });
+              return;
+            }
+
+            resetLessonsStack();
+            navigation.navigate('Lessons');
           },
         })}
       />
