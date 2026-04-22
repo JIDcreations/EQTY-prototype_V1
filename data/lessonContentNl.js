@@ -100,6 +100,8 @@ export const lessonContentNl = {
       },
       reflection: {
         question: 'Als er één ding is dat je geleerd hebt uit deze les, wat is het?',
+        insightText:
+          'Genoteerd - door een proces te volgen, bouw je eerst inzicht op, waardoor je later bewuster en met meer zekerheid investeert.',
         placeholder: 'Schrijf hier je antwoord...',
       },
       summary: {
