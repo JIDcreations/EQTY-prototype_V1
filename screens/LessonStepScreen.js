@@ -1225,7 +1225,8 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
 
   const pageWidth = Dimensions.get('window').width;
   const CARD_GAP = 8;
-  const snapInterval = pageWidth - (2 * components.layout.pagePaddingHorizontal) + CARD_GAP;
+  const CARD_PEEK = 10;
+  const snapInterval = pageWidth - (2 * components.layout.pagePaddingHorizontal) - CARD_PEEK + CARD_GAP;
 
   const handlePageChange = useCallback((event) => {
     const nextIndex = Math.max(0, Math.min(Math.round(event.nativeEvent.contentOffset.x / snapInterval), steps.length - 1));
@@ -1272,7 +1273,13 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
             data={steps}
             keyExtractor={(item) => item.id}
             style={styles.l1VisPagerList}
-            contentContainerStyle={[styles.l1VisPagerTrack, { paddingLeft: components.layout.pagePaddingHorizontal }]}
+            contentContainerStyle={[
+              styles.l1VisPagerTrack,
+              {
+                paddingLeft: components.layout.pagePaddingHorizontal,
+                paddingRight: components.layout.pagePaddingHorizontal + CARD_PEEK,
+              },
+            ]}
             horizontal
             snapToInterval={snapInterval}
             snapToAlignment="start"
@@ -1283,7 +1290,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
             onScrollEndDrag={handlePageChange}
             onScrollToIndexFailed={handleScrollFailed}
             renderItem={({ item: step, index }) => (
-              <View style={[styles.l1VisPage, { width: snapInterval }]}>
+              <View style={[styles.l1VisPage, { width: snapInterval, paddingRight: CARD_GAP }]}>
                 <ProcessGridFlipCard
                   step={step}
                   index={index}
