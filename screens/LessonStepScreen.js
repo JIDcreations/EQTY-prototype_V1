@@ -201,6 +201,7 @@ export default function LessonStepScreen() {
   const { colors, components, styles } = useLessonStepStyles();
   const [isLessonGlossaryOpen, setLessonGlossaryOpen] = useState(false);
   const [lessonTermQuery, setLessonTermQuery] = useState('');
+  const stepScrollRef = useRef(null);
   const lessonGlossarySheetMaxHeight = Math.max(
     components.sizes.screen.minPanelHeight,
     Dimensions.get('window').height * 0.72
@@ -304,6 +305,14 @@ export default function LessonStepScreen() {
     }
   };
 
+  const scrollToAnswerReveal = useCallback(() => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        stepScrollRef.current?.scrollToEnd?.({ animated: true });
+      }, 120);
+    });
+  }, []);
+
   const disableOuterScroll = lessonId === 'lesson_0' && step === 5;
   let flowPhaseLabel = copy.labels.lessonFlowPhases?.[step] || copy.labels.part;
   if (lessonId === 'lesson_0' && step === 6) {
@@ -346,6 +355,7 @@ export default function LessonStepScreen() {
     <View style={styles.root}>
     <ScreenBackground variant="bg3">
       <LessonStepContainer
+        scrollRef={stepScrollRef}
         scrollEnabled={!disableOuterScroll && !isLessonGlossaryOpen}
         containerStyle={styles.transparentScreen}
         fillViewport={step === 2}
@@ -433,12 +443,14 @@ export default function LessonStepScreen() {
             onPressTerm={handleTermPress}
             copy={copy}
             language={preferences?.language}
+            onAnswerReveal={scrollToAnswerReveal}
           />
         ) : lessonId === 'lesson_1' ? (
           <Lesson1SummaryStep
             content={content}
             onComplete={handleComplete}
             copy={copy}
+            onAnswerReveal={scrollToAnswerReveal}
           />
         ) : (
           <SummaryStep
@@ -4307,6 +4319,7 @@ function GuidedGoalExercise({
   showProgressDots = true,
   completeOnFirstSubmit = false,
   personalizationHint,
+  onAnswerReveal,
 }) {
   const { colors, components, styles } = useLessonStepStyles();
   const {
@@ -4332,6 +4345,15 @@ function GuidedGoalExercise({
   const selectedSingleOption = activeSingleSection ? answers[activeSingleSection.id] : null;
   const isSingleAnswered = selectedSingleOption !== null;
   const isLastSingleSection = activeIndex === sections.length - 1;
+  const answeredCount = Object.values(answers).filter((answer) => answer !== null).length;
+  const previousAnsweredCountRef = useRef(answeredCount);
+
+  useEffect(() => {
+    if (answeredCount > previousAnsweredCountRef.current) {
+      onAnswerReveal?.();
+    }
+    previousAnsweredCountRef.current = answeredCount;
+  }, [answeredCount, onAnswerReveal]);
 
   if (isSingleQuestionImmediate) {
     const activeSection = activeSingleSection;
@@ -5091,7 +5113,7 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
 }
 
 
-function Lesson1SummaryStep({ content, onComplete, copy }) {
+function Lesson1SummaryStep({ content, onComplete, copy, onAnswerReveal }) {
   const { styles } = useLessonStepStyles();
   const summary = content?.steps?.summary || {};
 
@@ -5112,12 +5134,13 @@ function Lesson1SummaryStep({ content, onComplete, copy }) {
         postSubmitLabel={copy.buttons.completeLesson}
         showProgressDots={false}
         completeOnFirstSubmit
+        onAnswerReveal={onAnswerReveal}
       />
     </View>
   );
 }
 
-function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language }) {
+function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language, onAnswerReveal }) {
   const { colors, components, styles } = useLessonStepStyles();
   const [picked, setPicked] = useState(null);
   const isDutch = getLocaleKey(language) === 'nl';
@@ -5184,6 +5207,12 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
   );
   const completionLabel = summary.completionLabel || copy.buttons.next;
   const followupText = pickedOption?.followupText || nonKeyFollowupText;
+
+  useEffect(() => {
+    if (isAnswered) {
+      onAnswerReveal?.();
+    }
+  }, [isAnswered, onAnswerReveal]);
 
   return (
     <View style={[styles.stepBody, styles.scenarioTopSpacing]}>

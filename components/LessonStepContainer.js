@@ -7,6 +7,7 @@ import { useTheme } from '../theme';
 export default function LessonStepContainer({
   children,
   scrollEnabled = true,
+  scrollRef,
   contentStyle,
   containerStyle,
   fillViewport = false,
@@ -28,6 +29,7 @@ export default function LessonStepContainer({
     <View style={wrapperStyle}>
       {scrollEnabled ? (
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
         >
