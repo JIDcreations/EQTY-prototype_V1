@@ -110,7 +110,7 @@ const INTRO_VISUALIZATION_STEPS = [
     label: 'Individuele risicoanalyse',
     question: 'Hoeveel risico kan en wil ik nemen?',
     detail:
-      'De risicoanalyse bepaalt hoeveel risico binnen jouw grenzen blijft, op basis van je tolerantie en je tijdshorizon.',
+      'Risicoanalyse bepaalt hoeveel risico jij aankan. Dat hangt af van hoe lang je wil investeren en hoe je reageert als je geld daalt.',
   },
   {
     id: 'strategy',
