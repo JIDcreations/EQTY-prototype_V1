@@ -509,7 +509,7 @@ export const lessonContent = {
             story: 'Joris wants to buy a car within 1–2 years.',
             question: 'Which goal type fits this?',
             correctOption: 'Short term',
-            options: ['Short term', 'Medium term', 'Long term'],
+            options: ['Medium term', 'Long term', 'Short term'],
             feedback: {
               correctLabel: 'Correct',
               incorrectLabel: 'Not quite',
@@ -526,7 +526,7 @@ export const lessonContent = {
             story: 'Emma is saving for something in a few years.',
             question: 'Which goal type fits this?',
             correctOption: 'Medium term',
-            options: ['Short term', 'Medium term', 'Long term'],
+            options: ['Long term', 'Medium term', 'Short term'],
             feedback: {
               correctLabel: 'Correct',
               incorrectLabel: 'Not quite',
@@ -543,7 +543,7 @@ export const lessonContent = {
             story: 'Lucas wants to build wealth for later.',
             question: 'Which goal type fits this?',
             correctOption: 'Long term',
-            options: ['Short term', 'Medium term', 'Long term'],
+            options: ['Long term', 'Short term', 'Medium term'],
             feedback: {
               correctLabel: 'Correct',
               incorrectLabel: 'Not quite',

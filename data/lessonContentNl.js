@@ -530,9 +530,9 @@ export const lessonContentNl = {
             question: 'Welk doeltype past hierbij?',
             correctOption: 'Korte termijn',
             options: [
-              'Korte termijn',
               'Middellange termijn',
               'Lange termijn',
+              'Korte termijn',
             ],
             feedback: {
               correctLabel: 'GOED',
@@ -551,9 +551,9 @@ export const lessonContentNl = {
             question: 'Welk doeltype past hierbij?',
             correctOption: 'Middellange termijn',
             options: [
-              'Korte termijn',
-              'Middellange termijn',
               'Lange termijn',
+              'Middellange termijn',
+              'Korte termijn',
             ],
             feedback: {
               correctLabel: 'GOED',
@@ -572,9 +572,9 @@ export const lessonContentNl = {
             question: 'Welk doeltype past hierbij?',
             correctOption: 'Lange termijn',
             options: [
+              'Lange termijn',
               'Korte termijn',
               'Middellange termijn',
-              'Lange termijn',
             ],
             feedback: {
               correctLabel: 'GOED',
