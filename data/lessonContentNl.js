@@ -585,6 +585,27 @@ export const lessonContentNl = {
                 'Niet helemaal. Dit is een langetermijndoel omdat het voor later is.',
             },
           },
+          {
+            id: 'business',
+            name: 'Jasper',
+            cardSubtitle: 'Voorbeeldscenario',
+            story: 'Jasper spaart om binnen enkele jaren een eigen zaak te starten.',
+            question: 'Welk doeltype past hierbij?',
+            correctOption: 'Middellange termijn',
+            options: [
+              'Lange termijn',
+              'Middellange termijn',
+              'Korte termijn',
+            ],
+            feedback: {
+              correctLabel: 'GOED',
+              incorrectLabel: 'Niet helemaal',
+              correctText:
+                'Correct. Dit is een middellangetermijndoel omdat Jasper zijn eigen zaak binnen enkele jaren wil starten.',
+              incorrectText:
+                'Niet helemaal. Dit is een middellangetermijndoel omdat Jasper zijn eigen zaak binnen enkele jaren wil starten.',
+            },
+          },
         ],
         nextQuestionLabel: 'Volgende vraag',
         nextLabel: 'Volgende',

@@ -553,6 +553,23 @@ export const lessonContent = {
                 'Not quite. This is a long-term goal because it is for later.',
             },
           },
+          {
+            id: 'business',
+            name: 'Jasper',
+            cardSubtitle: 'Example scenario',
+            story: 'Jasper is saving to start his own business within a few years.',
+            question: 'Which goal type fits this?',
+            correctOption: 'Medium term',
+            options: ['Long term', 'Medium term', 'Short term'],
+            feedback: {
+              correctLabel: 'Correct',
+              incorrectLabel: 'Not quite',
+              correctText:
+                'Correct. This is a medium-term goal because Jasper wants to start his own business within a few years.',
+              incorrectText:
+                'Not quite. This is a medium-term goal because Jasper wants to start his own business within a few years.',
+            },
+          },
         ],
         nextQuestionLabel: 'Next question',
         nextLabel: 'Next',
