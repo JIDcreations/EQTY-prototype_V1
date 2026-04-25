@@ -578,12 +578,11 @@ export const lessonContent = {
       },
       reflection: {
         title: 'Reflection',
-        question: 'Which type of goal fits you best right now?',
-        subtitle:
-          'Think about what feels closest today. Your answer will be used in future lessons.',
+        question: 'Why do you handle money differently for short- vs long-term goals?',
+        subtitle: 'Think about how much risk you can take.',
         placeholder: 'Short term, medium term, or long term...',
         insightText:
-          'Good. Knowing your current goal type will help future lessons connect decisions to your situation.',
+          'Good point. In the short term, you take less risk. With more time, you can take more risk.',
       },
       summary: {
         takeaways: [

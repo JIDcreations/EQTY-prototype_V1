@@ -614,12 +614,11 @@ export const lessonContentNl = {
       },
       reflection: {
         title: 'Reflectie',
-        question: 'Waarom zijn er verschillende soorten doelen?',
-        subtitle:
-          'Leg in je eigen woorden uit waarom tijd een rol speelt bij investeren.',
+        question: 'Waarom ga je anders om met geld bij korte vs lange doelen?',
+        subtitle: 'Denk aan hoeveel risico je kan nemen.',
         placeholder: 'Beschrijf kort waarom tijd een rol speelt...',
         insightText:
-          'Goed gezien. Tijd bepaalt hoeveel risico je kan nemen en welke aanpak past bij je doel.',
+          'Goed gezien. Op korte termijn neem je minder risico. Met meer tijd kan je meer risico nemen.',
       },
       summary: {
         title: 'Welke aanpak past het best deze situatie?',
