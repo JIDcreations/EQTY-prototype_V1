@@ -157,6 +157,7 @@ const LESSON_STEP_COPY = {
       outcome: 'Outcome',
       aligned: 'Aligned',
       recheckFlow: 'Recheck the flow',
+      scenarioExampleSub: 'Example situation',
       scenarioPersonalisedSub: 'Based on your situation',
       yourOrder: 'Your order',
       actions: 'Actions',
@@ -319,10 +320,10 @@ const LESSON_STEP_COPY = {
         'When execution happens too early, the outcome becomes unpredictable.',
       feedbackCorrectTitle: 'Good choice',
       feedbackCorrectBody:
-        "By going through the process first, Lars doesn't decide on instinct, but on insight. That leads to more structure and a more predictable outcome.",
+        "By going through the process first, Bert doesn't decide on instinct, but on insight. That leads to more structure and a more predictable outcome.",
       feedbackIncorrectTitle: 'Not the best choice',
       feedbackIncorrectBody:
-        'Without preparation, Lars invests on instinct. That makes the outcome unpredictable and hard to control.',
+        'Without preparation, Bert invests on instinct. That makes the outcome unpredictable and hard to control.',
       steps: [
         { id: 'goal', label: 'Goal' },
         { id: 'risk', label: 'Risk' },
@@ -386,6 +387,7 @@ const LESSON_STEP_COPY = {
       outcome: 'Uitkomst',
       aligned: 'In lijn',
       recheckFlow: 'Controleer de volgorde',
+      scenarioExampleSub: 'Voorbeeldsituatie',
       scenarioPersonalisedSub: 'Gebaseerd op jouw situatie',
       yourOrder: 'Jouw volgorde',
       actions: 'Acties',
@@ -550,10 +552,10 @@ const LESSON_STEP_COPY = {
         'Wanneer uitvoering te vroeg gebeurt, wordt het resultaat onvoorspelbaar.',
       feedbackCorrectTitle: 'Goede keuze',
       feedbackCorrectBody:
-        'Door het proces eerst te doorlopen, neemt Lars geen beslissing op gevoel.\nDit zorgt voor meer structuur en een beter voorspelbaar resultaat.',
+        'Door het proces eerst te doorlopen, neemt Bert geen beslissing op gevoel.\nDit zorgt voor meer structuur en een beter voorspelbaar resultaat.',
       feedbackIncorrectTitle: 'Niet de beste keuze',
       feedbackIncorrectBody:
-        'Zonder voorbereiding investeert Lars op gevoel. Dat maakt het resultaat onvoorspelbaar en moeilijk te controleren.',
+        'Zonder voorbereiding investeert Bert op gevoel. Dat maakt het resultaat onvoorspelbaar en moeilijk te controleren.',
       steps: [
         { id: 'goal', label: 'Doel' },
         { id: 'risk', label: 'Risico' },

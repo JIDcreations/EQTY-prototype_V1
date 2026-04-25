@@ -237,7 +237,7 @@ export const lessonContentNl = {
         cardLabel: 'Jean-Pierre',
         text:
           'Ik heb €5.000 klaarstaan, maar ik weet nog niet waarvoor ik precies investeer.',
-        prompt: 'Wat zou jij doen in deze situatie?',
+        prompt: 'Wat zou Bert best doen?',
         choices: [
           {
             id: 'invest_now',
@@ -468,7 +468,7 @@ export const lessonContentNl = {
         cardLabel: 'Pieter-Jan',
         text:
           'Ik wil binnen 2 jaar een auto kopen en wil hiervoor mijn geld laten groeien.',
-        prompt: 'Wat zou jij doen in deze situatie?',
+        prompt: 'Wat zou Bert best doen?',
         choices: [
           {
             id: 'max_growth',

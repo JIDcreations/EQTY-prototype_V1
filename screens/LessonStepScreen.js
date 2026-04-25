@@ -2430,6 +2430,8 @@ function IntroScenarioStep({ onNext, copy }) {
   const { styles, colors, components } = useLessonStepStyles();
   const steps = copy.introScenario.steps;
   const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
+  const scenarioName = 'Bert';
+  const scenarioSubtitle = copy.labels.scenarioExampleSub;
 
   const [selected, setSelected] = useState(null);
   const showComparison = selected !== null;
@@ -2508,7 +2510,6 @@ function IntroScenarioStep({ onNext, copy }) {
   return (
     <View style={styles.stepBody}>
       <View style={styles.narrativeTopSection}>
-        {/* Lars — always visible */}
         <Card style={styles.narrativeCard}>
           <View style={styles.narrativeCharacterRow}>
             <View style={styles.narrativeAvatar}>
@@ -2519,9 +2520,9 @@ function IntroScenarioStep({ onNext, copy }) {
               />
             </View>
             <View style={styles.narrativeCharacterText}>
-              <AppText style={styles.narrativeCharacterName}>Lars</AppText>
+              <AppText style={styles.narrativeCharacterName}>{scenarioName}</AppText>
               <AppText style={styles.narrativeCharacterSubtitle}>
-                {copy.labels.scenarioPersonalisedSub}
+                {scenarioSubtitle}
               </AppText>
             </View>
           </View>
@@ -2530,7 +2531,7 @@ function IntroScenarioStep({ onNext, copy }) {
           </AppText>
         </Card>
 
-        <AppText style={styles.narrativePrompt}>Wat zou jij doen in deze situatie?</AppText>
+        <AppText style={styles.narrativePrompt}>Wat zou Bert best doen?</AppText>
       </View>
 
       {/* Choice cards + connector + comparison — tightly grouped */}
@@ -2728,7 +2729,6 @@ function ScenarioCompareCard({ title, animatedStyle, cardStyle, visual, rows }) 
 }
 
 function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
-  const { authUser } = useApp();
   const { styles, colors, components } = useLessonStepStyles();
   const scenario = content?.steps?.scenario || {};
   const choices = scenario?.choices || [];
@@ -2741,7 +2741,8 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
   const isLeftSelected = selected === leftChoice?.id;
   const isRightSelected = selected === rightChoice?.id;
   const isCorrect = choices.find((choice) => choice.id === selected)?.isKey;
-  const scenarioName = scenario?.cardLabel || authUser?.name || authUser?.username || 'Scenario';
+  const scenarioName = 'Bert';
+  const scenarioSubtitle = copy.labels.scenarioExampleSub;
 
   const leftScale = useSharedValue(1);
   const rightScale = useSharedValue(1);
@@ -2826,7 +2827,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                 {scenarioName}
               </AppText>
               <AppText style={styles.narrativeCharacterSubtitle}>
-                {copy.labels.scenarioPersonalisedSub}
+                {scenarioSubtitle}
               </AppText>
             </View>
           </View>

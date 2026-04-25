@@ -237,7 +237,7 @@ export const lessonContent = {
         cardLabel: 'Jean-Pierre',
         text:
           'I have €5,000 ready, but I do not yet know what exactly I am investing for.',
-        prompt: 'What do you do first?',
+        prompt: 'What would Bert best do?',
         choices: [
           {
             id: 'invest_now',
@@ -448,7 +448,7 @@ export const lessonContent = {
         intro: 'Discover how time shapes your approach',
         text:
           'I want to buy something within 2 years and want my money to grow.',
-        prompt: 'What would you do in this situation?',
+        prompt: 'What would Bert best do?',
         choices: [
           {
             id: 'max_growth',
