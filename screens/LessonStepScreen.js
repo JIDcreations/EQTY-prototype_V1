@@ -5804,7 +5804,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   /* ── Concept screen: process track ── */
   conceptTrackWrap: {
-    gap: components.layout.spacing.md,
+    gap: 12,
     marginTop: components.layout.spacing.sm,
   },
   conceptTrackHeader: {
@@ -5848,12 +5848,12 @@ const createStyles = (colors, components, mode = 'dark') =>
     paddingVertical: components.layout.spacing.md,
     paddingLeft: components.layout.spacing.md,
     paddingRight: components.layout.spacing.lg,
-    gap: components.layout.spacing.sm,
+    gap: 12,
   },
   conceptTrackBodyRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: components.layout.spacing.sm,
+    gap: 12,
   },
   conceptTrackIndex: {
     ...typography.styles.stepLabel,
@@ -5902,7 +5902,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.secondary,
   },
   goalConceptImpactList: {
-    gap: components.layout.spacing.sm,
+    gap: 12,
   },
   segmentRow: {
     flexDirection: 'row',
@@ -8299,7 +8299,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: components.radius.card,
     backgroundColor: colors.accent.primary,
     padding: components.layout.spacing.xl,
-    gap: components.layout.spacing.sm,
+    gap: 12,
     shadowColor: colors.accent.primary,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
@@ -8319,14 +8319,14 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.onAccent,
   },
   anchorContent: {
-    gap: components.layout.spacing.xs,
+    gap: 12,
   },
   anchorForkContainer: {
     width: '100%',
   },
   anchorTiles: {
     flexDirection: 'row',
-    gap: components.layout.spacing.sm,
+    gap: 12,
   },
   anchorTilesGrid: {
     flexWrap: 'wrap',

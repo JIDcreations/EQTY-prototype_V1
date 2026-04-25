@@ -452,34 +452,32 @@ const LESSON_STEP_COPY = {
         {
           id: 'goal',
           label: 'Doelbepaling',
-          detail: 'Wat wil je met je belegging bereiken?',
+          detail: 'Wat wil je bereiken?',
         },
         {
           id: 'risk',
           label: 'Individuele risicoanalyse',
-          detail: 'Hoeveel risico kan en wil je nemen?',
+          detail: 'Hoeveel risico past bij jou?',
         },
         {
           id: 'strategy',
-          label: 'Financiële investeringsstrategie',
-          detail: 'Welke aanpak ga je volgen om je doel te bereiken?',
+          label: 'Investeringsstrategie',
+          detail: 'Hoe pak je je doel aan?',
         },
         {
           id: 'allocation',
           label: 'Kapitaalallocatie',
-          detail: 'Hoe verdeel je je geld over verschillende beleggingen?',
+          detail: 'Hoe verdeel je je geld?',
         },
         {
           id: 'vehicle',
           label: 'Beleggingsinstrument',
-          detail:
-            'In welke beleggingen ga je investeren, zoals aandelen, ETF’s of obligaties.',
+          detail: 'Waarin investeer je?',
         },
         {
           id: 'execution',
           label: 'Uitvoering',
-          detail:
-            'De stap waarin je de investering effectief uitvoert via een broker.',
+          detail: 'Je investering effectief uitvoeren.',
         },
       ],
     },
