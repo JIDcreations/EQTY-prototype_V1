@@ -163,6 +163,9 @@ export default function HomeScreen() {
   const heroDescription = hasCompletedAllLessons
     ? deepDiveCopy.sectionSubtitle
     : lessonDescription;
+  const headerSubtitle = hasCompletedAllLessons
+    ? homeCopy.postCourseStepLabel
+    : currentContextLabel;
   const greetingLine = `${greeting}, ${displayName}`;
   const handlePrimaryCtaPress = useCallback(() => {
     if (hasCompletedAllLessons) {
@@ -224,7 +227,7 @@ export default function HomeScreen() {
       <View style={styles.topBlock}>
         <TopTabHeader
           title={greetingLine}
-          subtitle={currentContextLabel}
+          subtitle={headerSubtitle}
           subtitleStyle={styles.headerStepLabel}
           onPressProfile={() => navigation.navigate('Profile')}
         />
