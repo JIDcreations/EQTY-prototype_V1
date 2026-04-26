@@ -677,7 +677,8 @@ export const lessonContent = {
       },
       exercise: {
         type: 'tradeoff',
-        description: 'Adjust the sliders to see how risk feels beyond numbers.',
+        description:
+          'Joris begint met investeren omdat vrienden zeggen dat het een goed idee is. Na een paar weken staat hij in verlies en weet hij niet of hij moet bijhouden.',
         sliders: [
           {
             id: 'drawdown',
