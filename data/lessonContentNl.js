@@ -629,12 +629,12 @@ export const lessonContentNl = {
         lockAnswerAfterSelection: true,
       },
       reflection: {
-        title: 'Reflectie',
-        question: 'Waarom ga je anders om met geld bij korte vs lange doelen?',
-        subtitle: 'Denk aan hoeveel risico je kan nemen.',
-        placeholder: 'Beschrijf kort waarom tijd een rol speelt...',
+        title: 'Waarom zijn er verschillende soorten doelen?',
+        question: 'Waarom zijn er verschillende soorten doelen?',
+        subtitle: 'Denk aan tijd en hoeveel risico je kan nemen.',
+        placeholder: 'Bij korte termijn neem je minder risico…',
         insightText:
-          'Goed gezien. Op korte termijn neem je minder risico. Met meer tijd kan je meer risico nemen.',
+          'Goed gezien. Meer tijd betekent dat je meer risico kan nemen, terwijl je bij korte termijn eerder voor zekerheid kiest.',
       },
       summary: {
         title: 'Welke aanpak past het best deze situatie?',

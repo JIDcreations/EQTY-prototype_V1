@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
@@ -26,11 +26,15 @@ import { deepDiveTracks, getDeepDiveLessonsForTrack } from '../data/deepDives';
 
 export default function LessonsScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
   const tabBarHeight = useBottomTabBarHeight();
   const { progress, preferences, isPremium, updateProgress } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef(new Map());
   const devTitleTapRef = useRef({ count: 0, timestamp: 0 });
+  const scrollRef = useRef(null);
+  const deepDiveOffsetRef = useRef(null);
+  const [deepDiveSectionY, setDeepDiveSectionY] = useState(null);
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
@@ -117,11 +121,36 @@ export default function LessonsScreen() {
     [openLessonOverview]
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.scrollToSection !== 'deepDive') return undefined;
+
+      const scrollToDeepDive = () => {
+        if (typeof deepDiveSectionY !== 'number') return;
+        scrollRef.current?.scrollTo?.({
+          y: Math.max(0, deepDiveSectionY - components.layout.spacing.lg),
+          animated: true,
+        });
+        navigation.setParams({ scrollToSection: undefined });
+      };
+
+      deepDiveOffsetRef.current = setTimeout(scrollToDeepDive, 120);
+
+      return () => {
+        if (deepDiveOffsetRef.current) {
+          clearTimeout(deepDiveOffsetRef.current);
+          deepDiveOffsetRef.current = null;
+        }
+      };
+    }, [components.layout.spacing.lg, deepDiveSectionY, navigation, route.params?.scrollToSection])
+  );
+
   return (
     <OnboardingScreen
       scroll
       backgroundVariant="bg3"
       contentContainerStyle={styles.content}
+      scrollRef={scrollRef}
     >
       <TopTabHeader
         title="Lesoverzicht"
@@ -209,7 +238,10 @@ export default function LessonsScreen() {
       </View>
 
       {/* Deep Dive section — always visible, signals a new phase */}
-      <View style={styles.deepDiveSection}>
+      <View
+        style={styles.deepDiveSection}
+        onLayout={(event) => setDeepDiveSectionY(event.nativeEvent.layout.y)}
+      >
 
         {/* Divider */}
         <View style={[styles.deepDiveDivider, { backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke) }]} />
@@ -217,7 +249,7 @@ export default function LessonsScreen() {
         {/* Section intro */}
         <View style={styles.deepDiveIntro}>
           <View style={styles.deepDiveTitleRow}>
-            <AppText style={[styles.deepDiveIntroTitle, { color: colors.text.primary }]}>
+            <AppText style={[styles.deepDiveIntroTitle, { color: colors.accent.primary }]}>
               {deepDiveCopy.sectionTitle}
             </AppText>
             {!isPremium && (

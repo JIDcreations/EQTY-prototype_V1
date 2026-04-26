@@ -17,6 +17,7 @@ import SectionTitle from '../components/SectionTitle';
 import TopTabHeader from '../components/TopTabHeader';
 import {
   formatThemeLessonContextLabel,
+  getDeepDiveCopy,
   getHomeCopy,
   getHomeLessonCardCopy,
   getLocalizedLessons,
@@ -39,6 +40,10 @@ export default function HomeScreen() {
     [colors, components, tabBarHeight, mode]
   );
   const homeCopy = useMemo(() => getHomeCopy(preferences?.language), [preferences?.language]);
+  const deepDiveCopy = useMemo(
+    () => getDeepDiveCopy(preferences?.language),
+    [preferences?.language]
+  );
   const localizedModules = useMemo(
     () => getLocalizedModules(preferences?.language),
     [preferences?.language]
@@ -145,10 +150,39 @@ export default function HomeScreen() {
   const displayName = getDisplayName(authUser, homeCopy);
   const lessonTitle = currentLesson?.title || homeCopy.lessonFallbackTitle;
   const lessonDescription = currentLesson?.shortDescription || homeCopy.lessonFallbackDescription;
-  const primaryCtaLabel =
-    completedCount > 0 ? homeCopy.continueLesson : homeCopy.startLesson;
-  const heroDescription = lessonDescription;
+  const hasCompletedAllLessons = totalLessons > 0 && completedCount >= totalLessons;
+  const primaryCtaLabel = hasCompletedAllLessons
+    ? homeCopy.deepenInterests
+    : completedCount > 0
+      ? homeCopy.continueLesson
+      : homeCopy.startLesson;
+  const heroStepLabel = hasCompletedAllLessons
+    ? (deepDiveCopy.sectionTitle || '').replace(/\.$/, '')
+    : currentContextLabel;
+  const heroTitle = hasCompletedAllLessons ? homeCopy.deepenInterests : lessonTitle;
+  const heroDescription = hasCompletedAllLessons
+    ? deepDiveCopy.sectionSubtitle
+    : lessonDescription;
   const greetingLine = `${greeting}, ${displayName}`;
+  const handlePrimaryCtaPress = useCallback(() => {
+    if (hasCompletedAllLessons) {
+      navigation.navigate('Lessons', {
+        screen: 'LessonsHome',
+        params: {
+          scrollToSection: 'deepDive',
+        },
+      });
+      return;
+    }
+
+    navigation.navigate('Lessons', {
+      screen: 'LessonOverview',
+      params: {
+        lessonId: currentLesson?.id,
+        entrySource: 'Home',
+      },
+    });
+  }, [currentLesson?.id, hasCompletedAllLessons, navigation]);
   const quickActions = useMemo(
     () => [
       {
@@ -206,10 +240,10 @@ export default function HomeScreen() {
           <Card style={[styles.heroStack, styles.heroCard]}>
             <View style={styles.heroTextBlock}>
               <AppText style={styles.heroStepLabel} numberOfLines={1}>
-                {currentContextLabel}
+                {heroStepLabel}
               </AppText>
               <View style={styles.heroTitleBlock}>
-                <AppText style={styles.heroTitle}>{lessonTitle}</AppText>
+                <AppText style={styles.heroTitle}>{heroTitle}</AppText>
                 {heroDescription ? (
                   <AppText style={styles.heroSubtitle}>{heroDescription}</AppText>
                 ) : null}
@@ -217,15 +251,7 @@ export default function HomeScreen() {
             </View>
             <CtaInsideButton
               label={primaryCtaLabel}
-              onPress={() =>
-                navigation.navigate('Lessons', {
-                  screen: 'LessonOverview',
-                  params: {
-                    lessonId: currentLesson?.id,
-                    entrySource: 'Home',
-                  },
-                })
-              }
+              onPress={handlePrimaryCtaPress}
             />
           </Card>
         </Animated.View>
