@@ -286,7 +286,8 @@ export const lessonContentNl = {
       },
       exercise: {
         title: 'Wat deed Joris fout?',
-        subtitle: 'Ontdek wat ontbreekt voordat je begint met investeren.',
+        subtitle:
+          'Plaats de stappen van het beleggingsproces in de juiste volgorde. Klik op de volgende stap.',
         type: 'scenario',
         name: 'Joris',
         personalized: true,

@@ -155,6 +155,13 @@ const glossaryTermIndex = glossaryTerms.reduce((acc, term) => {
   return acc;
 }, {});
 
+const sortTermsAlphabetically = (terms, language) =>
+  [...terms].sort((left, right) =>
+    (left?.term || '').localeCompare(right?.term || '', language || 'nl', {
+      sensitivity: 'base',
+    })
+  );
+
 const getSmoothPoints = (basePoints, samplesPerSegment = 10) => {
   if (basePoints.length < 3) return basePoints;
   const smooth = [];
@@ -218,18 +225,24 @@ export default function LessonStepScreen() {
   );
   const lessonTerms = useMemo(() => {
     const termIds = lessonId === 'lesson_0' ? INTRO_PROCESS_GLOSSARY_TERM_IDS : lessonTermIds;
-    return termIds.map((termId) => glossaryTermIndex[termId]).filter(Boolean);
-  }, [lessonId, lessonTermIds]);
+    return sortTermsAlphabetically(
+      termIds.map((termId) => glossaryTermIndex[termId]).filter(Boolean),
+      preferences?.language
+    );
+  }, [lessonId, lessonTermIds, preferences?.language]);
   const isLessonSearchActive = lessonTermQuery.trim().length > 0;
   const globalSearchResults = useMemo(() => {
     const query = lessonTermQuery.trim().toLowerCase();
     if (!query) return [];
-    return glossaryTerms.filter((term) => {
-      const name = term.term?.toLowerCase() || '';
-      const definition = term.definition?.toLowerCase() || '';
-      return name.includes(query) || definition.includes(query);
-    });
-  }, [lessonTermQuery]);
+    return sortTermsAlphabetically(
+      glossaryTerms.filter((term) => {
+        const name = term.term?.toLowerCase() || '';
+        const definition = term.definition?.toLowerCase() || '';
+        return name.includes(query) || definition.includes(query);
+      }),
+      preferences?.language
+    );
+  }, [lessonTermQuery, preferences?.language]);
   const displayedLessonTerms = isLessonSearchActive ? globalSearchResults : lessonTerms;
   const copy = useMemo(() => getLessonStepCopy(preferences?.language), [preferences?.language]);
   
@@ -347,7 +360,9 @@ export default function LessonStepScreen() {
     if (lessonId !== 'lesson_0') return null;
     if (step === 2) return INTRO_VISUALIZATION_SUBTITLE;
     if (step === 3) return copy.introScenario.headerHelper;
-    if (step === 4) return 'Plaats de stappen van het beleggingsproces in de juiste volgorde.';
+    if (step === 4) {
+      return 'Plaats de stappen van het beleggingsproces in de juiste volgorde. Klik op de volgende stap.';
+    }
     if (step === 6) return 'Herken je het proces in een echte situatie?';
   }, [content, copy.introScenario.headerHelper, lessonId, locale, step]);
 
