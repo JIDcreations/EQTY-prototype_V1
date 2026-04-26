@@ -455,7 +455,7 @@ export const lessonContentNl = {
           {
             id: 'short',
             label: 'Korte termijn',
-            question: 'Iets kopen binnen 1–2 jaar',
+            question: 'Iets dat je binnenkort nodig hebt',
             detail:
               'Je doel ligt dichtbij. Daarom kies je voor stabiliteit en voorspelbare resultaten.',
             example: 'Sparen voor een reis, laptop of voorschot',
