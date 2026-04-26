@@ -732,6 +732,39 @@ export const glossaryTerms = [
     tags: ['Goal', 'Core'],
   },
   {
+    id: 'tg_short_term',
+    term: 'Korte termijn',
+    definition:
+      'Een doel of tijdshorizon binnen ongeveer 1 tot 2 jaar. A goal or time horizon within roughly 1 to 2 years.',
+    example:
+      'Sparen voor een auto of reis binnen 2 jaar is een kortetermijndoel. Saving for a car or trip within 2 years is a short-term goal.',
+    categoryId: 'time_goals',
+    tags: ['Goal', 'Planning'],
+    aliases: ['Short term', 'Short-term'],
+  },
+  {
+    id: 'tg_medium_term',
+    term: 'Middellange termijn',
+    definition:
+      'Een doel of tijdshorizon over enkele jaren, maar niet pas veel later. A goal or time horizon over the next few years, but not far in the future.',
+    example:
+      'Sparen voor een woning binnen enkele jaren is een middellangetermijndoel. Saving for a home within a few years is a medium-term goal.',
+    categoryId: 'time_goals',
+    tags: ['Goal', 'Planning'],
+    aliases: ['Medium term', 'Medium-term'],
+  },
+  {
+    id: 'tg_long_term',
+    term: 'Lange termijn',
+    definition:
+      'Een doel of tijdshorizon dat vele jaren vooruit ligt. A goal or time horizon that lies many years ahead.',
+    example:
+      'Vermogen opbouwen voor later of pensioen is een langetermijndoel. Building wealth for later or retirement is a long-term goal.',
+    categoryId: 'time_goals',
+    tags: ['Goal', 'Planning'],
+    aliases: ['Long term', 'Long-term'],
+  },
+  {
     id: 'tg_risk_tolerance',
     term: 'Risk tolerance',
     definition: 'Your ability and willingness to handle losses.',

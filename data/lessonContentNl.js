@@ -157,6 +157,13 @@ export const lessonContentNl = {
   lesson_1: {
     title: 'Waarom wil ik beleggen?',
     shortDescription: 'Doelen geven richting aan elke beslissing.',
+    glossaryTerms: [
+      { termId: 'eqty_goal_definition' },
+      { termId: 'tg_goal_based' },
+      { termId: 'tg_time_horizon' },
+      { termId: 'rr_risk' },
+      { termId: 'eqty_risk_analysis' },
+    ],
     steps: {
       concept: {
         title: 'Wat is een beleggingsdoel?',
@@ -406,6 +413,14 @@ export const lessonContentNl = {
   lesson_2: {
     title: 'Soorten beleggingsdoelen',
     shortDescription: 'Het type doel stuurt latere beleggingskeuzes.',
+    glossaryTerms: [
+      { termId: 'tg_short_term' },
+      { termId: 'tg_medium_term' },
+      { termId: 'tg_long_term' },
+      { termId: 'tg_time_horizon' },
+      { termId: 'tg_goal_based' },
+      { termId: 'rr_risk' },
+    ],
     steps: {
       concept: {
         title: 'Soorten beleggingsdoelen',

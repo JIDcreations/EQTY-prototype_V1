@@ -162,6 +162,19 @@ const sortTermsAlphabetically = (terms, language) =>
     })
   );
 
+const extractGlossaryTermIds = (content) => {
+  const explicitTermIds = Array.isArray(content?.glossaryTerms)
+    ? content.glossaryTerms
+        .map((entry) => {
+          if (typeof entry === 'string') return entry;
+          return entry?.termId || entry?.id || null;
+        })
+        .filter(Boolean)
+    : [];
+
+  return Array.from(new Set([...explicitTermIds, ...collectGlossaryTermIds(content || {})]));
+};
+
 const getSmoothPoints = (basePoints, samplesPerSegment = 10) => {
   if (basePoints.length < 3) return basePoints;
   const smooth = [];
@@ -220,7 +233,7 @@ export default function LessonStepScreen() {
   const glossary = useGlossary();
   const content = getLessonContent(lessonId, preferences?.language);
   const lessonTermIds = useMemo(
-    () => collectGlossaryTermIds(content || {}),
+    () => extractGlossaryTermIds(content),
     [content]
   );
   const lessonTerms = useMemo(() => {

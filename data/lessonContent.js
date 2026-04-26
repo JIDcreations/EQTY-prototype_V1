@@ -157,6 +157,13 @@ export const lessonContent = {
   lesson_1: {
     title: 'Why Do I Want to Invest?',
     shortDescription: 'Goals give every decision direction.',
+    glossaryTerms: [
+      { termId: 'eqty_goal_definition' },
+      { termId: 'tg_goal_based' },
+      { termId: 'tg_time_horizon' },
+      { termId: 'rr_risk' },
+      { termId: 'eqty_risk_analysis' },
+    ],
     steps: {
       concept: {
         title: 'Investing is a means, not a goal',
@@ -389,6 +396,14 @@ export const lessonContent = {
   lesson_2: {
     title: 'Types of Investment Goals',
     shortDescription: 'Goal type guides future investing choices.',
+    glossaryTerms: [
+      { termId: 'tg_short_term' },
+      { termId: 'tg_medium_term' },
+      { termId: 'tg_long_term' },
+      { termId: 'tg_time_horizon' },
+      { termId: 'tg_goal_based' },
+      { termId: 'rr_risk' },
+    ],
     steps: {
       concept: {
         title: 'Types of Investment Goals',
@@ -596,6 +611,13 @@ export const lessonContent = {
   lesson_3: {
     title: 'What Does Risk Really Mean?',
     shortDescription: 'Risk includes emotions, not just numbers.',
+    glossaryTerms: [
+      { termId: 'rr_risk' },
+      { termId: 'rr_volatility' },
+      { termId: 'rr_drawdown' },
+      { termId: 'tg_risk_tolerance' },
+      { termId: 'eqty_risk_analysis' },
+    ],
     steps: {
       concept: {
         title: 'Risk is more than loss',
