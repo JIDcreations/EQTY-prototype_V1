@@ -156,6 +156,7 @@ export default function SettingsAccountScreen({ navigation }) {
           <SettingsRow
             label={settingsCopy.account.resetPasswordLabel}
             onPress={() => navigation.navigate('ChangePassword')}
+            labelNumberOfLines={1}
             isLast
             containerStyle={styles.rowCard}
           />

@@ -29,6 +29,7 @@ export default function ChangePasswordScreen({ navigation }) {
   const [nextPassword, setNextPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const toast = useToast();
+  const forgotPasswordParts = splitFooterLink(passwordCopy.forgotPasswordCta);
 
   const canSave = currentPassword && nextPassword && confirmPassword;
 
@@ -86,7 +87,11 @@ export default function ChangePasswordScreen({ navigation }) {
             onPress={() => navigation.navigate('ResetPassword')}
             style={styles.forgotRow}
           >
-            <AppText style={styles.forgotText}>{passwordCopy.forgotPasswordCta}</AppText>
+            <AppText style={styles.forgotText}>
+              {forgotPasswordParts.prefix}
+              {forgotPasswordParts.prefix ? ' ' : ''}
+              <AppText style={styles.forgotTextUnderline}>{forgotPasswordParts.cta}</AppText>
+            </AppText>
           </Pressable>
         </View>
         <View style={styles.actions}>
@@ -101,6 +106,18 @@ export default function ChangePasswordScreen({ navigation }) {
       <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />
     </View>
   );
+}
+
+function splitFooterLink(text) {
+  const separatorIndex = text.lastIndexOf('?');
+  if (separatorIndex === -1) {
+    return { prefix: '', cta: text };
+  }
+
+  return {
+    prefix: text.slice(0, separatorIndex + 1),
+    cta: text.slice(separatorIndex + 1).trim(),
+  };
 }
 
 const createStyles = (colors, components, tabBarHeight) =>
@@ -135,6 +152,9 @@ const createStyles = (colors, components, tabBarHeight) =>
     forgotText: {
       ...typography.styles.small,
       color: colors.text.primary,
+    },
+    forgotTextUnderline: {
+      textDecorationLine: 'underline',
     },
     actions: {
       gap: components.layout.spacing.md,

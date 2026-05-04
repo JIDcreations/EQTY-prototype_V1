@@ -50,6 +50,8 @@ export default function OnboardingEmailScreen({ navigation }) {
     navigation.navigate('OnboardingWhatIsEqty');
   };
 
+  const loginLinkParts = splitFooterLink(copy.email.link);
+
   return (
     <OnboardingScreen
       backgroundVariant="bg3"
@@ -157,7 +159,11 @@ export default function OnboardingEmailScreen({ navigation }) {
                   onPress={() => navigation.navigate('OnboardingLogin')}
                   style={styles.linkInline}
                 >
-                  <AppText style={styles.loginLink}>{copy.email.link}</AppText>
+                  <AppText style={styles.loginLink}>
+                    {loginLinkParts.prefix}
+                    {loginLinkParts.prefix ? ' ' : ''}
+                    <AppText style={styles.loginLinkUnderline}>{loginLinkParts.cta}</AppText>
+                  </AppText>
                 </Pressable>
               </View>
             </View>
@@ -166,6 +172,18 @@ export default function OnboardingEmailScreen({ navigation }) {
       </KeyboardAvoidingView>
     </OnboardingScreen>
   );
+}
+
+function splitFooterLink(text) {
+  const separatorIndex = text.lastIndexOf('?');
+  if (separatorIndex === -1) {
+    return { prefix: '', cta: text };
+  }
+
+  return {
+    prefix: text.slice(0, separatorIndex + 1),
+    cta: text.slice(separatorIndex + 1).trim(),
+  };
 }
 
 const toRgba = (hex, alpha) => {
@@ -304,6 +322,9 @@ const createStyles = (colors, components) =>
       ...typography.styles.small,
       color: colors.text.secondary,
       textAlign: 'center',
+    },
+    loginLinkUnderline: {
+      textDecorationLine: 'underline',
     },
     footer: {
       paddingTop: components.layout.spacing.sm,
