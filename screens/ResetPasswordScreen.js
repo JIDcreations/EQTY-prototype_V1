@@ -106,6 +106,7 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     label: {
       ...components.input.label,
+      color: colors.text.primary,
     },
     input: {
       ...components.input.container,
