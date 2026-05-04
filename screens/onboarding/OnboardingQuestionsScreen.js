@@ -3,6 +3,7 @@ import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'rea
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../../components/AppText';
 import AppTextInput from '../../components/AppTextInput';
+import EqtyLogo from '../../components/EqtyLogo';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import OnboardingStackedCard from '../../components/OnboardingStackedCard';
 import { PrimaryButton, SecondaryButton } from '../../components/Button';
@@ -80,7 +81,7 @@ export default function OnboardingQuestionsScreen({ navigation, route }) {
                 color={colors.text.secondary}
               />
             </Pressable>
-            <AppText style={styles.logo}>EQTY</AppText>
+            <EqtyLogo width={84} color={colors.text.primary} />
           </View>
 
           <OnboardingStackedCard>
@@ -178,10 +179,6 @@ const createStyles = (colors, components) =>
       alignItems: 'center',
       justifyContent: 'center',
       minHeight: components.sizes.input.minHeight,
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
     },
     backButton: {
       width: components.sizes.square.lg,

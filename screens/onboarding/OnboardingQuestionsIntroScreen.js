@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import AppText from '../../components/AppText';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import { PrimaryButton, SecondaryButton } from '../../components/Button';
+import EqtyLogo from '../../components/EqtyLogo';
 import { typography, useTheme } from '../../theme';
 import { useApp } from '../../utils/AppContext';
 import { getOnboardingCopy } from '../../utils/localization';
@@ -26,7 +27,7 @@ export default function OnboardingQuestionsIntroScreen({ navigation }) {
     >
       <View style={styles.container}>
         <View style={styles.logoWrap}>
-          <AppText style={styles.logo}>EQTY</AppText>
+          <EqtyLogo width={108} color={colors.text.primary} />
         </View>
         <View style={styles.copyBlock}>
           <AppText style={styles.title}>{copy.questionsIntro.title}</AppText>
@@ -79,10 +80,6 @@ const createStyles = (colors, components) =>
       marginTop: components.layout.spacing.xxl,
       alignItems: 'center',
       justifyContent: 'flex-start',
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
     },
     copyBlock: {
       width: '100%',

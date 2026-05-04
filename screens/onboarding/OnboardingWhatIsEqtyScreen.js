@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../../components/AppText';
 import { PrimaryButton } from '../../components/Button';
+import EqtyLogo from '../../components/EqtyLogo';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import { typography, useTheme } from '../../theme';
 import { useApp } from '../../utils/AppContext';
@@ -36,7 +37,7 @@ export default function OnboardingWhatIsEqtyScreen({ navigation }) {
           </Pressable>
         </View>
         <View style={styles.logoWrap}>
-          <AppText style={styles.logo}>EQTY</AppText>
+          <EqtyLogo width={108} color={colors.text.primary} />
         </View>
         <View style={styles.editorialWrap}>
           <View style={styles.copyBlock}>
@@ -86,10 +87,6 @@ const createStyles = (colors, components) =>
       marginTop: components.layout.spacing.xxl,
       alignItems: 'center',
       justifyContent: 'flex-start',
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
     },
     header: {
       position: 'absolute',

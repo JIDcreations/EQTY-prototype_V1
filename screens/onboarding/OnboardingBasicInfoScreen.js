@@ -9,6 +9,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AppText from '../../components/AppText';
 import AppTextInput from '../../components/AppTextInput';
+import EqtyLogo from '../../components/EqtyLogo';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import OnboardingStackedCard from '../../components/OnboardingStackedCard';
 import { PrimaryButton } from '../../components/Button';
@@ -52,7 +53,7 @@ export default function OnboardingBasicInfoScreen({ navigation }) {
                   color={colors.text.secondary}
                 />
               </Pressable>
-              <AppText style={styles.logo}>EQTY</AppText>
+              <EqtyLogo width={84} color={colors.text.primary} />
             </View>
           </View>
 
@@ -130,10 +131,6 @@ const createStyles = (colors, components) =>
       justifyContent: 'center',
       marginBottom: components.layout.spacing.md,
       minHeight: components.sizes.input.minHeight,
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
     },
     backButton: {
       width: components.sizes.square.lg,

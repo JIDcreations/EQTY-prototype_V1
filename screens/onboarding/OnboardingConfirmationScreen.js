@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import AppText from '../../components/AppText';
+import EqtyLogo from '../../components/EqtyLogo';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import OnboardingStackedCard from '../../components/OnboardingStackedCard';
 import { PrimaryButton } from '../../components/Button';
@@ -32,7 +33,7 @@ export default function OnboardingConfirmationScreen() {
     <OnboardingScreen backgroundVariant={mode === 'dark' ? 'bg2' : 'whiteNoBlur'}>
       <View style={styles.container}>
         <View style={styles.topArea}>
-          <AppText style={styles.logo}>EQTY</AppText>
+          <EqtyLogo width={108} color={colors.text.primary} />
         </View>
         <OnboardingStackedCard>
           <View style={styles.cardHeader}>
@@ -65,10 +66,6 @@ const createStyles = (colors, components) =>
     topArea: {
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
     },
     cardHeader: {
       gap: components.layout.spacing.sm,

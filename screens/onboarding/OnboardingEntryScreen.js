@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import AppText from '../../components/AppText';
 import BottomSheet from '../../components/BottomSheet';
+import EqtyLogo from '../../components/EqtyLogo';
 import OnboardingAuthButton from '../../components/OnboardingAuthButton';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import OnboardingStackedCard from '../../components/OnboardingStackedCard';
@@ -36,7 +37,7 @@ export default function OnboardingEntryScreen({ navigation }) {
     <OnboardingScreen backgroundVariant="bg3">
       <View style={styles.container}>
         <View style={styles.header}>
-          <AppText style={styles.logo}>EQTY</AppText>
+          <EqtyLogo width={92} color={colors.text.primary} />
           <View style={styles.kickerRow}>
             <View style={styles.kickerDot} />
             <AppText style={styles.kicker}>{copy.entry.kicker}</AppText>
@@ -102,10 +103,6 @@ const createStyles = (colors, components) =>
     header: {
       gap: components.layout.spacing.sm,
       maxWidth: components.sizes.screen.maxContentWidth,
-    },
-    logo: {
-      ...typography.styles.display,
-      color: colors.text.primary,
     },
     kickerRow: {
       flexDirection: 'row',
