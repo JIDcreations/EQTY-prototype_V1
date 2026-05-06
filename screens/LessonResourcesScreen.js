@@ -222,7 +222,13 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
   const resources = lessonResources[lesson.id] || [];
 
   return (
-    <View style={[styles.lessonCard, isExpanded && styles.lessonCardExpanded]}>
+    <View
+      style={[
+        styles.lessonCard,
+        isCurrent && styles.lessonCardCurrent,
+        isExpanded && styles.lessonCardExpanded,
+      ]}
+    >
       <Pressable
         onPress={() =>
           setExpandedLessonId((prev) => (prev === lesson.id ? null : lesson.id))
@@ -240,9 +246,6 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
             >
               {lesson.title}
             </AppText>
-            {isCurrent && !isCompleted ? (
-              <View style={styles.currentDot} />
-            ) : null}
             {isCompleted ? (
               <Ionicons
                 name="checkmark-circle"
@@ -400,16 +403,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       color: colors.text.primary,
     },
 
-    // Current lesson dot
-    currentDot: {
-      width: 7,
-      height: 7,
-      borderRadius: 999,
-      backgroundColor: colors.accent.primary,
-      flexShrink: 0,
-      marginTop: 6,
-    },
-
     // Module list
     moduleList: {
       gap: 24,
@@ -434,6 +427,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       borderColor: dividerColor,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       overflow: 'hidden',
+    },
+    lessonCardCurrent: {
+      borderColor: colors.accent.primary,
     },
     lessonCardExpanded: {
       borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),

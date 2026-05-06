@@ -12,6 +12,7 @@ import {
   getLocalizedLessons,
   getLocalizedModules,
   getDeepDiveCopy,
+  getLocalizedDeepDiveTracks,
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
@@ -22,7 +23,7 @@ import {
   getLastCoreLessonId,
 } from '../utils/helpers';
 import { lessons } from '../data/curriculum';
-import { deepDiveTracks, getDeepDiveLessonsForTrack } from '../data/deepDives';
+import { getDeepDiveLessonsForTrack } from '../data/deepDives';
 
 export default function LessonsScreen() {
   const navigation = useNavigation();
@@ -41,6 +42,10 @@ export default function LessonsScreen() {
   );
   const deepDiveCopy = useMemo(
     () => getDeepDiveCopy(preferences?.language),
+    [preferences?.language]
+  );
+  const localizedDeepDiveTracks = useMemo(
+    () => getLocalizedDeepDiveTracks(preferences?.language),
     [preferences?.language]
   );
   const allCoreComplete = useMemo(
@@ -284,7 +289,7 @@ export default function LessonsScreen() {
 
         {/* Track cards */}
         <View style={styles.deepDiveTrackList}>
-          {deepDiveTracks.map((track) => {
+          {localizedDeepDiveTracks.map((track) => {
             const trackLessons = getDeepDiveLessonsForTrack(track.id);
             const completedCount = trackLessons.filter((l) =>
               (progress?.completedLessonIds || []).includes(l.id)
@@ -338,25 +343,6 @@ export default function LessonsScreen() {
                           >
                             {track.title}
                           </AppText>
-                          {!track.available && (
-                            <View
-                              style={[
-                                styles.deepDiveComingSoonChip,
-                                {
-                                  borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-                                },
-                              ]}
-                            >
-                              <AppText
-                                style={[
-                                  styles.deepDiveComingSoonLabel,
-                                  { color: colors.text.secondary },
-                                ]}
-                              >
-                                {deepDiveCopy.comingSoon}
-                              </AppText>
-                            </View>
-                          )}
                         </View>
                         <AppText
                           style={[
@@ -410,6 +396,24 @@ export default function LessonsScreen() {
                             size={components.sizes.icon.sm}
                             color={colors.text.secondary}
                           />
+                        ) : !track.available ? (
+                          <View
+                            style={[
+                              styles.deepDiveComingSoonChip,
+                              {
+                                borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+                              },
+                            ]}
+                          >
+                            <AppText
+                              style={[
+                                styles.deepDiveComingSoonLabel,
+                                { color: colors.text.secondary },
+                              ]}
+                            >
+                              {deepDiveCopy.comingSoon}
+                            </AppText>
+                          </View>
                         ) : null}
                       </View>
                     </View>
@@ -605,7 +609,8 @@ const createStyles = (colors, components, tabBarHeight) =>
     deepDiveTrackCardRight: {
       flexShrink: 0,
       alignItems: 'flex-end',
-      justifyContent: 'center',
+      justifyContent: 'flex-start',
+      alignSelf: 'flex-start',
       gap: 2,
     },
     deepDiveTrackMeta: {

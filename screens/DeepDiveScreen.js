@@ -6,12 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import AppText from '../components/AppText';
 import OnboardingScreen from '../components/OnboardingScreen';
 import {
-  getDeepDiveTrack,
   getDeepDiveLessonsForTrack,
 } from '../data/deepDives';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getDeepDiveCopy } from '../utils/localization';
+import { getDeepDiveCopy, getLocalizedDeepDiveTrack } from '../utils/localization';
 import { getDeepDiveLessonStatus } from '../utils/helpers';
 
 const toRgba = (hex, alpha) => {
@@ -61,7 +60,8 @@ export default function DeepDiveScreen() {
 // ─── Track detail view ────────────────────────────────────────────────────────
 
 function TrackDetailView({ trackId, progress, navigation, copy, styles, colors, components }) {
-  const track = getDeepDiveTrack(trackId);
+  const { preferences } = useApp();
+  const track = getLocalizedDeepDiveTrack(trackId, preferences?.language);
   const lessons = useMemo(
     () => getDeepDiveLessonsForTrack(trackId),
     [trackId]

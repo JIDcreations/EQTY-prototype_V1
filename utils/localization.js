@@ -3,6 +3,7 @@ import { lessonContentNl } from '../data/lessonContentNl';
 import { deepDiveContent } from '../data/deepDiveContent';
 import { lessons, modules } from '../data/curriculum';
 import { curriculumNl } from '../data/curriculumNl';
+import { deepDiveTracks } from '../data/deepDives';
 
 const LOCALE_MAP = {
   english: 'en',
@@ -1979,6 +1980,31 @@ const DEEP_DIVE_COPY = {
   },
 };
 
+const DEEP_DIVE_TRACK_COPY = {
+  nl: {
+    track_etfs: {
+      title: "ETF's in Depth",
+      description: 'Kosten, structuur en portfolio.',
+    },
+    track_risk: {
+      title: 'Risico begrijpen',
+      description: 'Biases, volatiliteit en discipline.',
+    },
+    track_strategy: {
+      title: 'Een strategie opbouwen',
+      description: 'Herbalanceren, stijl en fit.',
+    },
+    track_stocks: {
+      title: 'Aandelen in depth',
+      description: 'Waardering, selectie en fit.',
+    },
+    track_bonds: {
+      title: 'Obligaties in depth',
+      description: 'Duration, rendement en allocatie.',
+    },
+  },
+};
+
 // ─── Premium paywall copy ───────────────────────────────────────────────────────
 
 const PREMIUM_COPY = {
@@ -2016,6 +2042,20 @@ export function getPremiumCopy(language) {
 export function getDeepDiveCopy(language) {
   const locale = getLocaleKey(language);
   return DEEP_DIVE_COPY[locale] || DEEP_DIVE_COPY.en;
+}
+
+export function getLocalizedDeepDiveTracks(language) {
+  const locale = getLocaleKey(language);
+  const localizedById = DEEP_DIVE_TRACK_COPY[locale];
+  if (!localizedById) return deepDiveTracks;
+  return deepDiveTracks.map((track) => {
+    const override = localizedById[track.id];
+    return override ? { ...track, ...override } : track;
+  });
+}
+
+export function getLocalizedDeepDiveTrack(trackId, language) {
+  return getLocalizedDeepDiveTracks(language).find((track) => track.id === trackId) || null;
 }
 
 export function getLocalizedGlossaryCategories(language, categories = []) {
