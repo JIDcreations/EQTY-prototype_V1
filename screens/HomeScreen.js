@@ -20,6 +20,7 @@ import {
   getDeepDiveCopy,
   getHomeCopy,
   getHomeLessonCardCopy,
+  getLocaleKey,
   getLocalizedLessons,
   getLocalizedModules,
 } from '../utils/localization';
@@ -95,6 +96,7 @@ export default function HomeScreen() {
   const currentLessonInTheme = currentModule?.lessons.find(
     (lesson) => lesson.id === currentLesson?.id
   );
+  const isDutch = getLocaleKey(preferences?.language) === 'nl';
   const currentThemeIndex = currentLesson?.themeIndex || currentModule?.themeIndex || 1;
   const currentLessonIndexInTheme =
     currentLesson?.lessonIndexInTheme || currentLessonInTheme?.lessonIndexInTheme || 1;
@@ -191,7 +193,7 @@ export default function HomeScreen() {
       {
         id: 'resources',
         title: 'Bronnen',
-        subtitle: 'Sources and deeper context',
+        subtitle: isDutch ? 'Bronnen en extra context' : 'Sources and deeper context',
         icon: 'book-outline',
         target: 'Lessons',
         params: {
@@ -204,7 +206,7 @@ export default function HomeScreen() {
       {
         id: 'videos',
         title: 'Videos',
-        subtitle: 'Quick visual explainers',
+        subtitle: isDutch ? 'Korte visuele\nuitleg' : 'Quick visual explainers',
         icon: 'play-circle-outline',
         target: 'Lessons',
         params: {
@@ -215,7 +217,7 @@ export default function HomeScreen() {
         },
       },
     ],
-    []
+    [isDutch]
   );
 
   return (
@@ -332,7 +334,8 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       alignSelf: 'center',
     },
     heroCard: {
-      padding: components.layout.spacing.xxl,
+      paddingVertical: components.layout.spacing.xxl,
+      paddingHorizontal: components.layout.spacing.lg,
       gap: components.layout.spacing.xl,
       backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
       borderWidth: components.borderWidth.thin,

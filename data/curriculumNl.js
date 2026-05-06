@@ -37,7 +37,7 @@ export const curriculumNl = {
     lesson_0: {
       title: 'Beleggen als proces',
       shortDescription:
-        'Investeren is een proces: eerst beslissen, dan handelen.',
+        'Beleggen is een gestructureerd beslissingsproces, geen losse handeling.',
     },
     lesson_1: {
       title: 'Waarom wil ik beleggen?',
