@@ -19,7 +19,6 @@ import ProfileStack from './navigation/ProfileStack';
 import OnboardingStack from './navigation/OnboardingStack';
 import GlossaryDetailScreen from './screens/GlossaryDetailScreen';
 import OnboardingQuestionScreen from './screens/onboarding/OnboardingQuestionScreen';
-import OnboardingRequiredScreen from './screens/OnboardingRequiredScreen';
 import LessonsStack from './navigation/LessonsStack';
 
 const Tab = createBottomTabNavigator();
@@ -135,7 +134,6 @@ function RootStack() {
       ) : (
         <>
           <Stack.Screen name="Tabs" component={Tabs} />
-          <Stack.Screen name="OnboardingRequired" component={OnboardingRequiredScreen} />
           <Stack.Screen
             name="OnboardingQuestionExperience"
             component={OnboardingQuestionScreen}

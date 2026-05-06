@@ -25,7 +25,7 @@ export default function LessonOverviewScreen() {
   const route = useRoute();
   const tabBarHeight = useBottomTabBarHeight();
   const { lessonId, entrySource } = route.params || {};
-  const { preferences, onboardingContext, progress } = useApp();
+  const { preferences, progress } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef({ count: 0, timestamp: 0 });
 
@@ -88,22 +88,15 @@ export default function LessonOverviewScreen() {
   const pointsLabel = overviewCopy.lessonPointsLabel || overviewCopy.outcomesLabel;
   const metaChips = getLessonMetaChips(overviewCopy, lesson.id, estimatedMinutes);
 
-  const isLessonGateRequired =
-    lesson.id === 'lesson_1' && !onboardingContext?.onboardingComplete;
   const isLessonLocked = lessonStatus === 'locked';
 
   const startLesson = useCallback(() => {
-    if (isLessonGateRequired) {
-      navigation.navigate('OnboardingRequired', { entrySource });
-      return;
-    }
-
     navigation.navigate('LessonStep', {
       lessonId: lesson.id,
       step: 1,
       entrySource,
     });
-  }, [entrySource, isLessonGateRequired, lesson.id, navigation]);
+  }, [entrySource, lesson.id, navigation]);
 
   const handleStartPress = useCallback(() => {
     if (!isLessonLocked) {
