@@ -9,14 +9,27 @@ import { useApp } from '../../utils/AppContext';
 import { getOnboardingCopy } from '../../utils/localization';
 
 export default function OnboardingQuestionsIntroScreen({ navigation }) {
-  const { preferences, updatePreferences, updateAuthUser } = useApp();
+  const { preferences, resetOnboardingState, updatePreferences, updateAuthUser } = useApp();
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
 
   const handleSkip = async () => {
+    await resetOnboardingState();
     await updateAuthUser({});
     await updatePreferences({ hasOnboarded: true });
+  };
+
+  const handleStart = async () => {
+    await resetOnboardingState();
+    navigation.navigate({
+      name: 'OnboardingQuestionExperience',
+      params: {
+        exitToTabs: true,
+        setHasOnboardedOnComplete: true,
+      },
+      merge: true,
+    });
   };
 
   return (
@@ -36,16 +49,7 @@ export default function OnboardingQuestionsIntroScreen({ navigation }) {
         <View style={styles.actions}>
           <PrimaryButton
             label={copy.questionsIntro.primaryButton}
-            onPress={() =>
-              navigation.navigate({
-                name: 'OnboardingQuestionExperience',
-                params: {
-                  exitToTabs: true,
-                  setHasOnboardedOnComplete: true,
-                },
-                merge: true,
-              })
-            }
+            onPress={handleStart}
           />
           <SecondaryButton
             label={copy.questionsIntro.secondaryButton}

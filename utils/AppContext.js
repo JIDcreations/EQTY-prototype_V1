@@ -9,6 +9,8 @@ import {
 import { deriveUserContextFromOnboarding, getNextLessonId, getTextScale } from './helpers';
 import {
   clearAuthUser,
+  clearOnboardingContext,
+  clearUserContext,
   loadAuthUser,
   loadOnboardingContext,
   loadPreferences,
@@ -83,9 +85,15 @@ export function AppProvider({ children }) {
     await saveAuthUser(next);
   };
 
+  const resetOnboardingState = async () => {
+    setOnboardingContext(defaultOnboardingContext);
+    setUserContext(defaultUserContext);
+    await Promise.all([clearOnboardingContext(), clearUserContext()]);
+  };
+
   const logOut = async () => {
     setAuthUser(null);
-    await clearAuthUser();
+    await Promise.all([clearAuthUser(), resetOnboardingState()]);
   };
 
   const updateOnboardingContext = async (updates) => {
@@ -182,6 +190,7 @@ export function AppProvider({ children }) {
       textScale: getTextScale(preferences?.textSize),
       updateAuthUser,
       updateOnboardingContext,
+      resetOnboardingState,
       updatePreferences,
       logOut,
       updateUserContext,
@@ -190,7 +199,16 @@ export function AppProvider({ children }) {
       completeLesson,
       unlockPremium,
     }),
-    [authUser, onboardingContext, preferences, userContext, progress, reflections, isPremium, isReady]
+    [
+      authUser,
+      onboardingContext,
+      preferences,
+      userContext,
+      progress,
+      reflections,
+      isPremium,
+      isReady,
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

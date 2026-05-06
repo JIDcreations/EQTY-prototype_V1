@@ -69,6 +69,13 @@ export async function saveOnboardingContext(context) {
   await AsyncStorage.setItem(STORAGE_KEYS.onboardingContext, JSON.stringify(context));
 }
 
+export async function clearOnboardingContext() {
+  await AsyncStorage.setItem(
+    STORAGE_KEYS.onboardingContext,
+    JSON.stringify(defaultOnboardingContext)
+  );
+}
+
 export async function loadPreferences() {
   const stored = await AsyncStorage.getItem(STORAGE_KEYS.preferences);
   if (!stored) return defaultPreferences;
@@ -91,6 +98,10 @@ export async function loadUserContext() {
 
 export async function saveUserContext(context) {
   await AsyncStorage.setItem(STORAGE_KEYS.userContext, JSON.stringify(context));
+}
+
+export async function clearUserContext() {
+  await AsyncStorage.setItem(STORAGE_KEYS.userContext, JSON.stringify(defaultUserContext));
 }
 
 export async function loadProgress() {
