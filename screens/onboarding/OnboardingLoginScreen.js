@@ -102,7 +102,9 @@ export default function OnboardingLoginScreen({ navigation }) {
                   </Pressable>
                 </View>
                 <Pressable onPress={() => navigation.navigate('ResetPassword')}>
-                  <AppText style={styles.forgotLink}>{copy.login.forgotPassword}</AppText>
+                  <AppText numberOfLines={1} style={styles.forgotLink}>
+                    {copy.login.forgotPassword}
+                  </AppText>
                 </Pressable>
               </View>
             </View>
@@ -298,6 +300,7 @@ const createStyles = (colors, components) =>
       ...typography.styles.small,
       color: colors.text.secondary,
       marginTop: components.layout.spacing.xs,
+      alignSelf: 'flex-start',
     },
     linkInline: {
       paddingTop: components.layout.spacing.sm,

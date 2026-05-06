@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
@@ -16,7 +16,7 @@ import useToast from '../utils/useToast';
 export default function ResetPasswordScreen({ navigation }) {
   const { preferences } = useApp();
   const { colors, components } = useTheme();
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = useContext(BottomTabBarHeightContext) || 0;
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]

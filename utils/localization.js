@@ -789,7 +789,7 @@ const ONBOARDING_COPY = {
       usernamePlaceholder: 'Jouw gebruikersnaam of e-mail',
       passwordLabel: 'Maak wachtwoord',
       passwordPlaceholder: '********',
-      forgotPassword: 'Wachtwoord vergeten?',
+      forgotPassword: 'Wachtwoord\u00A0vergeten?',
       button: 'Log in',
       divider: 'of',
       socialApple: 'Apple',

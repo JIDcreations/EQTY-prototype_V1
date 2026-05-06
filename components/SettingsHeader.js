@@ -25,7 +25,7 @@ export default function SettingsHeader({ title, subtitle, onBack, rightAction })
         <View style={styles.titleWrap}>
           <AppText style={styles.title}>{title}</AppText>
         </View>
-        {rightAction ? rightAction : <View style={styles.backSpacer} />}
+        {rightAction ? <View style={styles.rightActionWrap}>{rightAction}</View> : null}
       </View>
       {subtitle ? <AppText style={styles.subtitle}>{subtitle}</AppText> : null}
     </View>
@@ -58,6 +58,9 @@ const createStyles = (colors, components) =>
     titleWrap: {
       flex: 1,
       minWidth: 0,
+    },
+    rightActionWrap: {
+      flexShrink: 0,
     },
     title: {
       ...typography.styles.h1,
