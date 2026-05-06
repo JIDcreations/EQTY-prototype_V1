@@ -297,11 +297,9 @@ export const lessonContentNl = {
           'Plaats de stappen van het beleggingsproces in de juiste volgorde. Klik op de volgende stap.',
         type: 'scenario',
         name: 'Joris',
-        personalized: true,
-        storyLead: 'Joris wil beginnen met investeren omdat hij',
-        storyQuoteFallback: 'een huis wil kopen',
-        storyTail:
-          'Na een paar weken weet hij niet goed of hij moet bijhouden, verkopen of veranderen.',
+        personalized: false,
+        story:
+          'Joris begint met investeren omdat vrienden zeggen dat het een goed idee is. Na een paar weken staat hij in verlies en weet hij niet of hij moet bijhouden.',
         question: 'Wat ontbreekt er in zijn aanpak?',
         feedback: {
           correctLabel: 'GOED',
