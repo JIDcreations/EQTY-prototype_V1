@@ -3,13 +3,11 @@ import { createStackNavigator } from '@react-navigation/stack';
 import SettingsHomeScreen from '../screens/SettingsHomeScreen';
 import SettingsAccountScreen from '../screens/SettingsAccountScreen';
 import SettingsSecurityScreen from '../screens/SettingsSecurityScreen';
-import SettingsPersonalContextScreen from '../screens/SettingsPersonalContextScreen';
 import SettingsPreferencesScreen from '../screens/SettingsPreferencesScreen';
 import SettingsAccessibilityScreen from '../screens/SettingsAccessibilityScreen';
 import SettingsSupportScreen from '../screens/SettingsSupportScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
-import EditPersonalContextScreen from '../screens/EditPersonalContextScreen';
 import HelpCenterScreen from '../screens/HelpCenterScreen';
 import ContactSupportScreen from '../screens/ContactSupportScreen';
 import FAQScreen from '../screens/FAQScreen';
@@ -23,13 +21,11 @@ export default function ProfileStack() {
       <Stack.Screen name="SettingsHome" component={SettingsHomeScreen} />
       <Stack.Screen name="SettingsAccount" component={SettingsAccountScreen} />
       <Stack.Screen name="SettingsSecurity" component={SettingsSecurityScreen} />
-      <Stack.Screen name="SettingsPersonalContext" component={SettingsPersonalContextScreen} />
       <Stack.Screen name="SettingsPreferences" component={SettingsPreferencesScreen} />
       <Stack.Screen name="SettingsAccessibility" component={SettingsAccessibilityScreen} />
       <Stack.Screen name="SettingsSupport" component={SettingsSupportScreen} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-      <Stack.Screen name="EditPersonalContext" component={EditPersonalContextScreen} />
       <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
       <Stack.Screen name="ContactSupport" component={ContactSupportScreen} />
       <Stack.Screen name="FAQ" component={FAQScreen} />

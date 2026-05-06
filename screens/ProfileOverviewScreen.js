@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import AppText from '../components/AppText';
 import Card from '../components/Card';
-import { PrimaryButton, SecondaryButton } from '../components/Button';
+import { PrimaryButton } from '../components/Button';
 import SegmentedControl from '../components/SegmentedControl';
 import SettingsRow from '../components/SettingsRow';
 import SettingsSection from '../components/SettingsSection';
@@ -18,7 +18,6 @@ import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import useToast from '../utils/useToast';
-import { getSettingsCopy } from '../utils/localization';
 
 const APPEARANCE_OPTIONS = [
   { label: 'Dark', value: 'Dark' },
@@ -43,30 +42,10 @@ const toRgba = (hex, alpha) => {
 
 export default function ProfileOverviewScreen() {
   const navigation = useNavigation();
-  const { authUser, onboardingContext, preferences, updatePreferences, logOut } = useApp();
+  const { authUser, preferences, updatePreferences, logOut } = useApp();
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const toast = useToast();
-  const settingsCopy = useMemo(
-    () => getSettingsCopy(preferences?.language),
-    [preferences?.language]
-  );
-  const showOnboardingHighlight = !onboardingContext?.onboardingComplete;
-
-  const previewAnswers = useMemo(() => {
-    const fallback = 'Not set yet.';
-    const makePreview = (value) => {
-      if (!value) return fallback;
-      const trimmed = value.trim();
-      if (trimmed.length <= 72) return trimmed;
-      return `${trimmed.slice(0, 72).trim()}...`;
-    };
-    return {
-      experience: makePreview(onboardingContext?.experienceAnswer),
-      knowledge: makePreview(onboardingContext?.knowledgeAnswer),
-      motivation: makePreview(onboardingContext?.motivationAnswer),
-    };
-  }, [onboardingContext]);
 
   const handleLogOut = () => {
     Alert.alert('Log out', 'Are you sure you want to log out?', [
@@ -170,91 +149,6 @@ export default function ProfileOverviewScreen() {
           </Card>
         </SettingsSection>
 
-        <SettingsSection title="Personal context (AI)">
-          <Card style={styles.card}>
-            {showOnboardingHighlight ? (
-              <View style={styles.onboardingRowHighlight}>
-                <SettingsRow
-                  label={settingsCopy.onboardingQuestions}
-                  onPress={() =>
-                    navigation.navigate({
-                      name: 'OnboardingQuestionExperience',
-                      params: {
-                        returnTo: 'Tabs',
-                        returnParams: {
-                          screen: 'Profile',
-                          params: { screen: 'ProfileOverview' },
-                        },
-                      },
-                      merge: true,
-                    })
-                  }
-                  isLast
-                />
-              </View>
-            ) : (
-              <SettingsRow
-                label={settingsCopy.onboardingQuestions}
-                onPress={() =>
-                  navigation.navigate({
-                    name: 'OnboardingQuestionExperience',
-                    params: {
-                      returnTo: 'Tabs',
-                      returnParams: {
-                        screen: 'Profile',
-                        params: { screen: 'ProfileOverview' },
-                      },
-                    },
-                    merge: true,
-                  })
-                }
-                isLast
-              />
-            )}
-            <View style={styles.contextBlock}>
-              <AppText style={styles.contextLabel}>Investing experience so far</AppText>
-              <AppText
-                style={[
-                  styles.contextValue,
-                  previewAnswers.experience === 'Not set yet.' && styles.contextPlaceholder,
-                ]}
-              >
-                {previewAnswers.experience}
-              </AppText>
-            </View>
-            <View style={styles.contextBlock}>
-              <AppText style={styles.contextLabel}>Current knowledge</AppText>
-              <AppText
-                style={[
-                  styles.contextValue,
-                  previewAnswers.knowledge === 'Not set yet.' && styles.contextPlaceholder,
-                ]}
-              >
-                {previewAnswers.knowledge}
-              </AppText>
-            </View>
-            <View style={styles.contextBlock}>
-              <AppText style={styles.contextLabel}>Motivation</AppText>
-              <AppText
-                style={[
-                  styles.contextValue,
-                  previewAnswers.motivation === 'Not set yet.' && styles.contextPlaceholder,
-                ]}
-              >
-                {previewAnswers.motivation}
-              </AppText>
-            </View>
-            <AppText style={styles.contextHelper}>
-              Used to adapt explanations and feedback. No financial advice.
-            </AppText>
-            <SecondaryButton
-              label="Edit personal context"
-              onPress={() => navigation.navigate('EditPersonalContext')}
-              style={styles.contextButton}
-            />
-          </Card>
-        </SettingsSection>
-
         <SettingsSection title="Preferences">
           <Card style={styles.card}>
             <SettingsRow
@@ -346,33 +240,6 @@ const createStyles = (colors, components) =>
     inlineHint: {
       ...typography.styles.small,
       color: colors.text.secondary,
-    },
-    contextBlock: {
-      gap: components.layout.spacing.xs,
-    },
-    contextLabel: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    contextValue: {
-      ...typography.styles.body,
-      color: colors.text.primary,
-    },
-    contextPlaceholder: {
-      color: colors.text.secondary,
-    },
-    contextButton: {
-      marginTop: components.layout.spacing.xs,
-    },
-    contextHelper: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-    },
-    onboardingRowHighlight: {
-      borderWidth: components.borderWidth.thin,
-      borderColor: colors.accent.primary,
-      borderRadius: components.radius.input,
-      overflow: 'hidden',
     },
     cardTitle: {
       ...typography.styles.h3,

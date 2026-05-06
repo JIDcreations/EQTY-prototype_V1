@@ -29,10 +29,6 @@ const SETTINGS_CATEGORIES = [
     route: 'SettingsSecurity',
   },
   {
-    key: 'personal',
-    route: 'SettingsPersonalContext',
-  },
-  {
     key: 'preferences',
     route: 'SettingsPreferences',
   },
