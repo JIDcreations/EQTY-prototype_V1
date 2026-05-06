@@ -56,6 +56,8 @@ export default function LessonSuccessScreen() {
       ? copy.lessonSuccess.introSubtitle
       : lessonId === 'lesson_2' && locale === 'nl'
         ? 'Je hebt de les ‘Soorten beleggingsdoelen’ afgerond.'
+      : lessonId === 'lesson_1' && locale === 'nl'
+        ? 'Je hebt de les ‘Waarom wil ik beleggen?’ afgerond.'
       : copy.lessonSuccess.subtitle
         ? copy.lessonSuccess.subtitle(lessonTitle)
         : '';
