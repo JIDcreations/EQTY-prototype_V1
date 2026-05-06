@@ -2,6 +2,8 @@ import { lessons } from '../data/curriculum';
 import { deepDiveLessons } from '../data/deepDives';
 import { defaultUserContext } from '../data/defaults';
 
+const PROTOTYPE_AVAILABLE_LESSON_IDS = ['lesson_0', 'lesson_1', 'lesson_2'];
+
 export function getLessonById(lessonId) {
   return lessons.find((lesson) => lesson.id === lessonId);
 }
@@ -10,8 +12,33 @@ function getSortedLessons() {
   return [...lessons].sort((a, b) => a.order - b.order);
 }
 
+export function isPrototypeLessonAvailable(lessonId) {
+  return PROTOTYPE_AVAILABLE_LESSON_IDS.includes(lessonId);
+}
+
+export function getPrototypeAvailableLessonIds() {
+  return [...PROTOTYPE_AVAILABLE_LESSON_IDS];
+}
+
+export function getPrototypeAvailableLessons() {
+  return getSortedLessons().filter((lesson) => isPrototypeLessonAvailable(lesson.id));
+}
+
+export function getPrototypeLessonIdsUpTo(lessonId) {
+  const availableLessons = getPrototypeAvailableLessons();
+  const lessonIndex = availableLessons.findIndex((lesson) => lesson.id === lessonId);
+  if (lessonIndex === -1) {
+    return [];
+  }
+  return availableLessons.slice(0, lessonIndex + 1).map((lesson) => lesson.id);
+}
+
 export function isLessonUnlocked(lessonId, progress) {
-  const sortedLessons = getSortedLessons();
+  if (!isPrototypeLessonAvailable(lessonId)) {
+    return false;
+  }
+
+  const sortedLessons = getPrototypeAvailableLessons();
   const lessonIndex = sortedLessons.findIndex((lesson) => lesson.id === lessonId);
   if (lessonIndex <= 0) {
     return true;
@@ -39,7 +66,7 @@ export function getLessonStatus(lessonId, progress) {
 }
 
 export function getNextLessonId(currentLessonId) {
-  const sorted = getSortedLessons();
+  const sorted = getPrototypeAvailableLessons();
   const index = sorted.findIndex((lesson) => lesson.id === currentLessonId);
   if (index === -1 || index === sorted.length - 1) {
     return currentLessonId;
@@ -49,7 +76,8 @@ export function getNextLessonId(currentLessonId) {
 
 export function areAllCoreLessonsComplete(progress) {
   const completedIds = progress?.completedLessonIds || [];
-  return lessons.every((lesson) => completedIds.includes(lesson.id));
+  const availableLessons = getPrototypeAvailableLessons();
+  return availableLessons.every((lesson) => completedIds.includes(lesson.id));
 }
 
 export function getDeepDiveLessonStatus(lessonId, progress) {
@@ -59,7 +87,7 @@ export function getDeepDiveLessonStatus(lessonId, progress) {
 }
 
 export function getLastCoreLessonId() {
-  const sorted = getSortedLessons();
+  const sorted = getPrototypeAvailableLessons();
   return sorted[sorted.length - 1]?.id || null;
 }
 

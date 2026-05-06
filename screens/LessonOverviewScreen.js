@@ -16,7 +16,11 @@ import {
   formatLessonModuleLabel,
 } from '../utils/localization';
 import { typography, useTheme } from '../theme';
-import { annotateLessonsWithThemeContext, getLessonStatus } from '../utils/helpers';
+import {
+  annotateLessonsWithThemeContext,
+  getLessonStatus,
+  isPrototypeLessonAvailable,
+} from '../utils/helpers';
 
 const FALLBACK_STEP_COUNT = 6;
 
@@ -88,7 +92,7 @@ export default function LessonOverviewScreen() {
   const pointsLabel = overviewCopy.lessonPointsLabel || overviewCopy.outcomesLabel;
   const metaChips = getLessonMetaChips(overviewCopy, lesson.id, estimatedMinutes);
 
-  const isLessonLocked = lessonStatus === 'locked';
+  const isLessonLocked = lessonStatus === 'locked' || !isPrototypeLessonAvailable(lesson.id);
 
   const startLesson = useCallback(() => {
     navigation.navigate('LessonStep', {
@@ -104,7 +108,7 @@ export default function LessonOverviewScreen() {
       return;
     }
 
-    if (!__DEV__) {
+    if (!__DEV__ || !isPrototypeLessonAvailable(lesson.id)) {
       return;
     }
 
@@ -124,7 +128,7 @@ export default function LessonOverviewScreen() {
       count: nextCount,
       timestamp: now,
     };
-  }, [isLessonLocked, startLesson]);
+  }, [isLessonLocked, lesson.id, startLesson]);
 
   return (
     <ScreenBackground variant="bg3">
@@ -193,7 +197,7 @@ export default function LessonOverviewScreen() {
         <View style={styles.ctaDock}>
           <CtaButton
             label={isLessonLocked ? overviewCopy.lockedLesson : overviewCopy.startLesson}
-            disabled={isLessonLocked && !__DEV__}
+            disabled={isLessonLocked && !isPrototypeLessonAvailable(lesson.id)}
             onPress={handleStartPress}
           />
         </View>

@@ -29,6 +29,7 @@ import { useApp } from '../utils/AppContext';
 import {
   annotateLessonsWithThemeContext,
   buildModulesWithIndexedLessons,
+  isPrototypeLessonAvailable,
 } from '../utils/helpers';
 
 export default function HomeScreen() {
@@ -58,12 +59,16 @@ export default function HomeScreen() {
     () => annotateLessonsWithThemeContext(localizedLessons, localizedModules),
     [localizedLessons, localizedModules]
   );
+  const prototypeLessons = useMemo(
+    () => lessonsWithThemeContext.filter((lesson) => isPrototypeLessonAvailable(lesson.id)),
+    [lessonsWithThemeContext]
+  );
   const completedLessonIds = progress.completedLessonIds || [];
   const modulesWithLessons = useMemo(
     () => {
       const indexedModules = buildModulesWithIndexedLessons(localizedModules, localizedLessons);
       return indexedModules.map((module) => {
-        const lessons = module.lessons;
+        const lessons = module.lessons.filter((lesson) => isPrototypeLessonAvailable(lesson.id));
         const completedCount = lessons.filter((lesson) =>
           completedLessonIds.includes(lesson.id)
         ).length;
@@ -76,11 +81,11 @@ export default function HomeScreen() {
     },
     [completedLessonIds, localizedLessons, localizedModules]
   );
-  const totalLessons = lessonsWithThemeContext.length;
-  const progressCurrentLesson = lessonsWithThemeContext.find(
+  const totalLessons = prototypeLessons.length;
+  const progressCurrentLesson = prototypeLessons.find(
     (lesson) => lesson.id === progress.currentLessonId
   );
-  const firstUpcomingLesson = lessonsWithThemeContext.find(
+  const firstUpcomingLesson = prototypeLessons.find(
     (lesson) => !completedLessonIds.includes(lesson.id)
   );
   const currentLesson =
@@ -89,7 +94,7 @@ export default function HomeScreen() {
       : null) ||
     firstUpcomingLesson ||
     progressCurrentLesson ||
-    lessonsWithThemeContext[0];
+    prototypeLessons[0];
   const currentModule = modulesWithLessons.find(
     (module) => module.id === currentLesson?.moduleId
   );
@@ -107,7 +112,7 @@ export default function HomeScreen() {
   );
   const completedCount = Math.min(
     completedLessonIds.filter((lessonId) =>
-      lessonsWithThemeContext.some((lesson) => lesson.id === lessonId)
+      prototypeLessons.some((lesson) => lesson.id === lessonId)
     ).length,
     totalLessons
   );

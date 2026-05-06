@@ -6,7 +6,12 @@ import {
   defaultProgress,
   defaultUserContext,
 } from '../data/defaults';
-import { deriveUserContextFromOnboarding, getNextLessonId, getTextScale } from './helpers';
+import {
+  deriveUserContextFromOnboarding,
+  getNextLessonId,
+  getPrototypeLessonIdsUpTo,
+  getTextScale,
+} from './helpers';
 import {
   clearAuthUser,
   clearOnboardingContext,
@@ -163,9 +168,13 @@ export function AppProvider({ children }) {
   };
 
   const completeLesson = async (lessonId) => {
-    const completed = progress.completedLessonIds.includes(lessonId)
-      ? progress.completedLessonIds
-      : [...progress.completedLessonIds, lessonId];
+    const prototypeLessonIds = getPrototypeLessonIdsUpTo(lessonId);
+    const completed = Array.from(
+      new Set([
+        ...progress.completedLessonIds,
+        ...(prototypeLessonIds.length > 0 ? prototypeLessonIds : [lessonId]),
+      ])
+    );
     // Deep dive lessons do not advance the core lesson pointer
     const isDeepDive = typeof lessonId === 'string' && lessonId.startsWith('deep_');
     const nextLessonId = isDeepDive ? progress.currentLessonId : getNextLessonId(lessonId);

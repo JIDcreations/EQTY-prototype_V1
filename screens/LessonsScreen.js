@@ -20,19 +20,17 @@ import {
   buildModulesWithIndexedLessons,
   getLessonStatus,
   areAllCoreLessonsComplete,
-  getLastCoreLessonId,
+  isPrototypeLessonAvailable,
 } from '../utils/helpers';
-import { lessons } from '../data/curriculum';
 import { getDeepDiveLessonsForTrack } from '../data/deepDives';
 
 export default function LessonsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const tabBarHeight = useBottomTabBarHeight();
-  const { progress, preferences, isPremium, updateProgress } = useApp();
+  const { progress, preferences, isPremium } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef(new Map());
-  const devTitleTapRef = useRef({ count: 0, timestamp: 0 });
   const scrollRef = useRef(null);
   const deepDiveOffsetRef = useRef(null);
   const [deepDiveSectionY, setDeepDiveSectionY] = useState(null);
@@ -70,22 +68,6 @@ export default function LessonsScreen() {
       .map((module) => module);
   }, [localizedLessons, localizedModules]);
 
-  const handleDevTripleTap = useCallback(() => {
-    if (!__DEV__) return;
-    const now = Date.now();
-    const ref = devTitleTapRef.current;
-    const nextCount = now - ref.timestamp < 600 ? ref.count + 1 : 1;
-    devTitleTapRef.current = { count: nextCount, timestamp: now };
-    if (nextCount >= 3) {
-      devTitleTapRef.current = { count: 0, timestamp: 0 };
-      const allIds = lessons.map((l) => l.id);
-      updateProgress({
-        completedLessonIds: allIds,
-        currentLessonId: getLastCoreLessonId(),
-      });
-    }
-  }, [updateProgress]);
-
   const openLessonOverview = useCallback(
     (lessonId) => {
       navigation.navigate('LessonOverview', {
@@ -97,13 +79,13 @@ export default function LessonsScreen() {
   );
 
   const handleLessonPress = useCallback(
-    (lessonId, isLocked) => {
+    (lessonId, isLocked, isAvailable) => {
       if (!isLocked) {
         openLessonOverview(lessonId);
         return;
       }
 
-      if (!__DEV__) {
+      if (!__DEV__ || !isAvailable) {
         return;
       }
 
@@ -161,7 +143,6 @@ export default function LessonsScreen() {
         title="Lesoverzicht"
         subtitle="Bekijk alle lessen per thema"
         onPressProfile={() => navigation.navigate('Profile')}
-        onPressTitle={__DEV__ ? handleDevTripleTap : undefined}
       />
 
       <View style={styles.themeList}>
@@ -176,12 +157,13 @@ export default function LessonsScreen() {
             <View style={styles.lessonList}>
               {module.lessons.map((lesson) => {
                 const status = getLessonStatus(lesson.id, progress);
-                const isLocked = status === 'locked';
+                const isAvailable = isPrototypeLessonAvailable(lesson.id);
+                const isLocked = status === 'locked' || !isAvailable;
 
                 return (
                   <Pressable
                     key={lesson.id}
-                    onPress={() => handleLessonPress(lesson.id, isLocked)}
+                    onPress={() => handleLessonPress(lesson.id, isLocked, isAvailable)}
                   >
                     {({ pressed }) => (
                       <View
@@ -190,7 +172,7 @@ export default function LessonsScreen() {
                           status === 'current' && styles.lessonRowCurrent,
                           status === 'completed' && styles.lessonRowCompleted,
                           isLocked && styles.lessonRowLocked,
-                          pressed && (!isLocked || __DEV__) && styles.lessonRowPressed,
+                          pressed && !isLocked && styles.lessonRowPressed,
                         ]}
                       >
                         <View style={styles.lessonRowLeft}>
