@@ -17,7 +17,7 @@ export default function OnboardingLanguageScreen({ navigation, route }) {
     () => getLanguageOptions(preferences?.language),
     [preferences?.language]
   );
-  const [selected, setSelected] = useState(preferences?.language || 'English');
+  const [selected, setSelected] = useState(preferences?.language || 'Dutch');
 
   const nextRoute = route?.params?.nextRoute || 'OnboardingEntry';
 

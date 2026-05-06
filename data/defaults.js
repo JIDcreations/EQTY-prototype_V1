@@ -23,7 +23,7 @@ export const defaultOnboardingContext = {
 };
 
 export const defaultPreferences = {
-  language: 'English',
+  language: 'Dutch',
   appearance: 'Dark',
   textSize: 'Default',
   hasOnboarded: false,

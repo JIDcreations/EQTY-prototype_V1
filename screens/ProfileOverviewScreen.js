@@ -153,7 +153,7 @@ export default function ProfileOverviewScreen() {
           <Card style={styles.card}>
             <SettingsRow
               label="Language"
-              value={preferences?.language || 'English'}
+              value={preferences?.language || 'Dutch'}
               onPress={() => navigation.navigate('Language')}
               isLast
             />
