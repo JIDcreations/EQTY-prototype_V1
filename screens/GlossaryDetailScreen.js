@@ -4,11 +4,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AppText from '../components/AppText';
 import Card from '../components/Card';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
-import { glossaryTerms } from '../data/glossary';
+import { glossaryTerms as rawGlossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getGlossaryExplanation } from '../utils/helpers';
-import { getGlossaryCopy } from '../utils/localization';
+import { getGlossaryCopy, getLocalizedGlossaryTerms } from '../utils/localization';
 
 const DEFAULT_GLOSSARY_COPY = {
   explainForMeTitle: 'Explain for me',
@@ -28,11 +28,17 @@ export default function GlossaryDetailScreen() {
     () => getGlossaryCopy?.(preferences?.language) || DEFAULT_GLOSSARY_COPY,
     [preferences?.language]
   );
+  const localizedTerms = useMemo(
+    () =>
+      getLocalizedGlossaryTerms?.(preferences?.language, rawGlossaryTerms) ||
+      rawGlossaryTerms,
+    [preferences?.language]
+  );
   const [explanation, setExplanation] = useState(null);
 
   const term = useMemo(
-    () => glossaryTerms.find((item) => item.id === termId) || glossaryTerms[0],
-    [termId]
+    () => localizedTerms.find((item) => item.id === termId) || localizedTerms[0],
+    [localizedTerms, termId]
   );
 
   return (

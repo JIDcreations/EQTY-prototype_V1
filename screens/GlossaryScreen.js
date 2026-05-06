@@ -9,10 +9,14 @@ import Card from '../components/Card';
 import SearchBar from '../components/SearchBar';
 import OnboardingScreen from '../components/OnboardingScreen';
 import TopTabHeader from '../components/TopTabHeader';
-import { glossaryCategories, glossaryTerms } from '../data/glossary';
+import { glossaryCategories, glossaryTerms as rawGlossaryTerms } from '../data/glossary';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getGlossaryCopy, getLocalizedGlossaryCategories } from '../utils/localization';
+import {
+  getGlossaryCopy,
+  getLocalizedGlossaryCategories,
+  getLocalizedGlossaryTerms,
+} from '../utils/localization';
 
 const DEFAULT_GLOSSARY_COPY = {
   title: 'Glossary',
@@ -48,6 +52,12 @@ export default function GlossaryScreen() {
       glossaryCategories,
     [preferences?.language]
   );
+  const localizedTerms = useMemo(
+    () =>
+      getLocalizedGlossaryTerms?.(preferences?.language, rawGlossaryTerms) ||
+      rawGlossaryTerms,
+    [preferences?.language]
+  );
   const [query, setQuery] = useState('');
   const [selectedTerm, setSelectedTerm] = useState(null);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -68,20 +78,29 @@ export default function GlossaryScreen() {
     }, {});
   }, [localizedCategories]);
 
+  const rawTermsById = useMemo(() => {
+    return rawGlossaryTerms.reduce((acc, term) => {
+      acc[term.id] = term;
+      return acc;
+    }, {});
+  }, []);
+
   const scopedTerms = useMemo(() => {
     if (!Array.isArray(scopedTermIds) || scopedTermIds.length === 0) {
-      return glossaryTerms;
+      return localizedTerms;
     }
     const normalizedIds = scopedTermIds
       .map((value) => (typeof value === 'string' ? value.toLowerCase() : value))
       .filter(Boolean);
     const idSet = new Set(normalizedIds);
-    return glossaryTerms.filter((term) => {
+    return localizedTerms.filter((term) => {
+      const rawTerm = rawTermsById[term.id];
       const termId = term.id?.toLowerCase();
       const termLabel = term.term?.toLowerCase();
-      return idSet.has(termId) || idSet.has(termLabel);
+      const rawTermLabel = rawTerm?.term?.toLowerCase();
+      return idSet.has(termId) || idSet.has(termLabel) || idSet.has(rawTermLabel);
     });
-  }, [scopedTermIds]);
+  }, [localizedTerms, rawTermsById, scopedTermIds]);
 
   const activeCategories = useMemo(() => {
     return localizedCategories.filter((category) =>
