@@ -4640,11 +4640,11 @@ function GuidedGoalExercise({
                         style={[styles.goalOption, isActive && styles.goalOptionActive]}
                         onPress={() => handlePick(section.id, option, index)}
                       >
-                        <GlossaryText
-                          text={option}
+                        <AppText
                           style={[styles.goalOptionText, isActive && styles.goalOptionTextActive]}
-                          onPressTerm={onPressTerm}
-                        />
+                        >
+                          {option}
+                        </AppText>
                       </Pressable>
                     );
                   })}
@@ -4663,6 +4663,7 @@ function GuidedGoalExercise({
           <SplitInsightCard
             sections={summarySections}
             onPressTerm={onPressTerm}
+            disableGlossaryTerms
           />
         </Animated.View>
       )}

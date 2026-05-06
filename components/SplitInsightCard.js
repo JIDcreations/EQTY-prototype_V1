@@ -13,7 +13,7 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-export default function SplitInsightCard({ sections = [], onPressTerm, style }) {
+export default function SplitInsightCard({ sections = [], onPressTerm, style, disableGlossaryTerms = false }) {
   const { colors, components } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const visibleSections = sections.filter((section) => section?.label && section?.text);
@@ -27,11 +27,15 @@ export default function SplitInsightCard({ sections = [], onPressTerm, style }) 
           {index > 0 ? <View style={styles.divider} /> : null}
           <View style={styles.section}>
             <AppText style={styles.label}>{section.label}</AppText>
-            <GlossaryText
-              text={section.text}
-              style={styles.text}
-              onPressTerm={onPressTerm}
-            />
+            {disableGlossaryTerms ? (
+              <AppText style={styles.text}>{section.text}</AppText>
+            ) : (
+              <GlossaryText
+                text={section.text}
+                style={styles.text}
+                onPressTerm={onPressTerm}
+              />
+            )}
           </View>
         </React.Fragment>
       ))}
