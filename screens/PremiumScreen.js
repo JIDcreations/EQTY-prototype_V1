@@ -91,8 +91,8 @@ export default function PremiumScreen() {
           style={[
             styles.benefitsCard,
             {
-              backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
-              borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+              backgroundColor: colors.background.surfaceActive,
+              borderColor: colors.ui.divider,
             },
           ]}
         >

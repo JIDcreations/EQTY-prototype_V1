@@ -31,7 +31,7 @@ export default function LessonsScreen() {
   const route = useRoute();
   const tabBarHeight = useBottomTabBarHeight();
   const { progress, preferences, isPremium, updateProgress } = useApp();
-  const { colors, components } = useTheme();
+  const { colors, components, mode } = useTheme();
   const lockedTapStateRef = useRef(new Map());
   const titleTapStateRef = useRef({ count: 0, timestamp: 0 });
   const scrollRef = useRef(null);
@@ -266,14 +266,19 @@ export default function LessonsScreen() {
         {/* Section intro */}
         <View style={styles.deepDiveIntro}>
           <View style={styles.deepDiveTitleRow}>
-            <AppText style={[styles.deepDiveIntroTitle, { color: colors.accent.primary }]}>
+            <AppText
+              style={[
+                styles.deepDiveIntroTitle,
+                { color: mode === 'light' ? colors.text.primary : colors.accent.primary },
+              ]}
+            >
               {deepDiveCopy.sectionTitle}
             </AppText>
             {!isPremium && (
               <View
                 style={[
                   styles.deepDivePremiumBadge,
-                  { borderColor: toRgba(colors.ui.divider, colors.opacity.stroke) },
+                  { borderColor: toRgba(colors.text.secondary, colors.opacity.stroke) },
                 ]}
               >
                 <AppText style={[styles.deepDivePremiumLabel, { color: colors.text.secondary }]}>
@@ -413,7 +418,7 @@ export default function LessonsScreen() {
                             style={[
                               styles.deepDiveComingSoonChip,
                               {
-                                borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+                                borderColor: toRgba(colors.text.secondary, colors.opacity.stroke),
                               },
                             ]}
                           >
