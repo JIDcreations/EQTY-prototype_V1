@@ -161,16 +161,14 @@ export default function SettingsAccountScreen({ navigation }) {
             containerStyle={styles.rowCard}
           />
         </View>
-        {hasChanges ? (
-          <View style={styles.actions}>
-            <PrimaryButton
-              label={settingsCopy.account.saveChanges}
-              onPress={handleSave}
-              disabled={saveDisabled}
-            />
-            <SecondaryButton label={settingsCopy.account.cancel} onPress={handleCancel} />
-          </View>
-        ) : null}
+        <View style={styles.actions}>
+          <PrimaryButton
+            label={settingsCopy.account.saveChanges}
+            onPress={handleSave}
+            disabled={saveDisabled}
+          />
+          <SecondaryButton label={settingsCopy.account.cancel} onPress={handleCancel} />
+        </View>
       </OnboardingScreen>
       <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />
     </View>
