@@ -1123,7 +1123,7 @@ const LESSON_VIDEOS_COPY = {
     currentLessonBadge: 'Matching your current lesson',
   },
   nl: {
-    title: 'Videos',
+    title: "Video's",
     subtitle: 'Snelle visuele uitleg per les',
     featuredTitle: 'Uitgelicht voor je huidige les',
     featuredFallback: 'Nog geen uitgelichte video. Bekijk de lesvideo’s hieronder.',
@@ -1143,7 +1143,7 @@ const LESSON_VIDEOS_COPY = {
     statusUpcoming: 'Aankomend',
     statusCompleted: 'Afgerond',
     browseSectionTitle: 'Bekijk per thema',
-    videosCountFn: (n) => `${n} video's`,
+    videosCountFn: (n) => `${n} ${n === 1 ? 'video' : "video's"}`,
     currentLessonBadge: 'Passend bij je huidige les',
   },
 };

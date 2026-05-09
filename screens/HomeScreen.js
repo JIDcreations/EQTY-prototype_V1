@@ -210,7 +210,7 @@ export default function HomeScreen() {
       },
       {
         id: 'videos',
-        title: 'Videos',
+        title: isDutch ? "Video's" : 'Videos',
         subtitle: isDutch ? 'Korte visuele\nuitleg' : 'Quick visual explainers',
         icon: 'play-circle-outline',
         target: 'Lessons',
