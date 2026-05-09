@@ -34,7 +34,7 @@ export default function LessonStepContainer({
           showsVerticalScrollIndicator={false}
         >
           <Animated.View
-            style={fillViewport ? styles.contentInner : null}
+            style={styles.contentInner}
             entering={FadeInDown.duration(280)}
           >
             {children}
@@ -66,13 +66,14 @@ const createStyles = (colors, components, tabBarHeight) =>
       gap: components.layout.contentGap,
     },
     contentScroll: {
+      flexGrow: 1,
       paddingTop: components.layout.safeArea.top + components.layout.spacing.lg,
       paddingBottom:
-        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.xxl,
+        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.md,
     },
     contentFixed: {
       flex: 1,
-      paddingBottom: tabBarHeight + components.layout.spacing.xxl,
+      paddingBottom: tabBarHeight + components.layout.spacing.md,
     },
     contentFill: {
       flexGrow: 1,

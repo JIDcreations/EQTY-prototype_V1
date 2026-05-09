@@ -662,7 +662,7 @@ function IntroConceptStep({ content, onNext, copy }) {
   };
 
   return (
-    <View style={styles.stepBody}>
+    <View style={styles.bottomPinnedStepBody}>
       <View style={styles.introConceptLead}>
         <AppText style={styles.introConceptLeadLabel}>{processLeadTitle}</AppText>
         <AppText style={styles.introConceptLeadBody}>{processLeadBody}</AppText>
@@ -700,7 +700,7 @@ function GoalConceptStep({ content, onNext, copy }) {
   };
 
   return (
-    <View style={styles.stepBody}>
+    <View style={styles.bottomPinnedStepBody}>
       <View style={styles.introConceptLead}>
         <AppText style={styles.introConceptLeadLabel}>{conceptLeadLabel}</AppText>
         <AppText style={styles.introConceptLeadBody}>{conceptLeadBody}</AppText>
@@ -728,7 +728,7 @@ function DropdownConceptStep({ content, lessonId, onNext, copy }) {
   const topSpacing = lessonId === 'lesson_1' ? 32 : components.layout.spacing.xxl;
 
   return (
-    <View style={[styles.stepBody, { marginTop: topSpacing }]}>
+    <View style={[styles.bottomPinnedStepBody, { marginTop: topSpacing }]}>
       <ConceptDropdownMenu
         headerLabel={concept?.sectionLabel}
         headerHint={concept?.sectionHint}
@@ -774,7 +774,7 @@ function AnchorConceptStep({ content, lessonId, onNext, copy }) {
     [0.5];
 
   return (
-    <View style={styles.anchorStepBody}>
+    <View style={styles.bottomPinnedAnchorStepBody}>
       {/* Anchor card — the concept hero */}
       <Animated.View style={[styles.anchorCard, anchorStyle]}>
         <View style={styles.anchorCardIcon}>
@@ -4996,43 +4996,45 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.stepBody}>
-        <View style={styles.reflectionHeader}>
-          <AppText style={styles.reflectionQuestion}>{question}</AppText>
-          <AppText style={styles.reflectionSubtitle}>
-            {subtitle}
-          </AppText>
-        </View>
-        {isSubmitted ? (
-          <Animated.View entering={FadeInDown.duration(350)}>
-            <ReflectionResultCard
-              answer={submittedText}
-              insightLabel={copy.labels.eqtyInsight}
-              insightText={response}
-            />
-            <AppText style={styles.reflectionPersonalizationHint}>
-              {copy.messages.reflectionPersonalizationHint}
-            </AppText>
-          </Animated.View>
-        ) : (
-          <View>
-            <View style={styles.reflectionTextAreaWrap}>
-              <AppTextInput
-                style={styles.reflectionTextArea}
-                value={text}
-                onChangeText={setText}
-                placeholder={placeholder}
-                placeholderTextColor={colors.text.secondary}
-                multiline
-                autoCorrect
-                textAlignVertical="top"
-              />
-            </View>
-            <AppText style={styles.reflectionPersonalizationHint}>
-              {copy.messages.reflectionPersonalizationHint}
+      <View style={styles.bottomPinnedStepBody}>
+        <View style={styles.reflectionContent}>
+          <View style={styles.reflectionHeader}>
+            <AppText style={styles.reflectionQuestion}>{question}</AppText>
+            <AppText style={styles.reflectionSubtitle}>
+              {subtitle}
             </AppText>
           </View>
-        )}
+          {isSubmitted ? (
+            <Animated.View entering={FadeInDown.duration(350)}>
+              <ReflectionResultCard
+                answer={submittedText}
+                insightLabel={copy.labels.eqtyInsight}
+                insightText={response}
+              />
+              <AppText style={styles.reflectionPersonalizationHint}>
+                {copy.messages.reflectionPersonalizationHint}
+              </AppText>
+            </Animated.View>
+          ) : (
+            <View>
+              <View style={styles.reflectionTextAreaWrap}>
+                <AppTextInput
+                  style={styles.reflectionTextArea}
+                  value={text}
+                  onChangeText={setText}
+                  placeholder={placeholder}
+                  placeholderTextColor={colors.text.secondary}
+                  multiline
+                  autoCorrect
+                  textAlignVertical="top"
+                />
+              </View>
+              <AppText style={styles.reflectionPersonalizationHint}>
+                {copy.messages.reflectionPersonalizationHint}
+              </AppText>
+            </View>
+          )}
+        </View>
         <PrimaryButton
           label={isSubmitted ? copy.buttons.next : copy.buttons.submitReflection}
           onPress={handleContinue}
@@ -5376,6 +5378,11 @@ const createStyles = (colors, components, mode = 'dark') =>
     lineHeight: 34,
   },
   stepBody: {
+    gap: components.layout.spacing.lg,
+  },
+  bottomPinnedStepBody: {
+    flex: 1,
+    justifyContent: 'space-between',
     gap: components.layout.spacing.lg,
   },
   scenarioTopSpacing: {
@@ -7337,6 +7344,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     gap: components.layout.spacing.xs,
     marginTop: components.layout.spacing.md,
   },
+  reflectionContent: {
+    gap: components.layout.spacing.lg,
+  },
   reflectionQuestion: {
     ...typography.styles.h2,
     color: colors.text.primary,
@@ -8323,6 +8333,11 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   // ─── Anchor concept step ──────────────────────────────────────────────────
   anchorStepBody: {
+    gap: components.layout.spacing.xl,
+  },
+  bottomPinnedAnchorStepBody: {
+    flex: 1,
+    justifyContent: 'space-between',
     gap: components.layout.spacing.xl,
   },
   anchorCard: {
