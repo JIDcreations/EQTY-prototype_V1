@@ -46,33 +46,37 @@ export default function ResetPasswordScreen({ navigation }) {
           contentContainerStyle={styles.content}
           showGlow={false}
         >
-          <SettingsHeader
-            title={resetCopy.title}
-            subtitle={resetCopy.subtitle}
-            onBack={() => navigation.goBack()}
-          />
-          <View style={styles.section}>
-            <View style={styles.field}>
-              <AppText style={styles.label}>{resetCopy.emailLabel}</AppText>
-              <AppTextInput
-                value={email}
-                onChangeText={setEmail}
-                placeholder={resetCopy.emailPlaceholder}
-                placeholderTextColor={colors.text.secondary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
+          <View style={styles.layout}>
+            <View style={styles.topContent}>
+              <SettingsHeader
+                title={resetCopy.title}
+                subtitle={resetCopy.subtitle}
+                onBack={() => navigation.goBack()}
               />
+              <View style={styles.section}>
+                <View style={styles.field}>
+                  <AppText style={styles.label}>{resetCopy.emailLabel}</AppText>
+                  <AppTextInput
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder={resetCopy.emailPlaceholder}
+                    placeholderTextColor={colors.text.secondary}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    style={styles.input}
+                  />
+                </View>
+                <AppText style={styles.hint}>{resetCopy.hint}</AppText>
+              </View>
             </View>
-            <AppText style={styles.hint}>{resetCopy.hint}</AppText>
-          </View>
-          <View style={styles.actions}>
-            <PrimaryButton
-              label={resetCopy.sendResetLink}
-              onPress={handleSend}
-              disabled={!email.trim()}
-            />
-            <SecondaryButton label={resetCopy.cancel} onPress={() => navigation.goBack()} />
+            <View style={styles.actions}>
+              <PrimaryButton
+                label={resetCopy.sendResetLink}
+                onPress={handleSend}
+                disabled={!email.trim()}
+              />
+              <SecondaryButton label={resetCopy.cancel} onPress={() => navigation.goBack()} />
+            </View>
           </View>
         </OnboardingScreen>
       </KeyboardAvoidingView>
@@ -97,6 +101,14 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     content: {
       ...getSettingsOnboardingContentStyle(components, tabBarHeight),
+      flexGrow: 1,
+    },
+    layout: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    topContent: {
+      gap: components.layout.contentGap,
     },
     section: {
       gap: components.layout.spacing.sm,

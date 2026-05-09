@@ -44,63 +44,67 @@ export default function ChangePasswordScreen({ navigation }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <SettingsHeader
-          title={passwordCopy.title}
-          subtitle={passwordCopy.subtitle}
-          onBack={() => navigation.goBack()}
-        />
-        <View style={styles.section}>
-          <View style={styles.field}>
-            <AppText style={styles.label}>{passwordCopy.currentPasswordLabel}</AppText>
-            <AppTextInput
-              value={currentPassword}
-              onChangeText={setCurrentPassword}
-              placeholder={passwordCopy.currentPasswordPlaceholder}
-              placeholderTextColor={colors.text.secondary}
-              secureTextEntry
-              style={styles.input}
+        <View style={styles.layout}>
+          <View style={styles.topContent}>
+            <SettingsHeader
+              title={passwordCopy.title}
+              subtitle={passwordCopy.subtitle}
+              onBack={() => navigation.goBack()}
             />
+            <View style={styles.section}>
+              <View style={styles.field}>
+                <AppText style={styles.label}>{passwordCopy.currentPasswordLabel}</AppText>
+                <AppTextInput
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  placeholder={passwordCopy.currentPasswordPlaceholder}
+                  placeholderTextColor={colors.text.secondary}
+                  secureTextEntry
+                  style={styles.input}
+                />
+              </View>
+              <View style={styles.field}>
+                <AppText style={styles.label}>{passwordCopy.newPasswordLabel}</AppText>
+                <AppTextInput
+                  value={nextPassword}
+                  onChangeText={setNextPassword}
+                  placeholder={passwordCopy.newPasswordPlaceholder}
+                  placeholderTextColor={colors.text.secondary}
+                  secureTextEntry
+                  style={styles.input}
+                />
+              </View>
+              <View style={styles.field}>
+                <AppText style={styles.label}>{passwordCopy.confirmPasswordLabel}</AppText>
+                <AppTextInput
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  placeholder={passwordCopy.confirmPasswordPlaceholder}
+                  placeholderTextColor={colors.text.secondary}
+                  secureTextEntry
+                  style={styles.input}
+                />
+              </View>
+              <Pressable
+                onPress={() => navigation.navigate('ResetPassword')}
+                style={styles.forgotRow}
+              >
+                <AppText style={styles.forgotText}>
+                  {forgotPasswordParts.prefix}
+                  {forgotPasswordParts.prefix ? ' ' : ''}
+                  <AppText style={styles.forgotTextUnderline}>{forgotPasswordParts.cta}</AppText>
+                </AppText>
+              </Pressable>
+            </View>
           </View>
-          <View style={styles.field}>
-            <AppText style={styles.label}>{passwordCopy.newPasswordLabel}</AppText>
-            <AppTextInput
-              value={nextPassword}
-              onChangeText={setNextPassword}
-              placeholder={passwordCopy.newPasswordPlaceholder}
-              placeholderTextColor={colors.text.secondary}
-              secureTextEntry
-              style={styles.input}
+          <View style={styles.actions}>
+            <PrimaryButton
+              label={passwordCopy.saveChanges}
+              onPress={handleSave}
+              disabled={!canSave}
             />
+            <SecondaryButton label={passwordCopy.cancel} onPress={() => navigation.goBack()} />
           </View>
-          <View style={styles.field}>
-            <AppText style={styles.label}>{passwordCopy.confirmPasswordLabel}</AppText>
-            <AppTextInput
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              placeholder={passwordCopy.confirmPasswordPlaceholder}
-              placeholderTextColor={colors.text.secondary}
-              secureTextEntry
-              style={styles.input}
-            />
-          </View>
-          <Pressable
-            onPress={() => navigation.navigate('ResetPassword')}
-            style={styles.forgotRow}
-          >
-            <AppText style={styles.forgotText}>
-              {forgotPasswordParts.prefix}
-              {forgotPasswordParts.prefix ? ' ' : ''}
-              <AppText style={styles.forgotTextUnderline}>{forgotPasswordParts.cta}</AppText>
-            </AppText>
-          </Pressable>
-        </View>
-        <View style={styles.actions}>
-          <PrimaryButton
-            label={passwordCopy.saveChanges}
-            onPress={handleSave}
-            disabled={!canSave}
-          />
-          <SecondaryButton label={passwordCopy.cancel} onPress={() => navigation.goBack()} />
         </View>
       </ScrollView>
       <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />
@@ -129,6 +133,14 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     content: {
       ...getSettingsScrollContentStyle(components, tabBarHeight),
+      flexGrow: 1,
+    },
+    layout: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    topContent: {
+      gap: components.layout.contentGap,
     },
     section: {
       gap: components.layout.spacing.sm,

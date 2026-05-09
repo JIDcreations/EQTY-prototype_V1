@@ -129,45 +129,49 @@ export default function SettingsAccountScreen({ navigation }) {
         backgroundVariant="bg3"
         contentContainerStyle={styles.content}
       >
-        <SettingsHeader
-          title={settingsCopy.account.title}
-          subtitle={settingsCopy.account.subtitle}
-          onBack={() => navigation.goBack()}
-        />
-        <View style={styles.section}>
-          {renderField({
-            key: 'username',
-            label: settingsCopy.account.usernameLabel,
-            value: username,
-            placeholder: settingsCopy.account.usernamePlaceholder,
-            onChangeText: setUsername,
-          })}
-          {renderField({
-            key: 'email',
-            label: settingsCopy.account.emailLabel,
-            value: email,
-            placeholder: settingsCopy.account.emailPlaceholder,
-            onChangeText: setEmail,
-            inputProps: {
-              keyboardType: 'email-address',
-              autoCapitalize: 'none',
-            },
-          })}
-          <SettingsRow
-            label={settingsCopy.account.resetPasswordLabel}
-            onPress={() => navigation.navigate('ChangePassword')}
-            labelNumberOfLines={1}
-            isLast
-            containerStyle={styles.rowCard}
-          />
-        </View>
-        <View style={styles.actions}>
-          <PrimaryButton
-            label={settingsCopy.account.saveChanges}
-            onPress={handleSave}
-            disabled={saveDisabled}
-          />
-          <SecondaryButton label={settingsCopy.account.cancel} onPress={handleCancel} />
+        <View style={styles.layout}>
+          <View style={styles.topContent}>
+            <SettingsHeader
+              title={settingsCopy.account.title}
+              subtitle={settingsCopy.account.subtitle}
+              onBack={() => navigation.goBack()}
+            />
+            <View style={styles.section}>
+              {renderField({
+                key: 'username',
+                label: settingsCopy.account.usernameLabel,
+                value: username,
+                placeholder: settingsCopy.account.usernamePlaceholder,
+                onChangeText: setUsername,
+              })}
+              {renderField({
+                key: 'email',
+                label: settingsCopy.account.emailLabel,
+                value: email,
+                placeholder: settingsCopy.account.emailPlaceholder,
+                onChangeText: setEmail,
+                inputProps: {
+                  keyboardType: 'email-address',
+                  autoCapitalize: 'none',
+                },
+              })}
+              <SettingsRow
+                label={settingsCopy.account.resetPasswordLabel}
+                onPress={() => navigation.navigate('ChangePassword')}
+                labelNumberOfLines={1}
+                isLast
+                containerStyle={styles.rowCard}
+              />
+            </View>
+          </View>
+          <View style={styles.actions}>
+            <PrimaryButton
+              label={settingsCopy.account.saveChanges}
+              onPress={handleSave}
+              disabled={saveDisabled}
+            />
+            <SecondaryButton label={settingsCopy.account.cancel} onPress={handleCancel} />
+          </View>
         </View>
       </OnboardingScreen>
       <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />
@@ -182,6 +186,14 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     content: {
       ...getSettingsOnboardingContentStyle(components, tabBarHeight),
+      flexGrow: 1,
+    },
+    layout: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    topContent: {
+      gap: components.layout.contentGap,
     },
     section: {
       gap: components.layout.spacing.md,

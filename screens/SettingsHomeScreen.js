@@ -74,29 +74,33 @@ export default function SettingsHomeScreen({ navigation }) {
       backgroundVariant="bg3"
       contentContainerStyle={styles.content}
     >
-      <SettingsHeader
-        title={settingsCopy.settingsHome.title}
-        subtitle={settingsCopy.settingsHome.subtitle}
-        onBack={() => navigation.goBack()}
-      />
-      <View style={styles.section}>
-        {SETTINGS_CATEGORIES.map((item) => (
-          <SettingsRow
-            key={item.key}
-            label={settingsCopy.settingsHome.categories[item.key]?.label || item.key}
-            subtitle={settingsCopy.settingsHome.categories[item.key]?.subtitle}
-            subtitleNumberOfLines={item.key === 'account' ? 1 : undefined}
-            onPress={() => navigation.navigate(item.route)}
-            isLast
-            containerStyle={styles.rowCard}
+      <View style={styles.layout}>
+        <View style={styles.topContent}>
+          <SettingsHeader
+            title={settingsCopy.settingsHome.title}
+            subtitle={settingsCopy.settingsHome.subtitle}
+            onBack={() => navigation.goBack()}
           />
-        ))}
+          <View style={styles.section}>
+            {SETTINGS_CATEGORIES.map((item) => (
+              <SettingsRow
+                key={item.key}
+                label={settingsCopy.settingsHome.categories[item.key]?.label || item.key}
+                subtitle={settingsCopy.settingsHome.categories[item.key]?.subtitle}
+                subtitleNumberOfLines={item.key === 'account' ? 1 : undefined}
+                onPress={() => navigation.navigate(item.route)}
+                isLast
+                containerStyle={styles.rowCard}
+              />
+            ))}
+          </View>
+        </View>
+        <PrimaryButton
+          label={settingsCopy.settingsHome.logoutButton}
+          onPress={handleLogOut}
+          style={styles.logoutButton}
+        />
       </View>
-      <PrimaryButton
-        label={settingsCopy.settingsHome.logoutButton}
-        onPress={handleLogOut}
-        style={styles.logoutButton}
-      />
     </OnboardingScreen>
   );
 }
@@ -105,6 +109,14 @@ const createStyles = (colors, components, tabBarHeight) =>
   StyleSheet.create({
     content: {
       ...getSettingsOnboardingContentStyle(components, tabBarHeight),
+      flexGrow: 1,
+    },
+    layout: {
+      flex: 1,
+      justifyContent: 'space-between',
+    },
+    topContent: {
+      gap: components.layout.contentGap,
     },
     section: {
       gap: components.layout.spacing.sm,
