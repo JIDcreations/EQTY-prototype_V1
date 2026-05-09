@@ -61,7 +61,7 @@ const createStyles = (colors, components) =>
       borderRadius: components.radius.pill,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: toRgba(colors.accent.primary, 0.12),
+      backgroundColor: colors.text.secondary,
     },
     label: {
       ...typography.styles.bodyStrong,

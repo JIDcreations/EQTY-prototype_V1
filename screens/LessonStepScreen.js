@@ -2595,7 +2595,7 @@ function IntroScenarioStep({ onNext, copy }) {
             <Ionicons
               name="layers-outline"
               size={components.sizes.icon.lg}
-              color={selected !== null ? colors.accent.primary : colors.text.primary}
+              color={selected !== null ? colors.text.secondary : colors.text.primary}
             />
             <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
               Volg het proces
@@ -2612,11 +2612,21 @@ function IntroScenarioStep({ onNext, copy }) {
               style={styles.scenarioRevealCard}
             >
               <View style={styles.scenarioRevealHeader}>
-                <Ionicons
-                  name={selected === 'plan' ? 'checkmark-circle' : 'information-circle'}
-                  size={18}
-                  color={selected === 'plan' ? colors.accent.primary : colors.text.secondary}
-                />
+                {selected === 'plan' ? (
+                  <View style={styles.scenarioRevealIconBubble}>
+                    <Ionicons
+                      name="checkmark"
+                      size={14}
+                      color={colors.accent.primary}
+                    />
+                  </View>
+                ) : (
+                  <Ionicons
+                    name="information-circle"
+                    size={18}
+                    color={colors.text.secondary}
+                  />
+                )}
                 <AppText style={[styles.scenarioRevealLabel, selected === 'plan' && styles.scenarioRevealLabelKey]}>
                   {selected === 'plan'
                     ? copy.introScenario.feedbackCorrectTitle
@@ -2902,7 +2912,11 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
               <Ionicons
                 name={rightChoice.icon || 'flag-outline'}
                 size={components.sizes.icon.lg}
-                color={showComparison && rightChoice?.isKey ? colors.accent.primary : colors.text.primary}
+                color={
+                  showComparison && rightChoice?.isKey
+                    ? colors.text.secondary
+                    : colors.text.primary
+                }
               />
               <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
                 {rightChoice.label}
@@ -3693,14 +3707,13 @@ function ScenarioExercise({ exercise, onNext, copy }) {
                             width: components.sizes.icon.lg,
                             height: components.sizes.icon.lg,
                             borderRadius: components.sizes.icon.lg / 2,
-                            backgroundColor: colors.accent.primary,
                           },
                         ]}
                       >
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={colors.background.surface}
+                          color={colors.text.secondary}
                         />
                       </View>
                     ) : isWrongPick ? (
@@ -3717,11 +3730,21 @@ function ScenarioExercise({ exercise, onNext, copy }) {
       {isAnswered && pickedOption ? (
         <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
           <View style={styles.scenarioRevealHeader}>
-            <Ionicons
-              name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
-              size={components.sizes.icon.lg}
-              color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
-            />
+            {pickedOption.isKey ? (
+              <View style={styles.scenarioRevealIconBubble}>
+                <Ionicons
+                  name="checkmark"
+                  size={components.sizes.icon.sm}
+                  color={colors.accent.primary}
+                />
+              </View>
+            ) : (
+              <Ionicons
+                name="information-circle"
+                size={components.sizes.icon.lg}
+                color={colors.text.secondary}
+              />
+            )}
             <AppText
               style={[
                 styles.scenarioRevealLabel,
@@ -3986,7 +4009,9 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                           {item.label}
                         </AppText>
                         {isWrong ? (
-                          <Ionicons name="close" size={14} color={colors.text.primary} />
+                          <View style={[styles.introSlotStateIcon, styles.introSlotStateIconWrong]}>
+                            <Ionicons name="close" size={12} color={colors.text.primary} />
+                          </View>
                         ) : isCorrect && item ? (
                           <Ionicons name="checkmark-circle" size={15} color={colors.accent.primary} />
                         ) : (
@@ -4452,14 +4477,13 @@ function GuidedGoalExercise({
                                 width: components.sizes.icon.lg,
                                 height: components.sizes.icon.lg,
                                 borderRadius: components.sizes.icon.lg / 2,
-                                backgroundColor: colors.accent.primary,
                               },
                             ]}
                           >
                             <Ionicons
                               name="checkmark"
                               size={components.sizes.icon.sm}
-                              color={colors.background.surface}
+                              color={colors.text.secondary}
                             />
                           </View>
                         ) : isWrongPick ? (
@@ -4481,11 +4505,21 @@ function GuidedGoalExercise({
         {feedbackConfig?.text ? (
           <Animated.View entering={FadeInDown.duration(250)} style={styles.scenarioRevealCard}>
             <View style={styles.scenarioRevealHeader}>
-              <Ionicons
-                name={isCorrect ? 'checkmark-circle' : 'information-circle'}
-                size={components.sizes.icon.lg}
-                color={isCorrect ? colors.accent.primary : colors.text.secondary}
-              />
+              {isCorrect ? (
+                <View style={styles.scenarioRevealIconBubble}>
+                  <Ionicons
+                    name="checkmark"
+                    size={components.sizes.icon.sm}
+                    color={colors.accent.primary}
+                  />
+                </View>
+              ) : (
+                <Ionicons
+                  name="information-circle"
+                  size={components.sizes.icon.lg}
+                  color={colors.text.secondary}
+                />
+              )}
               <AppText
                 style={[
                   styles.scenarioRevealLabel,
@@ -5321,23 +5355,22 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                 labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
                 accessory={
                   isKey ? (
-                    <View
-                      style={[
-                        styles.scenarioOptionCheckBadge,
-                        {
-                          width: components.sizes.icon.lg,
-                          height: components.sizes.icon.lg,
-                          borderRadius: components.sizes.icon.lg / 2,
-                          backgroundColor: colors.accent.primary,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name="checkmark"
-                        size={components.sizes.icon.sm}
-                        color={colors.background.surface}
-                      />
-                    </View>
+                      <View
+                        style={[
+                          styles.scenarioOptionCheckBadge,
+                          {
+                            width: components.sizes.icon.lg,
+                            height: components.sizes.icon.lg,
+                            borderRadius: components.sizes.icon.lg / 2,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name="checkmark"
+                          size={components.sizes.icon.sm}
+                          color={colors.text.secondary}
+                        />
+                      </View>
                   ) : isWrongPick ? (
                     <Ionicons
                       name="close-circle"
@@ -5359,11 +5392,21 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
           style={styles.scenarioRevealCard}
         >
           <View style={styles.scenarioRevealHeader}>
-            <Ionicons
-              name={pickedOption.isKey ? 'checkmark-circle' : 'information-circle'}
-              size={18}
-              color={pickedOption.isKey ? colors.accent.primary : colors.text.secondary}
-            />
+            {pickedOption.isKey ? (
+              <View style={styles.scenarioRevealIconBubble}>
+                <Ionicons
+                  name="checkmark"
+                  size={14}
+                  color={colors.accent.primary}
+                />
+              </View>
+            ) : (
+              <Ionicons
+                name="information-circle"
+                size={18}
+                color={colors.text.secondary}
+              />
+            )}
             <AppText style={[styles.scenarioRevealLabel, pickedOption.isKey && styles.scenarioRevealLabelKey]}>
               {pickedLabel}
             </AppText>
@@ -6266,7 +6309,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: colors.text.primary,
   },
   narrativeChoiceCardActivePlan: {
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderColor: colors.text.primary,
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
   },
   narrativeChoiceCardPressed: {
@@ -7117,13 +7160,13 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   introSlotWrong: {
     borderStyle: 'solid',
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderColor: colors.accent.primary,
     backgroundColor: colors.background.surface,
   },
   introSlotCorrect: {
     borderStyle: 'solid',
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surface,
+    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   introSlotHint: {
     borderStyle: 'solid',
@@ -7185,6 +7228,17 @@ const createStyles = (colors, components, mode = 'dark') =>
     alignItems: 'center',
     gap: components.layout.spacing.xs,
   },
+  introSlotStateIcon: {
+    width: 18,
+    height: 18,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  introSlotStateIconWrong: {
+    backgroundColor: colors.accent.primary,
+  },
   introSlotLabel: {
     ...typography.styles.small,
     color: colors.text.primary,
@@ -7197,7 +7251,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.text.primary,
   },
   introSlotLabelWrong: {
-    color: colors.accent.primary,
+    color: colors.text.primary,
   },
   introSlotPlaceholder: {
     ...typography.styles.small,
@@ -7801,12 +7855,22 @@ const createStyles = (colors, components, mode = 'dark') =>
     alignItems: 'center',
     gap: components.layout.spacing.xs,
   },
+  scenarioRevealIconBubble: {
+    width: components.sizes.icon.lg,
+    height: components.sizes.icon.lg,
+    borderRadius: components.sizes.icon.lg / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.text.secondary,
+    borderWidth: components.borderWidth.thin,
+    borderColor: colors.text.secondary,
+  },
   scenarioRevealLabel: {
     ...typography.styles.stepLabel,
     color: colors.text.secondary,
   },
   scenarioRevealLabelKey: {
-    color: colors.accent.primary,
+    color: colors.text.primary,
   },
   scenarioRevealText: {
     ...typography.styles.body,
@@ -8167,11 +8231,11 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   l1CtaPillLabel: {
     ...typography.styles.small,
-    color: colors.accent.primary,
+    color: colors.text.primary,
   },
   l1CtaPillArrow: {
     ...typography.styles.small,
-    color: colors.accent.primary,
+    color: colors.text.primary,
   },
   l1TapHint: {
     ...typography.styles.meta,
