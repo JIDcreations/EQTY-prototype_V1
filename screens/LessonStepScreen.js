@@ -4013,7 +4013,9 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                             <Ionicons name="close" size={12} color={colors.text.primary} />
                           </View>
                         ) : isCorrect && item ? (
-                          <Ionicons name="checkmark-circle" size={15} color={colors.accent.primary} />
+                          <View style={[styles.introSlotStateIcon, styles.introSlotStateIconCorrect]}>
+                            <Ionicons name="checkmark" size={12} color={colors.text.primary} />
+                          </View>
                         ) : (
                           <Ionicons name="close" size={13} color={toRgba(colors.text.secondary, 0.45)} />
                         )}
@@ -7166,7 +7168,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   introSlotCorrect: {
     borderStyle: 'solid',
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: colors.background.surface,
   },
   introSlotHint: {
     borderStyle: 'solid',
@@ -7203,9 +7205,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: colors.text.secondary,
   },
   introSlotBadgeCorrect: {
-    backgroundColor: colors.background.surface,
+    backgroundColor: colors.text.secondary,
     borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    borderColor: colors.text.secondary,
   },
   introSlotBadgeText: {
     fontFamily: typography.fonts.filsonBold,
@@ -7220,7 +7222,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     color: colors.background.surface,
   },
   introSlotBadgeTextCorrect: {
-    color: colors.text.primary,
+    color: colors.background.surface,
   },
   introSlotLabelRow: {
     flex: 1,
@@ -7237,6 +7239,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     flexShrink: 0,
   },
   introSlotStateIconWrong: {
+    backgroundColor: colors.accent.primary,
+  },
+  introSlotStateIconCorrect: {
     backgroundColor: colors.accent.primary,
   },
   introSlotLabel: {
