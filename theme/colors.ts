@@ -44,7 +44,7 @@ export const colors = {
     },
     opacity: {
       tint: 0.12,
-      stroke: 0.35,
+      stroke: 1,
       surface: 0.6,
       emphasis: 0.9,
     },
