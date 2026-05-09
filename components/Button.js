@@ -160,6 +160,7 @@ const createStyles = (components) =>
     },
     primaryLabel: {
       ...components.button.labelOnAccent,
+      transform: [{ translateY: -1 }],
     },
     secondaryButton: {
       ...components.button.base,
@@ -178,6 +179,7 @@ const createStyles = (components) =>
     },
     secondaryLabel: {
       ...components.button.label,
+      transform: [{ translateY: -1 }],
     },
     disabled: {
       ...components.button.disabled,
