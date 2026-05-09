@@ -20,6 +20,8 @@ import {
   buildModulesWithIndexedLessons,
   getLessonStatus,
   areAllCoreLessonsComplete,
+  getLastCoreLessonId,
+  getPrototypeAvailableLessonIds,
   isPrototypeLessonAvailable,
 } from '../utils/helpers';
 import { getDeepDiveLessonsForTrack } from '../data/deepDives';
@@ -28,9 +30,10 @@ export default function LessonsScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const tabBarHeight = useBottomTabBarHeight();
-  const { progress, preferences, isPremium } = useApp();
+  const { progress, preferences, isPremium, updateProgress } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef(new Map());
+  const titleTapStateRef = useRef({ count: 0, timestamp: 0 });
   const scrollRef = useRef(null);
   const deepDiveOffsetRef = useRef(null);
   const [deepDiveSectionY, setDeepDiveSectionY] = useState(null);
@@ -108,20 +111,46 @@ export default function LessonsScreen() {
     [openLessonOverview]
   );
 
+  const scrollToDeepDiveSection = useCallback(() => {
+    if (typeof deepDiveSectionY !== 'number') return;
+    scrollRef.current?.scrollTo?.({
+      y: Math.max(0, deepDiveSectionY - components.layout.spacing.lg),
+      animated: true,
+    });
+  }, [components.layout.spacing.lg, deepDiveSectionY]);
+
+  const handleTitlePress = useCallback(async () => {
+    const now = Date.now();
+    const previous = titleTapStateRef.current;
+    const nextCount =
+      previous && now - previous.timestamp < 700 ? previous.count + 1 : 1;
+
+    if (nextCount >= 3) {
+      titleTapStateRef.current = { count: 0, timestamp: 0 };
+      await updateProgress({
+        completedLessonIds: getPrototypeAvailableLessonIds(),
+        currentLessonId: getLastCoreLessonId() || progress.currentLessonId,
+      });
+      deepDiveOffsetRef.current = setTimeout(scrollToDeepDiveSection, 120);
+      return;
+    }
+
+    titleTapStateRef.current = {
+      count: nextCount,
+      timestamp: now,
+    };
+  }, [progress.currentLessonId, scrollToDeepDiveSection, updateProgress]);
+
   useFocusEffect(
     useCallback(() => {
       if (route.params?.scrollToSection !== 'deepDive') return undefined;
 
-      const scrollToDeepDive = () => {
-        if (typeof deepDiveSectionY !== 'number') return;
-        scrollRef.current?.scrollTo?.({
-          y: Math.max(0, deepDiveSectionY - components.layout.spacing.lg),
-          animated: true,
-        });
+      const handleDeepDiveScroll = () => {
+        scrollToDeepDiveSection();
         navigation.setParams({ scrollToSection: undefined });
       };
 
-      deepDiveOffsetRef.current = setTimeout(scrollToDeepDive, 120);
+      deepDiveOffsetRef.current = setTimeout(handleDeepDiveScroll, 120);
 
       return () => {
         if (deepDiveOffsetRef.current) {
@@ -129,7 +158,7 @@ export default function LessonsScreen() {
           deepDiveOffsetRef.current = null;
         }
       };
-    }, [components.layout.spacing.lg, deepDiveSectionY, navigation, route.params?.scrollToSection])
+    }, [navigation, route.params?.scrollToSection, scrollToDeepDiveSection])
   );
 
   return (
@@ -143,6 +172,7 @@ export default function LessonsScreen() {
         title="Lesoverzicht"
         subtitle="Bekijk alle lessen per thema"
         onPressProfile={() => navigation.navigate('Profile')}
+        onPressTitle={handleTitlePress}
       />
 
       <View style={styles.themeList}>

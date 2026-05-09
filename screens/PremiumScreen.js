@@ -129,8 +129,7 @@ const createStyles = (colors, components, tabBarHeight) =>
     content: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
       paddingTop: 0,
-      paddingBottom:
-        components.layout.safeArea.bottom + tabBarHeight + components.layout.spacing.xl,
+      paddingBottom: tabBarHeight + components.layout.spacing.md,
       flex: 1,
       justifyContent: 'space-between',
       position: 'relative',
