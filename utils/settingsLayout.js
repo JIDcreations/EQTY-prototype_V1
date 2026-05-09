@@ -3,7 +3,7 @@ export function getSettingsOnboardingContentStyle(components, tabBarHeight) {
     paddingBottom:
       components.layout.safeArea.bottom +
       tabBarHeight +
-      components.layout.spacing.xxl,
+      components.layout.spacing.md,
     gap: components.layout.contentGap,
   };
 }
@@ -16,6 +16,6 @@ export function getSettingsScrollContentStyle(components, tabBarHeight) {
     paddingBottom:
       components.layout.safeArea.bottom +
       tabBarHeight +
-      components.layout.spacing.xxl,
+      components.layout.spacing.md,
   };
 }
