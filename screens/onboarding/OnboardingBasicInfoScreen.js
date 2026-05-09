@@ -111,7 +111,7 @@ const createStyles = (colors, components) =>
   StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
-      paddingBottom: components.layout.safeArea.bottom + components.layout.spacing.xxl,
+      paddingBottom: components.layout.safeArea.bottom,
     },
     keyboard: {
       flex: 1,
@@ -120,7 +120,7 @@ const createStyles = (colors, components) =>
       flex: 1,
       justifyContent: 'space-between',
       paddingTop: components.layout.spacing.lg,
-      paddingBottom: components.layout.spacing.md,
+      paddingBottom: components.layout.spacing.none,
     },
     topArea: {
       alignItems: 'center',

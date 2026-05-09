@@ -98,7 +98,6 @@ const createStyles = (colors, components) =>
     container: {
       flex: 1,
       justifyContent: 'space-between',
-      paddingBottom: components.layout.spacing.xl,
     },
     header: {
       gap: components.layout.spacing.sm,

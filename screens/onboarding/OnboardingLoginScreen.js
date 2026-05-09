@@ -193,7 +193,7 @@ const createStyles = (colors, components) =>
     },
     contentBlock: {
       flex: 1,
-      justifyContent: 'flex-start',
+      justifyContent: 'space-between',
       gap: components.layout.spacing.xxl,
     },
     header: {
@@ -258,6 +258,7 @@ const createStyles = (colors, components) =>
     },
     actions: {
       gap: components.layout.spacing.md,
+      marginTop: components.layout.spacing.xl,
     },
     dividerRow: {
       flexDirection: 'row',

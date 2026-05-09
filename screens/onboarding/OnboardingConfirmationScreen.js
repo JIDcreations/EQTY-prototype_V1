@@ -61,7 +61,6 @@ const createStyles = (colors, components) =>
       flex: 1,
       justifyContent: 'space-between',
       gap: components.layout.spacing.xl,
-      paddingBottom: components.layout.spacing.xl,
     },
     topArea: {
       alignItems: 'center',

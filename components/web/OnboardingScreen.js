@@ -138,7 +138,7 @@ const createStyles = (colors, components) =>
       flex: 1,
       paddingHorizontal: components.layout.pagePaddingHorizontal,
       paddingTop: components.layout.spacing.xl,
-      paddingBottom: components.layout.spacing.xl,
+      paddingBottom: components.layout.spacing.none,
     },
     glowTop: {
       position: 'absolute',

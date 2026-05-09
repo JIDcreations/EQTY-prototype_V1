@@ -196,7 +196,7 @@ const createStyles = (colors, components) =>
     },
     contentBlock: {
       flex: 1,
-      justifyContent: 'flex-start',
+      justifyContent: 'space-between',
       gap: components.layout.spacing.lg,
     },
   });
