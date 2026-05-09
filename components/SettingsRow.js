@@ -20,6 +20,7 @@ export default function SettingsRow({
   right,
   subtitle,
   labelNumberOfLines,
+  subtitleNumberOfLines,
   isLast = false,
   disabled = false,
   containerStyle,
@@ -49,7 +50,10 @@ export default function SettingsRow({
           {label}
         </AppText>
         {subtitle ? (
-          <AppText style={[styles.subtitle, disabled && styles.subtitleDisabled]}>
+          <AppText
+            style={[styles.subtitle, disabled && styles.subtitleDisabled]}
+            numberOfLines={subtitleNumberOfLines}
+          >
             {subtitle}
           </AppText>
         ) : null}

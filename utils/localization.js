@@ -1439,7 +1439,7 @@ const SETTINGS_COPY = {
       categories: {
         account: {
           label: 'Account',
-          subtitle: 'Gebruikersnaam, e-mail, wachtwoord resetten',
+          subtitle: 'Gebruikersnaam, e-mail, wachtwoord',
         },
         security: {
           label: 'Beveiliging',

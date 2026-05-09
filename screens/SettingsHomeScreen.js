@@ -85,6 +85,7 @@ export default function SettingsHomeScreen({ navigation }) {
             key={item.key}
             label={settingsCopy.settingsHome.categories[item.key]?.label || item.key}
             subtitle={settingsCopy.settingsHome.categories[item.key]?.subtitle}
+            subtitleNumberOfLines={item.key === 'account' ? 1 : undefined}
             onPress={() => navigation.navigate(item.route)}
             isLast
             containerStyle={styles.rowCard}
