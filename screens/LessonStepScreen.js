@@ -5353,13 +5353,14 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                 disabled={isAnswered}
                 label={opt.label}
                 state={isKey ? 'correct' : isWrongPick ? 'incorrect' : isDimmed ? 'dimmed' : 'default'}
-                style={isKey ? styles.scenarioOptionButtonActive : null}
+                style={isKey ? [styles.scenarioOptionButtonActive, styles.summaryOptionButtonActive] : null}
                 labelStyle={isKey ? styles.scenarioOptionLabelActive : null}
                 accessory={
                   isKey ? (
                       <View
                         style={[
                           styles.scenarioOptionCheckBadge,
+                          styles.summaryOptionCheckBadge,
                           {
                             width: components.sizes.icon.lg,
                             height: components.sizes.icon.lg,
@@ -5370,7 +5371,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={colors.text.secondary}
+                          color={colors.text.primary}
                         />
                       </View>
                   ) : isWrongPick ? (
@@ -5391,7 +5392,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
       {isAnswered && pickedOption && (
         <Animated.View
           entering={FadeInDown.duration(300)}
-          style={styles.scenarioRevealCard}
+          style={[styles.scenarioRevealCard, styles.summaryRevealCard]}
         >
           <View style={styles.scenarioRevealHeader}>
             {pickedOption.isKey ? (
@@ -5409,7 +5410,12 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                 color={colors.text.secondary}
               />
             )}
-            <AppText style={[styles.scenarioRevealLabel, pickedOption.isKey && styles.scenarioRevealLabelKey]}>
+            <AppText
+              style={[
+                styles.scenarioRevealLabel,
+                pickedOption.isKey && styles.summaryRevealLabelKey,
+              ]}
+            >
               {pickedLabel}
             </AppText>
           </View>
@@ -7843,6 +7849,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: colors.accent.primary,
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
   },
+  summaryOptionButtonActive: {
+    backgroundColor: colors.background.surfaceActive,
+  },
   scenarioOptionLabelActive: {
     color: colors.text.primary,
   },
@@ -7854,6 +7863,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     padding: components.layout.spacing.lg,
     gap: components.layout.spacing.md,
+  },
+  summaryRevealCard: {
+    backgroundColor: colors.background.surface,
   },
   scenarioRevealHeader: {
     flexDirection: 'row',
@@ -7876,6 +7888,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioRevealLabelKey: {
     color: colors.text.primary,
+  },
+  summaryRevealLabelKey: {
+    color: colors.text.secondary,
   },
   scenarioRevealText: {
     ...typography.styles.body,
@@ -7908,6 +7923,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: colors.background.surfaceActive,
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+  },
+  summaryOptionCheckBadge: {
+    backgroundColor: colors.accent.primary,
+    borderColor: colors.accent.primary,
   },
   scenarioOptionCheckBadgeLight: {
     borderColor: colors.background.surfaceActive,
