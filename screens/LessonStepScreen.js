@@ -4943,6 +4943,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
   const [text, setText] = useState('');
   const [submittedText, setSubmittedText] = useState('');
   const [response, setResponse] = useState(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const customInsightText = content?.steps?.reflection?.insightText;
   const question =
     content?.steps?.reflection?.question || copy.messages.reflectionQuestion;
@@ -4994,53 +4995,78 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
     onSubmit(submittedText, response);
   };
 
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={styles.bottomPinnedStepBody}>
-        <View style={styles.reflectionContent}>
-          <View style={styles.reflectionHeader}>
-            <AppText style={styles.reflectionQuestion}>{question}</AppText>
-            <AppText style={styles.reflectionSubtitle}>
-              {subtitle}
-            </AppText>
-          </View>
-          {isSubmitted ? (
-            <Animated.View entering={FadeInDown.duration(350)}>
-              <ReflectionResultCard
-                answer={submittedText}
-                insightLabel={copy.labels.eqtyInsight}
-                insightText={response}
-              />
-              <AppText style={styles.reflectionPersonalizationHint}>
-                {copy.messages.reflectionPersonalizationHint}
-              </AppText>
-            </Animated.View>
-          ) : (
-            <View>
-              <View style={styles.reflectionTextAreaWrap}>
-                <AppTextInput
-                  style={styles.reflectionTextArea}
-                  value={text}
-                  onChangeText={setText}
-                  placeholder={placeholder}
-                  placeholderTextColor={colors.text.secondary}
-                  multiline
-                  autoCorrect
-                  textAlignVertical="top"
-                />
-              </View>
-              <AppText style={styles.reflectionPersonalizationHint}>
-                {copy.messages.reflectionPersonalizationHint}
+      <KeyboardAvoidingView
+        style={styles.reflectionKeyboard}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={components.layout.safeArea.top}
+      >
+        <View style={styles.bottomPinnedStepBody}>
+          <View style={styles.reflectionContent}>
+            <View style={styles.reflectionHeader}>
+              <AppText style={styles.reflectionQuestion}>{question}</AppText>
+              <AppText style={styles.reflectionSubtitle}>
+                {subtitle}
               </AppText>
             </View>
-          )}
+            {isSubmitted ? (
+              <Animated.View entering={FadeInDown.duration(350)}>
+                <ReflectionResultCard
+                  answer={submittedText}
+                  insightLabel={copy.labels.eqtyInsight}
+                  insightText={response}
+                />
+                <AppText style={styles.reflectionPersonalizationHint}>
+                  {copy.messages.reflectionPersonalizationHint}
+                </AppText>
+              </Animated.View>
+            ) : (
+              <View>
+                <View style={styles.reflectionTextAreaWrap}>
+                  <AppTextInput
+                    style={styles.reflectionTextArea}
+                    value={text}
+                    onChangeText={setText}
+                    placeholder={placeholder}
+                    placeholderTextColor={colors.text.secondary}
+                    multiline
+                    autoCorrect
+                    textAlignVertical="top"
+                  />
+                </View>
+                <AppText style={styles.reflectionPersonalizationHint}>
+                  {copy.messages.reflectionPersonalizationHint}
+                </AppText>
+              </View>
+            )}
+          </View>
+          <View
+            style={[
+              styles.reflectionActionWrap,
+              keyboardVisible && styles.reflectionActionWrapKeyboard,
+            ]}
+          >
+            <PrimaryButton
+              label={isSubmitted ? copy.buttons.next : copy.buttons.submitReflection}
+              onPress={handleContinue}
+              disabled={!isSubmitted && !canSubmit}
+            />
+          </View>
         </View>
-        <PrimaryButton
-          label={isSubmitted ? copy.buttons.next : copy.buttons.submitReflection}
-          onPress={handleContinue}
-          disabled={!isSubmitted && !canSubmit}
-        />
-      </View>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 }
@@ -7344,8 +7370,17 @@ const createStyles = (colors, components, mode = 'dark') =>
     gap: components.layout.spacing.xs,
     marginTop: components.layout.spacing.md,
   },
+  reflectionKeyboard: {
+    flex: 1,
+  },
   reflectionContent: {
     gap: components.layout.spacing.lg,
+  },
+  reflectionActionWrap: {
+    gap: components.layout.spacing.md,
+  },
+  reflectionActionWrapKeyboard: {
+    paddingBottom: components.layout.spacing.md,
   },
   reflectionQuestion: {
     ...typography.styles.h2,
