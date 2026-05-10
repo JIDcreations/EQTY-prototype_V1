@@ -6208,7 +6208,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   scenarioCompareNodeMissing: {
     backgroundColor: 'transparent',
     borderStyle: 'dashed',
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    borderColor: mode === 'light'
+      ? colors.text.secondary
+      : toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareLine: {
     position: 'absolute',
@@ -6238,7 +6240,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: 'transparent',
     borderWidth: components.borderWidth.thin,
     borderStyle: 'dashed',
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    borderColor: mode === 'light'
+      ? colors.text.secondary
+      : toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareStepLabel: {
     ...typography.styles.body,
