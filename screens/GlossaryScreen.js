@@ -37,10 +37,10 @@ export default function GlossaryScreen() {
   const route = useRoute();
   const { preferences } = useApp();
   const tabBarHeight = useBottomTabBarHeight();
-  const { colors, components } = useTheme();
+  const { colors, components, mode } = useTheme();
   const styles = useMemo(
-    () => createStyles(colors, components, tabBarHeight),
-    [colors, components, tabBarHeight]
+    () => createStyles(colors, components, tabBarHeight, mode),
+    [colors, components, tabBarHeight, mode]
   );
   const glossaryCopy = useMemo(
     () => getGlossaryCopy?.(preferences?.language) || DEFAULT_GLOSSARY_COPY,
@@ -281,7 +281,7 @@ export default function GlossaryScreen() {
                 <Ionicons
                   name="swap-vertical"
                   size={components.sizes.icon.xs}
-                  color={sortAz ? colors.text.primary : colors.text.secondary}
+                  color={sortAz ? (mode === 'light' ? colors.text.primary : colors.accent.primary) : colors.text.secondary}
                 />
                 <AppText
                   style={[styles.sortText, sortAz && styles.sortTextActive]}
@@ -363,8 +363,9 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const createStyles = (colors, components, tabBarHeight) =>
-  StyleSheet.create({
+const createStyles = (colors, components, tabBarHeight, mode) => {
+  const isLight = mode === 'light';
+  return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background.app,
@@ -406,7 +407,8 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
     },
     filterChipActive: {
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      backgroundColor: isLight ? colors.text.primary : colors.accent.primary,
+      borderColor: isLight ? colors.text.primary : colors.accent.primary,
     },
     filterChipPressed: {
       opacity: colors.opacity.emphasis,
@@ -416,7 +418,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.primary,
     },
     filterChipTextActive: {
-      color: colors.text.primary,
+      color: isLight ? colors.background.surfaceActive : colors.text.onAccent,
     },
     termsBlock: {
       gap: components.layout.spacing.sm,
@@ -435,7 +437,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.secondary,
     },
     sortTextActive: {
-      color: colors.text.primary,
+      color: isLight ? colors.text.primary : colors.accent.primary,
     },
     termsCard: {
       ...components.card.base,
@@ -533,3 +535,4 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.secondary,
     },
   });
+};
