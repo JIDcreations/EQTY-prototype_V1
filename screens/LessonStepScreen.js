@@ -2767,7 +2767,7 @@ function ScenarioCompareCard({ title, animatedStyle, cardStyle, visual, rows }) 
 }
 
 function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
+  const { styles, colors, components, mode } = useLessonStepStyles();
   const scenario = content?.steps?.scenario || {};
   const choices = scenario?.choices || [];
   const leftChoice = choices[0];
@@ -2933,11 +2933,21 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
               style={styles.scenarioRevealCard}
             >
               <View style={styles.scenarioRevealHeader}>
-                <Ionicons
-                  name={isCorrect ? 'checkmark-circle' : 'information-circle'}
-                  size={18}
-                  color={isCorrect ? colors.accent.primary : colors.text.secondary}
-                />
+                {isCorrect && mode === 'light' ? (
+                  <View style={styles.scenarioRevealIconBubble}>
+                    <Ionicons
+                      name="checkmark"
+                      size={components.sizes.icon.sm}
+                      color={colors.accent.primary}
+                    />
+                  </View>
+                ) : (
+                  <Ionicons
+                    name={isCorrect ? 'checkmark-circle' : 'information-circle'}
+                    size={18}
+                    color={isCorrect ? colors.accent.primary : colors.text.secondary}
+                  />
+                )}
                 <AppText
                   style={[
                     styles.scenarioRevealLabel,
@@ -3570,7 +3580,11 @@ function ScenarioExercise({ exercise, onNext, copy }) {
     activeSection?.storyQuoteFallback ?? storyQuoteFallback
   );
   const scenarioName = activeSection?.name || name;
-  const headerLabel = scenarioName || activeSection?.cardLabel || cardLabel || 'Scenario';
+  const headerLabel =
+    activeSection?.cardLabel ??
+    cardLabel ??
+    scenarioName ??
+    'Scenario';
   const showPersonalizationHint = Boolean(
     activeSection?.personalized ||
     personalized ||
@@ -5371,7 +5385,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={colors.text.primary}
+                          color={colors.text.secondary}
                         />
                       </View>
                   ) : isWrongPick ? (
@@ -6180,8 +6194,12 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: colors.accent.primary,
   },
   scenarioCompareNodeActiveReactive: {
-    backgroundColor: toRgba(colors.ui.divider, colors.opacity.surface),
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: mode === 'light'
+      ? 'transparent'
+      : toRgba(colors.ui.divider, colors.opacity.surface),
+    borderColor: mode === 'light'
+      ? colors.text.secondary
+      : toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareNodeCurrent: {
     backgroundColor: colors.text.primary,
@@ -6207,10 +6225,14 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: 'transparent',
     borderWidth: components.borderWidth.thin,
     borderStyle: 'dashed',
-    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    borderColor: mode === 'light'
+      ? colors.text.secondary
+      : toRgba(colors.ui.divider, colors.opacity.stroke),
   },
   scenarioCompareLineActiveReactive: {
-    backgroundColor: toRgba(colors.ui.divider, colors.opacity.surface),
+    backgroundColor: mode === 'light'
+      ? colors.text.secondary
+      : toRgba(colors.ui.divider, colors.opacity.surface),
   },
   scenarioCompareLineMissing: {
     backgroundColor: 'transparent',
@@ -7847,7 +7869,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   scenarioOptionButtonActive: {
     borderColor: colors.accent.primary,
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    backgroundColor: mode === 'light'
+      ? colors.background.surfaceActive
+      : toRgba(colors.accent.primary, colors.opacity.tint),
   },
   summaryOptionButtonActive: {
     backgroundColor: colors.background.surfaceActive,
@@ -7920,9 +7944,11 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: components.radius.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.background.surfaceActive,
+    backgroundColor: mode === 'light'
+      ? colors.accent.primary
+      : colors.background.surfaceActive,
     borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    borderColor: colors.accent.primary,
   },
   summaryOptionCheckBadge: {
     backgroundColor: colors.accent.primary,
@@ -8066,7 +8092,8 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.text.primary, 0.24),
   },
   l1StatusBadgeCompleted: {
-    borderColor: toRgba(colors.text.primary, 0.24),
+    borderColor: colors.text.secondary,
+    backgroundColor: colors.text.secondary,
   },
   l1StatusBadgeLocked: {
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),

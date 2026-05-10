@@ -297,6 +297,8 @@ export const lessonContentNl = {
           'Plaats de stappen van het beleggingsproces in de juiste volgorde. Klik op de volgende stap.',
         type: 'scenario',
         name: 'Joris',
+        cardLabel: 'Scenario',
+        cardSubtitle: 'Gebaseerd op jouw situatie',
         personalized: false,
         story:
           'Joris begint met investeren omdat vrienden zeggen dat het een goed idee is. Na een paar weken staat hij in verlies en weet hij niet of hij moet bijhouden.',
@@ -312,20 +314,20 @@ export const lessonContentNl = {
         options: [
           {
             id: 'knowledge',
-            label: 'Hij maakte te snel keuzes',
+            label: "Meer kennis over ETF's",
             reveal:
               'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
           },
           {
             id: 'goal',
-            label: 'Hij had geen duidelijk doel voor ogen',
+            label: 'Een concreet beleggingsdoel',
             isKey: true,
             reveal:
               'Zonder doel weet Joris niet waarom hij investeert. Daardoor weet hij ook niet hoe hij moet reageren wanneer de markt daalt.',
           },
           {
             id: 'capital',
-            label: 'Hij wist niet goed waarin hij investeerde',
+            label: 'Een groter startbedrag',
             reveal:
               'Meer kennis of een groter bedrag helpt niet als je geen doel hebt. Zonder doel blijven beslissingen willekeurig.',
           },
