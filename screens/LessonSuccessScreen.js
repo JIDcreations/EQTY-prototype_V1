@@ -48,6 +48,7 @@ export default function LessonSuccessScreen() {
   const lessonTitle = content?.title || copy.lessonSuccess.fallbackTitle;
   const isIntroLesson = lessonId === 'lesson_0';
   const isGoalWhyLesson = lessonId === 'lesson_1';
+  const isGoalTypesLesson = lessonId === 'lesson_2';
   const isDeepDiveLesson = typeof lessonId === 'string' && lessonId.startsWith('deep_');
   const isLastCoreLesson = lessonId === getLastCoreLessonId();
   const deepLesson = isDeepDiveLesson ? getDeepDiveLesson(lessonId) : null;
@@ -219,7 +220,7 @@ export default function LessonSuccessScreen() {
                 style={[
                   styles.lessonSubtitle,
                   {
-                    color: isIntroLesson || isGoalWhyLesson
+                    color: isIntroLesson || isGoalWhyLesson || isGoalTypesLesson
                       ? colors.text.primary
                       : colors.text.secondary,
                   },
