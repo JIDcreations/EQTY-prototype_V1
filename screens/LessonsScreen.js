@@ -225,11 +225,21 @@ export default function LessonsScreen() {
 
                         <View style={styles.lessonRowRight}>
                           {status === 'completed' ? (
-                            <Ionicons
-                              name="checkmark-circle"
-                              size={components.sizes.icon.lg}
-                              color={colors.accent.primary}
-                            />
+                            mode === 'light' ? (
+                              <View style={styles.completedLessonIconLight}>
+                                <Ionicons
+                                  name="checkmark"
+                                  size={components.sizes.icon.xs}
+                                  color={colors.text.secondary}
+                                />
+                              </View>
+                            ) : (
+                              <Ionicons
+                                name="checkmark-circle"
+                                size={components.sizes.icon.lg}
+                                color={colors.accent.primary}
+                              />
+                            )
                           ) : isLocked ? (
                             <Ionicons
                               name="lock-closed"
@@ -519,6 +529,14 @@ const createStyles = (colors, components, tabBarHeight) =>
       alignItems: 'center',
       gap: components.layout.spacing.sm,
       flexShrink: 0,
+    },
+    completedLessonIconLight: {
+      width: components.sizes.icon.lg,
+      height: components.sizes.icon.lg,
+      borderRadius: components.radius.pill,
+      backgroundColor: colors.accent.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
     lessonNumber: {
       ...typography.styles.stepLabel,

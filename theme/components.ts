@@ -212,8 +212,10 @@ export const createComponents = (colors, mode = 'dark') => {
     },
     primary: {
       backgroundColor: colors.accent.primary,
-      borderWidth: borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      borderWidth: isLight ? 0 : borderWidth.thin,
+      borderColor: isLight
+        ? 'transparent'
+        : toRgba(colors.ui.divider, colors.opacity.stroke),
     },
     secondary: {
       backgroundColor: colors.background.surface,
