@@ -28,8 +28,8 @@ export default function ConceptInfoCard({
   detail,
   style,
 }) {
-  const { colors, components } = useTheme();
-  const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const { colors, components, mode } = useTheme();
+  const styles = useMemo(() => createStyles(colors, components, mode), [colors, components, mode]);
 
   return (
     <Card style={[styles.card, style]}>
@@ -48,7 +48,7 @@ export default function ConceptInfoCard({
   );
 }
 
-const createStyles = (colors, components) =>
+const createStyles = (colors, components, mode) =>
   StyleSheet.create({
     card: {
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
@@ -69,7 +69,10 @@ const createStyles = (colors, components) =>
       borderRadius: components.radius.pill,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.text.secondary,
+      backgroundColor:
+        mode === 'dark'
+          ? toRgba(colors.accent.primary, colors.opacity.tint)
+          : colors.text.secondary,
     },
     label: {
       ...typography.styles.bodyStrong,
