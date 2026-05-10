@@ -2455,7 +2455,7 @@ function ExecutionGridAnim({ styles, colors }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function IntroScenarioStep({ onNext, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
+  const { styles, colors, components, mode } = useLessonStepStyles();
   const steps = copy.introScenario.steps;
   const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
   const scenarioName = 'Bert';
@@ -2588,16 +2588,41 @@ function IntroScenarioStep({ onNext, copy }) {
             style={({ pressed }) => [
               styles.narrativeChoiceCard,
               styles.narrativeChoiceCardPlan,
-              selected !== null && styles.narrativeChoiceCardActivePlan,
+              selected !== null && (
+                mode === 'dark'
+                  ? {
+                      borderColor:
+                        selected === 'plan'
+                          ? colors.accent.primary
+                          : toRgba(colors.accent.primary, colors.opacity.stroke),
+                      backgroundColor:
+                        selected === 'plan'
+                          ? toRgba(colors.accent.primary, colors.opacity.tint)
+                          : toRgba(colors.accent.primary, colors.opacity.tint),
+                    }
+                  : styles.narrativeChoiceCardActivePlan
+              ),
               pressed && styles.narrativeChoiceCardPressed,
             ]}
           >
             <Ionicons
               name="layers-outline"
               size={components.sizes.icon.lg}
-              color={selected !== null ? colors.text.secondary : colors.text.primary}
+              color={
+                selected !== null
+                  ? mode === 'dark'
+                    ? colors.accent.primary
+                    : colors.text.secondary
+                  : colors.text.primary
+              }
             />
-            <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
+            <AppText
+              style={[
+                styles.narrativeChoiceLabel,
+                styles.narrativeChoiceLabelPlan,
+                mode === 'dark' && selected !== null && styles.narrativeChoiceLabelPlanActiveDark,
+              ]}
+            >
               Volg het proces
             </AppText>
             <AppText style={styles.narrativeChoiceHint}>6 stappen doorlopen</AppText>
@@ -2905,7 +2930,20 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
               style={({ pressed }) => [
                 styles.narrativeChoiceCard,
                 styles.narrativeChoiceCardPlan,
-                showComparison && rightChoice?.isKey && styles.narrativeChoiceCardActivePlan,
+                showComparison && rightChoice?.isKey && (
+                  mode === 'dark'
+                    ? {
+                        borderColor:
+                          isRightSelected
+                            ? colors.accent.primary
+                            : toRgba(colors.accent.primary, colors.opacity.stroke),
+                        backgroundColor:
+                          isRightSelected
+                            ? toRgba(colors.accent.primary, colors.opacity.tint)
+                            : toRgba(colors.accent.primary, colors.opacity.tint),
+                      }
+                    : styles.narrativeChoiceCardActivePlan
+                ),
                 pressed && styles.narrativeChoiceCardPressed,
               ]}
             >
@@ -2914,11 +2952,19 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                 size={components.sizes.icon.lg}
                 color={
                   showComparison && rightChoice?.isKey
-                    ? colors.text.secondary
+                    ? mode === 'dark'
+                      ? colors.accent.primary
+                      : colors.text.secondary
                     : colors.text.primary
                 }
               />
-              <AppText style={[styles.narrativeChoiceLabel, styles.narrativeChoiceLabelPlan]}>
+              <AppText
+                style={[
+                  styles.narrativeChoiceLabel,
+                  styles.narrativeChoiceLabelPlan,
+                  mode === 'dark' && showComparison && rightChoice?.isKey && styles.narrativeChoiceLabelPlanActiveDark,
+                ]}
+              >
                 {rightChoice.label}
               </AppText>
               <AppText style={styles.narrativeChoiceHint}>{rightChoice.sublabel}</AppText>
@@ -6356,6 +6402,9 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   narrativeChoiceLabelPlan: {
     color: colors.text.primary,
+  },
+  narrativeChoiceLabelPlanActiveDark: {
+    color: colors.accent.primary,
   },
   narrativeChoiceHint: {
     ...typography.styles.meta,
