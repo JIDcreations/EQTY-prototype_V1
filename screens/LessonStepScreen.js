@@ -6902,8 +6902,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     paddingHorizontal: components.layout.spacing.md,
     borderRadius: components.radius.input,
     borderWidth: components.borderWidth.thin,
-    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
-    backgroundColor: toRgba(colors.accent.primary, 0.06),
+    borderColor: colors.accent.primary,
+    backgroundColor: mode === 'light'
+      ? colors.background.surfaceActive
+      : toRgba(colors.accent.primary, 0.06),
   },
   goalAnsweredContent: {
     gap: 2,
@@ -6951,7 +6953,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
   },
   goalOptionActive: {
-    backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
+    backgroundColor: mode === 'light'
+      ? colors.background.surfaceActive
+      : toRgba(colors.accent.primary, colors.opacity.tint),
     borderColor: colors.accent.primary,
   },
   goalOptionText: {
