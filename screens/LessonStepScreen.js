@@ -8196,12 +8196,8 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.text.primary, 0.24),
   },
   l1StatusBadgeCompleted: {
-    borderColor: mode === 'light'
-      ? colors.accent.primary
-      : toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: mode === 'light'
-      ? colors.accent.primary
-      : 'transparent',
+    borderColor: colors.accent.primary,
+    backgroundColor: colors.accent.primary,
   },
   l1StatusBadgeLocked: {
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),

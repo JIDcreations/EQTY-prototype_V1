@@ -144,7 +144,7 @@ export default function ProcessGridFlipCard({
     if (isCompleted) {
       return (
         <View style={[styles.l1StatusBadge, styles.l1StatusBadgeCompleted]}>
-          <Ionicons name="checkmark" size={14} color={mode === 'light' ? colors.text.primary : colors.accent.primary} />
+          <Ionicons name="checkmark" size={14} color={mode === 'light' ? colors.text.primary : colors.background.surface} />
         </View>
       );
     }
