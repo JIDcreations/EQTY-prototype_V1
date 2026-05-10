@@ -183,7 +183,7 @@ export const lessonContentNl = {
           {
             id: 'personal',
             label: 'Persoonlijke situatie',
-            detail: 'wat voor jou haalbaar is',
+            detail: 'Wat voor jou haalbaar is',
           },
         ],
         visualHint: 'Doelen maken van ruis richting.',

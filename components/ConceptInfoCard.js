@@ -14,6 +14,14 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const capitalizeFirstLetter = (value) => {
+  if (typeof value !== 'string' || value.length === 0) {
+    return value;
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
+
 export default function ConceptInfoCard({
   iconName = 'ellipse-outline',
   label,
@@ -35,7 +43,7 @@ export default function ConceptInfoCard({
         </View>
         <AppText style={styles.label}>{label}</AppText>
       </View>
-      <AppText style={styles.detail}>{detail}</AppText>
+      <AppText style={styles.detail}>{capitalizeFirstLetter(detail)}</AppText>
     </Card>
   );
 }
