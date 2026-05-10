@@ -47,6 +47,7 @@ export default function LessonSuccessScreen() {
   const locale = getLocaleKey(preferences?.language);
   const lessonTitle = content?.title || copy.lessonSuccess.fallbackTitle;
   const isIntroLesson = lessonId === 'lesson_0';
+  const isGoalWhyLesson = lessonId === 'lesson_1';
   const isDeepDiveLesson = typeof lessonId === 'string' && lessonId.startsWith('deep_');
   const isLastCoreLesson = lessonId === getLastCoreLessonId();
   const deepLesson = isDeepDiveLesson ? getDeepDiveLesson(lessonId) : null;
@@ -217,7 +218,11 @@ export default function LessonSuccessScreen() {
               <AppText
                 style={[
                   styles.lessonSubtitle,
-                  { color: isIntroLesson ? colors.text.primary : colors.text.secondary },
+                  {
+                    color: isIntroLesson || isGoalWhyLesson
+                      ? colors.text.primary
+                      : colors.text.secondary,
+                  },
                 ]}
               >
                 {subtitle}
