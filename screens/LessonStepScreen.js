@@ -2638,11 +2638,11 @@ function IntroScenarioStep({ onNext, copy }) {
             >
               <View style={styles.scenarioRevealHeader}>
                 {selected === 'plan' ? (
-                  <View style={styles.scenarioRevealIconBubble}>
+                  <View style={[styles.scenarioRevealIconBubble, mode === 'dark' && { backgroundColor: colors.accent.primary, borderColor: colors.accent.primary }]}>
                     <Ionicons
                       name="checkmark"
                       size={14}
-                      color={colors.accent.primary}
+                      color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
                     />
                   </View>
                 ) : (
@@ -2985,6 +2985,14 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                       name="checkmark"
                       size={components.sizes.icon.sm}
                       color={colors.accent.primary}
+                    />
+                  </View>
+                ) : isCorrect && mode === 'dark' ? (
+                  <View style={[styles.scenarioRevealIconBubble, { backgroundColor: colors.accent.primary, borderColor: colors.accent.primary }]}>
+                    <Ionicons
+                      name="checkmark"
+                      size={components.sizes.icon.sm}
+                      color={colors.background.surface}
                     />
                   </View>
                 ) : (
@@ -3791,11 +3799,11 @@ function ScenarioExercise({ exercise, onNext, copy }) {
         <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
           <View style={styles.scenarioRevealHeader}>
             {pickedOption.isKey ? (
-              <View style={styles.scenarioRevealIconBubble}>
+              <View style={[styles.scenarioRevealIconBubble, mode === 'dark' && { backgroundColor: colors.accent.primary, borderColor: colors.accent.primary }]}>
                 <Ionicons
                   name="checkmark"
                   size={components.sizes.icon.sm}
-                  color={colors.accent.primary}
+                  color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
                 />
               </View>
             ) : (
@@ -4576,11 +4584,11 @@ function GuidedGoalExercise({
           <Animated.View entering={FadeInDown.duration(250)} style={styles.scenarioRevealCard}>
             <View style={styles.scenarioRevealHeader}>
               {isCorrect ? (
-                <View style={styles.scenarioRevealIconBubble}>
+                <View style={[styles.scenarioRevealIconBubble, mode === 'dark' && { backgroundColor: colors.accent.primary, borderColor: colors.accent.primary }]}>
                   <Ionicons
                     name="checkmark"
                     size={components.sizes.icon.sm}
-                    color={colors.accent.primary}
+                    color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
                   />
                 </View>
               ) : (
@@ -5432,18 +5440,23 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                       <View
                         style={[
                           styles.scenarioOptionCheckBadge,
-                          styles.summaryOptionCheckBadge,
                           {
                             width: components.sizes.icon.lg,
                             height: components.sizes.icon.lg,
                             borderRadius: components.sizes.icon.lg / 2,
+                            backgroundColor: mode === 'dark'
+                              ? colors.accent.primary
+                              : undefined,
+                            borderColor: mode === 'dark'
+                              ? colors.accent.primary
+                              : undefined,
                           },
                         ]}
                       >
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={mode === 'light' ? colors.text.secondary : colors.background.surface}
+                          color={mode === 'dark' ? colors.background.surface : colors.text.secondary}
                         />
                       </View>
                   ) : isWrongPick ? (
@@ -5468,11 +5481,19 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
         >
           <View style={styles.scenarioRevealHeader}>
             {pickedOption.isKey ? (
-              <View style={styles.scenarioRevealIconBubble}>
+              <View
+                style={[
+                  styles.scenarioRevealIconBubble,
+                  mode === 'dark' && {
+                    backgroundColor: colors.accent.primary,
+                    borderColor: colors.accent.primary,
+                  },
+                ]}
+              >
                 <Ionicons
                   name="checkmark"
                   size={14}
-                  color={colors.accent.primary}
+                  color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
                 />
               </View>
             ) : (
