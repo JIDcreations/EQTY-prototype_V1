@@ -4453,7 +4453,7 @@ function GuidedGoalExercise({
   personalizationHint,
   onAnswerReveal,
 }) {
-  const { colors, components, styles } = useLessonStepStyles();
+  const { colors, components, styles, mode } = useLessonStepStyles();
   const {
     sections = [],
     interpretations = {},
@@ -4561,7 +4561,7 @@ function GuidedGoalExercise({
                             <Ionicons
                               name="checkmark"
                               size={components.sizes.icon.sm}
-                              color={colors.text.secondary}
+                              color={mode === 'light' ? colors.text.onAccent : colors.text.secondary}
                             />
                           </View>
                         ) : isWrongPick ? (
@@ -5444,19 +5444,15 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                             width: components.sizes.icon.lg,
                             height: components.sizes.icon.lg,
                             borderRadius: components.sizes.icon.lg / 2,
-                            backgroundColor: mode === 'dark'
-                              ? colors.accent.primary
-                              : undefined,
-                            borderColor: mode === 'dark'
-                              ? colors.accent.primary
-                              : undefined,
+                            backgroundColor: colors.accent.primary,
+                            borderColor: colors.accent.primary,
                           },
                         ]}
                       >
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={mode === 'dark' ? colors.background.surface : colors.text.secondary}
+                          color={mode === 'dark' ? colors.background.surface : colors.text.onAccent}
                         />
                       </View>
                   ) : isWrongPick ? (
