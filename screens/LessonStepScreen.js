@@ -3773,7 +3773,7 @@ function ScenarioExercise({ exercise, onNext, copy }) {
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={colors.text.secondary}
+                          color={mode === 'light' ? colors.text.secondary : colors.background.surface}
                         />
                       </View>
                     ) : isWrongPick ? (
@@ -3928,7 +3928,7 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
 }
 
 function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary, copy }) {
-  const { styles, colors, components } = useLessonStepStyles();
+  const { styles, colors, components, mode } = useLessonStepStyles();
   const { items = [], correctOrder = [] } = exercise;
 
   const [placements, setPlacements] = useState(() =>
@@ -4070,11 +4070,19 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
                         </AppText>
                         {isWrong ? (
                           <View style={[styles.introSlotStateIcon, styles.introSlotStateIconWrong]}>
-                            <Ionicons name="close" size={12} color={colors.text.primary} />
+                            <Ionicons
+                              name="close"
+                              size={12}
+                              color={mode === 'dark' ? colors.background.surface : colors.text.primary}
+                            />
                           </View>
                         ) : isCorrect && item ? (
                           <View style={[styles.introSlotStateIcon, styles.introSlotStateIconCorrect]}>
-                            <Ionicons name="checkmark" size={12} color={colors.text.primary} />
+                            <Ionicons
+                              name="checkmark"
+                              size={12}
+                              color={mode === 'dark' ? colors.background.surface : colors.text.primary}
+                            />
                           </View>
                         ) : (
                           <Ionicons name="close" size={13} color={toRgba(colors.text.secondary, 0.45)} />
@@ -4099,7 +4107,7 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
 
         {/* Card pool */}
         {available.length > 0 ? (
-          <View style={styles.exerciseSection}>
+          <View style={[styles.exerciseSection, styles.introExercisePoolSection]}>
             <AppText style={styles.exerciseSectionLabel}>{copy.labels.availableSteps}</AppText>
             <View style={styles.introCardGrid}>
               {available.map((item) => (
@@ -5189,7 +5197,11 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
         {[1, 2, 3, 4, 5].map((n, i) => (
           <React.Fragment key={n}>
             <View style={styles.summaryJourneyNode}>
-              <Ionicons name="checkmark" size={10} color={colors.accent.primary} />
+              <Ionicons
+                name="checkmark"
+                size={10}
+                color={mode === 'light' ? colors.accent.primary : colors.background.surface}
+              />
             </View>
             {i < 4 && <View style={styles.summaryJourneyConnector} />}
           </React.Fragment>
@@ -5233,7 +5245,7 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
                   <Ionicons
                     name="checkmark"
                     size={components.sizes.icon.md}
-                    color={mode === 'light' ? colors.text.primary : colors.accent.primary}
+                    color={mode === 'light' ? colors.text.primary : colors.background.surface}
                   />
                 </View>
               ) : (
@@ -5295,7 +5307,7 @@ function Lesson1SummaryStep({ content, onComplete, copy, onAnswerReveal }) {
 }
 
 function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflection, language, onAnswerReveal }) {
-  const { colors, components, styles } = useLessonStepStyles();
+  const { colors, components, styles, mode } = useLessonStepStyles();
   const [picked, setPicked] = useState(null);
   const isDutch = getLocaleKey(language) === 'nl';
   const summary = content?.steps?.summary || {};
@@ -5431,7 +5443,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                         <Ionicons
                           name="checkmark"
                           size={components.sizes.icon.sm}
-                          color={colors.text.secondary}
+                          color={mode === 'light' ? colors.text.secondary : colors.background.surface}
                         />
                       </View>
                   ) : isWrongPick ? (
@@ -6873,10 +6885,13 @@ const createStyles = (colors, components, mode = 'dark') =>
     flex: 1,
   },
   exerciseContent: {
-    gap: components.layout.spacing.lg,
+    gap: components.layout.spacing.none,
   },
   exerciseSection: {
     gap: components.layout.spacing.md,
+  },
+  introExercisePoolSection: {
+    marginTop: components.layout.spacing.xl,
   },
   guidedGoalSections: {
     gap: components.layout.spacing.md,
@@ -7109,13 +7124,14 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   exerciseStatusText: {
     ...typography.styles.small,
-    color: colors.text.secondary,
+    color: colors.text.primary,
+    marginTop: components.layout.spacing.xs,
   },
   exerciseStatusCorrect: {
     color: colors.text.primary,
   },
   exerciseStatusWrong: {
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
   exerciseSectionLabel: {
     ...typography.styles.stepLabel,
@@ -7246,14 +7262,20 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: mode === 'light' ? colors.accent.primary : colors.background.surface,
   },
   introSlotWrong: {
-    borderStyle: 'solid',
+    borderStyle: mode === 'dark' ? 'dashed' : 'solid',
     borderColor: colors.accent.primary,
-    backgroundColor: colors.background.surface,
+    backgroundColor:
+      mode === 'dark'
+        ? toRgba(colors.background.surfaceActive, colors.opacity.surface)
+        : colors.background.surface,
   },
   introSlotCorrect: {
     borderStyle: 'solid',
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
-    backgroundColor: colors.background.surface,
+    backgroundColor:
+      mode === 'dark'
+        ? toRgba(colors.background.surfaceActive, colors.opacity.surface)
+        : colors.background.surface,
   },
   introSlotHint: {
     borderStyle: 'solid',
@@ -7821,8 +7843,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
   },
   summaryInsightCardConfirmed: {
-    borderColor: mode === 'light' ? colors.accent.primary : toRgba(colors.accent.primary, colors.opacity.stroke),
-    backgroundColor: mode === 'light' ? colors.accent.primary : toRgba(colors.accent.primary, colors.opacity.tint),
+    borderColor: mode === 'light' ? colors.accent.primary : colors.accent.primary,
+    backgroundColor: mode === 'light'
+      ? colors.accent.primary
+      : toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   summaryInsightIndex: {
     width: components.sizes.square.md,
@@ -7836,11 +7860,13 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   summaryInsightIndexConfirmed: {
     backgroundColor:
-      mode === 'light' ? colors.background.surfaceActive : toRgba(colors.accent.primary, 0.15),
+      mode === 'light'
+        ? colors.background.surfaceActive
+        : toRgba(colors.background.surfaceActive, colors.opacity.surface),
     borderColor:
       mode === 'light'
         ? colors.background.surfaceActive
-        : toRgba(colors.accent.primary, colors.opacity.stroke),
+        : colors.accent.primary,
   },
   summaryInsightNumber: {
     ...typography.styles.stepLabel,
@@ -7856,12 +7882,14 @@ const createStyles = (colors, components, mode = 'dark') =>
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor:
-      mode === 'light' ? colors.background.surfaceActive : colors.background.surfaceActive,
+      mode === 'light'
+        ? colors.background.surfaceActive
+        : colors.accent.primary,
     borderWidth: components.borderWidth.thin,
     borderColor:
       mode === 'light'
         ? colors.background.surfaceActive
-        : toRgba(colors.accent.primary, colors.opacity.stroke),
+        : colors.accent.primary,
   },
   summaryInsightText: {
     ...typography.styles.body,
@@ -7928,10 +7956,12 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: colors.accent.primary,
     backgroundColor: mode === 'light'
       ? colors.background.surfaceActive
-      : toRgba(colors.accent.primary, colors.opacity.tint),
+      : toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   summaryOptionButtonActive: {
-    backgroundColor: colors.background.surfaceActive,
+    backgroundColor: mode === 'light'
+      ? colors.background.surfaceActive
+      : toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   scenarioOptionLabelActive: {
     color: colors.text.primary,
@@ -8003,7 +8033,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     justifyContent: 'center',
     backgroundColor: mode === 'light'
       ? colors.accent.primary
-      : colors.background.surfaceActive,
+      : colors.accent.primary,
     borderWidth: components.borderWidth.thin,
     borderColor: colors.accent.primary,
   },
