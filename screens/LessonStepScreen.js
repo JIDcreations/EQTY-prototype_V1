@@ -8100,8 +8100,12 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: toRgba(colors.text.primary, 0.24),
   },
   l1StatusBadgeCompleted: {
-    borderColor: colors.text.secondary,
-    backgroundColor: colors.text.secondary,
+    borderColor: mode === 'light'
+      ? colors.text.secondary
+      : toRgba(colors.ui.divider, colors.opacity.stroke),
+    backgroundColor: mode === 'light'
+      ? colors.text.secondary
+      : 'transparent',
   },
   l1StatusBadgeLocked: {
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
