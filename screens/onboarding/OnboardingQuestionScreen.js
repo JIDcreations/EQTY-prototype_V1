@@ -66,7 +66,7 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
   const { question, field, step, total, nextRoute, isLast, returnTo, returnParams, exitToTabs, setHasOnboardedOnComplete } =
     route.params;
   const { onboardingContext, updateOnboardingContext, updatePreferences, updateAuthUser, preferences } = useApp();
-  const { colors, components } = useTheme();
+  const { colors, components, mode } = useTheme();
   const styles = useMemo(() => createStyles(colors, components), [colors, components]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
   const locale = getLocaleKey(preferences?.language);
@@ -173,6 +173,7 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
                       label={optionLabel}
                       onPress={() => handleSelectOption(optionLabel)}
                       state={isSelected ? 'correct' : 'default'}
+                      labelStyle={!isSelected && mode === 'dark' ? styles.optionLabelSecondary : null}
                       accessory={
                         <View style={[styles.radio, isSelected && styles.radioActive]}>
                           {isSelected ? <View style={styles.radioDot} /> : null}
@@ -283,6 +284,9 @@ const createStyles = (colors, components) =>
     optionButton: {
       height: 64,
       paddingVertical: components.layout.spacing.none,
+    },
+    optionLabelSecondary: {
+      color: colors.text.secondary,
     },
     radio: {
       width: components.sizes.track.sm,
