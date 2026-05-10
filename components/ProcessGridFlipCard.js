@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import AppText from './AppText';
+import { useTheme } from '../theme';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -35,6 +36,7 @@ export default function ProcessGridFlipCard({
   onStepCompleted,
   renderAnimation,
 }) {
+  const { mode } = useTheme();
   const [uncontrolledFlipped, setUncontrolledFlipped] = useState(false);
   const isControlled = typeof controlledFlipped === 'boolean';
   const isFlipped = isControlled ? controlledFlipped : uncontrolledFlipped;
@@ -142,7 +144,7 @@ export default function ProcessGridFlipCard({
     if (isCompleted) {
       return (
         <View style={[styles.l1StatusBadge, styles.l1StatusBadgeCompleted]}>
-          <Ionicons name="checkmark" size={14} color={colors.accent.primary} />
+          <Ionicons name="checkmark" size={14} color={mode === 'light' ? colors.text.primary : colors.accent.primary} />
         </View>
       );
     }

@@ -2642,7 +2642,7 @@ function IntroScenarioStep({ onNext, copy }) {
                     <Ionicons
                       name="checkmark"
                       size={14}
-                      color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
+                      color={mode === 'dark' ? colors.background.surface : colors.text.primary}
                     />
                   </View>
                 ) : (
@@ -2984,7 +2984,7 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
                     <Ionicons
                       name="checkmark"
                       size={components.sizes.icon.sm}
-                      color={colors.accent.primary}
+                      color={colors.text.primary}
                     />
                   </View>
                 ) : isCorrect && mode === 'dark' ? (
@@ -3803,7 +3803,7 @@ function ScenarioExercise({ exercise, onNext, copy }) {
                 <Ionicons
                   name="checkmark"
                   size={components.sizes.icon.sm}
-                  color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
+                  color={mode === 'dark' ? colors.background.surface : colors.text.primary}
                 />
               </View>
             ) : (
@@ -4588,7 +4588,7 @@ function GuidedGoalExercise({
                   <Ionicons
                     name="checkmark"
                     size={components.sizes.icon.sm}
-                    color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
+                    color={mode === 'dark' ? colors.background.surface : colors.text.primary}
                   />
                 </View>
               ) : (
@@ -5489,7 +5489,7 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
                 <Ionicons
                   name="checkmark"
                   size={14}
-                  color={mode === 'dark' ? colors.background.surface : colors.accent.primary}
+                  color={mode === 'dark' ? colors.background.surface : colors.text.primary}
                 />
               </View>
             ) : (
@@ -8006,9 +8006,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderRadius: components.sizes.icon.lg / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.text.secondary,
+    backgroundColor: colors.accent.primary,
     borderWidth: components.borderWidth.thin,
-    borderColor: colors.text.secondary,
+    borderColor: colors.accent.primary,
   },
   scenarioRevealLabel: {
     ...typography.styles.stepLabel,
@@ -8197,10 +8197,10 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   l1StatusBadgeCompleted: {
     borderColor: mode === 'light'
-      ? colors.text.secondary
+      ? colors.accent.primary
       : toRgba(colors.ui.divider, colors.opacity.stroke),
     backgroundColor: mode === 'light'
-      ? colors.text.secondary
+      ? colors.accent.primary
       : 'transparent',
   },
   l1StatusBadgeLocked: {
