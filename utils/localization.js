@@ -21,9 +21,9 @@ const LESSON_OVERVIEW_COPY = {
     lessonPointsLabel: 'In this lesson',
     estimatedTimeLabel: 'Estimated time',
     readinessLabel: 'Focused start',
-    minutesLabel: (minutes) => `~${minutes} min`,
+    minutesLabel: (minutes) => `${minutes} min`,
     lessonMetaChips: {
-      lesson_0: ['~8 min', 'Introduction'],
+      lesson_0: ['8 min', 'Introduction'],
     },
     defaultHook: 'Clarity first. Action second.',
     lessonHooks: {
@@ -56,10 +56,10 @@ const LESSON_OVERVIEW_COPY = {
     lessonPointsLabel: 'In deze les',
     estimatedTimeLabel: 'Geschatte tijd',
     readinessLabel: 'Gerichte start',
-    minutesLabel: (minutes) => `~${minutes} min`,
+    minutesLabel: (minutes) => `${minutes} min`,
     lessonMetaChips: {
-      lesson_0: ['~8 min', 'Introductie'],
-      lesson_2: ['~8 min', 'Doeltypes'],
+      lesson_0: ['8 min', 'Introductie'],
+      lesson_2: ['8 min', 'Doeltypes'],
     },
     defaultHook: 'Eerst helderheid. Dan actie.',
     lessonHooks: {

@@ -271,7 +271,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       gap: components.layout.spacing.md,
     },
     outcomeLabel: {
-      ...typography.styles.bodyStrong,
+      ...typography.styles.body,
       color: colors.text.primary,
     },
     outcomeList: {
