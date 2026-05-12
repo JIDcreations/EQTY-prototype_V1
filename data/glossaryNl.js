@@ -570,7 +570,7 @@ export const glossaryTermsNl = {
     example: 'Een korte tijdshorizon betekent meestal dat minder risico passend is.',
   },
   eqty_investment_strategy: {
-    term: 'Financiele investeringsstrategie',
+    term: 'Financiële investeringsstrategie',
     definition: 'De set regels die bepaalt hoe je je doel nastreeft op basis van je risicoanalyse.',
     example: "'60/40 met jaarlijkse herbalancering' is een strategie.",
   },

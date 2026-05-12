@@ -39,7 +39,7 @@ const createStyles = (colors, components) =>
     segment: {
       flex: 1,
       paddingVertical: components.layout.spacing.xs,
-      borderRadius: components.radius.input,
+      borderRadius: Math.max(0, components.radius.input - components.layout.spacing.xs),
       alignItems: 'center',
       justifyContent: 'center',
     },

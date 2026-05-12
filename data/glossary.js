@@ -997,7 +997,7 @@ export const glossaryTerms = [
   },
   {
     id: 'eqty_investment_strategy',
-    term: 'Financiele investeringsstrategie',
+    term: 'Financiële investeringsstrategie',
     definition:
       'De set regels die bepaalt hoe je het doel uitvoert, op basis van je risicoanalyse. The rule set that defines how you will pursue the goal based on your risk analysis.',
     example:

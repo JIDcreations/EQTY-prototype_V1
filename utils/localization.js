@@ -507,7 +507,7 @@ const LESSON_STEP_COPY = {
         },
         {
           id: 'strategy',
-          label: 'Financiele investeringsstrategie',
+          label: 'Financiële investeringsstrategie',
           question: 'Hoe vertaal ik intentie naar regels?',
           why: 'Strategie vermindert complexiteit, ze voegt die niet toe.',
           detail:
@@ -1602,7 +1602,7 @@ const SETTINGS_COPY = {
         {
           question: 'Zijn mijn gegevens prive?',
           answer:
-            'We slaan alleen je profielcontext en lesvoortgang op. Deel geen gevoelige financiele details.',
+            'We slaan alleen je profielcontext en lesvoortgang op. Deel geen gevoelige financiële details.',
         },
         {
           question: 'Waarom ontbreekt inhoud of laadt iets niet?',
@@ -1647,7 +1647,7 @@ const SETTINGS_COPY = {
       subjectPlaceholder: 'Korte samenvatting',
       messageLabel: 'Bericht',
       messagePlaceholder: 'Beschrijf waarbij je hulp nodig hebt',
-      helperText: 'Deel geen wachtwoorden of gevoelige financiele details.',
+      helperText: 'Deel geen wachtwoorden of gevoelige financiële details.',
       sendButton: 'Verstuur bericht',
       sentToast: 'Supportverzoek verzonden',
     },
@@ -1741,7 +1741,7 @@ const GLOSSARY_COPY = {
     title: 'Woordenlijst',
     subtitle: 'Vind snel begrippen zonder je flow te onderbreken.',
     searchLabel: 'Zoek in woordenlijst',
-    searchPlaceholder: 'Zoek begrippen, tags of categorieen',
+    searchPlaceholder: 'Zoek begrippen, tags of categorieën',
     filterAll: 'Alles',
     allTerms: 'Alle begrippen',
     fallbackTerms: 'Begrippen',

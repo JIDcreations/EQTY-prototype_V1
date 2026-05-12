@@ -85,7 +85,7 @@ export const lessonContentNl = {
         items: [
           { id: 'target', label: 'Doelbepaling' },
           { id: 'drivers', label: 'Individuele risicoanalyse' },
-          { id: 'strategy', label: 'Financiele investeringsstrategie' },
+          { id: 'strategy', label: 'Financiële investeringsstrategie' },
           { id: 'allocation', label: 'Kapitaalallocatie' },
           { id: 'vehicle', label: 'Beleggingsinstrument' },
           { id: 'execution', label: 'Uitvoering' },
@@ -118,11 +118,11 @@ export const lessonContentNl = {
             id: 'drivers',
             title: 'Drijvers (Individuele risicoanalyse)',
             description: 'Verduidelijk de randvoorwaarden die elke beslissing vormen.',
-            substeps: ['Risicocapaciteit', 'Risicotolerantie', 'Financiele middelen'],
+            substeps: ['Risicocapaciteit', 'Risicotolerantie', 'Financiële middelen'],
           },
           {
             id: 'strategy',
-            title: 'Financiele investeringsstrategie',
+            title: 'Financiële investeringsstrategie',
             description: 'Zet de regels vast die beslissingen onder onzekerheid sturen.',
             substeps: ['Liquiditeit', 'Kosten', 'Ethiek/ESG', 'Dividendvoorkeur'],
           },
