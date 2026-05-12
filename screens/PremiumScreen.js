@@ -241,5 +241,6 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     dismissLabel: {
       ...typography.styles.small,
+      textDecorationLine: 'underline',
     },
   });

@@ -1975,7 +1975,7 @@ const DEEP_DIVE_COPY = {
     sectionChip: 'GA DIEPER',
     sectionTitle: 'Jouw volgende stap.',
     sectionSubtitle:
-      'Je hebt de basis afgerond. Kies zelf waarin je verder wil verdiepen.',
+      'Je hebt de basis afgerond.\nKies zelf waarin je verder wil verdiepen.',
     sectionLockedNote: 'Beschikbaar na het afronden van de kernlessen.',
     premiumBadge: 'PREMIUM',
     // LessonSuccessScreen — after final core lesson
