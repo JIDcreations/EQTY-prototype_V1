@@ -4015,18 +4015,6 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
     <View style={[styles.stepBody, styles.exerciseBody]}>
       <View style={styles.exerciseContent}>
 
-        {/* Status — inline, only when all slots are filled */}
-        {isComplete ? (
-          <AppText
-            style={[
-              styles.exerciseStatusText,
-              isCorrect ? styles.exerciseStatusCorrect : styles.exerciseStatusWrong,
-            ]}
-          >
-            {isCorrect ? copy.messages.correctOrder : copy.messages.incorrectOrder}
-          </AppText>
-        ) : null}
-
         {/* Slot stack */}
         <View style={[styles.exerciseSection, styles.introExercisePrimarySection]}>
           <View style={styles.introSlotStack}>
@@ -4123,6 +4111,17 @@ function IntroExerciseStep({ exercise, onNext, onPressTerm, onOpenLessonGlossary
               );
             })}
           </View>
+
+          {isComplete ? (
+            <AppText
+              style={[
+                styles.exerciseStatusText,
+                isCorrect ? styles.exerciseStatusCorrect : styles.exerciseStatusWrong,
+              ]}
+            >
+              {isCorrect ? copy.messages.correctOrder : copy.messages.incorrectOrder}
+            </AppText>
+          ) : null}
         </View>
 
         {/* Card pool */}
@@ -7158,6 +7157,7 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   introExercisePrimarySection: {
     marginTop: components.layout.sectionGap,
+    gap: components.layout.spacing.none,
   },
   exerciseInstruction: {
     ...typography.styles.body,
