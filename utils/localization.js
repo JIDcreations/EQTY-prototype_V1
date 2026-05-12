@@ -1505,7 +1505,7 @@ const SETTINGS_COPY = {
         {
           label: 'Vraag 03',
           prompt: 'Waarom wil je beginnen met investeren?',
-          placeholder: 'bv. groei op lange termijn, nieuwsgierigheid, financiele onafhankelijkheid...',
+          placeholder: 'bv. Je wilt een huis kopen...',
         },
       ],
       note: 'Wijzigingen gelden alleen voor toekomstige uitleg en scenario\'s.',
