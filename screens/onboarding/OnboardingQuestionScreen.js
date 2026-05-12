@@ -75,6 +75,8 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
     getInitialAnswer(onboardingContext?.[field], questionVariant)
   );
   const localizedQuestion = questionVariant?.title || copy.question.questions[field] || question;
+  const placeholder =
+    copy.question.placeholders?.[field] || copy.question.placeholder;
   const primaryLabel = isLast ? copy.question.finishButton : copy.question.button;
   const canContinue = questionVariant
     ? questionVariant.selectionMode === 'multi'
@@ -188,7 +190,7 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
               <AppTextInput
                 value={answer}
                 onChangeText={setAnswer}
-                placeholder={copy.question.placeholder}
+                placeholder={placeholder}
                 placeholderTextColor={colors.text.secondary}
                 multiline
                 style={styles.input}

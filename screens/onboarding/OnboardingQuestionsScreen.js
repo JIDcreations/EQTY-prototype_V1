@@ -102,7 +102,9 @@ export default function OnboardingQuestionsScreen({ navigation, route }) {
                 <AppTextInput
                   value={experienceAnswer}
                   onChangeText={setExperienceAnswer}
-                  placeholder={copy.question.placeholder}
+                  placeholder={
+                    copy.question.placeholders?.experienceAnswer || copy.question.placeholder
+                  }
                   placeholderTextColor={colors.text.secondary}
                   multiline
                   style={styles.input}
@@ -115,7 +117,9 @@ export default function OnboardingQuestionsScreen({ navigation, route }) {
                 <AppTextInput
                   value={knowledgeAnswer}
                   onChangeText={setKnowledgeAnswer}
-                  placeholder={copy.question.placeholder}
+                  placeholder={
+                    copy.question.placeholders?.knowledgeAnswer || copy.question.placeholder
+                  }
                   placeholderTextColor={colors.text.secondary}
                   multiline
                   style={styles.input}
@@ -128,7 +132,9 @@ export default function OnboardingQuestionsScreen({ navigation, route }) {
                 <AppTextInput
                   value={motivationAnswer}
                   onChangeText={setMotivationAnswer}
-                  placeholder={copy.question.placeholder}
+                  placeholder={
+                    copy.question.placeholders?.motivationAnswer || copy.question.placeholder
+                  }
                   placeholderTextColor={colors.text.secondary}
                   multiline
                   style={styles.input}

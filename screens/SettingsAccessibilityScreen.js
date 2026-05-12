@@ -157,7 +157,7 @@ const createStyles = (colors, components, tabBarHeight) =>
       gap: components.layout.spacing.xs,
     },
     previewTitle: {
-      ...typography.styles.small,
+      ...typography.styles.bodyStrong,
       color: colors.text.primary,
     },
     previewText: {

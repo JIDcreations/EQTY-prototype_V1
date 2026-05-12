@@ -872,6 +872,11 @@ const ONBOARDING_COPY = {
         knowledgeAnswer: 'Wat weet je vandaag al over investeren?',
         motivationAnswer: 'Waarom wil je nu beginnen met investeren?',
       },
+      placeholders: {
+        experienceAnswer: 'Bv. Nog niets, enkel sparen...',
+        knowledgeAnswer: 'Bv. Aandelen, ETF’s, risico spreiden...',
+        motivationAnswer: 'Bv. Je wilt een huis kopen...',
+      },
     },
     confirmation: {
       badge: 'Alles klaar',
@@ -1505,7 +1510,7 @@ const SETTINGS_COPY = {
         {
           label: 'Vraag 03',
           prompt: 'Waarom wil je beginnen met investeren?',
-          placeholder: 'bv. Je wilt een huis kopen...',
+          placeholder: 'Bv. Je wilt een huis kopen...',
         },
       ],
       note: 'Wijzigingen gelden alleen voor toekomstige uitleg en scenario\'s.',
@@ -2090,7 +2095,7 @@ export function formatLessonModuleLabel(language, themeIndex, lessonIndexInTheme
   if (!hasThemeIndex) {
     return formatLessonUnitLabel(language, lessonIndexInTheme);
   }
-  return formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'comma');
+  return formatThemeLessonContextLabel(language, themeIndex, lessonIndexInTheme, 'bullet');
 }
 
 export function formatThemeUnitLabel(language, themeIndex) {
@@ -2119,7 +2124,8 @@ export function formatThemeLessonContextLabel(
   lessonIndexInTheme,
   separator = 'dot'
 ) {
-  const joiner = separator === 'comma' ? ', ' : ' · ';
+  const joiner =
+    separator === 'bullet' ? ' • ' : separator === 'comma' ? ', ' : ' · ';
   return `${formatThemeUnitLabel(language, themeIndex)}${joiner}${formatLessonUnitLabel(
     language,
     lessonIndexInTheme

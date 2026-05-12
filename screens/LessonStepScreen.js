@@ -2634,7 +2634,10 @@ function IntroScenarioStep({ onNext, copy }) {
             {/* Feedback — appears immediately after selection, in viewport */}
             <Animated.View
               entering={FadeInDown.duration(300)}
-              style={styles.scenarioRevealCard}
+              style={[
+                styles.scenarioRevealCard,
+                selected === 'plan' && styles.scenarioRevealCardCorrect,
+              ]}
             >
               <View style={styles.scenarioRevealHeader}>
                 {selected === 'plan' ? (
@@ -2976,7 +2979,10 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
           <>
             <Animated.View
               entering={FadeInDown.duration(300)}
-              style={styles.scenarioRevealCard}
+              style={[
+                styles.scenarioRevealCard,
+                isCorrect && styles.scenarioRevealCardCorrect,
+              ]}
             >
               <View style={styles.scenarioRevealHeader}>
                 {isCorrect && mode === 'light' ? (
@@ -3796,7 +3802,13 @@ function ScenarioExercise({ exercise, onNext, copy }) {
       </Animated.View>
 
       {isAnswered && pickedOption ? (
-        <Animated.View entering={FadeInDown.duration(300)} style={styles.scenarioRevealCard}>
+        <Animated.View
+          entering={FadeInDown.duration(300)}
+          style={[
+            styles.scenarioRevealCard,
+            pickedOption.isKey && styles.scenarioRevealCardCorrect,
+          ]}
+        >
           <View style={styles.scenarioRevealHeader}>
             {pickedOption.isKey ? (
               <View style={[styles.scenarioRevealIconBubble, mode === 'dark' && { backgroundColor: colors.accent.primary, borderColor: colors.accent.primary }]}>
@@ -4581,7 +4593,13 @@ function GuidedGoalExercise({
         ) : null}
 
         {feedbackConfig?.text ? (
-          <Animated.View entering={FadeInDown.duration(250)} style={styles.scenarioRevealCard}>
+          <Animated.View
+            entering={FadeInDown.duration(250)}
+            style={[
+              styles.scenarioRevealCard,
+              isCorrect && styles.scenarioRevealCardCorrect,
+            ]}
+          >
             <View style={styles.scenarioRevealHeader}>
               {isCorrect ? (
                 <View style={[styles.scenarioRevealIconBubble, mode === 'dark' && { backgroundColor: colors.accent.primary, borderColor: colors.accent.primary }]}>
@@ -5372,8 +5390,9 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
   const pickedOption = options.find((o) => o.id === picked);
   const isAnswered = picked !== null;
   const pickedTone = pickedOption?.isKey ? 'correct' : pickedOption?.feedbackTone || 'incorrect';
+  const isCorrectPick = pickedTone === 'correct';
   const pickedLabel = pickedOption?.feedbackLabel || (
-    pickedTone === 'correct'
+    isCorrectPick
       ? revealExactLabel
       : pickedTone === 'almost'
         ? revealAlmostLabel
@@ -5423,9 +5442,10 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
         <View style={styles.scenarioOptionList}>
           {options.map((opt) => {
             const isPicked    = picked === opt.id;
-            const isKey       = isAnswered && opt.isKey;
-            const isWrongPick = isPicked && !opt.isKey;
-            const isDimmed    = isAnswered && !isPicked && !opt.isKey;
+            const optionIsCorrect = opt.isKey || opt.feedbackTone === 'correct';
+            const isKey       = isAnswered && optionIsCorrect;
+            const isWrongPick = isPicked && !optionIsCorrect;
+            const isDimmed    = isAnswered && !isPicked && !optionIsCorrect;
             return (
               <SelectableOptionButton
                 key={opt.id}
@@ -5473,10 +5493,14 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
       {isAnswered && pickedOption && (
         <Animated.View
           entering={FadeInDown.duration(300)}
-          style={[styles.scenarioRevealCard, styles.summaryRevealCard]}
+          style={[
+            styles.scenarioRevealCard,
+            styles.summaryRevealCard,
+            isCorrectPick && styles.scenarioRevealCardCorrect,
+          ]}
         >
           <View style={styles.scenarioRevealHeader}>
-            {pickedOption.isKey ? (
+            {isCorrectPick ? (
               <View
                 style={[
                   styles.scenarioRevealIconBubble,
@@ -5502,14 +5526,14 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
             <AppText
               style={[
                 styles.scenarioRevealLabel,
-                pickedOption.isKey && styles.summaryRevealLabelKey,
+                isCorrectPick && styles.summaryRevealLabelKey,
               ]}
             >
               {pickedLabel}
             </AppText>
           </View>
           <AppText style={styles.scenarioRevealText}>{pickedOption.reveal}</AppText>
-          {!pickedOption.isKey && followupText ? (
+          {!isCorrectPick && followupText ? (
             <>
               <View style={styles.scenarioRevealDivider} />
               <AppText style={styles.scenarioRevealText}>{followupText}</AppText>
@@ -7991,6 +8015,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     padding: components.layout.spacing.lg,
     gap: components.layout.spacing.md,
+  },
+  scenarioRevealCardCorrect: {
+    borderWidth: 2,
+    borderColor: colors.accent.primary,
   },
   summaryRevealCard: {
     backgroundColor: colors.background.surface,
