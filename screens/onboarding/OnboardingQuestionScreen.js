@@ -67,7 +67,7 @@ export default function OnboardingQuestionScreen({ navigation, route }) {
     route.params;
   const { onboardingContext, updateOnboardingContext, updatePreferences, updateAuthUser, preferences } = useApp();
   const { colors, components, mode } = useTheme();
-  const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const styles = useMemo(() => createStyles(colors, components, mode), [colors, components, mode]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
   const locale = getLocaleKey(preferences?.language);
   const questionVariant = QUESTION_VARIANTS[locale]?.[field] || QUESTION_VARIANTS.en[field] || null;
@@ -240,7 +240,7 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const createStyles = (colors, components) =>
+const createStyles = (colors, components, mode) =>
   StyleSheet.create({
     screen: {
       flex: 1,
@@ -259,9 +259,12 @@ const createStyles = (colors, components) =>
       width: components.sizes.square.lg,
       height: components.sizes.square.lg,
       borderRadius: components.radius.pill,
-      backgroundColor: colors.background.app,
+      backgroundColor: mode === 'light' ? colors.background.surface : colors.background.app,
       borderWidth: components.borderWidth.thin,
-      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+      borderColor:
+        mode === 'light'
+          ? toRgba(colors.ui.divider, 0.35)
+          : toRgba(colors.ui.divider, colors.opacity.stroke),
       alignItems: 'center',
       justifyContent: 'center',
     },

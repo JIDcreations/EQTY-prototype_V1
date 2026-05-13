@@ -19,8 +19,8 @@ import { getOnboardingCopy } from '../../utils/localization';
 
 export default function OnboardingBasicInfoScreen({ navigation }) {
   const { updateAuthUser, updatePreferences, preferences } = useApp();
-  const { colors, components } = useTheme();
-  const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const { colors, components, mode } = useTheme();
+  const styles = useMemo(() => createStyles(colors, components, mode), [colors, components, mode]);
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
   const [name, setName] = useState('');
   const [birthdate, setBirthdate] = useState('');
@@ -107,7 +107,7 @@ const toRgba = (hex, alpha) => {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-const createStyles = (colors, components) =>
+const createStyles = (colors, components, mode) =>
   StyleSheet.create({
     scrollContent: {
       flexGrow: 1,
@@ -137,6 +137,8 @@ const createStyles = (colors, components) =>
       height: components.sizes.square.lg,
       borderRadius: components.radius.pill,
       backgroundColor: colors.background.surface,
+      borderWidth: mode === 'light' ? components.borderWidth.thin : 0,
+      borderColor: mode === 'light' ? toRgba(colors.ui.divider, 0.35) : 'transparent',
       alignItems: 'center',
       justifyContent: 'center',
       position: 'absolute',
