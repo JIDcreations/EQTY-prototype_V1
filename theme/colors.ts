@@ -17,6 +17,9 @@ export const colors = {
     accent: {
       primary: '#FFD500',
     },
+    feedback: {
+      error: '#FF8A80',
+    },
     opacity: {
       tint: 0.12,
       stroke: 0.35,
@@ -41,6 +44,9 @@ export const colors = {
     },
     accent: {
       primary: '#FFD500',
+    },
+    feedback: {
+      error: '#B42318',
     },
     opacity: {
       tint: 0.12,

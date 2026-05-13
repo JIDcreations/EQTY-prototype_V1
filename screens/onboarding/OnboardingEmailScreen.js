@@ -1,28 +1,80 @@
 import React, { useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  FadeInDown,
+  FadeOutUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../../components/AppText';
 import AppTextInput from '../../components/AppTextInput';
 import OnboardingScreen from '../../components/OnboardingScreen';
 import { PrimaryButton } from '../../components/Button';
 import { typography, useTheme } from '../../theme';
 import { useApp } from '../../utils/AppContext';
+import { validateEmailAddress } from '../../utils/emailValidation';
 import { getOnboardingCopy } from '../../utils/localization';
 
 export default function OnboardingEmailScreen({ navigation }) {
   const { updateAuthUser, updatePreferences, preferences } = useApp();
   const { colors, components } = useTheme();
-  const styles = useMemo(() => createStyles(colors, components), [colors, components]);
+  const styles = useMemo(
+    () => createStyles(colors, components),
+    [colors, components]
+  );
   const copy = useMemo(() => getOnboardingCopy(preferences?.language), [preferences?.language]);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
+  const emailShake = useSharedValue(0);
+  const emailValidation = useMemo(() => validateEmailAddress(email), [email]);
+  const showEmailError = emailTouched && !emailValidation.isValid;
+  const emailErrorMessage = useMemo(() => {
+    if (!showEmailError) {
+      return '';
+    }
+
+    if (emailValidation.reason === 'required') {
+      return copy.email.emailRequired;
+    }
+
+    if (emailValidation.reason === 'typo' && emailValidation.suggestion) {
+      return copy.email.emailTypo.replace('{email}', emailValidation.suggestion);
+    }
+
+    return copy.email.emailInvalid;
+  }, [copy.email.emailInvalid, copy.email.emailRequired, copy.email.emailTypo, emailValidation, showEmailError]);
+  const emailShakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: emailShake.value }],
+  }));
+
+  const triggerEmailErrorFeedback = () => {
+    emailShake.value = 0;
+    emailShake.value = withSequence(
+      withTiming(-8, { duration: 45 }),
+      withTiming(7, { duration: 55 }),
+      withTiming(-5, { duration: 55 }),
+      withTiming(4, { duration: 55 }),
+      withTiming(0, { duration: 45 })
+    );
+  };
 
   const handleContinue = async () => {
+    const nextEmailValidation = validateEmailAddress(email);
+    if (!nextEmailValidation.isValid) {
+      setEmailTouched(true);
+      triggerEmailErrorFeedback();
+      return;
+    }
+
     await updatePreferences({ hasOnboarded: false });
     const trimmedUsername = username.trim();
-    const trimmed = email.trim();
+    const trimmed = nextEmailValidation.normalizedEmail;
     if (trimmedUsername) {
       await updateAuthUser({ username: trimmedUsername });
     }
@@ -87,18 +139,38 @@ export default function OnboardingEmailScreen({ navigation }) {
                   style={styles.input}
                 />
               </View>
-              <View style={styles.field}>
-                <AppText style={styles.label}>{copy.email.emailLabel}</AppText>
+              <Animated.View style={[styles.field, emailShakeStyle]}>
+                <AppText style={[styles.label, showEmailError && styles.labelError]}>
+                  {copy.email.emailLabel}
+                </AppText>
                 <AppTextInput
                   value={email}
                   onChangeText={setEmail}
+                  onBlur={() => setEmailTouched(true)}
                   placeholder={copy.email.emailPlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
                   keyboardType="email-address"
-                  style={styles.input}
+                  textContentType="emailAddress"
+                  style={[styles.input, showEmailError && styles.inputError]}
                 />
-              </View>
+                {showEmailError ? (
+                  <Animated.View
+                    entering={FadeInDown.duration(180)}
+                    exiting={FadeOutUp.duration(120)}
+                    style={styles.errorRow}
+                  >
+                    <Ionicons
+                      name="alert-circle"
+                      size={components.sizes.icon.sm}
+                      color={colors.feedback.error}
+                    />
+                    <AppText style={styles.errorText}>{emailErrorMessage}</AppText>
+                  </Animated.View>
+                ) : null}
+              </Animated.View>
               <View style={styles.field}>
                 <AppText style={styles.label}>{copy.email.passwordLabel}</AppText>
                 <View style={styles.inputRow}>
@@ -197,6 +269,9 @@ const toRgba = (hex, alpha) => {
 
 const createStyles = (colors, components) =>
   StyleSheet.create({
+    labelError: {
+      color: colors.feedback.error,
+    },
     screen: {
       flex: 1,
       paddingBottom: components.layout.spacing.none,
@@ -249,6 +324,10 @@ const createStyles = (colors, components) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputError: {
+      borderColor: colors.feedback.error,
+      backgroundColor: toRgba(colors.feedback.error, colors.opacity.tint),
+    },
     inputRow: {
       ...components.input.container,
       flexDirection: 'row',
@@ -274,6 +353,17 @@ const createStyles = (colors, components) =>
     },
     hint: {
       ...components.input.helper,
+    },
+    errorRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: components.layout.spacing.xs,
+      paddingLeft: components.layout.spacing.xs,
+    },
+    errorText: {
+      ...components.input.helper,
+      color: colors.feedback.error,
+      flex: 1,
     },
     actions: {
       gap: components.layout.spacing.md,
