@@ -226,6 +226,7 @@ const createStyles = (colors, components) =>
     },
     label: {
       ...components.input.label,
+      color: colors.text.primary,
     },
     input: {
       ...components.input.container,

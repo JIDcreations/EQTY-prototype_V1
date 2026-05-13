@@ -314,9 +314,11 @@ const createStyles = (colors, components) =>
     },
     label: {
       ...components.input.label,
+      color: colors.text.primary,
     },
     nameLabel: {
       ...components.input.helper,
+      color: colors.text.primary,
     },
     input: {
       ...components.input.container,
