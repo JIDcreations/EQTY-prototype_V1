@@ -7,6 +7,14 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  FadeInDown,
+  FadeOutUp,
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../../components/AppText';
 import AppTextInput from '../../components/AppTextInput';
 import OnboardingScreen from '../../components/OnboardingScreen';
@@ -23,11 +31,44 @@ export default function OnboardingLoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordTouched, setPasswordTouched] = useState(false);
+  const passwordShake = useSharedValue(0);
+  const trimmedUsername = username.trim();
+  const trimmedPassword = password.trim();
+  const passwordErrorMessage = useMemo(() => {
+    if (!passwordTouched || trimmedPassword) {
+      return '';
+    }
+
+    return copy.login.passwordRequired;
+  }, [copy.login.passwordRequired, passwordTouched, trimmedPassword]);
+  const showPasswordError = Boolean(passwordErrorMessage);
+  const passwordShakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: passwordShake.value }],
+  }));
+
+  const triggerShake = (shakeValue) => {
+    shakeValue.value = 0;
+    shakeValue.value = withSequence(
+      withTiming(-8, { duration: 45 }),
+      withTiming(7, { duration: 55 }),
+      withTiming(-5, { duration: 55 }),
+      withTiming(4, { duration: 55 }),
+      withTiming(0, { duration: 45 })
+    );
+  };
 
   const handleDone = async () => {
-    const trimmed = username.trim();
-    if (trimmed) {
-      await updateAuthUser({ username: trimmed });
+    const nextPasswordError = !trimmedPassword ? copy.login.passwordRequired : '';
+
+    if (nextPasswordError) {
+      setPasswordTouched(true);
+      triggerShake(passwordShake);
+      return;
+    }
+
+    if (trimmedUsername) {
+      await updateAuthUser({ username: trimmedUsername });
     } else {
       await updateAuthUser({});
     }
@@ -35,11 +76,21 @@ export default function OnboardingLoginScreen({ navigation }) {
   };
 
   const handleApple = async () => {
-    await handleDone();
+    if (trimmedUsername) {
+      await updateAuthUser({ username: trimmedUsername });
+    } else {
+      await updateAuthUser({});
+    }
+    await updatePreferences({ hasOnboarded: true });
   };
 
   const handleGoogle = async () => {
-    await handleDone();
+    if (trimmedUsername) {
+      await updateAuthUser({ username: trimmedUsername });
+    } else {
+      await updateAuthUser({});
+    }
+    await updatePreferences({ hasOnboarded: true });
   };
 
   const loginLinkParts = splitFooterLink(copy.login.link);
@@ -76,15 +127,19 @@ export default function OnboardingLoginScreen({ navigation }) {
                   placeholder={copy.login.usernamePlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   autoCapitalize="none"
+                  autoCorrect={false}
                   style={styles.input}
                 />
               </View>
-            <View style={styles.field}>
-              <AppText style={styles.label}>{copy.login.passwordLabel}</AppText>
-              <View style={styles.inputRow}>
-                <AppTextInput
-                  value={password}
+              <Animated.View style={[styles.field, passwordShakeStyle]}>
+                <AppText style={[styles.label, showPasswordError && styles.labelError]}>
+                  {copy.login.passwordLabel}
+                </AppText>
+                <View style={[styles.inputRow, showPasswordError && styles.inputError]}>
+                  <AppTextInput
+                    value={password}
                     onChangeText={setPassword}
+                    onBlur={() => setPasswordTouched(true)}
                     placeholder={copy.login.passwordPlaceholder}
                     placeholderTextColor={colors.text.secondary}
                     secureTextEntry={!showPassword}
@@ -101,12 +156,26 @@ export default function OnboardingLoginScreen({ navigation }) {
                     />
                   </Pressable>
                 </View>
+                {showPasswordError ? (
+                  <Animated.View
+                    entering={FadeInDown.duration(180)}
+                    exiting={FadeOutUp.duration(120)}
+                    style={styles.errorRow}
+                  >
+                    <Ionicons
+                      name="alert-circle"
+                      size={components.sizes.icon.sm}
+                      color={colors.feedback.error}
+                    />
+                    <AppText style={styles.errorText}>{passwordErrorMessage}</AppText>
+                  </Animated.View>
+                ) : null}
                 <Pressable onPress={() => navigation.navigate('ResetPassword')}>
                   <AppText numberOfLines={1} style={styles.forgotLink}>
                     {copy.login.forgotPassword}
                   </AppText>
                 </Pressable>
-              </View>
+              </Animated.View>
             </View>
 
             <View style={styles.actions}>
@@ -228,11 +297,18 @@ const createStyles = (colors, components) =>
       ...components.input.label,
       color: colors.text.primary,
     },
+    labelError: {
+      color: colors.feedback.error,
+    },
     input: {
       ...components.input.container,
       ...components.input.text,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+    inputError: {
+      borderColor: colors.feedback.error,
+      backgroundColor: toRgba(colors.feedback.error, colors.opacity.tint),
     },
     inputRow: {
       ...components.input.container,
@@ -256,6 +332,17 @@ const createStyles = (colors, components) =>
       height: components.sizes.square.md,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    errorRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: components.layout.spacing.xs,
+      paddingLeft: components.layout.spacing.xs,
+    },
+    errorText: {
+      ...components.input.helper,
+      color: colors.feedback.error,
+      flex: 1,
     },
     actions: {
       gap: components.layout.spacing.md,
