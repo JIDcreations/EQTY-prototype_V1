@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Animated, {
+  withDelay,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -138,19 +139,39 @@ export default function HomeScreen() {
   // Hero card entrance on every focus — subtle slide + fade
   const heroOpacity = useSharedValue(0);
   const heroY = useSharedValue(6);
+  const insightOpacity = useSharedValue(0);
+  const insightY = useSharedValue(12);
+  const actionsOpacity = useSharedValue(0);
+  const actionsY = useSharedValue(16);
 
   useFocusEffect(
     useCallback(() => {
       heroOpacity.value = 0;
       heroY.value = 6;
+      insightOpacity.value = 0;
+      insightY.value = 12;
+      actionsOpacity.value = 0;
+      actionsY.value = 16;
       heroOpacity.value = withTiming(1, { duration: 380 });
       heroY.value = withTiming(0, { duration: 380 });
+      insightOpacity.value = withDelay(120, withTiming(1, { duration: 320 }));
+      insightY.value = withDelay(120, withTiming(0, { duration: 320 }));
+      actionsOpacity.value = withDelay(210, withTiming(1, { duration: 320 }));
+      actionsY.value = withDelay(210, withTiming(0, { duration: 320 }));
     }, [])
   );
 
   const heroAnimStyle = useAnimatedStyle(() => ({
     opacity: heroOpacity.value,
     transform: [{ translateY: heroY.value }],
+  }));
+  const insightAnimStyle = useAnimatedStyle(() => ({
+    opacity: insightOpacity.value,
+    transform: [{ translateY: insightY.value }],
+  }));
+  const actionsAnimStyle = useAnimatedStyle(() => ({
+    opacity: actionsOpacity.value,
+    transform: [{ translateY: actionsY.value }],
   }));
 
   const greeting = getGreeting(homeCopy);
@@ -267,7 +288,7 @@ export default function HomeScreen() {
         </Animated.View>
 
         {insightCard ? (
-          <View style={styles.section}>
+          <Animated.View style={[styles.section, insightAnimStyle]}>
             <Card style={[styles.heroStack, styles.insightCard]}>
               <AppText style={styles.insightLabel} numberOfLines={1}>
                 {insightCard.label}
@@ -279,11 +300,11 @@ export default function HomeScreen() {
                 {insightCard.bodyAfter}
               </AppText>
             </Card>
-          </View>
+          </Animated.View>
         ) : null}
       </View>
 
-      <View style={styles.section}>
+      <Animated.View style={[styles.section, actionsAnimStyle]}>
         <SectionTitle title="Hulpmiddelen" />
         <View style={styles.actionRow}>
           {quickActions.map((action) => (
@@ -307,7 +328,7 @@ export default function HomeScreen() {
             </Pressable>
           ))}
         </View>
-      </View>
+      </Animated.View>
 
     </OnboardingScreen>
   );

@@ -1,8 +1,14 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import { CtaButton } from '../components/Button';
 import Card from '../components/Card';
@@ -32,6 +38,12 @@ export default function LessonOverviewScreen() {
   const { preferences, progress } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef({ count: 0, timestamp: 0 });
+  const heroOpacity = useSharedValue(0);
+  const heroY = useSharedValue(8);
+  const cardOpacity = useSharedValue(0);
+  const cardY = useSharedValue(14);
+  const ctaOpacity = useSharedValue(0);
+  const ctaY = useSharedValue(16);
 
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight),
@@ -130,6 +142,36 @@ export default function LessonOverviewScreen() {
     };
   }, [isLessonLocked, lesson.id, startLesson]);
 
+  useFocusEffect(
+    useCallback(() => {
+      heroOpacity.value = 0;
+      heroY.value = 8;
+      cardOpacity.value = 0;
+      cardY.value = 14;
+      ctaOpacity.value = 0;
+      ctaY.value = 16;
+      heroOpacity.value = withTiming(1, { duration: 320 });
+      heroY.value = withTiming(0, { duration: 320 });
+      cardOpacity.value = withDelay(110, withTiming(1, { duration: 300 }));
+      cardY.value = withDelay(110, withTiming(0, { duration: 300 }));
+      ctaOpacity.value = withDelay(180, withTiming(1, { duration: 280 }));
+      ctaY.value = withDelay(180, withTiming(0, { duration: 280 }));
+    }, [])
+  );
+
+  const heroAnimStyle = useAnimatedStyle(() => ({
+    opacity: heroOpacity.value,
+    transform: [{ translateY: heroY.value }],
+  }));
+  const cardAnimStyle = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ translateY: cardY.value }],
+  }));
+  const ctaAnimStyle = useAnimatedStyle(() => ({
+    opacity: ctaOpacity.value,
+    transform: [{ translateY: ctaY.value }],
+  }));
+
   return (
     <ScreenBackground variant="bg3">
       <View style={styles.container}>
@@ -142,10 +184,11 @@ export default function LessonOverviewScreen() {
                 color={colors.text.primary}
               />
             </Pressable>
-            <View
+            <Animated.View
               style={[
                 styles.heroContent,
                 lesson.id === 'lesson_0' && styles.heroContentLessonOne,
+                heroAnimStyle,
               ]}
             >
               <View style={styles.labelAndTitle}>
@@ -176,31 +219,33 @@ export default function LessonOverviewScreen() {
                   </View>
                 ))}
               </View>
-            </View>
+            </Animated.View>
           </View>
 
-          <Card>
-            <View style={styles.outcomeSection}>
-              <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
-              <View style={styles.outcomeList}>
-                {outcomes.map((line, index) => (
-                  <View key={`${index}-${line}`} style={styles.outcomeItemRow}>
-                    <AppText style={styles.outcomeBullet}>•</AppText>
-                    <AppText style={styles.outcomeText}>{line}</AppText>
-                  </View>
-                ))}
+          <Animated.View style={cardAnimStyle}>
+            <Card>
+              <View style={styles.outcomeSection}>
+                <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
+                <View style={styles.outcomeList}>
+                  {outcomes.map((line, index) => (
+                    <View key={`${index}-${line}`} style={styles.outcomeItemRow}>
+                      <AppText style={styles.outcomeBullet}>•</AppText>
+                      <AppText style={styles.outcomeText}>{line}</AppText>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          </Card>
+            </Card>
+          </Animated.View>
         </ScrollView>
 
-        <View style={styles.ctaDock}>
+        <Animated.View style={[styles.ctaDock, ctaAnimStyle]}>
           <CtaButton
             label={isLessonLocked ? overviewCopy.lockedLesson : overviewCopy.startLesson}
             disabled={isLessonLocked && !isPrototypeLessonAvailable(lesson.id)}
             onPress={handleStartPress}
           />
-        </View>
+        </Animated.View>
       </View>
     </ScreenBackground>
   );

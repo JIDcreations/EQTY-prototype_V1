@@ -17,7 +17,12 @@ function toRgba(hex, alpha) {
  * Reusable search bar — shared across all screens.
  * Slightly taller than 45 via padding and input normalization for better optical centering.
  */
-export default function SearchBar({ value, onChangeText, placeholder, style }) {
+export default function SearchBar({
+  value,
+  onChangeText,
+  placeholder,
+  style,
+}) {
   const { colors, components } = useTheme();
 
   return (

@@ -3,6 +3,11 @@ import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import BottomSheet from '../components/BottomSheet';
 import Card from '../components/Card';
@@ -173,26 +178,17 @@ export default function GlossaryScreen() {
   };
 
   const renderTermRow = (term, index, total) => (
-    <Pressable
+    <GlossaryTermRow
       key={term.id}
+      term={term}
+      index={index}
+      total={total}
+      isSelected={selectedTerm?.id === term.id}
       onPress={() => setSelectedTerm(term)}
-      style={[
-        styles.termRow,
-        index < total - 1 && styles.termDivider,
-      ]}
-    >
-      <View style={styles.termRowTop}>
-        <AppText style={styles.termTitle}>{term.term}</AppText>
-        <Ionicons
-          name="chevron-forward"
-          size={components.sizes.icon.sm}
-          color={colors.text.secondary}
-        />
-      </View>
-      <AppText style={styles.termDescription} numberOfLines={1}>
-        {term.definition}
-      </AppText>
-    </Pressable>
+      styles={styles}
+      colors={colors}
+      components={components}
+    />
   );
 
   return (
@@ -470,10 +466,16 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     termRow: {
       ...components.list.row,
       paddingVertical: components.layout.spacing.md,
+      paddingHorizontal: components.layout.spacing.sm,
+      marginHorizontal: -components.layout.spacing.sm,
+      borderRadius: components.radius.input,
     },
     termDivider: {
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+    termRowPressed: {
+      opacity: colors.opacity.emphasis,
     },
     termRowTop: {
       flexDirection: 'row',
@@ -536,3 +538,51 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
   });
 };
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+function GlossaryTermRow({
+  term,
+  index,
+  total,
+  isSelected,
+  onPress,
+  styles,
+  colors,
+  components,
+}) {
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      onPress={onPress}
+      onPressIn={() => {
+        scale.value = withTiming(components.transforms.scalePressed, { duration: 120 });
+      }}
+      onPressOut={() => {
+        scale.value = withTiming(1, { duration: 120 });
+      }}
+      style={[
+        styles.termRow,
+        index < total - 1 && styles.termDivider,
+        animatedStyle,
+      ]}
+    >
+      <View style={styles.termRowTop}>
+        <AppText style={styles.termTitle}>{term.term}</AppText>
+        <Ionicons
+          name="chevron-forward"
+          size={components.sizes.icon.sm}
+          color={colors.text.secondary}
+        />
+      </View>
+      <AppText style={styles.termDescription} numberOfLines={1}>
+        {term.definition}
+      </AppText>
+    </AnimatedPressable>
+  );
+}
