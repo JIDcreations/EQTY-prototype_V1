@@ -72,7 +72,9 @@ export default function GlossaryScreen() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [sortAz, setSortAz] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isLearnMorePending, setIsLearnMorePending] = useState(false);
   const scrollRef = useRef(null);
+  const isDutch = (preferences?.language || '').toLowerCase().startsWith('nl');
 
   const scopedTermIds =
     route?.params?.termIds ||
@@ -152,6 +154,17 @@ export default function GlossaryScreen() {
     activeCategory === 'all'
       ? glossaryCopy.allTerms
       : categoriesById[activeCategory]?.title || glossaryCopy.fallbackTerms;
+  const searchAssistiveCopy = normalizedQuery
+    ? displayTerms.length === 0
+      ? isDutch
+        ? 'Geen matches. Probeer een ander woord.'
+        : 'No matches. Try another term.'
+      : isDutch
+        ? `${displayTerms.length} term${displayTerms.length === 1 ? '' : 'en'} gevonden`
+        : `${displayTerms.length} term${displayTerms.length === 1 ? '' : 's'} found`
+    : isDutch
+      ? 'Tik op een term voor een snelle uitleg.'
+      : 'Tap a term for a quick explanation.';
 
   const handleScroll = useCallback(
     (event) => {
@@ -177,8 +190,11 @@ export default function GlossaryScreen() {
 
   const handleLearnMore = async () => {
     const videoUrl = getVideoUrl(selectedTerm);
-    if (!videoUrl) return;
+    if (!videoUrl || isLearnMorePending) return;
+    setIsLearnMorePending(true);
+    await new Promise((resolve) => setTimeout(resolve, 120));
     await Linking.openURL(videoUrl);
+    setIsLearnMorePending(false);
   };
 
   const renderTermRow = (term, index, total) => (
@@ -222,6 +238,7 @@ export default function GlossaryScreen() {
               onChangeText={setQuery}
               placeholder={glossaryCopy.searchPlaceholder}
             />
+            <AppText style={styles.searchAssistiveText}>{searchAssistiveCopy}</AppText>
             <View style={styles.chipRow}>
               <ScrollView
                 horizontal
@@ -348,9 +365,15 @@ export default function GlossaryScreen() {
             <Ionicons
               name="play-circle-outline"
               size={components.sizes.icon.sm}
-              color={colors.text.secondary}
+              color={isLearnMorePending ? colors.accent.primary : colors.text.secondary}
             />
-            <AppText style={styles.learnMoreText}>{glossaryCopy.watchVideo}</AppText>
+            <AppText style={[styles.learnMoreText, isLearnMorePending && styles.learnMoreTextActive]}>
+              {isLearnMorePending
+                ? isDutch
+                  ? 'Video openen...'
+                  : 'Opening video...'
+                : glossaryCopy.watchVideo}
+            </AppText>
           </Pressable>
         ) : null}
       </BottomSheet>
@@ -386,6 +409,11 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     stickyControls: {
       gap: components.layout.spacing.md,
+    },
+    searchAssistiveText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      marginTop: -components.layout.spacing.xs,
     },
     chipRow: {
       flexDirection: 'row',
@@ -478,6 +506,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       marginHorizontal: -components.layout.spacing.sm,
       borderRadius: components.radius.input,
     },
+    termRowSelected: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
     termDivider: {
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: toRgba(colors.ui.divider, colors.opacity.stroke),
@@ -544,6 +575,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       ...typography.styles.small,
       color: colors.text.secondary,
     },
+    learnMoreTextActive: {
+      color: colors.accent.primary,
+    },
   });
 };
 
@@ -580,6 +614,7 @@ function GlossaryTermRow({
         }}
         style={[
           styles.termRow,
+          isSelected && styles.termRowSelected,
           index < total - 1 && styles.termDivider,
           animatedStyle,
         ]}

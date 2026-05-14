@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Animated, {
@@ -48,6 +48,7 @@ export default function HomeScreen() {
     () => getDeepDiveCopy(preferences?.language),
     [preferences?.language]
   );
+  const [isPrimaryOpening, setIsPrimaryOpening] = useState(false);
   const localizedModules = useMemo(
     () => getLocalizedModules(preferences?.language),
     [preferences?.language]
@@ -196,25 +197,31 @@ export default function HomeScreen() {
     ? homeCopy.postCourseStepLabel
     : currentContextLabel;
   const greetingLine = `${greeting}, ${displayName}`;
+  const openingLabel = isDutch ? 'Openen...' : 'Opening...';
   const handlePrimaryCtaPress = useCallback(() => {
-    if (hasCompletedAllLessons) {
+    if (isPrimaryOpening) return;
+    setIsPrimaryOpening(true);
+    setTimeout(() => {
+      setIsPrimaryOpening(false);
+      if (hasCompletedAllLessons) {
+        navigation.navigate('Lessons', {
+          screen: 'LessonsHome',
+          params: {
+            scrollToSection: 'deepDive',
+          },
+        });
+        return;
+      }
+
       navigation.navigate('Lessons', {
-        screen: 'LessonsHome',
+        screen: 'LessonOverview',
         params: {
-          scrollToSection: 'deepDive',
+          lessonId: currentLesson?.id,
+          entrySource: 'Home',
         },
       });
-      return;
-    }
-
-    navigation.navigate('Lessons', {
-      screen: 'LessonOverview',
-      params: {
-        lessonId: currentLesson?.id,
-        entrySource: 'Home',
-      },
-    });
-  }, [currentLesson?.id, hasCompletedAllLessons, navigation]);
+    }, 140);
+  }, [currentLesson?.id, hasCompletedAllLessons, isPrimaryOpening, navigation]);
   const quickActions = useMemo(
     () => [
       {
@@ -282,7 +289,7 @@ export default function HomeScreen() {
               </View>
             </View>
             <CtaInsideButton
-              label={primaryCtaLabel}
+              label={isPrimaryOpening ? openingLabel : primaryCtaLabel}
               onPress={handlePrimaryCtaPress}
             />
           </Card>
@@ -374,7 +381,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
         : toRgba(colors.ui.divider, colors.opacity.stroke),
     },
     heroTextBlock: {
-      gap: components.layout.spacing.xl,
+      gap: 8,
     },
     heroTitleBlock: {
       gap: components.layout.spacing.sm,

@@ -20,7 +20,12 @@ import TopTabHeader from '../components/TopTabHeader';
 import { lessonResources } from '../data/resources';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
-import { getLessonResourcesCopy, getLocalizedLessons, getLocalizedModules } from '../utils/localization';
+import {
+  getLessonResourcesCopy,
+  getLocalizedLessons,
+  getLocalizedModules,
+  getLocaleKey,
+} from '../utils/localization';
 import { buildModulesWithIndexedLessons, getLessonStatus } from '../utils/helpers';
 
 export default function LessonResourcesScreen() {
@@ -37,6 +42,7 @@ export default function LessonResourcesScreen() {
     () => getLessonResourcesCopy(preferences?.language),
     [preferences?.language]
   );
+  const isDutch = getLocaleKey(preferences?.language) === 'nl';
 
   const modulesWithLessons = useMemo(() => {
     const localizedLessons = getLocalizedLessons(preferences?.language);
@@ -73,6 +79,21 @@ export default function LessonResourcesScreen() {
   }, [allLessons, query]);
 
   const isSearching = query.trim().length > 0;
+  const searchStatusCopy = useMemo(() => {
+    if (!isSearching) {
+      return isDutch
+        ? 'Tik op een les om de bronnen open te klappen.'
+        : 'Tap a lesson to reveal its sources.';
+    }
+    if (!searchResults || searchResults.length === 0) {
+      return isDutch
+        ? 'Geen matches. Probeer bijvoorbeeld ETF of risico.'
+        : 'No matches yet. Try ETF or risk.';
+    }
+    return isDutch
+      ? `${searchResults.length} les${searchResults.length === 1 ? '' : 'sen'} gevonden`
+      : `${searchResults.length} lesson match${searchResults.length === 1 ? '' : 'es'} found`;
+  }, [isDutch, isSearching, searchResults]);
 
   return (
     <OnboardingScreen
@@ -95,6 +116,9 @@ export default function LessonResourcesScreen() {
           onChangeText={handleQueryChange}
           placeholder={copy.searchPlaceholder}
         />
+      </Animated.View>
+      <Animated.View entering={FadeIn.duration(220).delay(70)}>
+        <AppText style={styles.searchStatusText}>{searchStatusCopy}</AppText>
       </Animated.View>
 
       {/* Search suggestions — visible when idle */}
@@ -327,8 +351,13 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
           style={styles.resourceList}
         >
           <View style={styles.resourceListDivider} />
+          <AppText style={styles.resourceListLabel}>
+            {resources.length > 0
+              ? `${resources.length} ${resources.length === 1 ? 'source' : 'sources'}`
+              : copy.noResources}
+          </AppText>
           {resources.length === 0 ? (
-            <AppText style={styles.emptyText}>{copy.noResources}</AppText>
+            null
           ) : (
             resources.map((resource, index) => (
               <ResourceRow
@@ -357,11 +386,15 @@ function getResourceIcon(url) {
   return 'globe-outline';
 }
 function ResourceRow({ resource, copy, styles, colors, components, showDivider }) {
+  const [isOpening, setIsOpening] = useState(false);
   const handleOpen = async () => {
-    if (!resource?.url) return;
+    if (!resource?.url || isOpening) return;
+    setIsOpening(true);
     try {
+      await new Promise((resolve) => setTimeout(resolve, 120));
       await Linking.openURL(resource.url);
     } catch (_) {}
+    setIsOpening(false);
   };
 
   return (
@@ -383,14 +416,14 @@ function ResourceRow({ resource, copy, styles, colors, components, showDivider }
             </AppText>
           ) : null}
           <AppText style={styles.resourceSource} numberOfLines={1}>
-            {resource.source}
+            {isOpening ? 'Opening...' : resource.source}
           </AppText>
         </View>
 
         <Ionicons
           name="open-outline"
           size={components.sizes.icon.md}
-          color={colors.text.secondary}
+          color={isOpening ? colors.accent.primary : colors.text.secondary}
         />
       </Pressable>
 
@@ -423,6 +456,11 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       paddingTop: components.layout.safeArea.top + sp.xl,
       paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.xxl,
       gap: sp.lg,
+    },
+    searchStatusText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      marginTop: -sp.sm,
     },
 
     // Search suggestions
@@ -538,10 +576,15 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       paddingHorizontal: 20,
       paddingTop: 0,
       paddingBottom: 16,
+      gap: sp.sm,
     },
     resourceListDivider: {
       height: components.borderWidth.thin,
       backgroundColor: colors.accent.primary,
+    },
+    resourceListLabel: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
     },
 
     // Resource row

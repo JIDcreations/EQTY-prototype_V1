@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -39,6 +39,7 @@ export default function LessonOverviewScreen() {
   const { preferences, progress } = useApp();
   const { colors, components } = useTheme();
   const lockedTapStateRef = useRef({ count: 0, timestamp: 0 });
+  const [isStarting, setIsStarting] = useState(false);
   const heroOpacity = useSharedValue(0);
   const heroY = useSharedValue(8);
   const cardOpacity = useSharedValue(0);
@@ -104,8 +105,23 @@ export default function LessonOverviewScreen() {
   const outcomes = getLessonOutcomes(overviewCopy, lesson.id);
   const pointsLabel = overviewCopy.lessonPointsLabel || overviewCopy.outcomesLabel;
   const metaChips = getLessonMetaChips(overviewCopy, lesson.id, estimatedMinutes);
+  const isDutch = (preferences?.language || '').toLowerCase().startsWith('nl');
 
   const isLessonLocked = lessonStatus === 'locked' || !isPrototypeLessonAvailable(lesson.id);
+  const ctaLabel = isStarting
+    ? isDutch
+      ? 'Openen...'
+      : 'Opening...'
+    : isLessonLocked
+      ? overviewCopy.lockedLesson
+      : overviewCopy.startLesson;
+  const ctaAssistiveCopy = isLessonLocked
+    ? isDutch
+      ? 'Werk eerst de vorige les af om deze te ontgrendelen.'
+      : 'Complete the previous lesson to unlock this one.'
+    : isDutch
+      ? `Start met ongeveer ${estimatedMinutes} minuten aan duidelijke stappen.`
+      : `Start with about ${estimatedMinutes} minutes of guided steps.`;
 
   const startLesson = useCallback(() => {
     navigation.navigate('LessonStep', {
@@ -117,7 +133,12 @@ export default function LessonOverviewScreen() {
 
   const handleStartPress = useCallback(() => {
     if (!isLessonLocked) {
-      startLesson();
+      if (isStarting) return;
+      setIsStarting(true);
+      setTimeout(() => {
+        setIsStarting(false);
+        startLesson();
+      }, 140);
       return;
     }
 
@@ -141,7 +162,7 @@ export default function LessonOverviewScreen() {
       count: nextCount,
       timestamp: now,
     };
-  }, [isLessonLocked, lesson.id, startLesson]);
+  }, [isLessonLocked, isStarting, lesson.id, startLesson]);
 
   useFocusEffect(
     useCallback(() => {
@@ -250,10 +271,11 @@ export default function LessonOverviewScreen() {
 
         <Animated.View style={[styles.ctaDock, ctaAnimStyle]}>
           <CtaButton
-            label={isLessonLocked ? overviewCopy.lockedLesson : overviewCopy.startLesson}
+            label={ctaLabel}
             disabled={isLessonLocked && !isPrototypeLessonAvailable(lesson.id)}
             onPress={handleStartPress}
           />
+          <AppText style={styles.ctaAssistiveCopy}>{ctaAssistiveCopy}</AppText>
         </Animated.View>
       </View>
     </ScreenBackground>
@@ -368,10 +390,18 @@ const createStyles = (colors, components, tabBarHeight) =>
     ctaDock: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
       paddingTop: components.layout.spacing.sm,
+      gap: components.layout.spacing.sm,
       paddingBottom:
         components.layout.safeArea.bottom +
         tabBarHeight +
         components.layout.spacing.md,
+    },
+    ctaAssistiveCopy: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      textAlign: 'center',
+      maxWidth: components.sizes.button.ctaPageWidth,
+      alignSelf: 'center',
     },
   });
 

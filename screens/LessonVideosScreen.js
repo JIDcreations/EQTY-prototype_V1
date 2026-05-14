@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
@@ -20,6 +20,7 @@ import {
   formatThemeUnitLabel,
   getLessonContent,
   getLessonVideosCopy,
+  getLocaleKey,
   getLocalizedLessons,
   getLocalizedModules,
 } from '../utils/localization';
@@ -51,10 +52,12 @@ export default function LessonVideosScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { preferences, progress } = useApp();
   const { colors, components, mode } = useTheme();
+  const [pendingVideoId, setPendingVideoId] = useState(null);
   const styles = useMemo(
     () => createStyles(colors, components, tabBarHeight, mode),
     [colors, components, tabBarHeight, mode]
   );
+  const isDutch = getLocaleKey(preferences?.language) === 'nl';
 
   const videosCopy = useMemo(
     () => getLessonVideosCopy(preferences?.language),
@@ -105,10 +108,18 @@ export default function LessonVideosScreen() {
 
   const featuredVideo = featuredEntry?.videos?.[0] || null;
 
-  const handleOpenUrl = useCallback(async (url) => {
-    if (!url) return;
-    try { await Linking.openURL(url); } catch (_) {}
-  }, []);
+  const handleOpenVideo = useCallback(
+    async (video) => {
+      if (!video?.url || pendingVideoId) return;
+      setPendingVideoId(video.id);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 120));
+        await Linking.openURL(video.url);
+      } catch (_) {}
+      setPendingVideoId(null);
+    },
+    [pendingVideoId]
+  );
 
   return (
     <OnboardingScreen
@@ -130,7 +141,8 @@ export default function LessonVideosScreen() {
           <HeroCard
             entry={featuredEntry}
             video={featuredVideo}
-            onPress={handleOpenUrl}
+            isOpening={pendingVideoId === featuredVideo.id}
+            onPress={handleOpenVideo}
             styles={styles}
             colors={colors}
             components={components}
@@ -142,6 +154,15 @@ export default function LessonVideosScreen() {
       {/* Browse by topic — vertical module groups */}
       <Animated.View entering={FadeInDown.duration(300).delay(110)} style={styles.browseSection}>
         <AppText style={styles.browseSectionTitle}>{videosCopy.browseSectionTitle}</AppText>
+        <AppText style={styles.browseSectionHint}>
+          {pendingVideoId
+            ? isDutch
+              ? 'Video wordt geopend...'
+              : 'Opening video...'
+            : isDutch
+              ? 'Elke video opent buiten de app.'
+              : 'Each video opens outside the app.'}
+        </AppText>
         {moduleGroups.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="videocam-outline" size={components.sizes.icon.lg} color={colors.text.secondary} />
@@ -154,7 +175,8 @@ export default function LessonVideosScreen() {
               group={group}
               index={index}
               language={preferences?.language}
-              onPress={handleOpenUrl}
+              onPress={handleOpenVideo}
+              pendingVideoId={pendingVideoId}
               styles={styles}
               colors={colors}
               components={components}
@@ -226,9 +248,8 @@ function VideoThumbnail({ duration, isHero, colors }) {
 
 // ─── Hero card ────────────────────────────────────────────────────────────────
 
-function HeroCard({ entry, video, onPress, styles, colors, components, videosCopy }) {
+function HeroCard({ entry, video, isOpening, onPress, styles, colors, components, videosCopy }) {
   const { lesson } = entry;
-  const lessonNumber = (lesson.lessonIndexInTheme ?? 0) + 1;
 
   return (
     <View style={styles.hero}>
@@ -243,7 +264,10 @@ function HeroCard({ entry, video, onPress, styles, colors, components, videosCop
         {lesson.shortDescription ? (
           <AppText style={styles.heroDesc} numberOfLines={2}>{lesson.shortDescription}</AppText>
         ) : null}
-        <CtaInsideButton label={videosCopy.watchNow} onPress={() => onPress(video.url)} />
+        <CtaInsideButton
+          label={isOpening ? 'Opening...' : videosCopy.watchNow}
+          onPress={() => onPress(video)}
+        />
       </View>
     </View>
   );
@@ -251,7 +275,17 @@ function HeroCard({ entry, video, onPress, styles, colors, components, videosCop
 
 // ─── Module group ─────────────────────────────────────────────────────────────
 
-function ModuleGroup({ group, index, language, onPress, styles, colors, components, videosCopy }) {
+function ModuleGroup({
+  group,
+  index,
+  language,
+  onPress,
+  pendingVideoId,
+  styles,
+  colors,
+  components,
+  videosCopy,
+}) {
   const entries = group.lessonEntries.filter((e) => e.videos.length > 0);
   if (entries.length === 0) return null;
 
@@ -278,6 +312,7 @@ function ModuleGroup({ group, index, language, onPress, styles, colors, componen
           video={entry.videos[0]}
           onPress={onPress}
           index={idx}
+          isOpening={pendingVideoId === entry.videos[0].id}
           isLast={idx === entries.length - 1}
           styles={styles}
           colors={colors}
@@ -290,7 +325,7 @@ function ModuleGroup({ group, index, language, onPress, styles, colors, componen
 
 // ─── Lesson row ───────────────────────────────────────────────────────────────
 
-function LessonRow({ entry, video, onPress, index, isLast, styles, colors, components }) {
+function LessonRow({ entry, video, onPress, index, isOpening, isLast, styles, colors, components }) {
   const { lesson } = entry;
   const sourceIcon = getSourceIcon(video.source);
   const scale = useSharedValue(1);
@@ -303,14 +338,14 @@ function LessonRow({ entry, video, onPress, index, isLast, styles, colors, compo
     <>
       <AnimatedPressable
         entering={FadeInDown.duration(240).delay(Math.min(110 + index * 55, 260))}
-        onPress={() => onPress(video.url)}
+        onPress={() => onPress(video)}
         onPressIn={() => {
           scale.value = withTiming(components.transforms.scalePressed, { duration: 120 });
         }}
         onPressOut={() => {
           scale.value = withTiming(1, { duration: 120 });
         }}
-        style={[styles.lessonRow, animatedStyle]}
+        style={[styles.lessonRow, isOpening && styles.lessonRowOpening, animatedStyle]}
       >
         <View style={styles.lessonRowThumb}>
           <VideoThumbnail
@@ -322,11 +357,22 @@ function LessonRow({ entry, video, onPress, index, isLast, styles, colors, compo
         <View style={styles.lessonRowInfo}>
           <AppText style={styles.lessonRowTitle} numberOfLines={2}>{lesson.title}</AppText>
           <View style={styles.lessonRowMeta}>
-            <Ionicons name={sourceIcon} size={12} color={colors.text.secondary} />
-            <AppText style={styles.lessonRowMetaText}>{video.source}</AppText>
+            <Ionicons
+              name={sourceIcon}
+              size={12}
+              color={isOpening ? colors.accent.primary : colors.text.secondary}
+            />
+            <AppText style={[styles.lessonRowMetaText, isOpening && styles.lessonRowMetaTextActive]}>
+              {isOpening ? 'Opening video...' : video.source}
+            </AppText>
           </View>
         </View>
-        <Ionicons name="open-outline" size={16} color={colors.text.secondary} style={{ opacity: 0.45 }} />
+        <Ionicons
+          name="open-outline"
+          size={16}
+          color={isOpening ? colors.accent.primary : colors.text.secondary}
+          style={{ opacity: isOpening ? 1 : 0.45 }}
+        />
       </AnimatedPressable>
       {!isLast && <View style={styles.rowDivider} />}
     </>
@@ -448,6 +494,11 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
     },
+    browseSectionHint: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+      marginTop: -sp.xs,
+    },
 
     // ── Hero card ─────────────────────────────────────────────────────────────
     hero: {
@@ -521,6 +572,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     lessonRowPressed: {
       backgroundColor: toRgba(colors.background.surfaceActive, 0.5),
     },
+    lessonRowOpening: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
     lessonRowThumb: {
       width: 120,
       height: 72,
@@ -544,6 +598,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     lessonRowMetaText: {
       ...typography.styles.small,
       color: colors.text.secondary,
+    },
+    lessonRowMetaTextActive: {
+      color: colors.accent.primary,
     },
     rowDivider: {
       height: components.borderWidth.thin,
