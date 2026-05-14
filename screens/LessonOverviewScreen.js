@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import Animated, {
+  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -213,10 +214,14 @@ export default function LessonOverviewScreen() {
                 </View>
               </View>
               <View style={styles.metaChipRow}>
-                {metaChips.map((chipText) => (
-                  <View key={chipText} style={styles.metaChip}>
+                {metaChips.map((chipText, index) => (
+                  <Animated.View
+                    key={chipText}
+                    entering={FadeInDown.duration(220).delay(120 + index * 50)}
+                    style={styles.metaChip}
+                  >
                     <AppText style={styles.metaChipText}>{chipText}</AppText>
-                  </View>
+                  </Animated.View>
                 ))}
               </View>
             </Animated.View>
@@ -228,10 +233,14 @@ export default function LessonOverviewScreen() {
                 <AppText style={styles.outcomeLabel}>{pointsLabel}</AppText>
                 <View style={styles.outcomeList}>
                   {outcomes.map((line, index) => (
-                    <View key={`${index}-${line}`} style={styles.outcomeItemRow}>
+                    <Animated.View
+                      key={`${index}-${line}`}
+                      entering={FadeInDown.duration(220).delay(170 + index * 55)}
+                      style={styles.outcomeItemRow}
+                    >
                       <AppText style={styles.outcomeBullet}>•</AppText>
                       <AppText style={styles.outcomeText}>{line}</AppText>
-                    </View>
+                    </Animated.View>
                   ))}
                 </View>
               </View>

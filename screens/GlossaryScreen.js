@@ -4,6 +4,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -212,7 +216,7 @@ export default function GlossaryScreen() {
             onPressProfile={() => navigation.navigate('Profile')}
           />
 
-          <View style={styles.stickyControls}>
+          <Animated.View entering={FadeInDown.duration(260).delay(40)} style={styles.stickyControls}>
             <SearchBar
               value={query}
               onChangeText={setQuery}
@@ -267,10 +271,10 @@ export default function GlossaryScreen() {
                 })}
               </ScrollView>
             </View>
-          </View>
+          </Animated.View>
         </View>
 
-        <View style={styles.termsBlock}>
+        <Animated.View entering={FadeInDown.duration(300).delay(110)} style={styles.termsBlock}>
           <View style={styles.sortTextRow}>
             <Pressable onPress={() => setSortAz((prev) => !prev)}>
               <View style={styles.sortTextInner}>
@@ -287,38 +291,42 @@ export default function GlossaryScreen() {
               </View>
             </Pressable>
           </View>
-          <Card style={styles.termsCard}>
-            <View style={styles.termsHeader}>
-              <AppText style={styles.termsTitle}>{listTitle}</AppText>
-              <AppText style={styles.termsCount}>{glossaryCopy.termCount(displayTerms.length)}</AppText>
-            </View>
-            {displayTerms.length === 0 ? (
-              <AppText style={styles.emptyText}>{glossaryCopy.noMatches}</AppText>
-            ) : (
-              <View style={styles.termList}>
-                {displayTerms.map((term, index) =>
-                  renderTermRow(term, index, displayTerms.length)
-                )}
+          <Animated.View layout={LinearTransition.duration(220)}>
+            <Card style={styles.termsCard}>
+              <View style={styles.termsHeader}>
+                <AppText style={styles.termsTitle}>{listTitle}</AppText>
+                <AppText style={styles.termsCount}>{glossaryCopy.termCount(displayTerms.length)}</AppText>
               </View>
-            )}
-          </Card>
-        </View>
+              {displayTerms.length === 0 ? (
+                <AppText style={styles.emptyText}>{glossaryCopy.noMatches}</AppText>
+              ) : (
+                <Animated.View layout={LinearTransition.duration(220)} style={styles.termList}>
+                  {displayTerms.map((term, index) =>
+                    renderTermRow(term, index, displayTerms.length)
+                  )}
+                </Animated.View>
+              )}
+            </Card>
+          </Animated.View>
+        </Animated.View>
       </OnboardingScreen>
 
       {showScrollTop ? (
-        <Pressable
-          onPress={handleScrollToTop}
-          style={({ pressed }) => [
-            styles.scrollTopButton,
-            pressed && styles.scrollTopButtonPressed,
-          ]}
-        >
-          <Ionicons
-            name="chevron-up"
-            size={components.sizes.icon.md}
-            color={colors.text.primary}
-          />
-        </Pressable>
+        <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(140)}>
+          <Pressable
+            onPress={handleScrollToTop}
+            style={({ pressed }) => [
+              styles.scrollTopButton,
+              pressed && styles.scrollTopButtonPressed,
+            ]}
+          >
+            <Ionicons
+              name="chevron-up"
+              size={components.sizes.icon.md}
+              color={colors.text.primary}
+            />
+          </Pressable>
+        </Animated.View>
       ) : null}
 
       <BottomSheet
@@ -558,31 +566,36 @@ function GlossaryTermRow({
   }));
 
   return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={() => {
-        scale.value = withTiming(components.transforms.scalePressed, { duration: 120 });
-      }}
-      onPressOut={() => {
-        scale.value = withTiming(1, { duration: 120 });
-      }}
-      style={[
-        styles.termRow,
-        index < total - 1 && styles.termDivider,
-        animatedStyle,
-      ]}
+    <Animated.View
+      entering={FadeInDown.duration(220).delay(Math.min(index * 35, 240))}
+      layout={LinearTransition.duration(220)}
     >
-      <View style={styles.termRowTop}>
-        <AppText style={styles.termTitle}>{term.term}</AppText>
-        <Ionicons
-          name="chevron-forward"
-          size={components.sizes.icon.sm}
-          color={colors.text.secondary}
-        />
-      </View>
-      <AppText style={styles.termDescription} numberOfLines={1}>
-        {term.definition}
-      </AppText>
-    </AnimatedPressable>
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={() => {
+          scale.value = withTiming(components.transforms.scalePressed, { duration: 120 });
+        }}
+        onPressOut={() => {
+          scale.value = withTiming(1, { duration: 120 });
+        }}
+        style={[
+          styles.termRow,
+          index < total - 1 && styles.termDivider,
+          animatedStyle,
+        ]}
+      >
+        <View style={styles.termRowTop}>
+          <AppText style={styles.termTitle}>{term.term}</AppText>
+          <Ionicons
+            name="chevron-forward"
+            size={components.sizes.icon.sm}
+            color={colors.text.secondary}
+          />
+        </View>
+        <AppText style={styles.termDescription} numberOfLines={1}>
+          {term.definition}
+        </AppText>
+      </AnimatedPressable>
+    </Animated.View>
   );
 }

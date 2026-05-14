@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Animated, {
+  FadeInDown,
   withDelay,
   useAnimatedStyle,
   useSharedValue,
@@ -307,16 +308,19 @@ export default function HomeScreen() {
       <Animated.View style={[styles.section, actionsAnimStyle]}>
         <SectionTitle title="Hulpmiddelen" />
         <View style={styles.actionRow}>
-          {quickActions.map((action) => (
-            <Pressable
+          {quickActions.map((action, index) => (
+            <Animated.View
               key={action.id}
-              onPress={() => navigation.navigate(action.target, action.params)}
-              style={({ pressed }) => [
-                styles.actionItem,
-                pressed && styles.actionItemPressed,
-              ]}
+              entering={FadeInDown.duration(260).delay(180 + index * 70)}
+              style={styles.actionItem}
             >
-              <View style={styles.actionCard}>
+              <Pressable
+                onPress={() => navigation.navigate(action.target, action.params)}
+                style={({ pressed }) => [
+                  styles.actionCard,
+                  pressed && styles.actionItemPressed,
+                ]}
+              >
                 <Ionicons
                   name={action.icon}
                   size={components.sizes.icon.lg}
@@ -324,8 +328,8 @@ export default function HomeScreen() {
                 />
                 <AppText style={styles.actionTitle}>{action.title}</AppText>
                 <AppText style={styles.actionSubtitle}>{action.subtitle}</AppText>
-              </View>
-            </Pressable>
+              </Pressable>
+            </Animated.View>
           ))}
         </View>
       </Animated.View>
@@ -436,6 +440,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     actionCard: {
       ...components.input.container,
+      borderRadius: components.radius.card,
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: isLight
         ? colors.ui.divider

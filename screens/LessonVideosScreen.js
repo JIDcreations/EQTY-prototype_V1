@@ -3,6 +3,12 @@ import { Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import { CtaInsideButton } from '../components/Button';
 import OnboardingScreen from '../components/OnboardingScreen';
@@ -35,6 +41,8 @@ const MODULE_COLORS = [
 function getModuleColor(themeIndex) {
   return MODULE_COLORS[(themeIndex ?? 0) % MODULE_COLORS.length];
 }
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -118,19 +126,21 @@ export default function LessonVideosScreen() {
 
       {/* Featured hero — current lesson */}
       {featuredEntry && featuredVideo ? (
-        <HeroCard
-          entry={featuredEntry}
-          video={featuredVideo}
-          onPress={handleOpenUrl}
-          styles={styles}
-          colors={colors}
-          components={components}
-          videosCopy={videosCopy}
-        />
+        <Animated.View entering={FadeInDown.duration(320).delay(40)}>
+          <HeroCard
+            entry={featuredEntry}
+            video={featuredVideo}
+            onPress={handleOpenUrl}
+            styles={styles}
+            colors={colors}
+            components={components}
+            videosCopy={videosCopy}
+          />
+        </Animated.View>
       ) : null}
 
       {/* Browse by topic — vertical module groups */}
-      <View style={styles.browseSection}>
+      <Animated.View entering={FadeInDown.duration(300).delay(110)} style={styles.browseSection}>
         <AppText style={styles.browseSectionTitle}>{videosCopy.browseSectionTitle}</AppText>
         {moduleGroups.length === 0 ? (
           <View style={styles.emptyState}>
@@ -138,10 +148,11 @@ export default function LessonVideosScreen() {
             <AppText style={styles.emptyText}>{videosCopy.noLessons}</AppText>
           </View>
         ) : (
-          moduleGroups.map((group) => (
+          moduleGroups.map((group, index) => (
             <ModuleGroup
               key={group.id}
               group={group}
+              index={index}
               language={preferences?.language}
               onPress={handleOpenUrl}
               styles={styles}
@@ -151,7 +162,7 @@ export default function LessonVideosScreen() {
             />
           ))
         )}
-      </View>
+      </Animated.View>
     </OnboardingScreen>
   );
 }
@@ -240,14 +251,17 @@ function HeroCard({ entry, video, onPress, styles, colors, components, videosCop
 
 // ─── Module group ─────────────────────────────────────────────────────────────
 
-function ModuleGroup({ group, language, onPress, styles, colors, components, videosCopy }) {
+function ModuleGroup({ group, index, language, onPress, styles, colors, components, videosCopy }) {
   const entries = group.lessonEntries.filter((e) => e.videos.length > 0);
   if (entries.length === 0) return null;
 
   const themeLabel = formatThemeUnitLabel(language, group.themeIndex);
 
   return (
-    <View style={styles.moduleGroup}>
+    <Animated.View
+      entering={FadeInDown.duration(280).delay(Math.min(150 + index * 80, 380))}
+      style={styles.moduleGroup}
+    >
       {/* Module header */}
       <View style={styles.moduleHeader}>
         <View style={styles.moduleHeaderText}>
@@ -262,30 +276,41 @@ function ModuleGroup({ group, language, onPress, styles, colors, components, vid
           key={entry.lesson.id}
           entry={entry}
           video={entry.videos[0]}
-          moduleThemeIndex={group.themeIndex}
           onPress={onPress}
+          index={idx}
           isLast={idx === entries.length - 1}
           styles={styles}
           colors={colors}
           components={components}
         />
       ))}
-    </View>
+    </Animated.View>
   );
 }
 
 // ─── Lesson row ───────────────────────────────────────────────────────────────
 
-function LessonRow({ entry, video, moduleThemeIndex, onPress, isLast, styles, colors, components }) {
+function LessonRow({ entry, video, onPress, index, isLast, styles, colors, components }) {
   const { lesson } = entry;
-  const lessonNumber = (lesson.lessonIndexInTheme ?? 0) + 1;
   const sourceIcon = getSourceIcon(video.source);
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <>
-      <Pressable
+      <AnimatedPressable
+        entering={FadeInDown.duration(240).delay(Math.min(110 + index * 55, 260))}
         onPress={() => onPress(video.url)}
-        style={({ pressed }) => [styles.lessonRow, pressed && styles.lessonRowPressed]}
+        onPressIn={() => {
+          scale.value = withTiming(components.transforms.scalePressed, { duration: 120 });
+        }}
+        onPressOut={() => {
+          scale.value = withTiming(1, { duration: 120 });
+        }}
+        style={[styles.lessonRow, animatedStyle]}
       >
         <View style={styles.lessonRowThumb}>
           <VideoThumbnail
@@ -302,7 +327,7 @@ function LessonRow({ entry, video, moduleThemeIndex, onPress, isLast, styles, co
           </View>
         </View>
         <Ionicons name="open-outline" size={16} color={colors.text.secondary} style={{ opacity: 0.45 }} />
-      </Pressable>
+      </AnimatedPressable>
       {!isLast && <View style={styles.rowDivider} />}
     </>
   );

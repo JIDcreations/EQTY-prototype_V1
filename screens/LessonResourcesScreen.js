@@ -1,8 +1,18 @@
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  LinearTransition,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import OnboardingScreen from '../components/OnboardingScreen';
 import SearchBar from '../components/SearchBar';
@@ -79,46 +89,55 @@ export default function LessonResourcesScreen() {
       />
 
       {/* Search */}
-      <SearchBar
-        value={query}
-        onChangeText={handleQueryChange}
-        placeholder={copy.searchPlaceholder}
-      />
+      <Animated.View entering={FadeInDown.duration(260).delay(40)}>
+        <SearchBar
+          value={query}
+          onChangeText={handleQueryChange}
+          placeholder={copy.searchPlaceholder}
+        />
+      </Animated.View>
 
       {/* Search suggestions — visible when idle */}
       {!isSearching && copy.searchSuggestions?.length > 0 ? (
-        <SearchSuggestions
-          suggestions={copy.searchSuggestions}
-          onSelect={handleQueryChange}
-          styles={styles}
-          colors={colors}
-        />
+        <Animated.View entering={FadeIn.duration(220).delay(90)}>
+          <SearchSuggestions
+            suggestions={copy.searchSuggestions}
+            onSelect={handleQueryChange}
+            styles={styles}
+            colors={colors}
+          />
+        </Animated.View>
       ) : null}
 
       {/* Content */}
-      {isSearching ? (
-        <SearchResults
-          results={searchResults}
-          expandedLessonId={expandedLessonId}
-          setExpandedLessonId={setExpandedLessonId}
-          progress={progress}
-          copy={copy}
-          styles={styles}
-          colors={colors}
-          components={components}
-        />
-      ) : (
-        <ModuleList
-          modulesWithLessons={modulesWithLessons}
-          expandedLessonId={expandedLessonId}
-          setExpandedLessonId={setExpandedLessonId}
-          progress={progress}
-          copy={copy}
-          styles={styles}
-          colors={colors}
-          components={components}
-        />
-      )}
+      <Animated.View
+        key={isSearching ? 'search-results' : 'module-list'}
+        entering={FadeInDown.duration(280).delay(120)}
+      >
+        {isSearching ? (
+          <SearchResults
+            results={searchResults}
+            expandedLessonId={expandedLessonId}
+            setExpandedLessonId={setExpandedLessonId}
+            progress={progress}
+            copy={copy}
+            styles={styles}
+            colors={colors}
+            components={components}
+          />
+        ) : (
+          <ModuleList
+            modulesWithLessons={modulesWithLessons}
+            expandedLessonId={expandedLessonId}
+            setExpandedLessonId={setExpandedLessonId}
+            progress={progress}
+            copy={copy}
+            styles={styles}
+            colors={colors}
+            components={components}
+          />
+        )}
+      </Animated.View>
     </OnboardingScreen>
   );
 }
@@ -128,8 +147,12 @@ export default function LessonResourcesScreen() {
 function ModuleList({ modulesWithLessons, expandedLessonId, setExpandedLessonId, progress, copy, styles, colors, components }) {
   return (
     <View style={styles.moduleList}>
-      {modulesWithLessons.map((module) => (
-        <View key={module.id} style={styles.moduleSection}>
+      {modulesWithLessons.map((module, index) => (
+        <Animated.View
+          key={module.id}
+          entering={FadeInDown.duration(260).delay(Math.min(100 + index * 70, 320))}
+          style={styles.moduleSection}
+        >
           <AppText style={styles.moduleSectionLabel}>
             {copy.themeLabel(module.themeIndex)}{'  ·  '}{module.title}
           </AppText>
@@ -149,7 +172,7 @@ function ModuleList({ modulesWithLessons, expandedLessonId, setExpandedLessonId,
               />
             ))}
           </View>
-        </View>
+        </Animated.View>
       ))}
     </View>
   );
@@ -220,9 +243,23 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
   const isCompleted = status === 'completed';
   const isCurrent = lesson.id === progress.currentLessonId;
   const resources = lessonResources[lesson.id] || [];
+  const chevronProgress = useSharedValue(isExpanded ? 1 : 0);
+
+  useEffect(() => {
+    chevronProgress.value = withTiming(isExpanded ? 1 : 0, { duration: 180 });
+  }, [chevronProgress, isExpanded]);
+
+  const chevronAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        rotate: `${interpolate(chevronProgress.value, [0, 1], [0, 90])}deg`,
+      },
+    ],
+  }));
 
   return (
-    <View
+    <Animated.View
+      layout={LinearTransition.duration(220)}
       style={[
         styles.lessonCard,
         isCurrent && styles.lessonCardCurrent,
@@ -272,16 +309,23 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
           ) : null}
         </View>
 
-        <Ionicons
-          name={isExpanded ? 'chevron-down' : 'chevron-forward'}
-          size={components.sizes.icon.md}
-          color={colors.text.secondary}
-          style={styles.chevron}
-        />
+        <Animated.View style={[styles.chevronWrap, chevronAnimStyle]}>
+          <Ionicons
+            name="chevron-forward"
+            size={components.sizes.icon.md}
+            color={colors.text.secondary}
+            style={styles.chevron}
+          />
+        </Animated.View>
       </Pressable>
 
       {isExpanded ? (
-        <View style={styles.resourceList}>
+        <Animated.View
+          entering={FadeInDown.duration(200)}
+          exiting={FadeOut.duration(160)}
+          layout={LinearTransition.duration(220)}
+          style={styles.resourceList}
+        >
           <View style={styles.resourceListDivider} />
           {resources.length === 0 ? (
             <AppText style={styles.emptyText}>{copy.noResources}</AppText>
@@ -298,9 +342,9 @@ function LessonCard({ lesson, progress, expandedLessonId, setExpandedLessonId, c
               />
             ))
           )}
-        </View>
+        </Animated.View>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -473,6 +517,10 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       marginTop: 2,
       flexShrink: 0,
     },
+    chevronWrap: {
+      marginTop: 2,
+      flexShrink: 0,
+    },
     resourceCountRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -506,6 +554,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     resourceRowPressed: {
       opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     resourceCopy: {
       flex: 1,
