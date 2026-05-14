@@ -115,13 +115,6 @@ export default function LessonOverviewScreen() {
     : isLessonLocked
       ? overviewCopy.lockedLesson
       : overviewCopy.startLesson;
-  const ctaAssistiveCopy = isLessonLocked
-    ? isDutch
-      ? 'Werk eerst de vorige les af om deze te ontgrendelen.'
-      : 'Complete the previous lesson to unlock this one.'
-    : isDutch
-      ? `Start met ongeveer ${estimatedMinutes} minuten aan duidelijke stappen.`
-      : `Start with about ${estimatedMinutes} minutes of guided steps.`;
 
   const startLesson = useCallback(() => {
     navigation.navigate('LessonStep', {
@@ -275,7 +268,6 @@ export default function LessonOverviewScreen() {
             disabled={isLessonLocked && !isPrototypeLessonAvailable(lesson.id)}
             onPress={handleStartPress}
           />
-          <AppText style={styles.ctaAssistiveCopy}>{ctaAssistiveCopy}</AppText>
         </Animated.View>
       </View>
     </ScreenBackground>
@@ -390,18 +382,10 @@ const createStyles = (colors, components, tabBarHeight) =>
     ctaDock: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
       paddingTop: components.layout.spacing.sm,
-      gap: components.layout.spacing.sm,
       paddingBottom:
         components.layout.safeArea.bottom +
         tabBarHeight +
         components.layout.spacing.md,
-    },
-    ctaAssistiveCopy: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-      textAlign: 'center',
-      maxWidth: components.sizes.button.ctaPageWidth,
-      alignSelf: 'center',
     },
   });
 
