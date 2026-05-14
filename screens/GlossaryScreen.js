@@ -154,17 +154,6 @@ export default function GlossaryScreen() {
     activeCategory === 'all'
       ? glossaryCopy.allTerms
       : categoriesById[activeCategory]?.title || glossaryCopy.fallbackTerms;
-  const searchAssistiveCopy = normalizedQuery
-    ? displayTerms.length === 0
-      ? isDutch
-        ? 'Geen matches. Probeer een ander woord.'
-        : 'No matches. Try another term.'
-      : isDutch
-        ? `${displayTerms.length} term${displayTerms.length === 1 ? '' : 'en'} gevonden`
-        : `${displayTerms.length} term${displayTerms.length === 1 ? '' : 's'} found`
-    : isDutch
-      ? 'Tik op een term voor een snelle uitleg.'
-      : 'Tap a term for a quick explanation.';
 
   const handleScroll = useCallback(
     (event) => {
@@ -238,7 +227,6 @@ export default function GlossaryScreen() {
               onChangeText={setQuery}
               placeholder={glossaryCopy.searchPlaceholder}
             />
-            <AppText style={styles.searchAssistiveText}>{searchAssistiveCopy}</AppText>
             <View style={styles.chipRow}>
               <ScrollView
                 horizontal
@@ -308,23 +296,30 @@ export default function GlossaryScreen() {
               </View>
             </Pressable>
           </View>
-          <Animated.View layout={LinearTransition.duration(220)}>
-            <Card style={styles.termsCard}>
-              <View style={styles.termsHeader}>
-                <AppText style={styles.termsTitle}>{listTitle}</AppText>
-                <AppText style={styles.termsCount}>{glossaryCopy.termCount(displayTerms.length)}</AppText>
-              </View>
-              {displayTerms.length === 0 ? (
-                <AppText style={styles.emptyText}>{glossaryCopy.noMatches}</AppText>
-              ) : (
+          {displayTerms.length === 0 ? (
+            <View style={styles.emptySearchCard}>
+              <Ionicons
+                name="search-outline"
+                size={components.sizes.icon.lg}
+                color={colors.text.secondary}
+              />
+              <AppText style={styles.emptySearchText}>{glossaryCopy.noMatches}</AppText>
+            </View>
+          ) : (
+            <Animated.View layout={LinearTransition.duration(220)}>
+              <Card style={styles.termsCard}>
+                <View style={styles.termsHeader}>
+                  <AppText style={styles.termsTitle}>{listTitle}</AppText>
+                  <AppText style={styles.termsCount}>{glossaryCopy.termCount(displayTerms.length)}</AppText>
+                </View>
                 <Animated.View layout={LinearTransition.duration(220)} style={styles.termList}>
                   {displayTerms.map((term, index) =>
                     renderTermRow(term, index, displayTerms.length)
                   )}
                 </Animated.View>
-              )}
-            </Card>
-          </Animated.View>
+              </Card>
+            </Animated.View>
+          )}
         </Animated.View>
       </OnboardingScreen>
 
@@ -408,12 +403,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       gap: components.layout.spacing.lg,
     },
     stickyControls: {
-      gap: components.layout.spacing.md,
-    },
-    searchAssistiveText: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-      marginTop: -components.layout.spacing.xs,
+      gap: 16,
     },
     chipRow: {
       flexDirection: 'row',
@@ -496,6 +486,17 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       ...typography.styles.small,
       color: colors.text.secondary,
     },
+    emptySearchCard: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: components.layout.spacing.md,
+      paddingVertical: components.layout.spacing.xxl,
+    },
+    emptySearchText: {
+      ...typography.styles.body,
+      color: colors.text.secondary,
+      textAlign: 'center',
+    },
     termList: {
       gap: 0,
     },
@@ -505,9 +506,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       paddingHorizontal: components.layout.spacing.sm,
       marginHorizontal: -components.layout.spacing.sm,
       borderRadius: components.radius.input,
-    },
-    termRowSelected: {
-      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     },
     termDivider: {
       borderBottomWidth: components.borderWidth.thin,
@@ -614,7 +612,6 @@ function GlossaryTermRow({
         }}
         style={[
           styles.termRow,
-          isSelected && styles.termRowSelected,
           index < total - 1 && styles.termDivider,
           animatedStyle,
         ]}

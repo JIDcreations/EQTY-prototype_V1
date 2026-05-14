@@ -80,11 +80,7 @@ export default function LessonResourcesScreen() {
 
   const isSearching = query.trim().length > 0;
   const searchStatusCopy = useMemo(() => {
-    if (!isSearching) {
-      return isDutch
-        ? 'Tik op een les om de bronnen open te klappen.'
-        : 'Tap a lesson to reveal its sources.';
-    }
+    if (!isSearching) return null;
     if (!searchResults || searchResults.length === 0) {
       return isDutch
         ? 'Geen matches. Probeer bijvoorbeeld ETF of risico.'
@@ -110,16 +106,18 @@ export default function LessonResourcesScreen() {
       />
 
       {/* Search */}
-      <Animated.View entering={FadeInDown.duration(260).delay(40)}>
+      <Animated.View entering={FadeInDown.duration(260).delay(40)} style={styles.searchBarWrap}>
         <SearchBar
           value={query}
           onChangeText={handleQueryChange}
           placeholder={copy.searchPlaceholder}
         />
       </Animated.View>
-      <Animated.View entering={FadeIn.duration(220).delay(70)}>
-        <AppText style={styles.searchStatusText}>{searchStatusCopy}</AppText>
-      </Animated.View>
+      {searchStatusCopy ? (
+        <Animated.View entering={FadeIn.duration(220).delay(70)}>
+          <AppText style={styles.searchStatusText}>{searchStatusCopy}</AppText>
+        </Animated.View>
+      ) : null}
 
       {/* Search suggestions — visible when idle */}
       {!isSearching && copy.searchSuggestions?.length > 0 ? (
@@ -456,6 +454,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       paddingTop: components.layout.safeArea.top + sp.xl,
       paddingBottom: components.layout.safeArea.bottom + tabBarHeight + sp.xxl,
       gap: sp.lg,
+    },
+    searchBarWrap: {
+      marginBottom: -8,
     },
     searchStatusText: {
       ...typography.styles.small,

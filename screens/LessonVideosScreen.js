@@ -154,15 +154,6 @@ export default function LessonVideosScreen() {
       {/* Browse by topic — vertical module groups */}
       <Animated.View entering={FadeInDown.duration(300).delay(110)} style={styles.browseSection}>
         <AppText style={styles.browseSectionTitle}>{videosCopy.browseSectionTitle}</AppText>
-        <AppText style={styles.browseSectionHint}>
-          {pendingVideoId
-            ? isDutch
-              ? 'Video wordt geopend...'
-              : 'Opening video...'
-            : isDutch
-              ? 'Elke video opent buiten de app.'
-              : 'Each video opens outside the app.'}
-        </AppText>
         {moduleGroups.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="videocam-outline" size={components.sizes.icon.lg} color={colors.text.secondary} />
@@ -493,11 +484,6 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     browseSectionTitle: {
       ...typography.styles.stepLabel,
       color: colors.text.secondary,
-    },
-    browseSectionHint: {
-      ...typography.styles.small,
-      color: colors.text.secondary,
-      marginTop: -sp.xs,
     },
 
     // ── Hero card ─────────────────────────────────────────────────────────────
