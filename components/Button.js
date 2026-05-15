@@ -1,6 +1,9 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
+  FadeIn,
+  FadeOut,
+  interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -10,9 +13,16 @@ import AppText from './AppText';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-function usePressScale() {
+function usePressScale(disabled = false) {
   const scale = useSharedValue(1);
+  const disabledProgress = useSharedValue(disabled ? 1 : 0);
+
+  useEffect(() => {
+    disabledProgress.value = withTiming(disabled ? 1 : 0, { duration: 180 });
+  }, [disabled, disabledProgress]);
+
   const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(disabledProgress.value, [0, 1], [1, 0.72]),
     transform: [{ scale: scale.value }],
   }));
 
@@ -27,10 +37,24 @@ function usePressScale() {
   return { animatedStyle, onPressIn, onPressOut };
 }
 
+function AnimatedButtonLabel({ label, textStyle }) {
+  return (
+    <View style={stylesShared.labelWrap} pointerEvents="none">
+      <Animated.View
+        key={label}
+        entering={FadeIn.duration(160)}
+        exiting={FadeOut.duration(120)}
+      >
+        <AppText style={textStyle}>{label}</AppText>
+      </Animated.View>
+    </View>
+  );
+}
+
 export function PrimaryButton({ label, onPress, style, disabled }) {
   const { components } = useTheme();
   const styles = useMemo(() => createStyles(components), [components]);
-  const { animatedStyle, onPressIn, onPressOut } = usePressScale();
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale(disabled);
 
   return (
     <AnimatedPressable
@@ -40,7 +64,7 @@ export function PrimaryButton({ label, onPress, style, disabled }) {
       onPress={onPress}
       disabled={disabled}
     >
-      <AppText style={styles.primaryLabel}>{label}</AppText>
+      <AnimatedButtonLabel label={label} textStyle={styles.primaryLabel} />
     </AnimatedPressable>
   );
 }
@@ -48,7 +72,7 @@ export function PrimaryButton({ label, onPress, style, disabled }) {
 export function CtaButton({ label, onPress, style, disabled }) {
   const { components } = useTheme();
   const styles = useMemo(() => createStyles(components), [components]);
-  const { animatedStyle, onPressIn, onPressOut } = usePressScale();
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale(disabled);
 
   return (
     <AnimatedPressable
@@ -64,7 +88,7 @@ export function CtaButton({ label, onPress, style, disabled }) {
       onPress={onPress}
       disabled={disabled}
     >
-      <AppText style={styles.primaryLabel}>{label}</AppText>
+      <AnimatedButtonLabel label={label} textStyle={styles.primaryLabel} />
     </AnimatedPressable>
   );
 }
@@ -72,7 +96,7 @@ export function CtaButton({ label, onPress, style, disabled }) {
 export function CtaInsideButton({ label, onPress, style, disabled }) {
   const { components } = useTheme();
   const styles = useMemo(() => createStyles(components), [components]);
-  const { animatedStyle, onPressIn, onPressOut } = usePressScale();
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale(disabled);
 
   return (
     <AnimatedPressable
@@ -88,7 +112,7 @@ export function CtaInsideButton({ label, onPress, style, disabled }) {
       onPress={onPress}
       disabled={disabled}
     >
-      <AppText style={styles.primaryLabel}>{label}</AppText>
+      <AnimatedButtonLabel label={label} textStyle={styles.primaryLabel} />
     </AnimatedPressable>
   );
 }
@@ -96,7 +120,7 @@ export function CtaInsideButton({ label, onPress, style, disabled }) {
 export function CtaSecondaryButton({ label, onPress, style, disabled }) {
   const { components } = useTheme();
   const styles = useMemo(() => createStyles(components), [components]);
-  const { animatedStyle, onPressIn, onPressOut } = usePressScale();
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale(disabled);
 
   return (
     <AnimatedPressable
@@ -113,7 +137,7 @@ export function CtaSecondaryButton({ label, onPress, style, disabled }) {
       disabled={disabled}
     >
       <View style={styles.secondaryBorder} />
-      <AppText style={styles.secondaryLabel}>{label}</AppText>
+      <AnimatedButtonLabel label={label} textStyle={styles.secondaryLabel} />
     </AnimatedPressable>
   );
 }
@@ -121,7 +145,7 @@ export function CtaSecondaryButton({ label, onPress, style, disabled }) {
 export function SecondaryButton({ label, onPress, style, disabled }) {
   const { components } = useTheme();
   const styles = useMemo(() => createStyles(components), [components]);
-  const { animatedStyle, onPressIn, onPressOut } = usePressScale();
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale(disabled);
 
   return (
     <AnimatedPressable
@@ -132,10 +156,17 @@ export function SecondaryButton({ label, onPress, style, disabled }) {
       disabled={disabled}
     >
       <View style={styles.secondaryBorder} />
-      <AppText style={styles.secondaryLabel}>{label}</AppText>
+      <AnimatedButtonLabel label={label} textStyle={styles.secondaryLabel} />
     </AnimatedPressable>
   );
 }
+
+const stylesShared = StyleSheet.create({
+  labelWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
 
 const createStyles = (components) =>
   StyleSheet.create({

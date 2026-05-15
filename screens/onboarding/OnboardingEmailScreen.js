@@ -116,7 +116,7 @@ export default function OnboardingEmailScreen({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.layout}>
-          <View style={styles.header}>
+          <Animated.View entering={FadeInDown.duration(220)} style={styles.header}>
             <Pressable
               onPress={() => navigation.goBack()}
               style={({ pressed }) => [
@@ -131,9 +131,9 @@ export default function OnboardingEmailScreen({ navigation }) {
               />
             </Pressable>
             <AppText style={styles.headerTitle}>{copy.email.title}</AppText>
-          </View>
+          </Animated.View>
 
-          <View style={styles.contentBlock}>
+          <Animated.View entering={FadeInDown.delay(70).duration(220)} style={styles.contentBlock}>
             <View style={styles.fields}>
               <View style={styles.field}>
                 <AppText style={styles.nameLabel}>{copy.email.usernameLabel}</AppText>
@@ -225,7 +225,7 @@ export default function OnboardingEmailScreen({ navigation }) {
               </View>
             </View>
 
-            <View style={styles.actions}>
+            <Animated.View entering={FadeInDown.delay(140).duration(220)} style={styles.actions}>
               <PrimaryButton
                 label={copy.email.button}
                 onPress={handleContinue}
@@ -281,8 +281,8 @@ export default function OnboardingEmailScreen({ navigation }) {
                   </AppText>
                 </Pressable>
               </View>
-            </View>
-          </View>
+            </Animated.View>
+          </Animated.View>
         </View>
       </KeyboardAvoidingView>
     </OnboardingScreen>

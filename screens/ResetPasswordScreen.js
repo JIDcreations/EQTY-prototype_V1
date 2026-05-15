@@ -1,6 +1,7 @@
 import React, { useContext, useMemo, useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 import { BottomTabBarHeightContext } from '@react-navigation/bottom-tabs';
+import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import AppTextInput from '../components/AppTextInput';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
@@ -62,13 +63,13 @@ export default function ResetPasswordScreen({ navigation }) {
           showGlow={false}
         >
           <View style={styles.layout}>
-            <View style={styles.topContent}>
+            <Animated.View entering={FadeInDown.duration(220)} style={styles.topContent}>
               <SettingsHeader
                 title={resetCopy.title}
                 subtitle={resetCopy.subtitle}
                 onBack={() => navigation.goBack()}
               />
-              <View style={styles.section}>
+              <Animated.View entering={FadeInDown.delay(70).duration(220)} style={styles.section}>
                 <View style={styles.field}>
                   <AppText style={styles.label}>{resetCopy.emailLabel}</AppText>
                   <AppTextInput
@@ -90,17 +91,23 @@ export default function ResetPasswordScreen({ navigation }) {
                     ]}
                   />
                 </View>
-                <AppText style={[styles.hint, showEmailError && styles.hintError]}>{helperText}</AppText>
-              </View>
-            </View>
-            <View style={styles.actions}>
+                <Animated.View
+                  key={showEmailError ? 'error' : 'hint'}
+                  entering={FadeInDown.duration(180)}
+                  exiting={FadeOutUp.duration(120)}
+                >
+                  <AppText style={[styles.hint, showEmailError && styles.hintError]}>{helperText}</AppText>
+                </Animated.View>
+              </Animated.View>
+            </Animated.View>
+            <Animated.View entering={FadeInDown.delay(140).duration(220)} style={styles.actions}>
               <PrimaryButton
                 label={isSending ? resetCopy.sendingResetLink : resetCopy.sendResetLink}
                 onPress={handleSend}
                 disabled={!canSend}
               />
               <SecondaryButton label={resetCopy.cancel} onPress={() => navigation.goBack()} />
-            </View>
+            </Animated.View>
           </View>
         </OnboardingScreen>
       </KeyboardAvoidingView>

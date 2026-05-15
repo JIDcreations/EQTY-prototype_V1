@@ -21,6 +21,8 @@ import Animated, {
   Easing,
   Extrapolation,
   FadeInDown,
+  FadeOutUp,
+  LinearTransition,
   interpolate,
   useAnimatedProps,
   useAnimatedStyle,
@@ -1373,16 +1375,22 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
             total={steps.length}
             style={styles.l1VisDots}
           />
-          <AppText
-            style={[
-              styles.l1VisHelperText,
-              hasViewedAllCards && styles.l1VisHelperTextReady,
-            ]}
+          <Animated.View
+            key={hasViewedAllCards ? 'ready' : 'view-all'}
+            entering={FadeInDown.duration(180)}
+            exiting={FadeOutUp.duration(120)}
           >
-            {hasViewedAllCards
-              ? copy.messages.readyToContinue
-              : copy.messages.viewAllCardsToContinue}
-          </AppText>
+            <AppText
+              style={[
+                styles.l1VisHelperText,
+                hasViewedAllCards && styles.l1VisHelperTextReady,
+              ]}
+            >
+              {hasViewedAllCards
+                ? copy.messages.readyToContinue
+                : copy.messages.viewAllCardsToContinue}
+            </AppText>
+          </Animated.View>
         </View>
       </View>
       <View style={styles.l1VisActionWrap}>
@@ -3957,30 +3965,38 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
       </Card>
 
       {message ? (
-        <Card style={styles.insightCard}>
-          <AppText style={styles.insightTitle}>
-            {isCorrect ? copy.labels.aligned : copy.labels.recheckFlow}
-          </AppText>
-          <GlossaryText text={message} style={styles.caption} onPressTerm={onPressTerm} />
-        </Card>
+        <Animated.View entering={FadeInDown.duration(220)}>
+          <Card style={styles.insightCard}>
+            <AppText style={styles.insightTitle}>
+              {isCorrect ? copy.labels.aligned : copy.labels.recheckFlow}
+            </AppText>
+            <GlossaryText text={message} style={styles.caption} onPressTerm={onPressTerm} />
+          </Card>
+        </Animated.View>
       ) : null}
 
-      <View style={styles.exerciseActions}>
-        <AppText
-          style={[
-            styles.ctaStatusText,
-            isComplete && styles.ctaStatusTextReady,
-          ]}
+      <Animated.View style={styles.exerciseActions} layout={LinearTransition.duration(180)}>
+        <Animated.View
+          key={isComplete ? 'ready' : 'incomplete'}
+          entering={FadeInDown.duration(180)}
+          exiting={FadeOutUp.duration(120)}
         >
-          {progressionHelper}
-        </AppText>
+          <AppText
+            style={[
+              styles.ctaStatusText,
+              isComplete && styles.ctaStatusTextReady,
+            ]}
+          >
+            {progressionHelper}
+          </AppText>
+        </Animated.View>
         <SecondaryButton label={copy.buttons.reset} onPress={reset} />
         <PrimaryButton
           label={copy.buttons.completeExercise}
           onPress={onNext}
           disabled={!isComplete}
         />
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -4309,28 +4325,36 @@ function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
       </Card>
 
       {selected ? (
-        <Card style={styles.insightCard}>
-          <AppText style={styles.insightTitle}>{selected.revealTitle || revealTitle}</AppText>
-          <GlossaryText text={selected.reveal} style={styles.caption} onPressTerm={onPressTerm} />
-        </Card>
+        <Animated.View entering={FadeInDown.duration(220)}>
+          <Card style={styles.insightCard}>
+            <AppText style={styles.insightTitle}>{selected.revealTitle || revealTitle}</AppText>
+            <GlossaryText text={selected.reveal} style={styles.caption} onPressTerm={onPressTerm} />
+          </Card>
+        </Animated.View>
       ) : null}
 
-      <View style={styles.exerciseActions}>
-        <AppText
-          style={[
-            styles.ctaStatusText,
-            canContinue && styles.ctaStatusTextReady,
-          ]}
+      <Animated.View style={styles.exerciseActions} layout={LinearTransition.duration(180)}>
+        <Animated.View
+          key={canContinue ? 'ready' : 'waiting'}
+          entering={FadeInDown.duration(180)}
+          exiting={FadeOutUp.duration(120)}
         >
-          {canContinue ? copy.messages.readyToContinue : copy.messages.chooseAnswerFirst}
-        </AppText>
+          <AppText
+            style={[
+              styles.ctaStatusText,
+              canContinue && styles.ctaStatusTextReady,
+            ]}
+          >
+            {canContinue ? copy.messages.readyToContinue : copy.messages.chooseAnswerFirst}
+          </AppText>
+        </Animated.View>
         <SecondaryButton label={copy.buttons.reset} onPress={reset} />
         <PrimaryButton
           label={copy.buttons.completeExercise}
           onPress={onNext}
           disabled={!canContinue}
         />
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -4695,14 +4719,20 @@ function GuidedGoalExercise({
               />
             </View>
           ) : null}
-          <AppText
-            style={[
-              styles.ctaStatusText,
-              isAnswered && styles.ctaStatusTextReady,
-            ]}
+          <Animated.View
+            key={isAnswered ? 'single-ready' : 'single-waiting'}
+            entering={FadeInDown.duration(180)}
+            exiting={FadeOutUp.duration(120)}
           >
-            {singleQuestionHelper}
-          </AppText>
+            <AppText
+              style={[
+                styles.ctaStatusText,
+                isAnswered && styles.ctaStatusTextReady,
+              ]}
+            >
+              {singleQuestionHelper}
+            </AppText>
+          </Animated.View>
           <PrimaryButton
             label={
               isLastSingleSection
@@ -4874,16 +4904,22 @@ function GuidedGoalExercise({
       )}
 
       {/* CTA */}
-      <View style={styles.guidedGoalFooter}>
+      <Animated.View style={styles.guidedGoalFooter} layout={LinearTransition.duration(180)}>
         {showProgressionHelper ? (
-          <AppText
-            style={[
-              styles.ctaStatusText,
-              isComplete && styles.ctaStatusTextReady,
-            ]}
+          <Animated.View
+            key={isComplete ? 'grouped-ready' : 'grouped-waiting'}
+            entering={FadeInDown.duration(180)}
+            exiting={FadeOutUp.duration(120)}
           >
-            {groupedProgressionHelper}
-          </AppText>
+            <AppText
+              style={[
+                styles.ctaStatusText,
+                isComplete && styles.ctaStatusTextReady,
+              ]}
+            >
+              {groupedProgressionHelper}
+            </AppText>
+          </Animated.View>
         ) : null}
         {isComplete ? (
           <Animated.View entering={FadeInDown.duration(200)}>
@@ -4893,7 +4929,7 @@ function GuidedGoalExercise({
             />
           </Animated.View>
         ) : null}
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -5241,7 +5277,11 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
               </AppText>
             </View>
             {isSubmitted ? (
-              <Animated.View entering={FadeInDown.duration(350)}>
+              <Animated.View
+                key="submitted-reflection"
+                entering={FadeInDown.duration(260)}
+                exiting={FadeOutUp.duration(140)}
+              >
                 <ReflectionResultCard
                   answer={submittedText}
                   insightLabel={copy.labels.eqtyInsight}
@@ -5252,7 +5292,12 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
                 </AppText>
               </Animated.View>
             ) : (
-              <View>
+              <Animated.View
+                key="draft-reflection"
+                entering={FadeInDown.duration(220)}
+                exiting={FadeOutUp.duration(140)}
+                layout={LinearTransition.duration(180)}
+              >
                 <View
                   style={[
                     styles.reflectionTextAreaWrap,
@@ -5275,7 +5320,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
                 <AppText style={styles.reflectionPersonalizationHint}>
                   {copy.messages.reflectionPersonalizationHint}
                 </AppText>
-              </View>
+              </Animated.View>
             )}
           </View>
           <View
@@ -5383,15 +5428,25 @@ function SummaryStep({ content, onComplete, onPressTerm, copy }) {
 
       {/* Status line */}
       {allConfirmed ? (
-        <Animated.View entering={FadeInDown.duration(280)}>
+        <Animated.View
+          key="summary-ready"
+          entering={FadeInDown.duration(220)}
+          exiting={FadeOutUp.duration(120)}
+        >
           <AppText style={styles.summaryReadyText}>
             {copy.labels.allInsightsConfirmed}
           </AppText>
         </Animated.View>
       ) : (
-        <AppText style={styles.summaryNudgeText}>
-          {copy.labels.tapInsightToConfirm}
-        </AppText>
+        <Animated.View
+          key="summary-nudge"
+          entering={FadeInDown.duration(180)}
+          exiting={FadeOutUp.duration(120)}
+        >
+          <AppText style={styles.summaryNudgeText}>
+            {copy.labels.tapInsightToConfirm}
+          </AppText>
+        </Animated.View>
       )}
 
       <PrimaryButton label={copy.buttons.completeLesson} onPress={onComplete} />
