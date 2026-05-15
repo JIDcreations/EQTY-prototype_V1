@@ -150,11 +150,6 @@ export default function LessonSuccessScreen() {
     }
   };
 
-  const handleGoToLessonsOverview = () => {
-    // Pop to the top of the lessons stack — the deep dive section is right there
-    navigation.popToTop();
-  };
-
   const handleBackToTrack = () => {
     if (deepLesson) {
       navigation.navigate('DeepDive', { trackId: deepLesson.trackId });
@@ -252,7 +247,7 @@ export default function LessonSuccessScreen() {
               </Pressable>
             </>
           ) : isLastCoreLesson ? (
-            <PrimaryButton label={deepDiveCopy.finalLessonCta} onPress={handleGoToLessonsOverview} />
+            <PrimaryButton label={copy.lessonSuccess.cta} onPress={handleReturnHome} />
           ) : (
             <PrimaryButton label={copy.lessonSuccess.cta} onPress={handleReturnHome} />
           )}
