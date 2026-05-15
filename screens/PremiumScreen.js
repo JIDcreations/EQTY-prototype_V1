@@ -42,7 +42,13 @@ export default function PremiumScreen() {
       contentContainerStyle={styles.content}
     >
       {/* Back button */}
-      <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+      <Pressable
+        onPress={() => navigation.goBack()}
+        style={({ pressed }) => [
+          styles.backButton,
+          pressed && styles.backButtonPressed,
+        ]}
+      >
         <Ionicons
           name="chevron-back"
           size={components.sizes.icon.lg}
@@ -114,7 +120,13 @@ export default function PremiumScreen() {
       {/* Footer */}
       <View style={styles.footer}>
         <PrimaryButton label={copy.priceNote} onPress={handleUnlock} style={styles.ctaButton} />
-        <Pressable style={styles.dismissAction} onPress={() => navigation.goBack()}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.dismissAction,
+            pressed && styles.dismissActionPressed,
+          ]}
+          onPress={() => navigation.goBack()}
+        >
           <AppText style={[styles.dismissLabel, { color: colors.text.secondary }]}>
             {copy.dismiss}
           </AppText>
@@ -147,6 +159,10 @@ const createStyles = (colors, components, tabBarHeight) =>
       alignItems: 'center',
       justifyContent: 'center',
       alignSelf: 'flex-start',
+    },
+    backButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
 
     body: {
@@ -238,6 +254,11 @@ const createStyles = (colors, components, tabBarHeight) =>
       paddingVertical: components.layout.spacing.xs,
       paddingHorizontal: components.layout.spacing.md,
       alignSelf: 'center',
+      borderRadius: components.radius.pill,
+    },
+    dismissActionPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     dismissLabel: {
       ...typography.styles.small,

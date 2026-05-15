@@ -36,7 +36,13 @@ export default function OnboardingLanguageScreen({ navigation, route }) {
         <View style={styles.header}>
           <View style={styles.titleBlock}>
             <View style={styles.titleRow}>
-              <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Pressable
+                onPress={() => navigation.goBack()}
+                style={({ pressed }) => [
+                  styles.backButton,
+                  pressed && styles.backButtonPressed,
+                ]}
+              >
                 <Ionicons
                   name="chevron-back"
                   size={components.sizes.icon.lg}
@@ -57,7 +63,12 @@ export default function OnboardingLanguageScreen({ navigation, route }) {
                 <Pressable
                   key={option.value}
                   onPress={() => setSelected(option.value)}
-                  style={[styles.row, isActive && styles.rowActive]}
+                  style={({ pressed }) => [
+                    styles.row,
+                    isActive && styles.rowActive,
+                    pressed && !isActive && styles.rowPressed,
+                    pressed && isActive && styles.rowActivePressed,
+                  ]}
                 >
                   <View style={styles.rowLeft}>
                     <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -143,6 +154,10 @@ const createStyles = (colors, components, mode) =>
       color: colors.text.secondary,
       textAlign: 'left',
     },
+    backButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
     list: {
       gap: components.layout.cardGap,
       marginTop: components.layout.spacing.sm,
@@ -157,6 +172,14 @@ const createStyles = (colors, components, mode) =>
     },
     rowActive: {
       borderColor: colors.accent.primary,
+    },
+    rowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    rowActivePressed: {
+      transform: [{ scale: components.transforms.scalePressed }],
+      opacity: colors.opacity.emphasis,
     },
     rowLeft: {
       flexDirection: 'row',

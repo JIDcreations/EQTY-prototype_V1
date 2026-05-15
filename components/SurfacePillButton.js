@@ -55,6 +55,9 @@ const createStyles = (colors, components) =>
     },
     buttonPressed: {
       opacity: colors.opacity.emphasis,
+      borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     buttonDisabled: {
       backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.stroke),

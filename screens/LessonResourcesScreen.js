@@ -479,7 +479,10 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       paddingVertical: 6,
     },
     suggestionChipPressed: {
-      opacity: 0.6,
+      opacity: colors.opacity.emphasis,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     suggestionChipText: {
       ...typography.styles.small,
@@ -529,6 +532,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     lessonHeaderPressed: {
       opacity: colors.opacity.emphasis,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
     },
     lessonHeaderContent: {
       flex: 1,

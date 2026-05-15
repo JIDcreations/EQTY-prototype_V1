@@ -84,7 +84,13 @@ export function GlossaryProvider({ children }) {
           </View>
         ) : null}
         {activeTerm?.term ? (
-          <Pressable style={styles.learnMoreRow} onPress={handleLearnMore}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.learnMoreRow,
+              pressed && styles.learnMoreRowPressed,
+            ]}
+            onPress={handleLearnMore}
+          >
             <Ionicons
               name="play-circle-outline"
               size={components.sizes.icon.sm}
@@ -124,6 +130,10 @@ const createStyles = (colors, components) =>
       alignItems: 'center',
       gap: components.layout.spacing.sm,
       paddingTop: components.layout.spacing.sm,
+    },
+    learnMoreRowPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     learnMoreText: {
       ...typography.styles.small,

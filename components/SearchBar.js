@@ -54,7 +54,17 @@ export default function SearchBar({
         style={[styles.input, { color: colors.text.primary }]}
       />
       {value.length > 0 ? (
-        <Pressable onPress={() => onChangeText('')} hitSlop={8}>
+        <Pressable
+          onPress={() => onChangeText('')}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.clearButton,
+            pressed && {
+              backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+              transform: [{ scale: components.transforms.scalePressed }],
+            },
+          ]}
+        >
           <Ionicons
             name="close-circle"
             size={components.sizes.icon.md}
@@ -84,5 +94,9 @@ const styles = StyleSheet.create({
     margin: 0,
     textAlignVertical: 'center',
     includeFontPadding: false,
+  },
+  clearButton: {
+    borderRadius: 999,
+    padding: 2,
   },
 });

@@ -34,7 +34,13 @@ export default function StepHeader({
   return (
     <View style={styles.container}>
       <View style={styles.topRow}>
-        <Pressable onPress={onBack} style={styles.backButton}>
+        <Pressable
+          onPress={onBack}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backButtonPressed,
+          ]}
+        >
           <Ionicons
             name="chevron-back"
             size={components.sizes.icon.lg}
@@ -88,6 +94,10 @@ const createStyles = (colors, components) =>
       backgroundColor: colors.background.surface,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    backButtonPressed: {
+      backgroundColor: colors.background.surfaceActive,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     progressInline: {
       ...typography.styles.small,

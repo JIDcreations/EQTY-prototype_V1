@@ -281,7 +281,13 @@ export default function GlossaryScreen() {
 
         <Animated.View entering={FadeInDown.duration(300).delay(110)} style={styles.termsBlock}>
           <View style={styles.sortTextRow}>
-            <Pressable onPress={() => setSortAz((prev) => !prev)}>
+            <Pressable
+              onPress={() => setSortAz((prev) => !prev)}
+              style={({ pressed }) => [
+                styles.sortToggle,
+                pressed && styles.sortTogglePressed,
+              ]}
+            >
               <View style={styles.sortTextInner}>
                 <Ionicons
                   name="swap-vertical"
@@ -356,7 +362,13 @@ export default function GlossaryScreen() {
           <AppText style={styles.sheetExample}>{selectedTerm?.example}</AppText>
         </View>
         {selectedTerm?.term ? (
-          <Pressable style={styles.learnMoreRow} onPress={handleLearnMore}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.learnMoreRow,
+              pressed && styles.learnMoreRowPressed,
+            ]}
+            onPress={handleLearnMore}
+          >
             <Ionicons
               name="play-circle-outline"
               size={components.sizes.icon.sm}
@@ -434,6 +446,9 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     filterChipPressed: {
       opacity: colors.opacity.emphasis,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     filterChipText: {
       ...typography.styles.small,
@@ -448,6 +463,15 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     sortTextRow: {
       flexDirection: 'row',
       justifyContent: 'flex-end',
+    },
+    sortToggle: {
+      borderRadius: components.radius.pill,
+      paddingHorizontal: components.layout.spacing.sm,
+      paddingVertical: components.layout.spacing.xs,
+    },
+    sortTogglePressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     sortTextInner: {
       flexDirection: 'row',
@@ -513,6 +537,8 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     termRowPressed: {
       opacity: colors.opacity.emphasis,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     termRowTop: {
       flexDirection: 'row',
@@ -547,6 +573,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     scrollTopButtonPressed: {
       opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     sheetSection: {
       gap: components.layout.spacing.xs,
@@ -568,6 +595,10 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       alignItems: 'center',
       gap: components.layout.spacing.sm,
       paddingTop: components.layout.spacing.sm,
+    },
+    learnMoreRowPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     learnMoreText: {
       ...typography.styles.small,

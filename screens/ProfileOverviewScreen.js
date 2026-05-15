@@ -66,13 +66,17 @@ export default function ProfileOverviewScreen() {
       <Pressable
         key={option.value}
         onPress={() => {
-          updatePreferences({ textSize: option.value });
-          toast.show('Saved');
+          if (!isActive) {
+            updatePreferences({ textSize: option.value });
+            toast.show('Saved');
+          }
         }}
-        style={[
+        style={({ pressed }) => [
           styles.textSizeRow,
           index !== TEXT_SIZE_OPTIONS.length - 1 && styles.rowDivider,
           isActive && styles.textSizeRowActive,
+          pressed && !isActive && styles.textSizeRowPressed,
+          pressed && isActive && styles.textSizeRowActivePressed,
         ]}
       >
         <View style={styles.textSizeLeft}>
@@ -270,6 +274,14 @@ const createStyles = (colors, components) =>
       borderWidth: components.borderWidth.thin,
       borderColor: colors.accent.primary,
       borderRadius: components.radius.input,
+    },
+    textSizeRowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    textSizeRowActivePressed: {
+      transform: [{ scale: components.transforms.scalePressed }],
+      opacity: colors.opacity.emphasis,
     },
     rowDivider: {
       borderBottomWidth: components.borderWidth.thin,

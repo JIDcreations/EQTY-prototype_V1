@@ -443,6 +443,8 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
     actionItemPressed: {
       opacity: colors.opacity.emphasis,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
       transform: [{ scale: components.transforms.scalePressed }],
     },
     actionCard: {

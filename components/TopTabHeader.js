@@ -30,7 +30,10 @@ export default function TopTabHeader({
         {onBack ? (
           <Pressable
             onPress={onBack}
-            style={styles.iconButton}
+            style={({ pressed }) => [
+              styles.iconButton,
+              pressed && styles.iconButtonPressed,
+            ]}
             hitSlop={components.layout.spacing.sm}
           >
             <Ionicons
@@ -56,7 +59,10 @@ export default function TopTabHeader({
         {onPressProfile ? (
           <Pressable
             onPress={onPressProfile}
-            style={styles.iconButton}
+            style={({ pressed }) => [
+              styles.iconButton,
+              pressed && styles.iconButtonPressed,
+            ]}
             hitSlop={components.layout.spacing.sm}
           >
             <Ionicons
@@ -112,5 +118,9 @@ const createStyles = (colors, components) =>
       width: components.sizes.square.lg,
       height: components.sizes.square.lg,
       flexShrink: 0,
+    },
+    iconButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
   });

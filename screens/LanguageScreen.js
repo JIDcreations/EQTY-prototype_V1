@@ -46,10 +46,18 @@ export default function LanguageScreen({ navigation }) {
               <Pressable
                 key={option.value}
                 onPress={() => {
-                  updatePreferences({ language: option.value });
-                  toast.show(settingsCopy.saved);
+                  if (!isActive) {
+                    updatePreferences({ language: option.value });
+                    toast.show(settingsCopy.saved);
+                  }
                 }}
-                style={[styles.row, index !== options.length - 1 && styles.rowDivider, isActive && styles.rowActive]}
+                style={({ pressed }) => [
+                  styles.row,
+                  index !== options.length - 1 && styles.rowDivider,
+                  isActive && styles.rowActive,
+                  pressed && !isActive && styles.rowPressed,
+                  pressed && isActive && styles.rowActivePressed,
+                ]}
               >
                 <View style={styles.rowLeft}>
                   <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -101,6 +109,14 @@ const createStyles = (colors, components) =>
       borderWidth: components.borderWidth.thin,
       borderColor: colors.accent.primary,
       borderRadius: components.radius.input,
+    },
+    rowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    rowActivePressed: {
+      transform: [{ scale: components.transforms.scalePressed }],
+      opacity: colors.opacity.emphasis,
     },
     rowLeft: {
       flexDirection: 'row',
