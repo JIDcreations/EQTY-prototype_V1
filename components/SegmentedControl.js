@@ -14,8 +14,15 @@ export default function SegmentedControl({ options, value, onChange }) {
         return (
           <Pressable
             key={option.value}
-            onPress={() => onChange(option.value)}
-            style={[styles.segment, isActive && styles.segmentActive]}
+            onPress={() => {
+              if (!isActive) onChange(option.value);
+            }}
+            style={({ pressed }) => [
+              styles.segment,
+              isActive && styles.segmentActive,
+              pressed && !isActive && styles.segmentPressed,
+              pressed && isActive && styles.segmentActivePressed,
+            ]}
           >
             <AppText style={[styles.segmentText, isActive && styles.segmentTextActive]}>
               {option.label}
@@ -46,6 +53,14 @@ const createStyles = (colors, components) =>
     segmentActive: {
       backgroundColor: colors.accent.primary,
     },
+    segmentPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    segmentActivePressed: {
+      transform: [{ scale: components.transforms.scalePressed }],
+      opacity: colors.opacity.emphasis,
+    },
     segmentText: {
       ...typography.styles.small,
       color: colors.text.secondary,
@@ -54,3 +69,12 @@ const createStyles = (colors, components) =>
       color: colors.text.onAccent,
     },
   });
+
+function toRgba(hex, alpha) {
+  const cleaned = hex.replace('#', '');
+  const value = parseInt(cleaned, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}

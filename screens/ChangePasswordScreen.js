@@ -28,10 +28,16 @@ export default function ChangePasswordScreen({ navigation }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [nextPassword, setNextPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [focusedField, setFocusedField] = useState(null);
   const toast = useToast();
   const forgotPasswordParts = splitFooterLink(passwordCopy.forgotPasswordCta);
 
-  const canSave = currentPassword && nextPassword && confirmPassword;
+  const hasMismatch = confirmPassword.length > 0 && nextPassword !== confirmPassword;
+  const canSave =
+    currentPassword.trim().length > 0 &&
+    nextPassword.trim().length > 0 &&
+    confirmPassword.trim().length > 0 &&
+    !hasMismatch;
 
   const handleSave = () => {
     toast.show(settingsCopy.saved);
@@ -60,7 +66,9 @@ export default function ChangePasswordScreen({ navigation }) {
                   placeholder={passwordCopy.currentPasswordPlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   secureTextEntry
-                  style={styles.input}
+                  style={[styles.input, focusedField === 'currentPassword' && styles.inputFocused]}
+                  onFocus={() => setFocusedField('currentPassword')}
+                  onBlur={() => setFocusedField(null)}
                 />
               </View>
               <View style={styles.field}>
@@ -71,7 +79,9 @@ export default function ChangePasswordScreen({ navigation }) {
                   placeholder={passwordCopy.newPasswordPlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   secureTextEntry
-                  style={styles.input}
+                  style={[styles.input, focusedField === 'nextPassword' && styles.inputFocused]}
+                  onFocus={() => setFocusedField('nextPassword')}
+                  onBlur={() => setFocusedField(null)}
                 />
               </View>
               <View style={styles.field}>
@@ -82,12 +92,28 @@ export default function ChangePasswordScreen({ navigation }) {
                   placeholder={passwordCopy.confirmPasswordPlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   secureTextEntry
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    focusedField === 'confirmPassword' && styles.inputFocused,
+                    hasMismatch && styles.inputInvalid,
+                  ]}
+                  onFocus={() => setFocusedField('confirmPassword')}
+                  onBlur={() => setFocusedField(null)}
                 />
+                {hasMismatch ? (
+                  <AppText style={[styles.helperText, styles.helperTextError]}>
+                    {passwordCopy.passwordMismatch}
+                  </AppText>
+                ) : focusedField === 'confirmPassword' || confirmPassword.length > 0 ? (
+                  <AppText style={styles.helperText}>{passwordCopy.confirmPasswordHelper}</AppText>
+                ) : null}
               </View>
               <Pressable
                 onPress={() => navigation.navigate('ResetPassword')}
-                style={styles.forgotRow}
+                style={({ pressed }) => [
+                  styles.forgotRow,
+                  pressed && styles.forgotRowPressed,
+                ]}
               >
                 <AppText style={styles.forgotText}>
                   {forgotPasswordParts.prefix}
@@ -158,9 +184,27 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputFocused: {
+      borderColor: colors.accent.primary,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
+    inputInvalid: {
+      borderColor: colors.feedback.error,
+    },
+    helperText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+    helperTextError: {
+      color: colors.feedback.error,
+    },
     forgotRow: {
       alignSelf: 'flex-start',
       marginTop: components.layout.spacing.xs,
+    },
+    forgotRowPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     forgotText: {
       ...typography.styles.small,

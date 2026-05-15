@@ -1,15 +1,13 @@
-import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Animated, Pressable, StyleSheet, View } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import AppText from '../components/AppText';
 import OnboardingScreen from '../components/OnboardingScreen';
 import SettingsHeader from '../components/SettingsHeader';
-import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import { getSettingsCopy, getTextSizeOptions } from '../utils/localization';
 import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
-import useToast from '../utils/useToast';
 
 export default function SettingsAccessibilityScreen({ navigation }) {
   const { preferences, updatePreferences } = useApp();
@@ -19,7 +17,6 @@ export default function SettingsAccessibilityScreen({ navigation }) {
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
-  const toast = useToast();
   const settingsCopy = useMemo(
     () => getSettingsCopy(preferences?.language),
     [preferences?.language]
@@ -28,6 +25,22 @@ export default function SettingsAccessibilityScreen({ navigation }) {
     () => getTextSizeOptions(preferences?.language),
     [preferences?.language]
   );
+  const previewOpacity = useRef(new Animated.Value(1)).current;
+  const hasMounted = useRef(false);
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    previewOpacity.setValue(0.82);
+    Animated.timing(previewOpacity, {
+      toValue: 1,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [preferences?.textSize, previewOpacity]);
 
   const renderTextSizeOption = (option) => {
     const isActive = preferences?.textSize === option.value;
@@ -35,10 +48,14 @@ export default function SettingsAccessibilityScreen({ navigation }) {
       <Pressable
         key={option.value}
         onPress={() => {
-          updatePreferences({ textSize: option.value });
-          toast.show(settingsCopy.saved);
+          if (!isActive) updatePreferences({ textSize: option.value });
         }}
-        style={[styles.textSizeRow, isActive && styles.textSizeRowActive]}
+        style={({ pressed }) => [
+          styles.textSizeRow,
+          isActive && styles.textSizeRowActive,
+          pressed && !isActive && styles.textSizeRowPressed,
+          pressed && isActive && styles.textSizeRowActivePressed,
+        ]}
       >
         <View style={styles.textSizeLeft}>
           <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -73,15 +90,14 @@ export default function SettingsAccessibilityScreen({ navigation }) {
         />
         <View style={styles.section}>
           <View style={styles.textSizeList}>{textSizeOptions.map(renderTextSizeOption)}</View>
-          <View style={styles.previewCard}>
+          <Animated.View style={[styles.previewCard, { opacity: previewOpacity }]}>
             <AppText style={styles.previewTitle}>{settingsCopy.accessibility.previewTitle}</AppText>
             <AppText style={styles.previewText}>
               {settingsCopy.accessibility.previewText}
             </AppText>
-          </View>
+          </Animated.View>
         </View>
       </OnboardingScreen>
-      <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />
     </View>
   );
 }
@@ -110,6 +126,14 @@ const createStyles = (colors, components, tabBarHeight) =>
     },
     textSizeRowActive: {
       borderColor: colors.accent.primary,
+    },
+    textSizeRowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    textSizeRowActivePressed: {
+      transform: [{ scale: components.transforms.scalePressed }],
+      opacity: colors.opacity.emphasis,
     },
     textSizeLeft: {
       flexDirection: 'row',

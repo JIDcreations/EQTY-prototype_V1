@@ -31,16 +31,24 @@ export default function SettingsRow({
   const iconColor = disabled
     ? toRgba(colors.text.secondary, colors.opacity.surface)
     : colors.text.secondary;
+  const containerStyleProp = onPress
+    ? ({ pressed }) => [
+      styles.row,
+      !isLast && styles.rowDivider,
+      pressed && !disabled && styles.rowPressed,
+      containerStyle,
+    ]
+    : [
+      styles.row,
+      !isLast && styles.rowDivider,
+      containerStyle,
+    ];
 
   return (
     <Container
       onPress={onPress}
       disabled={disabled}
-      style={[
-        styles.row,
-        !isLast && styles.rowDivider,
-        containerStyle,
-      ]}
+      style={containerStyleProp}
     >
       <View style={styles.rowContent}>
         <AppText
@@ -87,6 +95,10 @@ const createStyles = (colors, components) =>
     rowDivider: {
       borderBottomWidth: components.borderWidth.thin,
       borderBottomColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+    },
+    rowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     rowContent: {
       flex: 1,

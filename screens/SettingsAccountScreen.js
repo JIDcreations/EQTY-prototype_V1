@@ -15,6 +15,8 @@ import useToast from '../utils/useToast';
 import { getSettingsCopy } from '../utils/localization';
 import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
   const value = parseInt(cleaned, 16);
@@ -38,6 +40,8 @@ export default function SettingsAccountScreen({ navigation }) {
   );
   const toast = useToast();
   const [activeField, setActiveField] = useState(null);
+  const [focusedField, setFocusedField] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [username, setUsername] = useState(authUser?.username || '');
   const [email, setEmail] = useState(authUser?.email || '');
 
@@ -50,17 +54,20 @@ export default function SettingsAccountScreen({ navigation }) {
 
   const trimmedUsername = username.trim();
   const trimmedEmail = email.trim();
+  const emailIsValid = !trimmedEmail || EMAIL_REGEX.test(trimmedEmail);
   const hasUsernameChange = trimmedUsername !== (authUser?.username || '');
   const hasEmailChange = trimmedEmail !== (authUser?.email || '');
   const hasChanges = hasUsernameChange || hasEmailChange;
   const saveDisabled =
+    isSaving ||
     !hasChanges ||
     (hasUsernameChange && !trimmedUsername) ||
-    (hasEmailChange && !trimmedEmail);
+    (hasEmailChange && (!trimmedEmail || !emailIsValid));
 
   const handleCancel = () => {
     setUsername(authUser?.username || '');
     setEmail(authUser?.email || '');
+    setFocusedField(null);
     setActiveField(null);
   };
 
@@ -68,11 +75,19 @@ export default function SettingsAccountScreen({ navigation }) {
     const updates = {};
     if (hasUsernameChange) updates.username = trimmedUsername;
     if (hasEmailChange) updates.email = trimmedEmail;
-    if (Object.keys(updates).length) {
+    if (!Object.keys(updates).length || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    try {
       await updateAuthUser(updates);
       toast.show(settingsCopy.saved);
+      setFocusedField(null);
+      setActiveField(null);
+    } finally {
+      setIsSaving(false);
     }
-    setActiveField(null);
   };
 
   const renderField = ({
@@ -84,7 +99,16 @@ export default function SettingsAccountScreen({ navigation }) {
     inputProps,
   }) => {
     if (activeField === key) {
+      const isFocused = focusedField === key;
       const shouldCollapse = !hasChanges;
+      const helperState = getAccountFieldHelper({
+        fieldKey: key,
+        trimmedUsername,
+        trimmedEmail,
+        emailIsValid,
+        copy: settingsCopy.account,
+      });
+
       return (
         <View style={styles.inlineField}>
           <AppText style={styles.label}>{label}</AppText>
@@ -93,12 +117,28 @@ export default function SettingsAccountScreen({ navigation }) {
             onChangeText={onChangeText}
             placeholder={placeholder}
             placeholderTextColor={colors.text.secondary}
-            style={styles.input}
+            style={[
+              styles.input,
+              isFocused && styles.inputFocused,
+              helperState.tone === 'error' && styles.inputInvalid,
+            ]}
+            onFocus={() => setFocusedField(key)}
             onBlur={() => {
+              setFocusedField(null);
               if (shouldCollapse) setActiveField(null);
             }}
             {...inputProps}
           />
+          {helperState.text ? (
+            <AppText
+              style={[
+                styles.helperText,
+                helperState.tone === 'error' && styles.helperTextError,
+              ]}
+            >
+              {helperState.text}
+            </AppText>
+          ) : null}
         </View>
       );
     }
@@ -109,7 +149,10 @@ export default function SettingsAccountScreen({ navigation }) {
         <AppText style={styles.label}>{label}</AppText>
         <Pressable
           onPress={() => setActiveField(key)}
-          style={styles.valueRow}
+          style={({ pressed }) => [
+            styles.valueRow,
+            pressed && styles.valueRowPressed,
+          ]}
         >
           <AppText style={styles.valueText}>{displayValue}</AppText>
           <Ionicons
@@ -166,11 +209,15 @@ export default function SettingsAccountScreen({ navigation }) {
           </View>
           <View style={styles.actions}>
             <PrimaryButton
-              label={settingsCopy.account.saveChanges}
+              label={isSaving ? settingsCopy.account.savingChanges : settingsCopy.account.saveChanges}
               onPress={handleSave}
               disabled={saveDisabled}
             />
-            <SecondaryButton label={settingsCopy.account.cancel} onPress={handleCancel} />
+            <SecondaryButton
+              label={settingsCopy.account.cancel}
+              onPress={handleCancel}
+              disabled={isSaving}
+            />
           </View>
         </View>
       </OnboardingScreen>
@@ -219,6 +266,10 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    valueRowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
     valueText: {
       ...typography.styles.body,
       color: colors.text.primary,
@@ -229,7 +280,47 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputFocused: {
+      borderColor: colors.accent.primary,
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
+    inputInvalid: {
+      borderColor: colors.feedback.error,
+    },
+    helperText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+    helperTextError: {
+      color: colors.feedback.error,
+    },
     actions: {
       gap: components.layout.spacing.md,
     },
   });
+
+function getAccountFieldHelper({
+  fieldKey,
+  trimmedUsername,
+  trimmedEmail,
+  emailIsValid,
+  copy,
+}) {
+  if (fieldKey === 'username') {
+    if (!trimmedUsername) {
+      return { tone: 'error', text: copy.usernameRequired };
+    }
+
+    return { tone: 'default', text: copy.usernameHelper };
+  }
+
+  if (!trimmedEmail) {
+    return { tone: 'default', text: copy.emailHelper };
+  }
+
+  if (!emailIsValid) {
+    return { tone: 'error', text: copy.emailInvalid };
+  }
+
+  return { tone: 'default', text: copy.emailHelper };
+}

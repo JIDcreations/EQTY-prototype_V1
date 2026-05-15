@@ -29,13 +29,22 @@ export default function ContactSupportScreen({ navigation }) {
   const supportCopy = settingsCopy.contactSupport;
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const toast = useToast();
-  const canSend = subject.trim().length > 0 && message.trim().length > 0;
+  const canSend =
+    !isSending &&
+    subject.trim().length > 0 &&
+    message.trim().length > 0;
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    if (!canSend) return;
+
+    setIsSending(true);
+    await new Promise((resolve) => setTimeout(resolve, 500));
     toast.show(supportCopy.sentToast);
     setSubject('');
     setMessage('');
+    setIsSending(false);
   };
 
   return (
@@ -96,7 +105,7 @@ export default function ContactSupportScreen({ navigation }) {
           />
           <AppText style={styles.helperText}>{supportCopy.helperText}</AppText>
           <PrimaryButton
-            label={supportCopy.sendButton}
+            label={isSending ? supportCopy.sendingButton : supportCopy.sendButton}
             onPress={handleSend}
             disabled={!canSend}
           />

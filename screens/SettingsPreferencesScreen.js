@@ -5,7 +5,6 @@ import AppText from '../components/AppText';
 import OnboardingScreen from '../components/OnboardingScreen';
 import SegmentedControl from '../components/SegmentedControl';
 import SettingsHeader from '../components/SettingsHeader';
-import Toast from '../components/Toast';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import {
@@ -14,7 +13,6 @@ import {
   getSettingsCopy,
 } from '../utils/localization';
 import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
-import useToast from '../utils/useToast';
 
 const toRgba = (hex, alpha) => {
   const cleaned = hex.replace('#', '');
@@ -33,7 +31,6 @@ export default function SettingsPreferencesScreen({ navigation }) {
     () => createStyles(colors, components, tabBarHeight),
     [colors, components, tabBarHeight]
   );
-  const toast = useToast();
   const options = useMemo(
     () => getLanguageOptions(preferences?.language),
     [preferences?.language]
@@ -68,10 +65,14 @@ export default function SettingsPreferencesScreen({ navigation }) {
                 <Pressable
                   key={option.value}
                   onPress={() => {
-                    updatePreferences({ language: option.value });
-                    toast.show(settingsCopy.saved);
+                    if (!isActive) updatePreferences({ language: option.value });
                   }}
-                  style={[styles.languageRow, isActive && styles.languageRowActive]}
+                  style={({ pressed }) => [
+                    styles.languageRow,
+                    isActive && styles.languageRowActive,
+                    pressed && !isActive && styles.languageRowPressed,
+                    pressed && isActive && styles.languageRowActivePressed,
+                  ]}
                 >
                   <View style={styles.rowLeft}>
                     <View style={[styles.radio, isActive && styles.radioActive]}>
@@ -80,7 +81,9 @@ export default function SettingsPreferencesScreen({ navigation }) {
                     <AppText style={styles.rowLabel}>{option.label}</AppText>
                   </View>
                   {isActive ? (
-                    <AppText style={styles.activeLabel}>{settingsCopy.selected}</AppText>
+                    <View style={styles.activeIndicator}>
+                      <AppText style={styles.activeLabel}>{settingsCopy.selected}</AppText>
+                    </View>
                   ) : null}
                 </Pressable>
               );
@@ -94,14 +97,14 @@ export default function SettingsPreferencesScreen({ navigation }) {
               options={appearanceOptions}
               value={preferences?.appearance || 'Dark'}
               onChange={(next) => {
-                updatePreferences({ appearance: next });
-                toast.show(settingsCopy.saved);
+                if (next !== (preferences?.appearance || 'Dark')) {
+                  updatePreferences({ appearance: next });
+                }
               }}
             />
           </View>
         </View>
       </OnboardingScreen>
-      <Toast message={toast.message} visible={toast.visible} onHide={toast.hide} />
     </View>
   );
 }
@@ -135,10 +138,23 @@ const createStyles = (colors, components, tabBarHeight) =>
     languageRowActive: {
       borderColor: colors.accent.primary,
     },
+    languageRowPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
+    languageRowActivePressed: {
+      transform: [{ scale: components.transforms.scalePressed }],
+      opacity: colors.opacity.emphasis,
+    },
     rowLeft: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: components.layout.spacing.sm,
+    },
+    activeIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: components.layout.spacing.xs,
     },
     rowLabel: {
       ...typography.styles.body,

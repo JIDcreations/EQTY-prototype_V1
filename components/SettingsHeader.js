@@ -12,7 +12,13 @@ export default function SettingsHeader({ title, subtitle, onBack, rightAction })
     <View style={styles.container}>
       <View style={styles.row}>
         {onBack ? (
-          <Pressable onPress={onBack} style={styles.backButton}>
+          <Pressable
+            onPress={onBack}
+            style={({ pressed }) => [
+              styles.backButton,
+              pressed && styles.backButtonPressed,
+            ]}
+          >
             <Ionicons
               name="chevron-back"
               size={components.sizes.icon.lg}
@@ -49,6 +55,10 @@ const createStyles = (colors, components) =>
       backgroundColor: colors.background.surface,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    backButtonPressed: {
+      backgroundColor: colors.background.surfaceActive,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     backSpacer: {
       width: components.sizes.square.lg,

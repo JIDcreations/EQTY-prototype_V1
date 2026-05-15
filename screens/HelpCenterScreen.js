@@ -34,14 +34,17 @@ export default function HelpCenterScreen({ navigation }) {
   );
   const helpCopy = settingsCopy.helpCenter;
   const [query, setQuery] = useState('');
+  const normalizedQuery = query.trim().toLowerCase();
   const filteredGuides = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    if (!normalized) return helpCopy.guides;
+    if (!normalizedQuery) return helpCopy.guides;
     return helpCopy.guides.filter((item) => {
       const haystack = `${item.title} ${item.description}`.toLowerCase();
-      return haystack.includes(normalized);
+      return haystack.includes(normalizedQuery);
     });
-  }, [helpCopy.guides, query]);
+  }, [helpCopy.guides, normalizedQuery]);
+  const searchFeedback = normalizedQuery
+    ? helpCopy.resultsCount(filteredGuides.length)
+    : helpCopy.helperText;
 
   return (
     <View style={styles.container}>
@@ -62,7 +65,7 @@ export default function HelpCenterScreen({ navigation }) {
             onChangeText={setQuery}
             placeholder={helpCopy.searchPlaceholder}
           />
-          <AppText style={styles.helperText}>{helpCopy.helperText}</AppText>
+          <AppText style={styles.helperText}>{searchFeedback}</AppText>
         </Card>
         <Card style={styles.card}>
           <AppText style={styles.sectionTitle}>{helpCopy.browseTopicsTitle}</AppText>
@@ -82,7 +85,10 @@ export default function HelpCenterScreen({ navigation }) {
           <AppText style={styles.sectionTitle}>{helpCopy.popularGuidesTitle}</AppText>
           <View style={styles.list}>
             {filteredGuides.length === 0 ? (
-              <AppText style={styles.emptyText}>{helpCopy.noGuides}</AppText>
+              <View style={styles.emptyState}>
+                <AppText style={styles.emptyText}>{helpCopy.noGuides}</AppText>
+                <AppText style={styles.emptyHint}>{helpCopy.emptySearchHint}</AppText>
+              </View>
             ) : (
               filteredGuides.map((guide, index) => (
                 <View
@@ -149,6 +155,13 @@ const createStyles = (colors, components, tabBarHeight) =>
       color: colors.text.secondary,
     },
     emptyText: {
+      ...typography.styles.small,
+      color: colors.text.secondary,
+    },
+    emptyState: {
+      gap: components.layout.spacing.xs,
+    },
+    emptyHint: {
       ...typography.styles.small,
       color: colors.text.secondary,
     },
