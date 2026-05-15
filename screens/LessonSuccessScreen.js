@@ -242,11 +242,6 @@ export default function LessonSuccessScreen() {
 
         {/* Footer CTA */}
         <Animated.View style={[styles.footer, footerAnimStyle]}>
-          {/* DEV ONLY — remove before final */}
-          <Pressable style={styles.replayButton} onPress={runAnimation}>
-            <AppText style={[styles.replayLabel, { color: colors.text.secondary }]}>↺ Replay</AppText>
-          </Pressable>
-
           {isDeepDiveLesson ? (
             <>
               <PrimaryButton label={deepDiveCopy.deepDiveCta} onPress={handleBackToTrack} />
@@ -257,14 +252,7 @@ export default function LessonSuccessScreen() {
               </Pressable>
             </>
           ) : isLastCoreLesson ? (
-            <>
-              <PrimaryButton label={deepDiveCopy.finalLessonCta} onPress={handleGoToLessonsOverview} />
-              <Pressable style={styles.secondaryAction} onPress={handleReturnHome}>
-                <AppText style={[styles.secondaryActionLabel, { color: colors.text.secondary }]}>
-                  {copy.lessonSuccess.cta}
-                </AppText>
-              </Pressable>
-            </>
+            <PrimaryButton label={deepDiveCopy.finalLessonCta} onPress={handleGoToLessonsOverview} />
           ) : (
             <PrimaryButton label={copy.lessonSuccess.cta} onPress={handleReturnHome} />
           )}
@@ -359,14 +347,6 @@ const createStyles = (colors, components, tabBarHeight) =>
     footer: {
       paddingTop: components.layout.spacing.lg,
       gap: components.layout.spacing.md,
-    },
-    replayButton: {
-      alignSelf: 'center',
-      paddingVertical: components.layout.spacing.xs,
-      paddingHorizontal: components.layout.spacing.md,
-    },
-    replayLabel: {
-      ...typography.styles.small,
     },
     secondaryAction: {
       alignSelf: 'center',

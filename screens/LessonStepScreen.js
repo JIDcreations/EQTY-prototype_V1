@@ -258,6 +258,9 @@ export default function LessonStepScreen() {
   }, [lessonTermQuery, preferences?.language]);
   const displayedLessonTerms = isLessonSearchActive ? globalSearchResults : lessonTerms;
   const copy = useMemo(() => getLessonStepCopy(preferences?.language), [preferences?.language]);
+  const lessonGlossaryResultsLabel = isLessonSearchActive
+    ? copy.labels.lessonGlossaryResultsCount(displayedLessonTerms.length)
+    : null;
   
   useEffect(() => {
     if (!isLessonGlossaryOpen) setLessonTermQuery('');
@@ -543,18 +546,24 @@ export default function LessonStepScreen() {
                 ) : null}
               </View>
               {isLessonSearchActive ? (
-                <AppText style={styles.lessonGlossarySearchLabel}>
-                  {copy.labels.fullGlossaryResults}
-                </AppText>
+                <View style={styles.lessonGlossarySearchMeta}>
+                  <AppText style={styles.lessonGlossarySearchLabel}>
+                    {copy.labels.fullGlossaryResults}
+                  </AppText>
+                  <AppText style={styles.lessonGlossarySearchCount}>
+                    {lessonGlossaryResultsLabel}
+                  </AppText>
+                </View>
               ) : null}
             </View>
           }
           renderItem={({ item, index }) => (
             <Pressable
               onPress={() => handleLessonTermPress(item)}
-              style={[
+              style={({ pressed }) => [
                 styles.lessonGlossaryRow,
                 index < displayedLessonTerms.length - 1 && styles.lessonGlossaryDivider,
+                pressed && styles.lessonGlossaryRowPressed,
               ]}
             >
               <View style={styles.lessonGlossaryRowTop}>
@@ -574,7 +583,7 @@ export default function LessonStepScreen() {
             <View style={styles.lessonGlossaryEmpty}>
               <AppText style={styles.lessonGlossaryEmptyTitle}>
                 {isLessonSearchActive
-                  ? 'No matching terms found.'
+                  ? copy.messages.lessonGlossaryEmptySearch
                   : 'No terms defined for this lesson yet.'}
               </AppText>
             </View>
@@ -1295,6 +1304,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
   const stepCodePrefix =
     content?.steps?.visualization?.cardCodePrefix || (isGoalSequence ? 'VOORBEELD' : 'STEP');
   const progressLabel = `${stepCodePrefix} ${`${currentCardIndex + 1}`.padStart(2, '0')}`;
+  const hasViewedAllCards = maxReachedIndex >= steps.length - 1;
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
@@ -1363,6 +1373,16 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
             total={steps.length}
             style={styles.l1VisDots}
           />
+          <AppText
+            style={[
+              styles.l1VisHelperText,
+              hasViewedAllCards && styles.l1VisHelperTextReady,
+            ]}
+          >
+            {hasViewedAllCards
+              ? copy.messages.readyToContinue
+              : copy.messages.viewAllCardsToContinue}
+          </AppText>
         </View>
       </View>
       <View style={styles.l1VisActionWrap}>
@@ -3874,6 +3894,9 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
   };
 
   const reset = () => setOrder([]);
+  const progressionHelper = isComplete
+    ? copy.messages.readyToContinue
+    : copy.messages.completeOrderToContinue;
 
   return (
     <View style={styles.stepBody}>
@@ -3890,7 +3913,10 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
                 <Pressable
                   key={stepId}
                   onPress={() => handleRemove(stepId)}
-                  style={styles.sequenceItem}
+                  style={({ pressed }) => [
+                    styles.sequenceItem,
+                    pressed && styles.sequenceItemPressed,
+                  ]}
                 >
                   <View style={styles.sequenceIndex}>
                     <AppText style={styles.sequenceIndexText}>{index + 1}</AppText>
@@ -3913,7 +3939,11 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
               <Pressable
                 key={item.id}
                 onPress={() => handleAdd(item.id)}
-                style={[styles.option, isSelected && styles.optionDisabled]}
+                style={({ pressed }) => [
+                  styles.option,
+                  isSelected && styles.optionDisabled,
+                  pressed && !isSelected && styles.optionPressed,
+                ]}
               >
                 <GlossaryText
                   text={item.label}
@@ -3936,6 +3966,14 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
       ) : null}
 
       <View style={styles.exerciseActions}>
+        <AppText
+          style={[
+            styles.ctaStatusText,
+            isComplete && styles.ctaStatusTextReady,
+          ]}
+        >
+          {progressionHelper}
+        </AppText>
         <SecondaryButton label={copy.buttons.reset} onPress={reset} />
         <PrimaryButton
           label={copy.buttons.completeExercise}
@@ -4239,6 +4277,7 @@ function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
   const selected = options.find((option) => option.id === selectedId);
 
   const reset = () => setSelectedId(null);
+  const canContinue = selected !== null;
 
   return (
     <View style={styles.stepBody}>
@@ -4250,7 +4289,12 @@ function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
             return (
               <Pressable
                 key={option.id}
-                style={[styles.option, isActive && styles.optionActive]}
+                style={({ pressed }) => [
+                  styles.option,
+                  isActive && styles.optionActive,
+                  pressed && !isActive && styles.optionPressed,
+                  pressed && isActive && styles.optionActivePressed,
+                ]}
                 onPress={() => setSelectedId(option.id)}
               >
                 <GlossaryText
@@ -4272,11 +4316,19 @@ function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
       ) : null}
 
       <View style={styles.exerciseActions}>
+        <AppText
+          style={[
+            styles.ctaStatusText,
+            canContinue && styles.ctaStatusTextReady,
+          ]}
+        >
+          {canContinue ? copy.messages.readyToContinue : copy.messages.chooseAnswerFirst}
+        </AppText>
         <SecondaryButton label={copy.buttons.reset} onPress={reset} />
         <PrimaryButton
           label={copy.buttons.completeExercise}
           onPress={onNext}
-          disabled={!selected}
+          disabled={!canContinue}
         />
       </View>
     </View>
@@ -4463,6 +4515,7 @@ function GuidedGoalExercise({
   completeOnFirstSubmit = false,
   personalizationHint,
   onAnswerReveal,
+  showProgressionHelper = true,
 }) {
   const { colors, components, styles, mode } = useLessonStepStyles();
   const {
@@ -4497,6 +4550,10 @@ function GuidedGoalExercise({
     }
     previousAnsweredCountRef.current = answeredCount;
   }, [answeredCount, onAnswerReveal]);
+
+  const singleQuestionHelper = isSingleQuestionImmediate
+    ? (isSingleAnswered ? copy.messages.readyToContinue : copy.messages.chooseAnswerFirst)
+    : null;
 
   if (isSingleQuestionImmediate) {
     const activeSection = activeSingleSection;
@@ -4638,6 +4695,14 @@ function GuidedGoalExercise({
               />
             </View>
           ) : null}
+          <AppText
+            style={[
+              styles.ctaStatusText,
+              isAnswered && styles.ctaStatusTextReady,
+            ]}
+          >
+            {singleQuestionHelper}
+          </AppText>
           <PrimaryButton
             label={
               isLastSingleSection
@@ -4705,6 +4770,9 @@ function GuidedGoalExercise({
         }
       : null,
   ].filter(Boolean);
+  const groupedProgressionHelper = isComplete
+    ? copy.messages.readyToContinue
+    : copy.messages.answerAllQuestionsToContinue;
 
   return (
     <View style={styles.stepBody}>
@@ -4739,7 +4807,10 @@ function GuidedGoalExercise({
             return (
               <Animated.View key={section.id} entering={FadeInDown.duration(200)}>
                 <Pressable
-                  style={styles.goalAnsweredRow}
+                  style={({ pressed }) => [
+                    styles.goalAnsweredRow,
+                    pressed && styles.goalAnsweredRowPressed,
+                  ]}
                   onPress={() => handleChangeAnswer(index)}
                 >
                   <View style={styles.goalAnsweredContent}>
@@ -4766,7 +4837,12 @@ function GuidedGoalExercise({
                     return (
                       <Pressable
                         key={option}
-                        style={[styles.goalOption, isActive && styles.goalOptionActive]}
+                        style={({ pressed }) => [
+                          styles.goalOption,
+                          isActive && styles.goalOptionActive,
+                          pressed && !isActive && styles.goalOptionPressed,
+                          pressed && isActive && styles.goalOptionActivePressed,
+                        ]}
                         onPress={() => handlePick(section.id, option, index)}
                       >
                         <AppText
@@ -4798,14 +4874,26 @@ function GuidedGoalExercise({
       )}
 
       {/* CTA */}
-      {isComplete && (
-        <Animated.View entering={FadeInDown.duration(200)}>
-          <PrimaryButton
-            label={hasSubmitted && canContinue ? (postSubmitLabel || copy.buttons.next) : (submitLabel || copy.buttons.continue)}
-            onPress={handleSubmit}
-          />
-        </Animated.View>
-      )}
+      <View style={styles.guidedGoalFooter}>
+        {showProgressionHelper ? (
+          <AppText
+            style={[
+              styles.ctaStatusText,
+              isComplete && styles.ctaStatusTextReady,
+            ]}
+          >
+            {groupedProgressionHelper}
+          </AppText>
+        ) : null}
+        {isComplete ? (
+          <Animated.View entering={FadeInDown.duration(200)}>
+            <PrimaryButton
+              label={hasSubmitted && canContinue ? (postSubmitLabel || copy.buttons.next) : (submitLabel || copy.buttons.continue)}
+              onPress={handleSubmit}
+            />
+          </Animated.View>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -5073,6 +5161,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
   const [submittedText, setSubmittedText] = useState('');
   const [response, setResponse] = useState(null);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const customInsightText = content?.steps?.reflection?.insightText;
   const question =
     content?.steps?.reflection?.question || copy.messages.reflectionQuestion;
@@ -5164,7 +5253,12 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
               </Animated.View>
             ) : (
               <View>
-                <View style={styles.reflectionTextAreaWrap}>
+                <View
+                  style={[
+                    styles.reflectionTextAreaWrap,
+                    isFocused && styles.reflectionTextAreaWrapFocused,
+                  ]}
+                >
                   <AppTextInput
                     style={styles.reflectionTextArea}
                     value={text}
@@ -5174,6 +5268,8 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
                     multiline
                     autoCorrect
                     textAlignVertical="top"
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => setIsFocused(false)}
                   />
                 </View>
                 <AppText style={styles.reflectionPersonalizationHint}>
@@ -5324,6 +5420,7 @@ function Lesson1SummaryStep({ content, onComplete, copy, onAnswerReveal }) {
         copy={copy}
         postSubmitLabel={copy.buttons.completeLesson}
         showProgressDots={false}
+        showProgressionHelper={false}
         completeOnFirstSubmit
         onAnswerReveal={onAnswerReveal}
       />
@@ -5541,7 +5638,11 @@ function IntroSummaryStep({ content, onComplete, onPressTerm, copy, userReflecti
         </Animated.View>
       )}
 
-      {isAnswered && <PrimaryButton label={completionLabel} onPress={onComplete} />}
+      {isAnswered ? (
+        <View style={styles.guidedGoalFooter}>
+          <PrimaryButton label={completionLabel} onPress={onComplete} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -6167,6 +6268,13 @@ const createStyles = (colors, components, mode = 'dark') =>
     ...typography.styles.small,
     color: colors.text.secondary,
   },
+  lessonGlossarySearchCount: {
+    ...typography.styles.small,
+    color: colors.text.primary,
+  },
+  lessonGlossarySearchMeta: {
+    gap: components.layout.spacing.xs / 2,
+  },
   lessonGlossaryHeader: {
     backgroundColor: colors.background.surfaceActive,
     paddingBottom: components.layout.spacing.sm,
@@ -6194,6 +6302,11 @@ const createStyles = (colors, components, mode = 'dark') =>
   lessonGlossaryRow: {
     ...components.list.row,
     paddingVertical: components.layout.spacing.md,
+  },
+  lessonGlossaryRowPressed: {
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    borderRadius: components.radius.input,
+    transform: [{ scale: components.transforms.scalePressed }],
   },
   lessonGlossaryDivider: {
     borderBottomWidth: components.borderWidth.thin,
@@ -6902,6 +7015,16 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.accent.primary, colors.opacity.tint),
     borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
   },
+  optionPressed: {
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+    transform: [{ scale: components.transforms.scalePressed }],
+  },
+  optionActivePressed: {
+    backgroundColor: toRgba(colors.accent.primary, colors.opacity.surface),
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    transform: [{ scale: components.transforms.scalePressed }],
+  },
   optionText: {
     ...typography.styles.small,
     color: colors.text.primary,
@@ -7011,6 +7134,12 @@ const createStyles = (colors, components, mode = 'dark') =>
       ? colors.background.surfaceActive
       : toRgba(colors.accent.primary, 0.06),
   },
+  goalAnsweredRowPressed: {
+    transform: [{ scale: components.transforms.scalePressed }],
+    backgroundColor: mode === 'light'
+      ? toRgba(colors.background.surfaceActive, colors.opacity.surface)
+      : toRgba(colors.accent.primary, colors.opacity.tint),
+  },
   goalAnsweredContent: {
     gap: 2,
     flex: 1,
@@ -7061,6 +7190,18 @@ const createStyles = (colors, components, mode = 'dark') =>
       ? colors.background.surfaceActive
       : toRgba(colors.accent.primary, colors.opacity.tint),
     borderColor: colors.accent.primary,
+  },
+  goalOptionPressed: {
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+    transform: [{ scale: components.transforms.scalePressed }],
+  },
+  goalOptionActivePressed: {
+    backgroundColor: mode === 'light'
+      ? colors.background.surfaceActive
+      : toRgba(colors.accent.primary, colors.opacity.surface),
+    borderColor: colors.accent.primary,
+    transform: [{ scale: components.transforms.scalePressed }],
   },
   goalOptionText: {
     ...typography.styles.body,
@@ -7486,6 +7627,11 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderWidth: components.borderWidth.thin,
     borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
   },
+  sequenceItemPressed: {
+    backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+    borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+    transform: [{ scale: components.transforms.scalePressed }],
+  },
   sequenceIndex: {
     width: components.sizes.square.xs,
     height: components.sizes.square.xs,
@@ -7573,6 +7719,14 @@ const createStyles = (colors, components, mode = 'dark') =>
   exerciseActions: {
     gap: components.layout.spacing.md,
   },
+  ctaStatusText: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+    textAlign: 'center',
+  },
+  ctaStatusTextReady: {
+    color: colors.accent.primary,
+  },
   reflectionHeader: {
     gap: components.layout.spacing.xs,
     marginTop: components.layout.spacing.md,
@@ -7604,6 +7758,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surface, 0.6),
     paddingHorizontal: 16,
     paddingVertical: 20,
+  },
+  reflectionTextAreaWrapFocused: {
+    borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   reflectionTextArea: {
     ...typography.styles.body,
@@ -8113,6 +8271,15 @@ const createStyles = (colors, components, mode = 'dark') =>
   },
   l1VisDots: {
     justifyContent: 'center',
+  },
+  l1VisHelperText: {
+    ...typography.styles.meta,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginTop: 24,
+  },
+  l1VisHelperTextReady: {
+    color: colors.accent.primary,
   },
   l1VisPagerWrap: {
     alignSelf: 'center',
