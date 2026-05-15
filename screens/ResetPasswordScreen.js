@@ -9,6 +9,7 @@ import SettingsHeader from '../components/SettingsHeader';
 import Toast from '../components/Toast';
 import { useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
+import { validateEmailAddress } from '../utils/emailValidation';
 import { getSettingsCopy } from '../utils/localization';
 import { getSettingsOnboardingContentStyle } from '../utils/settingsLayout';
 import useToast from '../utils/useToast';
@@ -27,10 +28,24 @@ export default function ResetPasswordScreen({ navigation }) {
   );
   const resetCopy = settingsCopy.resetPassword;
   const [email, setEmail] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const toast = useToast();
+  const emailValidation = useMemo(() => validateEmailAddress(email), [email]);
+  const showEmailError = emailTouched && !emailValidation.isValid;
+  const canSend = !isSending && emailValidation.isValid;
+  const helperText = showEmailError ? resetCopy.emailInvalid : resetCopy.hint;
 
-  const handleSend = () => {
+  const handleSend = async () => {
+    if (!emailValidation.isValid) {
+      setEmailTouched(true);
+      return;
+    }
+    setIsSending(true);
+    await new Promise((resolve) => setTimeout(resolve, 450));
     toast.show(resetCopy.sentToast);
+    setIsSending(false);
     setTimeout(() => navigation.goBack(), 500);
   };
 
@@ -59,21 +74,30 @@ export default function ResetPasswordScreen({ navigation }) {
                   <AppTextInput
                     value={email}
                     onChangeText={setEmail}
+                    onFocus={() => setIsFocused(true)}
+                    onBlur={() => {
+                      setIsFocused(false);
+                      setEmailTouched(true);
+                    }}
                     placeholder={resetCopy.emailPlaceholder}
                     placeholderTextColor={colors.text.secondary}
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    style={styles.input}
+                    style={[
+                      styles.input,
+                      isFocused && styles.inputFocused,
+                      showEmailError && styles.inputError,
+                    ]}
                   />
                 </View>
-                <AppText style={styles.hint}>{resetCopy.hint}</AppText>
+                <AppText style={[styles.hint, showEmailError && styles.hintError]}>{helperText}</AppText>
               </View>
             </View>
             <View style={styles.actions}>
               <PrimaryButton
-                label={resetCopy.sendResetLink}
+                label={isSending ? resetCopy.sendingResetLink : resetCopy.sendResetLink}
                 onPress={handleSend}
-                disabled={!email.trim()}
+                disabled={!canSend}
               />
               <SecondaryButton label={resetCopy.cancel} onPress={() => navigation.goBack()} />
             </View>
@@ -126,8 +150,19 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputFocused: {
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
+    inputError: {
+      borderColor: colors.feedback.error,
+      backgroundColor: toRgba(colors.feedback.error, colors.opacity.tint),
+    },
     hint: {
       ...components.input.helper,
+    },
+    hintError: {
+      color: colors.feedback.error,
     },
     actions: {
       gap: components.layout.spacing.md,

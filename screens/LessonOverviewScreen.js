@@ -78,7 +78,13 @@ export default function LessonOverviewScreen() {
         <View style={styles.container}>
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.hero}>
-              <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Pressable
+                onPress={() => navigation.goBack()}
+                style={({ pressed }) => [
+                  styles.backButton,
+                  pressed && styles.backButtonPressed,
+                ]}
+              >
                 <Ionicons
                   name="chevron-back"
                   size={components.sizes.icon.lg}
@@ -192,7 +198,13 @@ export default function LessonOverviewScreen() {
       <View style={styles.container}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.hero}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backButtonPressed,
+              ]}
+            >
               <Ionicons
                 name="chevron-back"
                 size={components.sizes.icon.lg}
@@ -314,6 +326,10 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: colors.background.surface,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    backButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     fallbackTitle: {
       ...typography.styles.h2,

@@ -32,6 +32,7 @@ export default function OnboardingLoginScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+  const [focusedField, setFocusedField] = useState(null);
   const passwordShake = useSharedValue(0);
   const trimmedUsername = username.trim();
   const trimmedPassword = password.trim();
@@ -107,7 +108,13 @@ export default function OnboardingLoginScreen({ navigation }) {
       >
         <View style={styles.layout}>
           <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backButtonPressed,
+              ]}
+            >
               <Ionicons
                 name="chevron-back"
                 size={components.sizes.icon.lg}
@@ -128,18 +135,30 @@ export default function OnboardingLoginScreen({ navigation }) {
                   placeholderTextColor={colors.text.secondary}
                   autoCapitalize="none"
                   autoCorrect={false}
-                  style={styles.input}
+                  onFocus={() => setFocusedField('username')}
+                  onBlur={() => setFocusedField(null)}
+                  style={[styles.input, focusedField === 'username' && styles.inputFocused]}
                 />
               </View>
               <Animated.View style={[styles.field, passwordShakeStyle]}>
                 <AppText style={[styles.label, showPasswordError && styles.labelError]}>
                   {copy.login.passwordLabel}
                 </AppText>
-                <View style={[styles.inputRow, showPasswordError && styles.inputError]}>
+                <View
+                  style={[
+                    styles.inputRow,
+                    focusedField === 'password' && styles.inputRowFocused,
+                    showPasswordError && styles.inputError,
+                  ]}
+                >
                   <AppTextInput
                     value={password}
                     onChangeText={setPassword}
-                    onBlur={() => setPasswordTouched(true)}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => {
+                      setFocusedField(null);
+                      setPasswordTouched(true);
+                    }}
                     placeholder={copy.login.passwordPlaceholder}
                     placeholderTextColor={colors.text.secondary}
                     secureTextEntry={!showPassword}
@@ -147,7 +166,10 @@ export default function OnboardingLoginScreen({ navigation }) {
                   />
                   <Pressable
                     onPress={() => setShowPassword((current) => !current)}
-                    style={styles.eyeButton}
+                    style={({ pressed }) => [
+                      styles.eyeButton,
+                      pressed && styles.utilityButtonPressed,
+                    ]}
                   >
                     <Ionicons
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -170,7 +192,13 @@ export default function OnboardingLoginScreen({ navigation }) {
                     <AppText style={styles.errorText}>{passwordErrorMessage}</AppText>
                   </Animated.View>
                 ) : null}
-                <Pressable onPress={() => navigation.navigate('ResetPassword')}>
+                <Pressable
+                  onPress={() => navigation.navigate('ResetPassword')}
+                  style={({ pressed }) => [
+                    styles.forgotLinkPressable,
+                    pressed && styles.inlineLinkPressed,
+                  ]}
+                >
                   <AppText numberOfLines={1} style={styles.forgotLink}>
                     {copy.login.forgotPassword}
                   </AppText>
@@ -189,7 +217,13 @@ export default function OnboardingLoginScreen({ navigation }) {
                 <View style={styles.dividerLine} />
               </View>
               <View style={styles.socialRow}>
-                <Pressable onPress={handleApple} style={styles.socialButton}>
+                <Pressable
+                  onPress={handleApple}
+                  style={({ pressed }) => [
+                    styles.socialButton,
+                    pressed && styles.socialButtonPressed,
+                  ]}
+                >
                   <Ionicons
                     name="logo-apple"
                     size={components.sizes.icon.md}
@@ -197,7 +231,13 @@ export default function OnboardingLoginScreen({ navigation }) {
                   />
                   <AppText style={styles.socialText}>{copy.login.socialApple}</AppText>
                 </Pressable>
-                <Pressable onPress={handleGoogle} style={styles.socialButton}>
+                <Pressable
+                  onPress={handleGoogle}
+                  style={({ pressed }) => [
+                    styles.socialButton,
+                    pressed && styles.socialButtonPressed,
+                  ]}
+                >
                   <Ionicons
                     name="logo-google"
                     size={components.sizes.icon.md}
@@ -209,7 +249,10 @@ export default function OnboardingLoginScreen({ navigation }) {
               <View style={styles.footer}>
                 <Pressable
                   onPress={() => navigation.navigate('OnboardingEmail')}
-                  style={styles.linkInline}
+                  style={({ pressed }) => [
+                    styles.linkInline,
+                    pressed && styles.inlineLinkPressed,
+                  ]}
                 >
                   <AppText style={styles.loginLink}>
                     {loginLinkParts.prefix}
@@ -290,6 +333,11 @@ const createStyles = (colors, components, mode) =>
       justifyContent: 'center',
       position: 'relative',
     },
+    backButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
     fields: {
       gap: components.layout.cardGap,
     },
@@ -309,6 +357,10 @@ const createStyles = (colors, components, mode) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputFocused: {
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
     inputError: {
       borderColor: colors.feedback.error,
       backgroundColor: toRgba(colors.feedback.error, colors.opacity.tint),
@@ -324,6 +376,10 @@ const createStyles = (colors, components, mode) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputRowFocused: {
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
     inputField: {
       ...components.input.text,
       flex: 1,
@@ -335,6 +391,11 @@ const createStyles = (colors, components, mode) =>
       height: components.sizes.square.md,
       alignItems: 'center',
       justifyContent: 'center',
+      borderRadius: components.radius.pill,
+    },
+    utilityButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     errorRow: {
       flexDirection: 'row',
@@ -383,6 +444,10 @@ const createStyles = (colors, components, mode) =>
       justifyContent: 'center',
       gap: components.layout.spacing.sm,
     },
+    socialButtonPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
     socialText: {
       ...typography.styles.small,
       color: colors.background.app,
@@ -390,11 +455,24 @@ const createStyles = (colors, components, mode) =>
     forgotLink: {
       ...typography.styles.small,
       color: colors.text.secondary,
+      alignSelf: 'flex-start',
+    },
+    forgotLinkPressable: {
       marginTop: components.layout.spacing.xs,
       alignSelf: 'flex-start',
+      borderRadius: components.radius.pill,
+      paddingHorizontal: components.layout.spacing.xs,
+      paddingVertical: components.layout.spacing.xs / 2,
     },
     linkInline: {
       paddingTop: components.layout.spacing.sm,
+      borderRadius: components.radius.pill,
+      paddingHorizontal: components.layout.spacing.sm,
+      paddingBottom: components.layout.spacing.xs,
+    },
+    inlineLinkPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     loginLink: {
       ...typography.styles.small,

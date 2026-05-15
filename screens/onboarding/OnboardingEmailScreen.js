@@ -31,6 +31,7 @@ export default function OnboardingEmailScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
+  const [focusedField, setFocusedField] = useState(null);
   const emailShake = useSharedValue(0);
   const emailValidation = useMemo(() => validateEmailAddress(email), [email]);
   const showEmailError = emailTouched && !emailValidation.isValid;
@@ -116,7 +117,13 @@ export default function OnboardingEmailScreen({ navigation }) {
       >
         <View style={styles.layout}>
           <View style={styles.header}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Pressable
+              onPress={() => navigation.goBack()}
+              style={({ pressed }) => [
+                styles.backButton,
+                pressed && styles.backButtonPressed,
+              ]}
+            >
               <Ionicons
                 name="chevron-back"
                 size={components.sizes.icon.lg}
@@ -136,7 +143,9 @@ export default function OnboardingEmailScreen({ navigation }) {
                   placeholder={copy.email.usernamePlaceholder}
                   placeholderTextColor={colors.text.secondary}
                   autoCapitalize="none"
-                  style={styles.input}
+                  onFocus={() => setFocusedField('username')}
+                  onBlur={() => setFocusedField(null)}
+                  style={[styles.input, focusedField === 'username' && styles.inputFocused]}
                 />
               </View>
               <Animated.View style={[styles.field, emailShakeStyle]}>
@@ -154,7 +163,16 @@ export default function OnboardingEmailScreen({ navigation }) {
                   autoComplete="email"
                   keyboardType="email-address"
                   textContentType="emailAddress"
-                  style={[styles.input, showEmailError && styles.inputError]}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => {
+                    setFocusedField(null);
+                    setEmailTouched(true);
+                  }}
+                  style={[
+                    styles.input,
+                    focusedField === 'email' && styles.inputFocused,
+                    showEmailError && styles.inputError,
+                  ]}
                 />
                 {showEmailError ? (
                   <Animated.View
@@ -173,18 +191,28 @@ export default function OnboardingEmailScreen({ navigation }) {
               </Animated.View>
               <View style={styles.field}>
                 <AppText style={styles.label}>{copy.email.passwordLabel}</AppText>
-                <View style={styles.inputRow}>
+                <View
+                  style={[
+                    styles.inputRow,
+                    focusedField === 'password' && styles.inputRowFocused,
+                  ]}
+                >
                   <AppTextInput
                     value={password}
                     onChangeText={setPassword}
                     placeholder={copy.email.passwordPlaceholder}
                     placeholderTextColor={colors.text.secondary}
                     secureTextEntry={!showPassword}
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
                     style={styles.inputField}
                   />
                   <Pressable
                     onPress={() => setShowPassword((current) => !current)}
-                    style={styles.eyeButton}
+                    style={({ pressed }) => [
+                      styles.eyeButton,
+                      pressed && styles.utilityButtonPressed,
+                    ]}
                   >
                     <Ionicons
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
@@ -209,7 +237,13 @@ export default function OnboardingEmailScreen({ navigation }) {
                 <View style={styles.dividerLine} />
               </View>
               <View style={styles.socialRow}>
-                <Pressable onPress={handleApple} style={styles.socialButton}>
+                <Pressable
+                  onPress={handleApple}
+                  style={({ pressed }) => [
+                    styles.socialButton,
+                    pressed && styles.socialButtonPressed,
+                  ]}
+                >
                   <Ionicons
                     name="logo-apple"
                     size={components.sizes.icon.md}
@@ -217,7 +251,13 @@ export default function OnboardingEmailScreen({ navigation }) {
                   />
                   <AppText style={styles.socialText}>{copy.email.socialApple}</AppText>
                 </Pressable>
-                <Pressable onPress={handleGoogle} style={styles.socialButton}>
+                <Pressable
+                  onPress={handleGoogle}
+                  style={({ pressed }) => [
+                    styles.socialButton,
+                    pressed && styles.socialButtonPressed,
+                  ]}
+                >
                   <Ionicons
                     name="logo-google"
                     size={components.sizes.icon.md}
@@ -229,7 +269,10 @@ export default function OnboardingEmailScreen({ navigation }) {
               <View style={styles.footer}>
                 <Pressable
                   onPress={() => navigation.navigate('OnboardingLogin')}
-                  style={styles.linkInline}
+                  style={({ pressed }) => [
+                    styles.linkInline,
+                    pressed && styles.inlineLinkPressed,
+                  ]}
                 >
                   <AppText style={styles.loginLink}>
                     {loginLinkParts.prefix}
@@ -309,6 +352,11 @@ const createStyles = (colors, components, mode) =>
       justifyContent: 'center',
       position: 'relative',
     },
+    backButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      borderColor: toRgba(colors.text.primary, colors.opacity.stroke),
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
     fields: {
       gap: components.layout.cardGap,
     },
@@ -329,6 +377,10 @@ const createStyles = (colors, components, mode) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputFocused: {
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
     inputError: {
       borderColor: colors.feedback.error,
       backgroundColor: toRgba(colors.feedback.error, colors.opacity.tint),
@@ -344,6 +396,10 @@ const createStyles = (colors, components, mode) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
+    inputRowFocused: {
+      borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+    },
     inputField: {
       ...components.input.text,
       flex: 1,
@@ -355,6 +411,11 @@ const createStyles = (colors, components, mode) =>
       height: components.sizes.square.md,
       alignItems: 'center',
       justifyContent: 'center',
+      borderRadius: components.radius.pill,
+    },
+    utilityButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     hint: {
       ...components.input.helper,
@@ -406,12 +467,23 @@ const createStyles = (colors, components, mode) =>
       justifyContent: 'center',
       gap: components.layout.spacing.sm,
     },
+    socialButtonPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
+    },
     socialText: {
       ...typography.styles.small,
       color: colors.background.app,
     },
     linkInline: {
       paddingTop: components.layout.spacing.sm,
+      borderRadius: components.radius.pill,
+      paddingHorizontal: components.layout.spacing.sm,
+      paddingBottom: components.layout.spacing.xs,
+    },
+    inlineLinkPressed: {
+      opacity: colors.opacity.emphasis,
+      transform: [{ scale: components.transforms.scalePressed }],
     },
     loginLink: {
       ...typography.styles.small,

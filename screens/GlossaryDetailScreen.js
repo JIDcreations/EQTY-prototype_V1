@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import AppText from '../components/AppText';
 import Card from '../components/Card';
 import { PrimaryButton, SecondaryButton } from '../components/Button';
@@ -54,9 +55,15 @@ export default function GlossaryDetailScreen() {
 
         <Card style={styles.explainCard}>
           <AppText style={styles.cardTitle}>{glossaryCopy.explainForMeTitle || 'Explain for me'}</AppText>
-          <AppText style={styles.cardText}>
-            {explanation || glossaryCopy.explainForMeBody || 'Tap below for a tailored explanation.'}
-          </AppText>
+          {explanation ? (
+            <Animated.View key={explanation} entering={FadeInDown.duration(220)}>
+              <AppText style={styles.cardText}>{explanation}</AppText>
+            </Animated.View>
+          ) : (
+            <AppText style={styles.cardText}>
+              {glossaryCopy.explainForMeBody || 'Tap below for a tailored explanation.'}
+            </AppText>
+          )}
           <PrimaryButton
             label={glossaryCopy.explainForMeButton || 'Explain for me'}
             onPress={() => setExplanation(getGlossaryExplanation(term, userContext))}

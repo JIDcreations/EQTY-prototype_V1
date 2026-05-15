@@ -94,7 +94,13 @@ function TrackDetailView({ trackId, progress, navigation, copy, styles, colors, 
     <OnboardingScreen scroll backgroundVariant="bg3" contentContainerStyle={styles.content}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Pressable
+          onPress={() => navigation.goBack()}
+          style={({ pressed }) => [
+            styles.backButton,
+            pressed && styles.backButtonPressed,
+          ]}
+        >
           <Ionicons
             name="chevron-back"
             size={components.sizes.icon.lg}
@@ -195,6 +201,10 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: colors.background.surface,
       alignItems: 'center',
       justifyContent: 'center',
+    },
+    backButtonPressed: {
+      backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+      transform: [{ scale: components.transforms.scalePressed }],
     },
 
     // Hero block
