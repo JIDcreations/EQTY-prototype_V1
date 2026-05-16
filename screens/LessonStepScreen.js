@@ -431,12 +431,14 @@ export default function LessonStepScreen() {
           userContext={userContext}
           onNext={handleNext}
           copy={copy}
+          onAnswerReveal={scrollToAnswerReveal}
         />
       ) : (lessonId === 'lesson_1' || lessonId === 'lesson_2') ? (
         <Lesson1ContextualScenarioStep
           content={content}
           onNext={handleNext}
           copy={copy}
+          onAnswerReveal={scrollToAnswerReveal}
         />
       ) : (
         <ScenarioStep
@@ -445,6 +447,7 @@ export default function LessonStepScreen() {
           onNext={handleNext}
           onPressTerm={handleTermPress}
           copy={copy}
+          onAnswerReveal={scrollToAnswerReveal}
         />
       ))}
       {step === 4 && (
@@ -455,6 +458,7 @@ export default function LessonStepScreen() {
           onPressTerm={handleTermPress}
           onOpenLessonGlossary={() => setLessonGlossaryOpen(true)}
           copy={copy}
+          onAnswerReveal={scrollToAnswerReveal}
         />
       )}
       {step === 5 && (
@@ -2482,7 +2486,7 @@ function ExecutionGridAnim({ styles, colors }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function IntroScenarioStep({ onNext, copy }) {
+function IntroScenarioStep({ onNext, copy, onAnswerReveal }) {
   const { styles, colors, components, mode } = useLessonStepStyles();
   const steps = copy.introScenario.steps;
   const reactiveMissingIds = ['goal', 'risk', 'strategy', 'allocation'];
@@ -2594,7 +2598,10 @@ function IntroScenarioStep({ onNext, copy }) {
       <View style={styles.narrativeFlowWrap}>
         <View style={styles.narrativeChoiceRow}>
           <Pressable
-            onPress={() => setSelected('reactive')}
+            onPress={() => {
+              setSelected('reactive');
+              onAnswerReveal?.();
+            }}
             style={({ pressed }) => [
               styles.narrativeChoiceCard,
               styles.narrativeChoiceCardReactive,
@@ -2612,7 +2619,10 @@ function IntroScenarioStep({ onNext, copy }) {
           </Pressable>
 
           <Pressable
-            onPress={() => setSelected('plan')}
+            onPress={() => {
+              setSelected('plan');
+              onAnswerReveal?.();
+            }}
             style={({ pressed }) => [
               styles.narrativeChoiceCard,
               styles.narrativeChoiceCardPlan,
@@ -2822,7 +2832,7 @@ function ScenarioCompareCard({ title, animatedStyle, cardStyle, visual, rows }) 
   );
 }
 
-function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
+function Lesson1ContextualScenarioStep({ content, onNext, copy, onAnswerReveal }) {
   const { styles, colors, components, mode } = useLessonStepStyles();
   const scenario = content?.steps?.scenario || {};
   const choices = scenario?.choices || [];
@@ -2937,7 +2947,10 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
         <View style={styles.narrativeChoiceRow}>
           {leftChoice ? (
             <Pressable
-              onPress={() => setSelected(leftChoice.id)}
+              onPress={() => {
+                setSelected(leftChoice.id);
+                onAnswerReveal?.();
+              }}
               style={({ pressed }) => [
                 styles.narrativeChoiceCard,
                 styles.narrativeChoiceCardReactive,
@@ -2957,7 +2970,10 @@ function Lesson1ContextualScenarioStep({ content, onNext, copy }) {
 
           {rightChoice ? (
             <Pressable
-              onPress={() => setSelected(rightChoice.id)}
+              onPress={() => {
+                setSelected(rightChoice.id);
+                onAnswerReveal?.();
+              }}
               style={({ pressed }) => [
                 styles.narrativeChoiceCard,
                 styles.narrativeChoiceCardPlan,
@@ -3482,7 +3498,7 @@ function VisualizationStep({ content, lessonId, onNext, onPressTerm, copy }) {
   );
 }
 
-function ScenarioStep({ content, userContext, onNext, onPressTerm, copy }) {
+function ScenarioStep({ content, userContext, onNext, onPressTerm, copy, onAnswerReveal }) {
   const { styles } = useLessonStepStyles();
   const variantKey = getScenarioVariant(userContext);
   const variant = content?.steps?.scenario?.variants?.[variantKey];
@@ -3499,7 +3515,10 @@ function ScenarioStep({ content, userContext, onNext, onPressTerm, copy }) {
               <Pressable
                 key={option}
                 style={[styles.option, isActive && styles.optionActive]}
-                onPress={() => setSelected(option)}
+                onPress={() => {
+                  setSelected(option);
+                  onAnswerReveal?.();
+                }}
               >
                 <GlossaryText
                   text={option}
@@ -3526,7 +3545,7 @@ function ScenarioStep({ content, userContext, onNext, onPressTerm, copy }) {
   );
 }
 
-function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlossary, copy }) {
+function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlossary, copy, onAnswerReveal }) {
   const { styles } = useLessonStepStyles();
   const exercise = content?.steps?.exercise;
 
@@ -3561,6 +3580,7 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
           onNext={onNext}
           onPressTerm={onPressTerm}
           copy={copy}
+          onAnswerReveal={onAnswerReveal}
         />
       );
     case 'choice':
@@ -3570,6 +3590,7 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
           onNext={onNext}
           onPressTerm={onPressTerm}
           copy={copy}
+          onAnswerReveal={onAnswerReveal}
         />
       );
     case 'guidedGoal':
@@ -3614,6 +3635,7 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
           exercise={exercise}
           onNext={onNext}
           copy={copy}
+          onAnswerReveal={onAnswerReveal}
         />
       );
     case 'tradeoff':
@@ -3629,7 +3651,7 @@ function ExerciseStep({ content, lessonId, onNext, onPressTerm, onOpenLessonGlos
   }
 }
 
-function ScenarioExercise({ exercise, onNext, copy }) {
+function ScenarioExercise({ exercise, onNext, copy, onAnswerReveal }) {
   const { onboardingContext } = useApp();
   const { colors, components, styles, mode } = useLessonStepStyles();
   const {
@@ -3703,6 +3725,7 @@ function ScenarioExercise({ exercise, onNext, copy }) {
   const handlePick = (id) => {
     if (!answerKey || picked) return;
     setAnswers((prev) => ({ ...prev, [answerKey]: id }));
+    onAnswerReveal?.();
   };
 
   const handleNext = () => {
@@ -3882,7 +3905,7 @@ function resolveScenarioStoryQuote(onboardingContext, quoteField, fallback = '')
   return String(value || fallback).trim() || fallback;
 }
 
-function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
+function SequenceExercise({ exercise, onNext, onPressTerm, copy, onAnswerReveal }) {
   const { styles } = useLessonStepStyles();
   const { description, items = [], correctOrder = [], feedback = {} } = exercise;
   const [order, setOrder] = useState([]);
@@ -3894,7 +3917,13 @@ function SequenceExercise({ exercise, onNext, onPressTerm, copy }) {
 
   const handleAdd = (stepId) => {
     if (order.includes(stepId)) return;
-    setOrder((prev) => [...prev, stepId]);
+    setOrder((prev) => {
+      const nextOrder = [...prev, stepId];
+      if (nextOrder.length === items.length) {
+        onAnswerReveal?.();
+      }
+      return nextOrder;
+    });
   };
 
   const handleRemove = (stepId) => {
@@ -4286,7 +4315,7 @@ function ExerciseOutcomeLine({ mode }) {
   );
 }
 
-function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
+function ChoiceExercise({ exercise, onNext, onPressTerm, copy, onAnswerReveal }) {
   const { styles } = useLessonStepStyles();
   const { description, options = [], revealTitle = copy.labels.outcome } = exercise;
   const [selectedId, setSelectedId] = useState(null);
@@ -4311,7 +4340,10 @@ function ChoiceExercise({ exercise, onNext, onPressTerm, copy }) {
                   pressed && !isActive && styles.optionPressed,
                   pressed && isActive && styles.optionActivePressed,
                 ]}
-                onPress={() => setSelectedId(option.id)}
+                onPress={() => {
+                  setSelectedId(option.id);
+                  onAnswerReveal?.();
+                }}
               >
                 <GlossaryText
                   text={option.label}
