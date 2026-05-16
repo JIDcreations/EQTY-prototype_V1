@@ -2,6 +2,21 @@ import { Alert } from 'react-native';
 
 const originalAlert = Alert.alert;
 
+if (typeof document !== 'undefined') {
+  document.documentElement.style.height = '100%';
+  document.documentElement.style.overflowX = 'hidden';
+  document.body.style.minHeight = '100vh';
+  document.body.style.overflowX = 'hidden';
+  document.body.style.overflowY = 'auto';
+  document.body.style.margin = '0';
+
+  const root = document.getElementById('root');
+  if (root) {
+    root.style.minHeight = '100vh';
+    root.style.overflowX = 'hidden';
+  }
+}
+
 Alert.alert = (title, message, buttons, options) => {
   if (typeof window === 'undefined') {
     return originalAlert(title, message, buttons, options);

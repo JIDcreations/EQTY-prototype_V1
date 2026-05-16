@@ -106,7 +106,7 @@ const createStyles = (colors, components) =>
       minHeight: '100vh',
       width: '100%',
       backgroundColor: colors.background.app,
-      overflow: 'hidden',
+      overflow: 'visible',
     },
     backgroundImage: {
       ...StyleSheet.absoluteFillObject,
@@ -115,17 +115,21 @@ const createStyles = (colors, components) =>
     },
     gradient: {
       flex: 1,
+      minHeight: '100vh',
       backgroundColor: toRgba(colors.background.app, 0),
     },
     safeArea: {
       flex: 1,
+      minHeight: '100%',
       ...components.screen.safeArea,
     },
     scrollContainer: {
       flex: 1,
+      minHeight: '100vh',
     },
     scroll: {
       flex: 1,
+      minHeight: '100vh',
     },
     scrollContent: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
