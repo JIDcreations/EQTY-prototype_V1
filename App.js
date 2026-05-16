@@ -10,11 +10,11 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, {
-  Easing,
+  Extrapolation,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from 'react-native-reanimated';
 import { colors, typography, useTheme } from './theme';
 import { AppProvider, useApp } from './utils/AppContext';
@@ -36,26 +36,31 @@ function AppTabIcon({ activeIconName, inactiveIconName, isActive, color, size, l
   const progress = useSharedValue(isActive ? 1 : 0);
 
   useEffect(() => {
-    progress.value = withTiming(isActive ? 1 : 0, {
-      duration: 220,
-      easing: Easing.out(Easing.quad),
+    progress.value = withSpring(isActive ? 1 : 0, {
+      damping: 18,
+      stiffness: 240,
+      mass: 0.9,
     });
   }, [isActive, progress]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(progress.value, [0, 1], [0.84, 1]),
+    opacity: interpolate(progress.value, [0, 1], [0.86, 1], Extrapolation.CLAMP),
     transform: [
-      { scale: interpolate(progress.value, [0, 1], [1, 1.06]) },
-      { translateY: interpolate(progress.value, [0, 1], [0, -1]) },
+      { scale: interpolate(progress.value, [0, 1], [1, 1.03], Extrapolation.CLAMP) },
+      { translateY: interpolate(progress.value, [0, 1], [0, -1], Extrapolation.CLAMP) },
     ],
+  }));
+
+  const labelStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 1], [0.9, 1], Extrapolation.CLAMP),
   }));
 
   return (
     <Animated.View style={[{ alignItems: 'center', justifyContent: 'center', gap: 2 }, animatedStyle]}>
       <Ionicons name={isActive ? activeIconName : inactiveIconName} size={size} color={color} />
-      <Text style={{ ...typography.styles.meta, fontSize: 12, color }}>
+      <Animated.Text style={[{ ...typography.styles.meta, fontSize: 12, color }, labelStyle]}>
         {label}
-      </Text>
+      </Animated.Text>
     </Animated.View>
   );
 }
