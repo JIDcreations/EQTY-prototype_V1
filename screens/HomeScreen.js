@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { InteractionManager, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Animated, {
   FadeInDown,
@@ -198,6 +198,26 @@ export default function HomeScreen() {
     : currentContextLabel;
   const greetingLine = `${greeting}, ${displayName}`;
   const openingLabel = isDutch ? 'Openen...' : 'Opening...';
+  const navigateToLessonOverview = useCallback((lessonId) => {
+    if (!lessonId) {
+      navigation.navigate('Lessons');
+      return;
+    }
+
+    navigation.navigate('Lessons');
+    requestAnimationFrame(() => {
+      InteractionManager.runAfterInteractions(() => {
+        navigation.navigate('Lessons', {
+          screen: 'LessonOverview',
+          params: {
+            lessonId,
+            entrySource: 'Home',
+          },
+        });
+      });
+    });
+  }, [navigation]);
+
   const handlePrimaryCtaPress = useCallback(() => {
     if (isPrimaryOpening) return;
     setIsPrimaryOpening(true);
@@ -213,15 +233,9 @@ export default function HomeScreen() {
         return;
       }
 
-      navigation.navigate('Lessons', {
-        screen: 'LessonOverview',
-        params: {
-          lessonId: currentLesson?.id,
-          entrySource: 'Home',
-        },
-      });
+      navigateToLessonOverview(currentLesson?.id);
     }, 140);
-  }, [currentLesson?.id, hasCompletedAllLessons, isPrimaryOpening, navigation]);
+  }, [currentLesson?.id, hasCompletedAllLessons, isPrimaryOpening, navigateToLessonOverview, navigation]);
   const quickActions = useMemo(
     () => [
       {

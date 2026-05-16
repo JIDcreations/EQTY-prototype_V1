@@ -21,10 +21,29 @@ const stepTransition = {
   close: { animation: 'timing', config: { duration: 140 } },
 };
 
+const overviewTransition = {
+  open: { animation: 'timing', config: { duration: 260 } },
+  close: { animation: 'timing', config: { duration: 200 } },
+};
+
 const successTransition = {
   open: { animation: 'timing', config: { duration: 300 } },
   close: { animation: 'timing', config: { duration: 200 } },
 };
+
+const forOverview = ({ current, layouts }) => ({
+  cardStyle: {
+    opacity: current.progress,
+    transform: [
+      {
+        translateX: current.progress.interpolate({
+          inputRange: [0, 1],
+          outputRange: [layouts.screen.width * 0.08, 0],
+        }),
+      },
+    ],
+  },
+});
 
 export default function LessonsStack() {
   return (
@@ -32,7 +51,11 @@ export default function LessonsStack() {
       <Stack.Screen name="LessonsHome" component={LessonsScreen} />
       <Stack.Screen name="LessonResources" component={LessonResourcesScreen} />
       <Stack.Screen name="LessonVideos" component={LessonVideosScreen} />
-      <Stack.Screen name="LessonOverview" component={LessonOverviewScreen} />
+      <Stack.Screen
+        name="LessonOverview"
+        component={LessonOverviewScreen}
+        options={{ cardStyleInterpolator: forOverview, transitionSpec: overviewTransition }}
+      />
       <Stack.Screen
         name="LessonStep"
         component={LessonStepScreen}

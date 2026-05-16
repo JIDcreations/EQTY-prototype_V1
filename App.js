@@ -33,9 +33,10 @@ function Tabs() {
       tabBar={(props) => <AppTabBar {...props} />}
       screenOptions={({ route }) => {
         const focusedRouteName = getFocusedRouteNameFromRoute(route) ?? 'LessonsHome';
+        const shouldHighlightLessonsTab =
+          route.name === 'Lessons' && focusedRouteName === 'LessonsHome';
         const suppressLessonsSelection =
-          route.name === 'Lessons' &&
-          (focusedRouteName === 'LessonResources' || focusedRouteName === 'LessonVideos');
+          route.name === 'Lessons' && !shouldHighlightLessonsTab;
         const activeTintColor = suppressLessonsSelection
           ? colors.text.secondary
           : isLight
