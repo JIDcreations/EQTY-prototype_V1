@@ -114,6 +114,7 @@ export default function LessonsScreen() {
   const scrollToDeepDiveSection = useCallback(() => {
     if (typeof deepDiveSectionY !== 'number') return;
     scrollRef.current?.scrollTo?.({
+      x: 0,
       y: Math.max(0, deepDiveSectionY - components.layout.spacing.lg),
       animated: true,
     });
@@ -167,6 +168,11 @@ export default function LessonsScreen() {
       backgroundVariant="bg3"
       contentContainerStyle={styles.content}
       scrollRef={scrollRef}
+      scrollProps={{
+        directionalLockEnabled: true,
+        alwaysBounceHorizontal: false,
+        showsHorizontalScrollIndicator: false,
+      }}
     >
       <TopTabHeader
         title="Lesoverzicht"
