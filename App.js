@@ -68,6 +68,12 @@ function AppTabIcon({ activeIconName, inactiveIconName, isActive, color, size, l
 function Tabs() {
   const { colors, typography, components, mode } = useTheme();
   const isLight = mode === 'light';
+  const tabLabels = {
+    Home: 'Home',
+    Lessons: 'Lessen',
+    Glossary: 'Glossary',
+    Profile: 'Profile',
+  };
 
   return (
     <Tab.Navigator
@@ -109,7 +115,7 @@ function Tabs() {
                 isActive={isActive}
                 color={color}
                 size={size}
-                label={route.name}
+                label={tabLabels[route.name] || route.name}
                 typography={typography}
               />
             );
