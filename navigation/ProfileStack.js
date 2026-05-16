@@ -12,12 +12,19 @@ import HelpCenterScreen from '../screens/HelpCenterScreen';
 import ContactSupportScreen from '../screens/ContactSupportScreen';
 import FAQScreen from '../screens/FAQScreen';
 import LoggedOutScreen from '../screens/LoggedOutScreen';
+import { forSubtleSlide, subtleTransitionSpec } from './transitions';
 
 const Stack = createStackNavigator();
 
 export default function ProfileStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyleInterpolator: forSubtleSlide,
+        transitionSpec: subtleTransitionSpec,
+      }}
+    >
       <Stack.Screen name="SettingsHome" component={SettingsHomeScreen} />
       <Stack.Screen name="SettingsAccount" component={SettingsAccountScreen} />
       <Stack.Screen name="SettingsSecurity" component={SettingsSecurityScreen} />

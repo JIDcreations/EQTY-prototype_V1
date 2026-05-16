@@ -8,6 +8,7 @@ import LessonResourcesScreen from '../screens/LessonResourcesScreen';
 import LessonVideosScreen from '../screens/LessonVideosScreen';
 import DeepDiveScreen from '../screens/DeepDiveScreen';
 import PremiumScreen from '../screens/PremiumScreen';
+import { forSubtleSlide, subtleTransitionSpec } from './transitions';
 
 const Stack = createStackNavigator();
 
@@ -47,7 +48,13 @@ const forOverview = ({ current, layouts }) => ({
 
 export default function LessonsStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyleInterpolator: forSubtleSlide,
+        transitionSpec: subtleTransitionSpec,
+      }}
+    >
       <Stack.Screen name="LessonsHome" component={LessonsScreen} />
       <Stack.Screen name="LessonResources" component={LessonResourcesScreen} />
       <Stack.Screen name="LessonVideos" component={LessonVideosScreen} />

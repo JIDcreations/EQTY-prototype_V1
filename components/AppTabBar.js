@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { BottomTabBar } from '@react-navigation/bottom-tabs';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useTheme } from '../theme';
 
 const buildDescriptors = (descriptors, tabBarStyle) => {
@@ -24,7 +25,11 @@ export default function AppTabBar(props) {
     [props.descriptors, styles.tabBar]
   );
 
-  return <BottomTabBar {...props} descriptors={descriptors} />;
+  return (
+    <Animated.View entering={FadeInDown.duration(260).delay(40)} style={styles.container}>
+      <BottomTabBar {...props} descriptors={descriptors} />
+    </Animated.View>
+  );
 }
 
 const createStyles = (colors, components) => {
@@ -32,6 +37,9 @@ const createStyles = (colors, components) => {
     components.layout.safeArea.bottom + components.tabBar.bottomOffset;
 
   return {
+    container: {
+      flexShrink: 0,
+    },
     tabBar: {
       position: 'absolute',
       left: components.tabBar.inset,

@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { CommonActions, DefaultTheme, NavigationContainer, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -9,6 +9,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { colors, typography, useTheme } from './theme';
 import { AppProvider, useApp } from './utils/AppContext';
 import { GlossaryProvider } from './components/GlossaryProvider';
@@ -20,9 +27,38 @@ import OnboardingStack from './navigation/OnboardingStack';
 import GlossaryDetailScreen from './screens/GlossaryDetailScreen';
 import OnboardingQuestionScreen from './screens/onboarding/OnboardingQuestionScreen';
 import LessonsStack from './navigation/LessonsStack';
+import { forSubtleSlide, subtleTransitionSpec } from './navigation/transitions';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
+function AppTabIcon({ activeIconName, inactiveIconName, isActive, color, size, label, typography }) {
+  const progress = useSharedValue(isActive ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withTiming(isActive ? 1 : 0, {
+      duration: 220,
+      easing: Easing.out(Easing.quad),
+    });
+  }, [isActive, progress]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(progress.value, [0, 1], [0.84, 1]),
+    transform: [
+      { scale: interpolate(progress.value, [0, 1], [1, 1.06]) },
+      { translateY: interpolate(progress.value, [0, 1], [0, -1]) },
+    ],
+  }));
+
+  return (
+    <Animated.View style={[{ alignItems: 'center', justifyContent: 'center', gap: 2 }, animatedStyle]}>
+      <Ionicons name={isActive ? activeIconName : inactiveIconName} size={size} color={color} />
+      <Text style={{ ...typography.styles.meta, fontSize: 12, color }}>
+        {label}
+      </Text>
+    </Animated.View>
+  );
+}
 
 function Tabs() {
   const { colors, typography, components, mode } = useTheme();
@@ -53,18 +89,24 @@ function Tabs() {
           },
           tabBarIcon: ({ color, size, focused }) => {
             const isActive = focused && !suppressLessonsSelection;
-            let iconName = 'home-outline';
-            if (route.name === 'Home') iconName = isActive ? 'home' : 'home-outline';
-            if (route.name === 'Lessons') iconName = isActive ? 'book' : 'book-outline';
-            if (route.name === 'Glossary') iconName = isActive ? 'list' : 'list-outline';
-            if (route.name === 'Profile') iconName = isActive ? 'person' : 'person-outline';
+            const iconNames = {
+              Home: ['home', 'home-outline'],
+              Lessons: ['book', 'book-outline'],
+              Glossary: ['list', 'list-outline'],
+              Profile: ['person', 'person-outline'],
+            };
+            const [activeIconName, inactiveIconName] = iconNames[route.name] || ['ellipse', 'ellipse-outline'];
+
             return (
-              <View style={{ alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-                <Ionicons name={iconName} size={size} color={color} />
-                <Text style={{ ...typography.styles.meta, fontSize: 12, color }}>
-                  {route.name}
-                </Text>
-              </View>
+              <AppTabIcon
+                activeIconName={activeIconName}
+                inactiveIconName={inactiveIconName}
+                isActive={isActive}
+                color={color}
+                size={size}
+                label={route.name}
+                typography={typography}
+              />
             );
           },
         };
@@ -129,7 +171,13 @@ function RootStack() {
   const showOnboarding = !preferences?.hasOnboarded || !authUser;
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        cardStyleInterpolator: forSubtleSlide,
+        transitionSpec: subtleTransitionSpec,
+      }}
+    >
       {showOnboarding ? (
         <Stack.Screen name="Onboarding" component={OnboardingStack} />
       ) : (

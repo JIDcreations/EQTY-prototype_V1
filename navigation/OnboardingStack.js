@@ -9,12 +9,20 @@ import OnboardingBasicInfoScreen from '../screens/onboarding/OnboardingBasicInfo
 import OnboardingQuestionsIntroScreen from '../screens/onboarding/OnboardingQuestionsIntroScreen';
 import OnboardingQuestionScreen from '../screens/onboarding/OnboardingQuestionScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
+import { forSubtleSlide, subtleTransitionSpec } from './transitions';
 
 const Stack = createStackNavigator();
 
 export default function OnboardingStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        gestureEnabled: false,
+        cardStyleInterpolator: forSubtleSlide,
+        transitionSpec: subtleTransitionSpec,
+      }}
+    >
       <Stack.Screen name="OnboardingWelcome" component={OnboardingWelcomeScreen} />
       <Stack.Screen name="OnboardingWhatIsEqty" component={OnboardingWhatIsEqtyScreen} />
       <Stack.Screen name="OnboardingEntry" component={OnboardingEntryScreen} />
