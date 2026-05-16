@@ -1229,6 +1229,10 @@ const SETTINGS_COPY = {
       subtitle: 'Language and appearance choices',
       languageLabel: 'Language',
       appearanceLabel: 'Appearance',
+      personalizationLabel: 'Personalization',
+      personalizationQuestionLabel: 'Fill in experience questions again',
+      personalizationQuestionSubtitle:
+        'Choose again how EQTY personalizes examples.',
     },
     security: {
       title: 'Security',
@@ -1511,6 +1515,10 @@ const SETTINGS_COPY = {
       subtitle: 'Taal- en weergavekeuzes',
       languageLabel: 'Taal',
       appearanceLabel: 'Weergave',
+      personalizationLabel: 'Personalisatie',
+      personalizationQuestionLabel: 'Ervaringsvragen opnieuw invullen',
+      personalizationQuestionSubtitle:
+        'Persoonlijkere voorbeelden op basis van ervaring.',
     },
     security: {
       title: 'Beveiliging',

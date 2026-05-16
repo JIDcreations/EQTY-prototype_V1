@@ -5,6 +5,7 @@ import AppText from '../components/AppText';
 import OnboardingScreen from '../components/OnboardingScreen';
 import SegmentedControl from '../components/SegmentedControl';
 import SettingsHeader from '../components/SettingsHeader';
+import SettingsRow from '../components/SettingsRow';
 import { typography, useTheme } from '../theme';
 import { useApp } from '../utils/AppContext';
 import {
@@ -43,6 +44,18 @@ export default function SettingsPreferencesScreen({ navigation }) {
     () => getSettingsCopy(preferences?.language),
     [preferences?.language]
   );
+  const handleRetakePersonalization = () => {
+    const rootNavigation = navigation.getParent?.()?.getParent?.() || navigation;
+    rootNavigation.navigate('OnboardingQuestionExperience', {
+      returnTo: 'Tabs',
+      returnParams: {
+        screen: 'Profile',
+        params: {
+          screen: 'SettingsPreferences',
+        },
+      },
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -103,6 +116,19 @@ export default function SettingsPreferencesScreen({ navigation }) {
               }}
             />
           </View>
+        </View>
+        <View style={styles.personalizationBlock}>
+          <AppText style={styles.cardTitle}>
+            {settingsCopy.preferences.personalizationLabel}
+          </AppText>
+          <SettingsRow
+            label={settingsCopy.preferences.personalizationQuestionLabel}
+            subtitle={settingsCopy.preferences.personalizationQuestionSubtitle}
+            subtitleNumberOfLines={2}
+            onPress={handleRetakePersonalization}
+            isLast
+            containerStyle={styles.personalizationRow}
+          />
         </View>
       </OnboardingScreen>
     </View>
@@ -190,5 +216,13 @@ const createStyles = (colors, components, tabBarHeight) =>
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
       borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
       padding: components.layout.spacing.xs,
+    },
+    personalizationBlock: {
+      gap: components.layout.spacing.sm,
+    },
+    personalizationRow: {
+      ...components.input.container,
+      backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
+      borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
     },
   });
