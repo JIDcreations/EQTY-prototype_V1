@@ -32,17 +32,9 @@ const successTransition = {
   close: { animation: 'timing', config: { duration: 200 } },
 };
 
-const forOverview = ({ current, layouts }) => ({
+const forOverview = ({ current }) => ({
   cardStyle: {
     opacity: current.progress,
-    transform: [
-      {
-        translateX: current.progress.interpolate({
-          inputRange: [0, 1],
-          outputRange: [layouts.screen.width * 0.08, 0],
-        }),
-      },
-    ],
   },
 });
 

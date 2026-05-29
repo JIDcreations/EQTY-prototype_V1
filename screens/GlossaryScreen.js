@@ -441,8 +441,8 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       backgroundColor: toRgba(colors.background.surface, colors.opacity.surface),
     },
     filterChipActive: {
-      backgroundColor: isLight ? colors.text.primary : colors.accent.primary,
-      borderColor: isLight ? colors.text.primary : colors.accent.primary,
+      backgroundColor: colors.accent.primary,
+      borderColor: colors.accent.primary,
     },
     filterChipPressed: {
       opacity: colors.opacity.emphasis,
@@ -455,7 +455,7 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       color: colors.text.primary,
     },
     filterChipTextActive: {
-      color: isLight ? colors.background.surfaceActive : colors.text.onAccent,
+      color: isLight ? colors.text.primary : colors.text.onAccent,
     },
     termsBlock: {
       gap: components.layout.spacing.sm,
