@@ -7397,10 +7397,10 @@ const createStyles = (colors, components, mode = 'dark') =>
     marginTop: components.layout.spacing.xs,
   },
   exerciseStatusCorrect: {
-    color: colors.text.primary,
+    color: mode === 'dark' ? colors.accent.primary : colors.text.primary,
   },
   exerciseStatusWrong: {
-    color: colors.text.primary,
+    color: colors.feedback.error,
   },
   exerciseSectionLabel: {
     ...typography.styles.stepLabel,
@@ -8366,7 +8366,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     marginTop: 24,
   },
   l1VisHelperTextReady: {
-    color: colors.accent.primary,
+    color: mode === 'dark' ? colors.accent.primary : colors.text.primary,
   },
   l1VisPagerWrap: {
     alignSelf: 'center',
