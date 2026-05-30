@@ -11,6 +11,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
@@ -5291,6 +5292,7 @@ function MultiExercise({ exercise, onNext, onPressTerm, copy }) {
 
 function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
   const { colors, components, styles } = useLessonStepStyles();
+  const reflectionInputRef = useRef(null);
   const [text, setText] = useState('');
   const [submittedText, setSubmittedText] = useState('');
   const [response, setResponse] = useState(null);
@@ -5395,8 +5397,10 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
                 styles.reflectionTextAreaWrap,
                 isFocused && styles.reflectionTextAreaWrapFocused,
               ]}
+              onTouchStart={() => reflectionInputRef.current?.focus?.()}
             >
-              <AppTextInput
+              <TextInput
+                ref={reflectionInputRef}
                 style={styles.reflectionTextArea}
                 value={text}
                 onChangeText={setText}
@@ -5404,6 +5408,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
                 placeholderTextColor={colors.text.secondary}
                 multiline
                 autoCorrect
+                editable
                 textAlignVertical="top"
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
