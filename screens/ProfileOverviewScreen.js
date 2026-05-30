@@ -197,13 +197,13 @@ export default function ProfileOverviewScreen() {
           <Card style={styles.card}>
             <SettingsRow
               label="Help center"
-              onPress={() => navigation.navigate('HelpCenter')}
+              showChevron
             />
             <SettingsRow
               label="Contact support"
-              onPress={() => navigation.navigate('ContactSupport')}
+              showChevron
             />
-            <SettingsRow label="FAQ" onPress={() => navigation.navigate('FAQ')} isLast />
+            <SettingsRow label="FAQ" showChevron isLast />
           </Card>
         </SettingsSection>
 

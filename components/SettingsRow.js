@@ -23,6 +23,7 @@ export default function SettingsRow({
   subtitleNumberOfLines,
   isLast = false,
   disabled = false,
+  showChevron = false,
   containerStyle,
 }) {
   const { colors, components } = useTheme();
@@ -71,7 +72,7 @@ export default function SettingsRow({
           <AppText style={[styles.value, disabled && styles.valueDisabled]}>{value}</AppText>
         ) : null}
         {right || null}
-        {onPress ? (
+        {onPress || showChevron ? (
           <Ionicons
             name="chevron-forward"
             size={components.sizes.icon.md}

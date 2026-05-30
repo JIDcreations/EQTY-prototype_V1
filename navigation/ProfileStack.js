@@ -8,9 +8,6 @@ import SettingsAccessibilityScreen from '../screens/SettingsAccessibilityScreen'
 import SettingsSupportScreen from '../screens/SettingsSupportScreen';
 import ResetPasswordScreen from '../screens/ResetPasswordScreen';
 import ChangePasswordScreen from '../screens/ChangePasswordScreen';
-import HelpCenterScreen from '../screens/HelpCenterScreen';
-import ContactSupportScreen from '../screens/ContactSupportScreen';
-import FAQScreen from '../screens/FAQScreen';
 import LoggedOutScreen from '../screens/LoggedOutScreen';
 import { forSubtleSlide, subtleTransitionSpec } from './transitions';
 
@@ -33,9 +30,6 @@ export default function ProfileStack() {
       <Stack.Screen name="SettingsSupport" component={SettingsSupportScreen} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-      <Stack.Screen name="HelpCenter" component={HelpCenterScreen} />
-      <Stack.Screen name="ContactSupport" component={ContactSupportScreen} />
-      <Stack.Screen name="FAQ" component={FAQScreen} />
       <Stack.Screen name="LoggedOut" component={LoggedOutScreen} />
     </Stack.Navigator>
   );

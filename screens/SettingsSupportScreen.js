@@ -45,19 +45,19 @@ export default function SettingsSupportScreen({ navigation }) {
       <View style={styles.section}>
         <SettingsRow
           label={settingsCopy.support.helpCenter}
-          onPress={() => navigation.navigate('HelpCenter')}
+          showChevron
           isLast
           containerStyle={styles.rowCard}
         />
         <SettingsRow
           label={settingsCopy.support.contactSupport}
-          onPress={() => navigation.navigate('ContactSupport')}
+          showChevron
           isLast
           containerStyle={styles.rowCard}
         />
         <SettingsRow
           label={settingsCopy.support.faq}
-          onPress={() => navigation.navigate('FAQ')}
+          showChevron
           isLast
           containerStyle={styles.rowCard}
         />
