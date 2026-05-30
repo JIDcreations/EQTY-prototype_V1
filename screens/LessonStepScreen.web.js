@@ -1264,6 +1264,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
   const contentCards = content?.steps?.visualization?.cards || [];
   const hasContentCards = contentCards.length > 0;
   const pagerRef = useRef(null);
+  const pagerWheelDeltaRef = useRef(0);
   const steps = isProcessSequence
     ? INTRO_VISUALIZATION_STEPS
     : hasContentCards
@@ -1299,6 +1300,31 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
     });
   }, []);
 
+  const scrollToCard = useCallback((index) => {
+    const nextIndex = Math.max(0, Math.min(index, steps.length - 1));
+    pagerRef.current?.scrollToOffset?.({
+      offset: nextIndex * snapInterval,
+      animated: true,
+    });
+    setCurrentCardIndex(nextIndex);
+    setMaxReachedIndex((prev) => Math.max(prev, nextIndex));
+  }, [snapInterval, steps.length]);
+
+  const handlePagerWheel = useCallback((event) => {
+    const nativeEvent = event?.nativeEvent || {};
+    const delta = nativeEvent.deltaX || (nativeEvent.shiftKey ? nativeEvent.deltaY : 0);
+    if (Math.abs(delta) < 8) return;
+
+    event?.preventDefault?.();
+    pagerWheelDeltaRef.current += delta;
+
+    if (Math.abs(pagerWheelDeltaRef.current) < 70) return;
+
+    const direction = pagerWheelDeltaRef.current > 0 ? 1 : -1;
+    pagerWheelDeltaRef.current = 0;
+    scrollToCard(currentCardIndex + direction);
+  }, [currentCardIndex, scrollToCard]);
+
   const handleStepCompleted = useCallback((stepId) => {
     setViewedStepIds((prev) => {
       if (prev.has(stepId)) return prev;
@@ -1312,6 +1338,8 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
     content?.steps?.visualization?.cardCodePrefix || (isGoalSequence ? 'VOORBEELD' : 'STEP');
   const progressLabel = `${stepCodePrefix} ${`${currentCardIndex + 1}`.padStart(2, '0')}`;
   const hasViewedAllCards = maxReachedIndex >= steps.length - 1;
+  const canGoPrevious = currentCardIndex > 0;
+  const canGoNext = currentCardIndex < steps.length - 1;
 
   return (
     <View style={[styles.stepBody, styles.l1VisBody]}>
@@ -1324,6 +1352,7 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
               marginHorizontal: -components.layout.pagePaddingHorizontal,
             },
           ]}
+          onWheel={isWeb ? handlePagerWheel : undefined}
         >
           <FlatList
             ref={pagerRef}
@@ -1375,6 +1404,40 @@ function Lesson1VisualizationStep({ content, onNext, copy, lessonId }) {
               </View>
             )}
           />
+          {isWeb ? (
+            <View pointerEvents="box-none" style={styles.l1VisDesktopNav}>
+              <Pressable
+                disabled={!canGoPrevious}
+                onPress={() => scrollToCard(currentCardIndex - 1)}
+                style={({ pressed }) => [
+                  styles.l1VisDesktopNavButton,
+                  !canGoPrevious && styles.l1VisDesktopNavButtonDisabled,
+                  pressed && canGoPrevious && styles.l1VisDesktopNavButtonPressed,
+                ]}
+              >
+                <Ionicons
+                  name="chevron-back"
+                  size={components.sizes.icon.lg}
+                  color={colors.text.primary}
+                />
+              </Pressable>
+              <Pressable
+                disabled={!canGoNext}
+                onPress={() => scrollToCard(currentCardIndex + 1)}
+                style={({ pressed }) => [
+                  styles.l1VisDesktopNavButton,
+                  !canGoNext && styles.l1VisDesktopNavButtonDisabled,
+                  pressed && canGoNext && styles.l1VisDesktopNavButtonPressed,
+                ]}
+              >
+                <Ionicons
+                  name="chevron-forward"
+                  size={components.sizes.icon.lg}
+                  color={colors.text.primary}
+                />
+              </Pressable>
+            </View>
+          ) : null}
         </View>
         <View style={styles.l1VisDotsWrap}>
           <OnboardingProgress
@@ -5296,6 +5359,81 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
     };
   }, []);
 
+  const reflectionContent = (
+    <View style={styles.bottomPinnedStepBody}>
+      <View style={styles.reflectionContent}>
+        <View style={styles.reflectionHeader}>
+          <AppText style={styles.reflectionQuestion}>{question}</AppText>
+          <AppText style={styles.reflectionSubtitle}>
+            {subtitle}
+          </AppText>
+        </View>
+        {isSubmitted ? (
+          <Animated.View
+            key="submitted-reflection"
+            entering={FadeInDown.duration(260)}
+            exiting={FadeOutUp.duration(140)}
+          >
+            <ReflectionResultCard
+              answer={submittedText}
+              insightLabel={copy.labels.eqtyInsight}
+              insightText={response}
+            />
+            <AppText style={styles.reflectionPersonalizationHint}>
+              {copy.messages.reflectionPersonalizationHint}
+            </AppText>
+          </Animated.View>
+        ) : (
+          <Animated.View
+            key="draft-reflection"
+            entering={FadeInDown.duration(220)}
+            exiting={FadeOutUp.duration(140)}
+            layout={LinearTransition.duration(180)}
+          >
+            <View
+              style={[
+                styles.reflectionTextAreaWrap,
+                isFocused && styles.reflectionTextAreaWrapFocused,
+              ]}
+            >
+              <AppTextInput
+                style={styles.reflectionTextArea}
+                value={text}
+                onChangeText={setText}
+                placeholder={placeholder}
+                placeholderTextColor={colors.text.secondary}
+                multiline
+                autoCorrect
+                textAlignVertical="top"
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setIsFocused(false)}
+              />
+            </View>
+            <AppText style={styles.reflectionPersonalizationHint}>
+              {copy.messages.reflectionPersonalizationHint}
+            </AppText>
+          </Animated.View>
+        )}
+      </View>
+      <View
+        style={[
+          styles.reflectionActionWrap,
+          keyboardVisible && styles.reflectionActionWrapKeyboard,
+        ]}
+      >
+        <PrimaryButton
+          label={isSubmitted ? copy.buttons.next : copy.buttons.submitReflection}
+          onPress={handleContinue}
+          disabled={!isSubmitted && !canSubmit}
+        />
+      </View>
+    </View>
+  );
+
+  if (Platform.OS === 'web') {
+    return <View style={styles.reflectionKeyboard}>{reflectionContent}</View>;
+  }
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <KeyboardAvoidingView
@@ -5303,74 +5441,7 @@ function ReflectionStep({ content, onSubmit, onPressTerm, copy }) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={components.layout.safeArea.top}
       >
-        <View style={styles.bottomPinnedStepBody}>
-          <View style={styles.reflectionContent}>
-            <View style={styles.reflectionHeader}>
-              <AppText style={styles.reflectionQuestion}>{question}</AppText>
-              <AppText style={styles.reflectionSubtitle}>
-                {subtitle}
-              </AppText>
-            </View>
-            {isSubmitted ? (
-              <Animated.View
-                key="submitted-reflection"
-                entering={FadeInDown.duration(260)}
-                exiting={FadeOutUp.duration(140)}
-              >
-                <ReflectionResultCard
-                  answer={submittedText}
-                  insightLabel={copy.labels.eqtyInsight}
-                  insightText={response}
-                />
-                <AppText style={styles.reflectionPersonalizationHint}>
-                  {copy.messages.reflectionPersonalizationHint}
-                </AppText>
-              </Animated.View>
-            ) : (
-              <Animated.View
-                key="draft-reflection"
-                entering={FadeInDown.duration(220)}
-                exiting={FadeOutUp.duration(140)}
-                layout={LinearTransition.duration(180)}
-              >
-                <View
-                  style={[
-                    styles.reflectionTextAreaWrap,
-                    isFocused && styles.reflectionTextAreaWrapFocused,
-                  ]}
-                >
-                  <AppTextInput
-                    style={styles.reflectionTextArea}
-                    value={text}
-                    onChangeText={setText}
-                    placeholder={placeholder}
-                    placeholderTextColor={colors.text.secondary}
-                    multiline
-                    autoCorrect
-                    textAlignVertical="top"
-                    onFocus={() => setIsFocused(true)}
-                    onBlur={() => setIsFocused(false)}
-                  />
-                </View>
-                <AppText style={styles.reflectionPersonalizationHint}>
-                  {copy.messages.reflectionPersonalizationHint}
-                </AppText>
-              </Animated.View>
-            )}
-          </View>
-          <View
-            style={[
-              styles.reflectionActionWrap,
-              keyboardVisible && styles.reflectionActionWrapKeyboard,
-            ]}
-          >
-            <PrimaryButton
-              label={isSubmitted ? copy.buttons.next : copy.buttons.submitReflection}
-              onPress={handleContinue}
-              disabled={!isSubmitted && !canSubmit}
-            />
-          </View>
-        </View>
+        {reflectionContent}
       </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
@@ -7848,6 +7919,7 @@ const createStyles = (colors, components, mode = 'dark') =>
     backgroundColor: toRgba(colors.background.surface, 0.6),
     paddingHorizontal: 16,
     paddingVertical: 20,
+    cursor: 'text',
   },
   reflectionTextAreaWrapFocused: {
     borderColor: toRgba(colors.accent.primary, colors.opacity.stroke),
@@ -7857,7 +7929,11 @@ const createStyles = (colors, components, mode = 'dark') =>
     ...typography.styles.body,
     color: colors.text.primary,
     minHeight: components.sizes.input.multilineMinHeight,
+    width: '100%',
     textAlignVertical: 'top',
+    outlineStyle: 'none',
+    cursor: 'text',
+    userSelect: 'text',
   },
   reflectionPersonalizationHint: {
     ...typography.styles.meta,
@@ -8386,6 +8462,33 @@ const createStyles = (colors, components, mode = 'dark') =>
     paddingRight: components.layout.spacing.sm,
     paddingTop: components.layout.spacing.none,
     paddingBottom: components.layout.spacing.none,
+  },
+  l1VisDesktopNav: {
+    position: 'absolute',
+    left: components.layout.spacing.md,
+    right: components.layout.spacing.md,
+    top: '50%',
+    marginTop: -18,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    pointerEvents: 'box-none',
+  },
+  l1VisDesktopNavButton: {
+    width: 36,
+    height: 36,
+    borderRadius: components.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: toRgba(colors.background.surface, 0.86),
+    borderWidth: components.borderWidth.thin,
+    borderColor: toRgba(colors.ui.divider, colors.opacity.stroke),
+  },
+  l1VisDesktopNavButtonPressed: {
+    transform: [{ scale: components.transforms.scalePressed }],
+    backgroundColor: toRgba(colors.background.surfaceActive, colors.opacity.surface),
+  },
+  l1VisDesktopNavButtonDisabled: {
+    opacity: 0,
   },
   l1CardShell: {
     width: '100%',
