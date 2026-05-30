@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import ScreenBackground from '../components/ScreenBackground';
 import SettingsHeader from '../components/SettingsHeader';
@@ -70,7 +70,12 @@ export default function SettingsHomeScreen({ navigation }) {
 
   return (
     <ScreenBackground variant="bg3">
-      <View style={styles.webScroll}>
+      <ScrollView
+        style={styles.webScroll}
+        contentContainerStyle={styles.webScrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.content}>
           <View style={styles.layout}>
             <View style={styles.topContent}>
@@ -100,7 +105,7 @@ export default function SettingsHomeScreen({ navigation }) {
             />
           </View>
         </View>
-      </View>
+      </ScrollView>
     </ScreenBackground>
   );
 }
@@ -108,6 +113,7 @@ export default function SettingsHomeScreen({ navigation }) {
 const createStyles = (colors, components, tabBarHeight) =>
   StyleSheet.create({
     webScroll: {
+      flex: 1,
       height: '100vh',
       width: '100%',
       overflowX: 'hidden',
@@ -115,14 +121,16 @@ const createStyles = (colors, components, tabBarHeight) =>
       WebkitOverflowScrolling: 'touch',
       touchAction: 'pan-y',
     },
+    webScrollContent: {
+      minHeight: '100vh',
+    },
     content: {
       ...getSettingsOnboardingContentStyle(components, tabBarHeight),
-      flexGrow: 1,
       minHeight: '100vh',
     },
     layout: {
-      flex: 1,
-      justifyContent: 'space-between',
+      minHeight: '100%',
+      gap: components.layout.spacing.xl,
     },
     topContent: {
       gap: components.layout.contentGap,
