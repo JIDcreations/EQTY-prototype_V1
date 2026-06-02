@@ -326,11 +326,9 @@ export default function LessonsScreen() {
             return (
               <Pressable
                 key={track.id}
-                disabled={!isAccessible}
+                disabled={!isAccessible || isPremium}
                 onPress={() => {
-                  if (isPremium) {
-                    navigation.navigate('DeepDive', { trackId: track.id });
-                  } else {
+                  if (!isPremium) {
                     navigation.navigate('Premium');
                   }
                 }}

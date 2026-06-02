@@ -32,7 +32,13 @@ export default function PremiumScreen() {
 
   const handleUnlock = () => {
     unlockPremium();
-    navigation.goBack();
+    const parent = navigation.getParent();
+    navigation.popToTop();
+    if (parent) {
+      parent.navigate('Home');
+    } else {
+      navigation.navigate('Home');
+    }
   };
 
   return (
