@@ -1,5 +1,9 @@
 import { layout } from './layout';
 import { typography } from './typography';
+import { colors as themeColors } from './colors';
+
+type ThemeMode = keyof typeof themeColors;
+type ThemeColors = (typeof themeColors)[ThemeMode];
 
 const toRgba = (hex: string, alpha: number) => {
   const cleaned = hex.replace('#', '');
@@ -145,7 +149,7 @@ const transforms = {
   scalePressedStrong: 0.96,
 };
 
-export const createComponents = (colors, mode = 'dark') => {
+export const createComponents = (colors: ThemeColors, mode: ThemeMode = 'dark') => {
   const isLight = mode === 'light';
   return {
   radius,

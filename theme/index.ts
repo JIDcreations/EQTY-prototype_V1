@@ -6,7 +6,15 @@ import { layout } from './layout';
 import { spacing } from './spacing';
 import { createComponents } from './components';
 
-export const getTheme = (appearance) => {
+type Appearance = 'Light' | 'Dark';
+type AppPreferences = {
+  appearance?: Appearance;
+};
+type AppContextValue = {
+  preferences?: AppPreferences;
+};
+
+export const getTheme = (appearance?: Appearance) => {
   const mode = appearance === 'Light' ? 'light' : 'dark';
   const palette = colors[mode];
   return {
@@ -20,7 +28,7 @@ export const getTheme = (appearance) => {
 };
 
 export const useTheme = () => {
-  const { preferences } = useApp();
+  const { preferences } = useApp() as AppContextValue;
   return useMemo(() => getTheme(preferences?.appearance), [preferences?.appearance]);
 };
 
