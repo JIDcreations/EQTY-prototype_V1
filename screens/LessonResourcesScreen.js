@@ -413,7 +413,7 @@ function ResourceRow({ resource, copy, styles, colors, components, showDivider }
               {resource.description}
             </AppText>
           ) : null}
-          <AppText style={styles.resourceSource} numberOfLines={1}>
+          <AppText style={[styles.resourceSource, isOpening && styles.resourceSourceActive]} numberOfLines={1}>
             {isOpening ? 'Opening...' : resource.source}
           </AppText>
         </View>
@@ -622,6 +622,10 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
       ...typography.styles.small,
       color: colors.text.secondary,
       opacity: 0.65,
+    },
+    resourceSourceActive: {
+      color: colors.accent.primary,
+      opacity: 1,
     },
     resourceDivider: {
       height: components.borderWidth.thin,
