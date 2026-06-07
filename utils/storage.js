@@ -23,7 +23,16 @@ export async function loadAuthUser() {
   try {
     const parsed = JSON.parse(stored);
     if (parsed === null) return null;
-    return { ...defaultAuthUser, ...parsed };
+    const user = { id: defaultAuthUser.id, ...parsed };
+    if (
+      user.email &&
+      user.email !== defaultAuthUser.email &&
+      user.username === defaultAuthUser.username &&
+      !user.name
+    ) {
+      delete user.username;
+    }
+    return user;
   } catch (error) {
     return defaultAuthUser;
   }

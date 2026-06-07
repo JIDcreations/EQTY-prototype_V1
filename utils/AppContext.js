@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import {
   defaultAuthUser,
   defaultOnboardingContext,
@@ -42,6 +42,7 @@ export function AppProvider({ children }) {
   const [reflections, setReflections] = useState([]);
   const [isPremium, setIsPremium] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const authUserRef = useRef(defaultAuthUser);
 
   useEffect(() => {
     let isMounted = true;
@@ -62,6 +63,7 @@ export function AppProvider({ children }) {
         loadReflections(),
       ]);
       if (isMounted) {
+        authUserRef.current = storedAuthUser;
         setAuthUser(storedAuthUser);
         setOnboardingContext(storedOnboarding);
         setPreferences(storedPreferences);
@@ -84,8 +86,9 @@ export function AppProvider({ children }) {
   }, []);
 
   const updateAuthUser = async (updates) => {
-    const base = authUser || defaultAuthUser;
+    const base = authUserRef.current || defaultAuthUser;
     const next = { ...base, ...updates };
+    authUserRef.current = next;
     setAuthUser(next);
     await saveAuthUser(next);
   };
@@ -97,6 +100,7 @@ export function AppProvider({ children }) {
   };
 
   const logOut = async () => {
+    authUserRef.current = null;
     setAuthUser(null);
     await Promise.all([clearAuthUser(), resetOnboardingState()]);
   };

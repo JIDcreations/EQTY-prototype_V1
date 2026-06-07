@@ -76,11 +76,16 @@ export default function OnboardingEmailScreen({ navigation }) {
     await updatePreferences({ hasOnboarded: false });
     const trimmedUsername = username.trim();
     const trimmed = nextEmailValidation.normalizedEmail;
+    const updates = {};
     if (trimmedUsername) {
-      await updateAuthUser({ username: trimmedUsername });
+      updates.username = trimmedUsername;
+      updates.name = trimmedUsername;
     }
     if (trimmed) {
-      await updateAuthUser({ email: trimmed });
+      updates.email = trimmed;
+    }
+    if (Object.keys(updates).length > 0) {
+      await updateAuthUser(updates);
     }
     navigation.navigate('OnboardingWhatIsEqty');
   };
@@ -89,7 +94,7 @@ export default function OnboardingEmailScreen({ navigation }) {
     await updatePreferences({ hasOnboarded: false });
     const trimmedUsername = username.trim();
     if (trimmedUsername) {
-      await updateAuthUser({ username: trimmedUsername });
+      await updateAuthUser({ username: trimmedUsername, name: trimmedUsername });
     }
     navigation.navigate('OnboardingWhatIsEqty');
   };
@@ -98,7 +103,7 @@ export default function OnboardingEmailScreen({ navigation }) {
     await updatePreferences({ hasOnboarded: false });
     const trimmedUsername = username.trim();
     if (trimmedUsername) {
-      await updateAuthUser({ username: trimmedUsername });
+      await updateAuthUser({ username: trimmedUsername, name: trimmedUsername });
     }
     navigation.navigate('OnboardingWhatIsEqty');
   };
