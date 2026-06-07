@@ -8266,7 +8266,9 @@ const createStyles = (colors, components, mode = 'dark') =>
     borderColor: colors.accent.primary,
   },
   summaryRevealCard: {
-    backgroundColor: colors.background.surface,
+    backgroundColor: mode === 'light'
+      ? colors.background.surfaceActive
+      : toRgba(colors.background.surfaceActive, colors.opacity.surface),
   },
   scenarioRevealHeader: {
     flexDirection: 'row',
