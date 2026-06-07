@@ -238,6 +238,7 @@ function SearchSuggestions({ suggestions, onSelect, styles, colors }) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.suggestionsScroll}
       contentContainerStyle={styles.suggestionsRow}
       keyboardShouldPersistTaps="handled"
     >
@@ -465,9 +466,14 @@ const createStyles = (colors, components, tabBarHeight, mode) => {
     },
 
     // Search suggestions
+    suggestionsScroll: {
+      marginHorizontal: -components.layout.pagePaddingHorizontal,
+    },
     suggestionsRow: {
       flexDirection: 'row',
       gap: sp.xs,
+      paddingHorizontal: components.layout.pagePaddingHorizontal,
+      paddingRight: components.layout.pagePaddingHorizontal + sp.sm,
       paddingVertical: 2,
     },
     suggestionChip: {
