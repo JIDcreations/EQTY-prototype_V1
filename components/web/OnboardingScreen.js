@@ -125,11 +125,18 @@ const createStyles = (colors, components) =>
     },
     scrollContainer: {
       flex: 1,
+      height: '100vh',
+      maxHeight: '100vh',
       minHeight: '100vh',
     },
     scroll: {
       flex: 1,
+      height: '100vh',
+      maxHeight: '100vh',
       minHeight: '100vh',
+      overflow: 'auto',
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
     },
     scrollContent: {
       paddingHorizontal: components.layout.pagePaddingHorizontal,
